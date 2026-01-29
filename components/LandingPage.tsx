@@ -15,7 +15,10 @@ import {
     LayoutDashboard,
     Star,
     Infinity,
-    Lock
+    Lock,
+    QrCode,
+    MessageSquare,
+    MousePointerClick
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -149,8 +152,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         onSelect={() => onPurchase('Vitalício')}
                     />
                 </div>
+            </section>
 
-                {/* Tabela Comparativa Detalhada (The "Interested" part) */}
+            {/* Como Funciona - NEW */}
+            <section className="py-24 bg-slate-900 border-y border-white/5 relative overflow-hidden">
+                <div className="absolute inset-0 bg-emerald-500/5 blur-[120px] rounded-full -translate-x-1/2 translate-y-1/2 pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto px-6 relative z-10 text-center mb-16">
+                    <h3 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-4">Como Começar? É Simples.</h3>
+                    <p className="text-slate-400 max-w-xl mx-auto text-sm">Siga os 3 passos para profissionalizar sua gestão hoje mesmo.</p>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+                    <StepItem
+                        icon={MousePointerClick}
+                        step="01"
+                        title="Escolha seu Plano"
+                        desc="Selecione acima a licença que melhor atende o tamanho da sua operação atual."
+                    />
+                    <StepItem
+                        icon={QrCode}
+                        step="02"
+                        title="Pagamento Pix"
+                        desc="Após o login, você receberá a chave Pix para realizar o pagamento de forma segura."
+                    />
+                    <StepItem
+                        icon={MessageSquare}
+                        step="03"
+                        title="Liberação Instantânea"
+                        desc="Envie o comprovante pelo WhatsApp e nossa equipe liberará seu painel em minutos."
+                    />
+                </div>
+            </section>
+
+            {/* Tabela Comparativa Detalhada (The "Interested" part) */}
+            <section className="py-32 relative">
                 <div className="max-w-5xl mx-auto px-6">
                     <div className="bg-slate-900 border border-slate-800 rounded-[3rem] overflow-hidden shadow-2xl relative">
                         <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none text-sky-500">
@@ -255,6 +291,21 @@ const LandingTableRow = ({ label, v1, v2, v3 }: any) => (
         <td className="p-8 text-emerald-400 font-black text-lg">{v2}</td>
         <td className="p-8 text-white font-bold">{v3}</td>
     </tr>
+);
+
+const StepItem = ({ icon: Icon, step, title, desc }: any) => (
+    <div className="flex flex-col items-center text-center group">
+        <div className="relative mb-8">
+            <div className="w-20 h-20 bg-slate-800 border border-white/10 rounded-[2rem] flex items-center justify-center shadow-xl group-hover:bg-emerald-500/10 group-hover:border-emerald-500/50 transition-all">
+                <Icon className="w-8 h-8 text-emerald-500" />
+            </div>
+            <div className="absolute -top-4 -right-4 w-10 h-10 bg-emerald-500 text-slate-950 rounded-full flex items-center justify-center font-black text-xs shadow-lg">
+                {step}
+            </div>
+        </div>
+        <h4 className="text-xl font-bold text-white mb-3">{title}</h4>
+        <p className="text-slate-400 text-sm leading-relaxed max-w-[250px]">{desc}</p>
+    </div>
 );
 
 export default LandingPage;
