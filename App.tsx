@@ -29,8 +29,11 @@ import {
 } from './constants';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
+  // Force Settings if profile is incomplete (First Visit) 
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    return (profile.name && profile.companyName) ? 'dashboard' : 'settings';
+  });
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [shippers, setShippers] = useState<Shipper[]>([]);

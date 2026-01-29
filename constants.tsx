@@ -2,9 +2,9 @@
 import { Vehicle, Driver, Shipper, Trip, UserProfile, VehiclePropertyType, MaintenanceRecord } from './types';
 
 export const INITIAL_PROFILE: UserProfile = {
-  name: 'Administrador',
-  email: 'admin@ribeirxlog.com',
-  companyName: 'Minha Transportadora',
+  name: '',
+  email: '',
+  companyName: '',
   config: {
     percMotFrete: 10,
     percMotDiaria: 30,
