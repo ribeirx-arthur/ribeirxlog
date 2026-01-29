@@ -132,4 +132,4 @@ export interface FinancialResults {
   lucroSociety: number;
 }
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription';

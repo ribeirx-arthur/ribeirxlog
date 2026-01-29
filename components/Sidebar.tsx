@@ -8,7 +8,8 @@ import {
   PlusCircle,
   Users,
   ShieldAlert,
-  LogOut
+  LogOut,
+  CreditCard
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { TabType, UserProfile } from '../types';
@@ -26,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp },
     { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !profile.config.showMileage },
     { id: 'setup', label: 'Cadastros', icon: Users },
+    { id: 'subscription', label: 'Assinatura', icon: CreditCard },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
 
@@ -48,8 +50,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
                 key={item.id}
                 onClick={() => setActiveTab(item.id as TabType)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id
-                    ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                  ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
                   }`}
               >
                 <Icon className="w-5 h-5" />
@@ -64,8 +66,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
         <button
           onClick={() => setActiveTab('new-trip')}
           className={`w-full flex items-center justify-center gap-2 font-black py-4 rounded-2xl transition-all shadow-lg ${activeTab === 'new-trip'
-              ? 'bg-sky-500 text-white shadow-sky-500/20'
-              : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
+            ? 'bg-sky-500 text-white shadow-sky-500/20'
+            : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
             }`}
         >
           <PlusCircle className="w-5 h-5" />

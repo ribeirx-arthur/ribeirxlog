@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import Trips from './components/Trips';
 import Performance from './components/Performance';
 import SettingsView from './components/Settings';
+import SubscriptionView from './components/SubscriptionView';
 import NewTrip from './components/NewTrip';
 import FleetHealth from './components/FleetHealth';
 import Setup from './components/Setup';
@@ -337,9 +338,13 @@ const App: React.FC = () => {
 
   const handleUpdateVehicles = async (updatedVehicles: Vehicle[]) => {
     const deleted = vehicles.filter(v => !updatedVehicles.find(uv => uv.id === v.id));
-    for (const v of deleted) await supabase.from('vehicles').delete().eq('id', v.id);
+    for (const v of deleted) {
+      if (v.id.length > 20) await supabase.from('vehicles').delete().eq('id', v.id);
+    }
+
+    const finalVehicles: Vehicle[] = [];
     for (const v of updatedVehicles) {
-      await supabase.from('vehicles').upsert({
+      const { data, error } = await supabase.from('vehicles').upsert({
         id: v.id.length > 20 ? v.id : undefined,
         user_id: session?.user.id,
         plate: v.plate,
@@ -353,16 +358,26 @@ const App: React.FC = () => {
         last_maintenance_km: v.lastMaintenanceKm,
         photo_url: v.photoUrl,
         thresholds: v.thresholds
-      });
+      }).select().single();
+
+      if (data) {
+        finalVehicles.push({ ...data, totalKmAccumulated: Number(data.total_km_accumulated), lastMaintenanceKm: Number(data.last_maintenance_km), societySplitFactor: data.society_split_factor });
+      } else {
+        finalVehicles.push(v);
+      }
     }
-    setVehicles(updatedVehicles);
+    setVehicles(finalVehicles);
   };
 
   const handleUpdateDrivers = async (updatedDrivers: Driver[]) => {
     const deleted = drivers.filter(d => !updatedDrivers.find(ud => ud.id === d.id));
-    for (const d of deleted) await supabase.from('drivers').delete().eq('id', d.id);
+    for (const d of deleted) {
+      if (d.id.length > 20) await supabase.from('drivers').delete().eq('id', d.id);
+    }
+
+    const finalDrivers: Driver[] = [];
     for (const d of updatedDrivers) {
-      await supabase.from('drivers').upsert({
+      const { data, error } = await supabase.from('drivers').upsert({
         id: d.id.length > 20 ? d.id : undefined,
         user_id: session?.user.id,
         name: d.name,
@@ -374,16 +389,26 @@ const App: React.FC = () => {
         cnh_validity: d.cnhValidity,
         status: d.status,
         photo_url: d.photoUrl
-      });
+      }).select().single();
+
+      if (data) {
+        finalDrivers.push({ ...data, cnhCategory: data.cnh_category, cnhValidity: data.cnh_validity, pixKey: data.pix_key });
+      } else {
+        finalDrivers.push(d);
+      }
     }
-    setDrivers(updatedDrivers);
+    setDrivers(finalDrivers);
   };
 
   const handleUpdateShippers = async (updatedShippers: Shipper[]) => {
     const deleted = shippers.filter(s => !updatedShippers.find(us => us.id === s.id));
-    for (const s of deleted) await supabase.from('shippers').delete().eq('id', s.id);
+    for (const s of deleted) {
+      if (s.id.length > 20) await supabase.from('shippers').delete().eq('id', s.id);
+    }
+
+    const finalShippers: Shipper[] = [];
     for (const s of updatedShippers) {
-      await supabase.from('shippers').upsert({
+      const { data, error } = await supabase.from('shippers').upsert({
         id: s.id.length > 20 ? s.id : undefined,
         user_id: session?.user.id,
         name: s.name,
@@ -392,9 +417,15 @@ const App: React.FC = () => {
         phone: s.phone,
         avg_payment_days: s.avgPaymentDays,
         logo_url: s.logoUrl
-      });
+      }).select().single();
+
+      if (data) {
+        finalShippers.push({ ...data, avgPaymentDays: data.avg_payment_days });
+      } else {
+        finalShippers.push(s);
+      }
     }
-    setShippers(updatedShippers);
+    setShippers(finalShippers);
   };
 
   const handleImportData = (data: any) => {
