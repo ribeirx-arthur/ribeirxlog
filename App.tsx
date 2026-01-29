@@ -30,6 +30,7 @@ import {
 import {
   INITIAL_PROFILE
 } from './constants';
+import SubscriptionView from './components/SubscriptionView'; // NEW
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
@@ -125,6 +126,11 @@ const App: React.FC = () => {
         })));
         if (mData) setMaintenances(mData.map(m => ({ ...m, vehicleId: m.vehicle_id, kmAtMaintenance: Number(m.km_at_maintenance), totalCost: Number(m.total_cost) })));
 
+        if (pendingPlanIntent) {
+          setActiveTab('subscription');
+        } else if (!profileData.company_name || !profileData.email) {
+          setActiveTab('settings');
+        }
         setLoadingData(false);
       };
       loadData();
@@ -582,6 +588,7 @@ const App: React.FC = () => {
           onResetData={handleResetData}
         />
       );
+      case 'subscription': return <SubscriptionView profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
       default: return null;
     }
   };
@@ -612,14 +619,29 @@ const App: React.FC = () => {
     return <LandingPage onGetStarted={() => setShowAuth(true)} onPurchase={handleLandingPurchase} />;
   }
 
-  // GATE DE PAGAMENTO
-  if (profile.payment_status !== 'paid') {
+  // GATE DE PAGAMENTO - Somente para abas operacionais
+  const isOperationalTab = !['subscription', 'settings'].includes(activeTab);
+  if (profile.payment_status !== 'paid' && isOperationalTab) {
     return (
-      <Paywall
-        profile={profile}
-        onRefreshProfile={handleRefreshProfile}
-        onSignOut={() => supabase.auth.signOut()}
-      />
+      <div className="min-h-screen bg-slate-950 text-slate-200">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} />
+        <Header
+          profile={profile}
+          notifications={notifications}
+          onReadNotification={() => { }}
+          setActiveTab={setActiveTab}
+          activeTab={activeTab}
+        />
+        <main className="md:ml-64 p-4 md:p-8">
+          <div className="max-w-7xl mx-auto pb-24 md:pb-8">
+            <Paywall
+              profile={profile}
+              onRefreshProfile={handleRefreshProfile}
+              onSignOut={() => supabase.auth.signOut()}
+            />
+          </div>
+        </main>
+      </div>
     );
   }
 
