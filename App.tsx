@@ -60,6 +60,69 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // FETCH DATA FROM SUPABASE
+  useEffect(() => {
+    if (session) {
+      const loadData = async () => {
+        const userId = session.user.id;
+
+        // Fetch Profile
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (profileData) {
+          setProfile({
+            ...profileData,
+            companyName: profileData.company_name,
+            logoUrl: profileData.logo_url,
+            signatureUrl: profileData.signature_url,
+          } as any);
+        } else {
+          // If no profile exists, create one from INITIAL_PROFILE
+          await supabase.from('profiles').insert({
+            id: userId,
+            name: session.user.user_metadata?.name || '',
+            email: session.user.email,
+            company_name: '',
+            config: INITIAL_PROFILE.config
+          });
+        }
+
+        // Fetch Others
+        const { data: vData } = await supabase.from('vehicles').select('*');
+        const { data: dData } = await supabase.from('drivers').select('*');
+        const { data: sData } = await supabase.from('shippers').select('*');
+        const { data: tData } = await supabase.from('trips').select('*').order('departure_date', { ascending: false });
+        const { data: mData } = await supabase.from('maintenance_records').select('*');
+
+        if (vData) setVehicles(vData.map(v => ({ ...v, totalKmAccumulated: Number(v.total_km_accumulated), lastMaintenanceKm: Number(v.last_maintenance_km), societySplitFactor: v.society_split_factor })));
+        if (dData) setDrivers(dData.map(d => ({ ...d, cnhCategory: d.cnh_category, cnhValidity: d.cnh_validity, pixKey: d.pix_key })));
+        if (sData) setShippers(sData.map(s => ({ ...s, avgPaymentDays: s.avg_payment_days })));
+        if (tData) setTrips(tData.map(t => ({
+          ...t,
+          vehicleId: t.vehicle_id,
+          driverId: t.driver_id,
+          shipperId: t.shipper_id,
+          departureDate: t.departure_date,
+          returnDate: t.return_date,
+          receiptDate: t.receipt_date,
+          freteSeco: Number(t.frete_seco),
+          diarias: Number(t.diarias),
+          adiantamento: Number(t.adiantamento),
+          combustivel: Number(t.combustivel),
+          litersDiesel: Number(t.liters_diesel),
+          outrasDespesas: Number(t.outras_despesas),
+          totalKm: Number(t.total_km)
+        })));
+        if (mData) setMaintenances(mData.map(m => ({ ...m, vehicleId: m.vehicle_id, kmAtMaintenance: Number(m.km_at_maintenance), totalCost: Number(m.total_cost) })));
+      };
+      loadData();
+    }
+  }, [session]);
+
   // THEME HANDLER
   useEffect(() => {
     if (profile.config.theme === 'light') {
@@ -135,44 +198,200 @@ const App: React.FC = () => {
     checkAlerts();
   }, [trips, vehicles, profile.config]);
 
-  const handleSaveTrip = (newTrip: Trip) => {
-    setTrips([newTrip, ...trips]);
-    setVehicles(prev => prev.map(v =>
-      v.id === newTrip.vehicleId
-        ? { ...v, totalKmAccumulated: v.totalKmAccumulated + newTrip.totalKm }
-        : v
-    ));
+  const handleSaveTrip = async (newTrip: Trip) => {
+    const { data: savedTrip, error } = await supabase.from('trips').insert({
+      origin: newTrip.origin,
+      destination: newTrip.destination,
+      vehicle_id: newTrip.vehicleId,
+      driver_id: newTrip.driverId,
+      shipper_id: newTrip.shipperId,
+      departure_date: newTrip.departureDate,
+      return_date: newTrip.returnDate,
+      receipt_date: newTrip.receiptDate,
+      frete_seco: newTrip.freteSeco,
+      diarias: newTrip.diarias,
+      adiantamento: newTrip.adiantamento,
+      combustivel: newTrip.combustivel,
+      liters_diesel: newTrip.litersDiesel,
+      outras_despesas: newTrip.outrasDespesas,
+      status: newTrip.status,
+      total_km: newTrip.totalKm,
+      user_id: session?.user.id
+    }).select().single();
+
+    if (error) {
+      console.error("Error saving trip:", error);
+      return;
+    }
+
+    const formattedTrip = { ...savedTrip, vehicleId: savedTrip.vehicle_id, driverId: savedTrip.driver_id, shipperId: savedTrip.shipper_id, departureDate: savedTrip.departure_date, returnDate: savedTrip.return_date, receiptDate: savedTrip.receipt_date, freteSeco: Number(savedTrip.frete_seco), diarias: Number(savedTrip.diarias), adiantamento: Number(savedTrip.adiantamento), combustivel: Number(savedTrip.combustivel), litersDiesel: Number(savedTrip.liters_diesel), outrasDespesas: Number(savedTrip.outras_despesas), totalKm: Number(savedTrip.total_km) };
+
+    setTrips([formattedTrip, ...trips]);
+
+    // Update vehicle KM in Supabase
+    const vehicle = vehicles.find(v => v.id === newTrip.vehicleId);
+    if (vehicle) {
+      const newKm = vehicle.totalKmAccumulated + newTrip.totalKm;
+      await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', newTrip.vehicleId);
+      setVehicles(prev => prev.map(v => v.id === newTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
+    }
+
     setActiveTab('trips');
   };
 
-  const handleUpdateTrip = (updatedTrip: Trip) => {
+  const handleUpdateTrip = async (updatedTrip: Trip) => {
+    await supabase.from('trips').update({
+      origin: updatedTrip.origin,
+      destination: updatedTrip.destination,
+      vehicle_id: updatedTrip.vehicleId,
+      driver_id: updatedTrip.driverId,
+      shipper_id: updatedTrip.shipperId,
+      departure_date: updatedTrip.departureDate,
+      return_date: updatedTrip.returnDate,
+      receipt_date: updatedTrip.receiptDate,
+      frete_seco: updatedTrip.freteSeco,
+      diarias: updatedTrip.diarias,
+      adiantamento: updatedTrip.adiantamento,
+      combustivel: updatedTrip.combustivel,
+      liters_diesel: updatedTrip.litersDiesel,
+      outras_despesas: updatedTrip.outrasDespesas,
+      status: updatedTrip.status,
+      total_km: updatedTrip.totalKm
+    }).eq('id', updatedTrip.id);
+
     const oldTrip = trips.find(t => t.id === updatedTrip.id);
     if (oldTrip && oldTrip.totalKm !== updatedTrip.totalKm) {
       const kmDiff = updatedTrip.totalKm - (oldTrip.totalKm || 0);
-      setVehicles(prev => prev.map(v =>
-        v.id === updatedTrip.vehicleId
-          ? { ...v, totalKmAccumulated: v.totalKmAccumulated + kmDiff }
-          : v
-      ));
+      const vehicle = vehicles.find(v => v.id === updatedTrip.vehicleId);
+      if (vehicle) {
+        const newKm = vehicle.totalKmAccumulated + kmDiff;
+        await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', updatedTrip.vehicleId);
+        setVehicles(prev => prev.map(v => v.id === updatedTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
+      }
     }
     setTrips(prev => prev.map(t => t.id === updatedTrip.id ? updatedTrip : t));
   };
 
-  const handleSaveMaintenance = (record: MaintenanceRecord) => {
-    setMaintenances([record, ...maintenances]);
-    setVehicles(prev => prev.map(v =>
-      v.id === record.vehicleId
-        ? { ...v, lastMaintenanceKm: record.kmAtMaintenance }
-        : v
-    ));
+  const handleSaveMaintenance = async (record: MaintenanceRecord) => {
+    const { data: saved, error } = await supabase.from('maintenance_records').insert({
+      vehicle_id: record.vehicleId,
+      date: record.date,
+      km_at_maintenance: record.kmAtMaintenance,
+      type: record.type,
+      description: record.description,
+      total_cost: record.totalCost,
+      provider: record.provider,
+      user_id: session?.user.id
+    }).select().single();
+
+    if (error) {
+      console.error("Error saving maintenance:", error);
+      return;
+    }
+
+    const formatted = { ...saved, vehicleId: saved.vehicle_id, kmAtMaintenance: Number(saved.km_at_maintenance), totalCost: Number(saved.total_cost) };
+    setMaintenances([formatted, ...maintenances]);
+
+    // Update vehicle km in Supabase
+    await supabase.from('vehicles').update({ last_maintenance_km: record.kmAtMaintenance }).eq('id', record.vehicleId);
+    setVehicles(prev => prev.map(v => v.id === record.vehicleId ? { ...v, lastMaintenanceKm: record.kmAtMaintenance } : v));
   };
 
-  const handleUpdateMaintenance = (record: MaintenanceRecord) => {
+  const handleUpdateMaintenance = async (record: MaintenanceRecord) => {
+    await supabase.from('maintenance_records').update({
+      vehicle_id: record.vehicleId,
+      date: record.date,
+      km_at_maintenance: record.kmAtMaintenance,
+      type: record.type,
+      description: record.description,
+      total_cost: record.totalCost,
+      provider: record.provider
+    }).eq('id', record.id);
+
     setMaintenances(prev => prev.map(m => m.id === record.id ? record : m));
   };
 
   const handleUpdateVehicleThresholds = (vehicleId: string, thresholds: MaintenanceThresholds) => {
     setVehicles(prev => prev.map(v => v.id === vehicleId ? { ...v, thresholds } : v));
+  };
+
+  const handleUpdateProfile = async (newProfile: UserProfile) => {
+    setProfile(newProfile);
+    if (session) {
+      await supabase.from('profiles').upsert({
+        id: session.user.id,
+        name: newProfile.name,
+        email: newProfile.email,
+        company_name: newProfile.companyName,
+        logo_url: newProfile.logoUrl,
+        signature_url: newProfile.signatureUrl,
+        phone: newProfile.phone,
+        config: newProfile.config,
+        updated_at: new Date().toISOString()
+      });
+    }
+  };
+
+  const handleUpdateVehicles = async (updatedVehicles: Vehicle[]) => {
+    const deleted = vehicles.filter(v => !updatedVehicles.find(uv => uv.id === v.id));
+    for (const v of deleted) await supabase.from('vehicles').delete().eq('id', v.id);
+    for (const v of updatedVehicles) {
+      await supabase.from('vehicles').upsert({
+        id: v.id.length > 20 ? v.id : undefined,
+        user_id: session?.user.id,
+        plate: v.plate,
+        name: v.name,
+        brand: v.brand,
+        model: v.model,
+        year: v.year,
+        type: v.type,
+        society_split_factor: v.societySplitFactor,
+        total_km_accumulated: v.totalKmAccumulated,
+        last_maintenance_km: v.lastMaintenanceKm,
+        photo_url: v.photoUrl,
+        thresholds: v.thresholds
+      });
+    }
+    setVehicles(updatedVehicles);
+  };
+
+  const handleUpdateDrivers = async (updatedDrivers: Driver[]) => {
+    const deleted = drivers.filter(d => !updatedDrivers.find(ud => ud.id === d.id));
+    for (const d of deleted) await supabase.from('drivers').delete().eq('id', d.id);
+    for (const d of updatedDrivers) {
+      await supabase.from('drivers').upsert({
+        id: d.id.length > 20 ? d.id : undefined,
+        user_id: session?.user.id,
+        name: d.name,
+        cpf: d.cpf,
+        phone: d.phone,
+        pix_key: d.pixKey,
+        cnh: d.cnh,
+        cnh_category: d.cnhCategory,
+        cnh_validity: d.cnhValidity,
+        status: d.status,
+        photo_url: d.photoUrl
+      });
+    }
+    setDrivers(updatedDrivers);
+  };
+
+  const handleUpdateShippers = async (updatedShippers: Shipper[]) => {
+    const deleted = shippers.filter(s => !updatedShippers.find(us => us.id === s.id));
+    for (const s of deleted) await supabase.from('shippers').delete().eq('id', s.id);
+    for (const s of updatedShippers) {
+      await supabase.from('shippers').upsert({
+        id: s.id.length > 20 ? s.id : undefined,
+        user_id: session?.user.id,
+        name: s.name,
+        cnpj: s.cnpj,
+        email: s.email,
+        phone: s.phone,
+        avg_payment_days: s.avgPaymentDays,
+        logo_url: s.logoUrl
+      });
+    }
+    setShippers(updatedShippers);
   };
 
   const handleImportData = (data: any) => {
@@ -184,14 +403,22 @@ const App: React.FC = () => {
     setMaintenances(data.maintenances || []);
   };
 
-  const handleResetData = () => {
-    setTrips([]);
-    setVehicles([]);
-    setDrivers([]);
-    setShippers([]);
-    setMaintenances([]);
-    setProfile(INITIAL_PROFILE);
-    alert("Sistema resetado com sucesso.");
+  const handleResetData = async () => {
+    if (window.confirm("Tem certeza que deseja apagar TODOS os seus dados?")) {
+      await supabase.from('trips').delete().eq('user_id', session?.user.id);
+      await supabase.from('vehicles').delete().eq('user_id', session?.user.id);
+      await supabase.from('drivers').delete().eq('user_id', session?.user.id);
+      await supabase.from('shippers').delete().eq('user_id', session?.user.id);
+      await supabase.from('maintenance_records').delete().eq('user_id', session?.user.id);
+
+      setTrips([]);
+      setVehicles([]);
+      setDrivers([]);
+      setShippers([]);
+      setMaintenances([]);
+      setProfile(INITIAL_PROFILE);
+      alert("Sistema resetado com sucesso.");
+    }
   };
 
   const renderContent = () => {
@@ -208,11 +435,11 @@ const App: React.FC = () => {
           onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
         />
       );
-      case 'setup': return <Setup vehicles={vehicles} drivers={drivers} shippers={shippers} onUpdateVehicles={setVehicles} onUpdateDrivers={setDrivers} onUpdateShippers={setShippers} />;
+      case 'setup': return <Setup vehicles={vehicles} drivers={drivers} shippers={shippers} onUpdateVehicles={handleUpdateVehicles} onUpdateDrivers={handleUpdateDrivers} onUpdateShippers={handleUpdateShippers} />;
       case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} />;
       case 'settings': return (
         <SettingsView
-          profile={profile} setProfile={setProfile}
+          profile={profile} setProfile={handleUpdateProfile}
           trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} maintenances={maintenances}
           onImportData={handleImportData}
           onResetData={handleResetData}
