@@ -45,17 +45,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
           {menuItems.filter(item => !item.hidden).map((item) => {
             const Icon = item.icon;
+            const isLocked = profile.payment_status !== 'paid' && !['subscription', 'settings'].includes(item.id);
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id as TabType)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id
+                disabled={isLocked && activeTab === item.id} // Don't disable but maybe show locked
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id
                   ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
-                  }`}
+                  } ${isLocked ? 'opacity-50 cursor-not-allowed group' : ''}`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {isLocked && <ShieldAlert className="w-4 h-4 text-slate-500 group-hover:text-amber-500 transition-colors" />}
               </button>
             );
           })}
