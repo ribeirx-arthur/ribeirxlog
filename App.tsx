@@ -15,7 +15,7 @@ import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
 import {
   UserProfile,
   Vehicle,
@@ -353,146 +353,181 @@ const App: React.FC = () => {
     }
   };
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleUpdateVehicles = async (updatedVehicles: Vehicle[]) => {
     if (loadingData) return;
+    showToast('Salvando veículos...', 'info');
 
-    setVehicles(currentVehicles => {
-      const deleted = currentVehicles.filter(v => v.id.length > 20 && !updatedVehicles.find(uv => uv.id === v.id));
-      deleted.forEach(async v => await supabase.from('vehicles').delete().eq('id', v.id));
-      return updatedVehicles;
-    });
+    const vehiclesToDelete = vehicles.filter(v => v.id.length > 20 && !updatedVehicles.find(uv => uv.id === v.id));
+    for (const v of vehiclesToDelete) {
+      try {
+        await supabase.from('vehicles').delete().eq('id', v.id);
+      } catch (err) {
+        console.error('Error deleting vehicle:', err);
+      }
+    }
 
     const finalVehicles: Vehicle[] = [];
     for (const v of updatedVehicles) {
-      if (v.id.length <= 20) { // New item (local ID)
-        const { data } = await supabase.from('vehicles').upsert({
-          user_id: session?.user.id,
-          plate: v.plate,
-          name: v.name,
-          brand: v.brand,
-          model: v.model,
-          year: v.year,
-          type: v.type,
-          society_split_factor: v.societySplitFactor,
-          total_km_accumulated: v.totalKmAccumulated,
-          last_maintenance_km: v.lastMaintenanceKm,
-          photo_url: v.photoUrl,
-          thresholds: v.thresholds
-        }).select().single();
+      const dbPayload = {
+        user_id: session?.user.id,
+        plate: v.plate,
+        name: v.name,
+        brand: v.brand,
+        model: v.model,
+        year: v.year,
+        type: v.type,
+        society_split_factor: v.societySplitFactor,
+        total_km_accumulated: v.totalKmAccumulated,
+        last_maintenance_km: v.lastMaintenanceKm,
+        photo_url: v.photoUrl,
+        thresholds: v.thresholds
+      };
 
-        if (data) {
-          finalVehicles.push({ ...data, totalKmAccumulated: Number(data.total_km_accumulated), lastMaintenanceKm: Number(data.last_maintenance_km), societySplitFactor: data.society_split_factor });
+      try {
+        const isExisting = v.id && v.id.length > 20 && v.id.includes('-');
+        if (!isExisting) {
+          const { data, error } = await supabase.from('vehicles').insert(dbPayload).select().single();
+          if (error) throw error;
+          if (data) {
+            finalVehicles.push({
+              ...data,
+              totalKmAccumulated: Number(data.total_km_accumulated),
+              lastMaintenanceKm: Number(data.last_maintenance_km),
+              societySplitFactor: data.society_split_factor
+            });
+          }
         } else {
+          const { error } = await supabase.from('vehicles').update(dbPayload).eq('id', v.id);
+          if (error) throw error;
           finalVehicles.push(v);
         }
-      } else { // Existing item
-        await supabase.from('vehicles').update({
-          plate: v.plate,
-          name: v.name,
-          brand: v.brand,
-          model: v.model,
-          year: v.year,
-          type: v.type,
-          society_split_factor: v.societySplitFactor,
-          total_km_accumulated: v.totalKmAccumulated,
-          last_maintenance_km: v.lastMaintenanceKm,
-          photo_url: v.photoUrl,
-          thresholds: v.thresholds
-        }).eq('id', v.id);
+      } catch (err: any) {
+        console.error('Persistence error for vehicle:', v.plate, err);
+        showToast(`Erro ao salvar veículo ${v.plate}: ${err.message}`, 'error');
         finalVehicles.push(v);
       }
     }
     setVehicles(finalVehicles);
+    showToast('Veículos atualizados!');
   };
 
   const handleUpdateDrivers = async (updatedDrivers: Driver[]) => {
     if (loadingData) return;
+    showToast('Salvando motoristas...', 'info');
 
-    setDrivers(currentDrivers => {
-      const deleted = currentDrivers.filter(d => d.id.length > 20 && !updatedDrivers.find(ud => ud.id === d.id));
-      deleted.forEach(async d => await supabase.from('drivers').delete().eq('id', d.id));
-      return updatedDrivers;
-    });
+    const driversToDelete = drivers.filter(d => d.id.length > 20 && !updatedDrivers.find(ud => ud.id === d.id));
+    for (const d of driversToDelete) {
+      try {
+        await supabase.from('drivers').delete().eq('id', d.id);
+      } catch (err) {
+        console.error('Error deleting driver:', err);
+      }
+    }
 
     const finalDrivers: Driver[] = [];
     for (const d of updatedDrivers) {
-      if (d.id.length <= 20) {
-        const { data } = await supabase.from('drivers').upsert({
-          user_id: session?.user.id,
-          name: d.name,
-          cpf: d.cpf,
-          phone: d.phone,
-          pix_key: d.pixKey,
-          cnh: d.cnh,
-          cnh_category: d.cnhCategory,
-          cnh_validity: d.cnhValidity,
-          status: d.status,
-          photo_url: d.photoUrl
-        }).select().single();
+      const dbPayload = {
+        user_id: session?.user.id,
+        name: d.name || '',
+        cpf: d.cpf || '',
+        phone: d.phone || '',
+        pix_key: d.pixKey || '',
+        cnh: d.cnh || '',
+        cnh_category: d.cnhCategory || '',
+        cnh_validity: d.cnhValidity || null,
+        status: d.status || 'Ativo',
+        photo_url: d.photoUrl || '',
+        custom_commission: d.customCommission || null
+      };
 
-        if (data) {
-          finalDrivers.push({ ...data, cnhCategory: data.cnh_category, cnhValidity: data.cnh_validity, pixKey: data.pix_key });
+      try {
+        const isExisting = d.id && d.id.length > 20 && d.id.includes('-');
+        if (!isExisting) {
+          const { data, error } = await supabase.from('drivers').insert(dbPayload).select().single();
+          if (error) throw error;
+          if (data) {
+            finalDrivers.push({
+              ...data,
+              cnhCategory: data.cnh_category,
+              cnhValidity: data.cnh_validity,
+              pixKey: data.pix_key,
+              photoUrl: data.photo_url,
+              customCommission: data.custom_commission
+            });
+          }
         } else {
+          const { error } = await supabase.from('drivers').update(dbPayload).eq('id', d.id);
+          if (error) throw error;
           finalDrivers.push(d);
         }
-      } else {
-        await supabase.from('drivers').update({
-          name: d.name,
-          cpf: d.cpf,
-          phone: d.phone,
-          pix_key: d.pixKey,
-          cnh: d.cnh,
-          cnh_category: d.cnhCategory,
-          cnh_validity: d.cnhValidity,
-          status: d.status,
-          photo_url: d.photoUrl
-        }).eq('id', d.id);
+      } catch (err: any) {
+        console.error('Persistence error for driver:', d.name, err);
+        showToast(`Erro ao salvar ${d.name || 'motorista'}: ${err.message}`, 'error');
         finalDrivers.push(d);
       }
     }
     setDrivers(finalDrivers);
+    showToast('Motoristas atualizados!');
   };
 
   const handleUpdateShippers = async (updatedShippers: Shipper[]) => {
     if (loadingData) return;
+    showToast('Salvando tomadores...', 'info');
 
-    setShippers(currentShippers => {
-      const deleted = currentShippers.filter(s => s.id.length > 20 && !updatedShippers.find(us => us.id === s.id));
-      deleted.forEach(async s => await supabase.from('shippers').delete().eq('id', s.id));
-      return updatedShippers;
-    });
+    const shippersToDelete = shippers.filter(s => s.id.length > 20 && !updatedShippers.find(us => us.id === s.id));
+    for (const s of shippersToDelete) {
+      try {
+        await supabase.from('shippers').delete().eq('id', s.id);
+      } catch (err) {
+        console.error('Error deleting shipper:', err);
+      }
+    }
 
     const finalShippers: Shipper[] = [];
     for (const s of updatedShippers) {
-      if (s.id.length <= 20) {
-        const { data } = await supabase.from('shippers').upsert({
-          user_id: session?.user.id,
-          name: s.name,
-          cnpj: s.cnpj,
-          email: s.email,
-          phone: s.phone,
-          avg_payment_days: s.avgPaymentDays,
-          logo_url: s.logoUrl
-        }).select().single();
+      const dbPayload = {
+        user_id: session?.user.id,
+        name: s.name,
+        cnpj_cpf: s.cnpj,
+        email: s.email,
+        phone: s.phone,
+        avg_payment_days: s.avgPaymentDays,
+        logo_url: s.logoUrl
+      };
 
-        if (data) {
-          finalShippers.push({ ...data, avgPaymentDays: data.avg_payment_days });
+      try {
+        const isExisting = s.id && s.id.length > 20 && s.id.includes('-');
+        if (!isExisting) {
+          const { data, error } = await supabase.from('shippers').insert(dbPayload).select().single();
+          if (error) throw error;
+          if (data) {
+            finalShippers.push({
+              ...data,
+              cnpj: data.cnpj_cpf,
+              avgPaymentDays: data.avg_payment_days,
+              logoUrl: data.logo_url
+            });
+          }
         } else {
+          const { error } = await supabase.from('shippers').update(dbPayload).eq('id', s.id);
+          if (error) throw error;
           finalShippers.push(s);
         }
-      } else {
-        await supabase.from('shippers').update({
-          name: s.name,
-          cnpj: s.cnpj,
-          email: s.email,
-          phone: s.phone,
-          avg_payment_days: s.avgPaymentDays,
-          logo_url: s.logoUrl
-        }).eq('id', s.id);
+      } catch (err: any) {
+        console.error('Persistence error for shipper:', s.name, err);
+        showToast(`Erro ao salvar ${s.name}: ${err.message}`, 'error');
         finalShippers.push(s);
       }
     }
     setShippers(finalShippers);
+    showToast('Tomadores atualizados!');
   };
 
   const handleImportData = (data: any) => {
@@ -665,6 +700,21 @@ const App: React.FC = () => {
         <button onClick={() => setActiveTab('trips')} className={activeTab === 'trips' ? 'text-emerald-500' : 'text-slate-500'}><Truck /></button>
         <button onClick={() => setActiveTab('new-trip')} className={activeTab === 'new-trip' ? 'text-sky-500' : 'text-slate-500'}><PlusCircle /></button>
       </div>
+
+      {/* Toast Notification System */}
+      {toast && (
+        <div className="fixed bottom-24 md:bottom-8 right-8 z-[200] animate-in slide-in-from-right-10 duration-300">
+          <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 ${toast.type === 'success' ? 'bg-emerald-500 text-emerald-950' :
+            toast.type === 'error' ? 'bg-rose-500 text-white' :
+              'bg-sky-500 text-white'
+            }`}>
+            {toast.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
+            {toast.type === 'error' && <AlertTriangle className="w-5 h-5" />}
+            {toast.type === 'info' && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            <span className="font-black text-xs uppercase tracking-widest">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

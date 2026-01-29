@@ -1,14 +1,14 @@
 
 import React, { useState, useRef } from 'react';
-import { 
-  Truck, 
-  Users, 
-  Building2, 
-  Plus, 
-  Search, 
-  Mail, 
-  Phone, 
-  CreditCard, 
+import {
+  Truck,
+  Users,
+  Building2,
+  Plus,
+  Search,
+  Mail,
+  Phone,
+  CreditCard,
   FileText,
   Trash2,
   CheckCircle2,
@@ -32,15 +32,15 @@ interface SetupProps {
 
 type SetupTab = 'vehicles' | 'drivers' | 'shippers';
 
-const Setup: React.FC<SetupProps> = ({ 
-  vehicles, drivers, shippers, 
-  onUpdateVehicles, onUpdateDrivers, onUpdateShippers 
+const Setup: React.FC<SetupProps> = ({
+  vehicles, drivers, shippers,
+  onUpdateVehicles, onUpdateDrivers, onUpdateShippers
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<SetupTab>('vehicles');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{id: string, type: SetupTab} | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string, type: SetupTab } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,18 +68,27 @@ const Setup: React.FC<SetupProps> = ({
     setEditingItem(null);
   };
 
-  const handleSave = () => {
-    if (activeSubTab === 'vehicles') {
-      const exists = vehicles.find(v => v.id === editingItem.id);
-      onUpdateVehicles(exists ? vehicles.map(v => v.id === editingItem.id ? editingItem : v) : [editingItem, ...vehicles]);
-    } else if (activeSubTab === 'drivers') {
-      const exists = drivers.find(d => d.id === editingItem.id);
-      onUpdateDrivers(exists ? drivers.map(d => d.id === editingItem.id ? editingItem : d) : [editingItem, ...drivers]);
-    } else {
-      const exists = shippers.find(s => s.id === editingItem.id);
-      onUpdateShippers(exists ? shippers.map(s => s.id === editingItem.id ? editingItem : s) : [editingItem, ...shippers]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      if (activeSubTab === 'vehicles') {
+        const exists = vehicles.find(v => v.id === editingItem.id);
+        await onUpdateVehicles(exists ? vehicles.map(v => v.id === editingItem.id ? editingItem : v) : [editingItem, ...vehicles]);
+      } else if (activeSubTab === 'drivers') {
+        const exists = drivers.find(d => d.id === editingItem.id);
+        await onUpdateDrivers(exists ? drivers.map(d => d.id === editingItem.id ? editingItem : d) : [editingItem, ...drivers]);
+      } else {
+        const exists = shippers.find(s => s.id === editingItem.id);
+        await onUpdateShippers(exists ? shippers.map(s => s.id === editingItem.id ? editingItem : s) : [editingItem, ...shippers]);
+      }
+      handleCloseModal();
+    } catch (err) {
+      console.error('Error in handleSave:', err);
+    } finally {
+      setIsSaving(false);
     }
-    handleCloseModal();
   };
 
   const handleDelete = () => {
@@ -113,7 +122,7 @@ const Setup: React.FC<SetupProps> = ({
           <h2 className="text-3xl font-black text-white tracking-tight">Gestão de Cadastros</h2>
           <p className="text-slate-400 text-sm">Administre os ativos e parceiros da sua operação logística.</p>
         </div>
-        <button 
+        <button
           onClick={() => handleOpenModal()}
           className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20"
         >
@@ -124,22 +133,22 @@ const Setup: React.FC<SetupProps> = ({
 
       {/* Sub-Tabs Navigation */}
       <div className="flex flex-wrap items-center gap-2 p-1 bg-slate-900 border border-slate-800 rounded-2xl w-fit">
-        <button 
-          onClick={() => {setActiveSubTab('vehicles'); setSearchTerm('');}}
+        <button
+          onClick={() => { setActiveSubTab('vehicles'); setSearchTerm(''); }}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'vehicles' ? 'bg-slate-800 text-emerald-500 shadow-inner' : 'text-slate-500 hover:text-slate-300'}`}
         >
           <Truck className="w-4 h-4" />
           Frota
         </button>
-        <button 
-          onClick={() => {setActiveSubTab('drivers'); setSearchTerm('');}}
+        <button
+          onClick={() => { setActiveSubTab('drivers'); setSearchTerm(''); }}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'drivers' ? 'bg-slate-800 text-sky-500 shadow-inner' : 'text-slate-500 hover:text-slate-300'}`}
         >
           <Users className="w-4 h-4" />
           Motoristas
         </button>
-        <button 
-          onClick={() => {setActiveSubTab('shippers'); setSearchTerm('');}}
+        <button
+          onClick={() => { setActiveSubTab('shippers'); setSearchTerm(''); }}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'shippers' ? 'bg-slate-800 text-rose-500 shadow-inner' : 'text-slate-500 hover:text-slate-300'}`}
         >
           <Building2 className="w-4 h-4" />
@@ -150,8 +159,8 @@ const Setup: React.FC<SetupProps> = ({
       {/* Search Bar */}
       <div className="relative max-w-md">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-        <input 
-          type="text" 
+        <input
+          type="text"
           placeholder={`Buscar em ${activeSubTab === 'vehicles' ? 'veículos' : activeSubTab === 'drivers' ? 'motoristas' : 'parceiros'}...`}
           className="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-12 pr-4 py-3 text-sm text-white outline-none focus:border-emerald-500/50 transition-all"
           value={searchTerm}
@@ -190,14 +199,14 @@ const Setup: React.FC<SetupProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2 mt-4">
-              <button 
+              <button
                 onClick={() => handleOpenModal(v)}
                 className="flex-1 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-[10px] font-black uppercase text-slate-400 hover:text-white transition-all"
               >
                 Editar
               </button>
-              <button 
-                onClick={() => setDeleteConfirm({id: v.id, type: 'vehicles'})}
+              <button
+                onClick={() => setDeleteConfirm({ id: v.id, type: 'vehicles' })}
                 className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-all"
               >
                 <Trash2 className="w-4 h-4" />
@@ -211,12 +220,12 @@ const Setup: React.FC<SetupProps> = ({
             <div className="flex justify-between items-start mb-6">
               <div className="relative w-16 h-16 bg-sky-500/10 rounded-2xl flex items-center justify-center text-sky-500 font-black overflow-hidden border border-slate-700">
                 {d.photoUrl ? (
-                   <img src={d.photoUrl} alt={d.name} className="w-full h-full object-cover" />
+                  <img src={d.photoUrl} alt={d.name} className="w-full h-full object-cover" />
                 ) : (
-                   d.name.split(' ').map(n => n[0]).join('').slice(0, 2)
+                  d.name.split(' ').map(n => n[0]).join('').slice(0, 2)
                 )}
               </div>
-              <button 
+              <button
                 onClick={() => toggleDriverStatus(d.id)}
                 className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 ${d.status === 'Ativo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-700 text-slate-400'}`}
               >
@@ -239,14 +248,14 @@ const Setup: React.FC<SetupProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2 mt-4">
-              <button 
+              <button
                 onClick={() => handleOpenModal(d)}
                 className="flex-1 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-[10px] font-black uppercase text-slate-400 hover:text-white transition-all"
               >
                 Perfil Completo
               </button>
-              <button 
-                onClick={() => setDeleteConfirm({id: d.id, type: 'drivers'})}
+              <button
+                onClick={() => setDeleteConfirm({ id: d.id, type: 'drivers' })}
                 className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-all"
               >
                 <Trash2 className="w-4 h-4" />
@@ -284,14 +293,14 @@ const Setup: React.FC<SetupProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2 mt-4">
-              <button 
+              <button
                 onClick={() => handleOpenModal(s)}
                 className="flex-1 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-[10px] font-black uppercase text-slate-400 hover:text-white transition-all"
               >
                 Editar Dados
               </button>
-              <button 
-                onClick={() => setDeleteConfirm({id: s.id, type: 'shippers'})}
+              <button
+                onClick={() => setDeleteConfirm({ id: s.id, type: 'shippers' })}
                 className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-all"
               >
                 <Trash2 className="w-4 h-4" />
@@ -320,7 +329,7 @@ const Setup: React.FC<SetupProps> = ({
               {/* Image Upload Area */}
               <div className="flex flex-col items-center justify-center p-8 bg-slate-950/50 border-2 border-dashed border-slate-800 rounded-3xl group hover:border-emerald-500/30 transition-all">
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
-                <div 
+                <div
                   onClick={() => fileInputRef.current?.click()}
                   className="relative w-32 h-32 bg-slate-900 rounded-3xl flex items-center justify-center text-slate-600 cursor-pointer overflow-hidden border border-slate-800 hover:scale-105 transition-transform"
                 >
@@ -342,23 +351,23 @@ const Setup: React.FC<SetupProps> = ({
                   <>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Placa</label>
-                      <input type="text" value={editingItem.plate} onChange={e => setEditingItem({...editingItem, plate: e.target.value.toUpperCase()})} placeholder="AAA-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.plate} onChange={e => setEditingItem({ ...editingItem, plate: e.target.value.toUpperCase() })} placeholder="AAA-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Apelido/Nome</label>
-                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} placeholder="Ex: Scania Azul" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Ex: Scania Azul" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Marca</label>
-                      <input type="text" value={editingItem.brand} onChange={e => setEditingItem({...editingItem, brand: e.target.value})} placeholder="Ex: Scania" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.brand} onChange={e => setEditingItem({ ...editingItem, brand: e.target.value })} placeholder="Ex: Scania" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Modelo</label>
-                      <input type="text" value={editingItem.model} onChange={e => setEditingItem({...editingItem, model: e.target.value})} placeholder="Ex: R450" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.model} onChange={e => setEditingItem({ ...editingItem, model: e.target.value })} placeholder="Ex: R450" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Tipo Propriedade</label>
-                      <select value={editingItem.type} onChange={e => setEditingItem({...editingItem, type: e.target.value as VehiclePropertyType})} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
+                      <select value={editingItem.type} onChange={e => setEditingItem({ ...editingItem, type: e.target.value as VehiclePropertyType })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
                         <option value={VehiclePropertyType.PROPRIO}>Próprio</option>
                         <option value={VehiclePropertyType.SOCIEDADE}>Sociedade</option>
                       </select>
@@ -366,7 +375,7 @@ const Setup: React.FC<SetupProps> = ({
                     {editingItem.type === VehiclePropertyType.SOCIEDADE && (
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Taxa Partilha (%)</label>
-                        <input type="number" value={editingItem.societySplitFactor} onChange={e => setEditingItem({...editingItem, societySplitFactor: Number(e.target.value)})} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                        <input type="number" value={editingItem.societySplitFactor} onChange={e => setEditingItem({ ...editingItem, societySplitFactor: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                       </div>
                     )}
                   </>
@@ -376,27 +385,27 @@ const Setup: React.FC<SetupProps> = ({
                   <>
                     <div className="md:col-span-2 space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Nome Completo</label>
-                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} placeholder="Nome do Motorista" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Nome do Motorista" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CPF</label>
-                      <input type="text" value={editingItem.cpf} onChange={e => setEditingItem({...editingItem, cpf: e.target.value})} placeholder="000.000.000-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.cpf} onChange={e => setEditingItem({ ...editingItem, cpf: e.target.value })} placeholder="000.000.000-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Telefone/WhatsApp</label>
-                      <input type="text" value={editingItem.phone} onChange={e => setEditingItem({...editingItem, phone: e.target.value})} placeholder="(00) 00000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.phone} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} placeholder="(00) 00000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Chave PIX</label>
-                      <input type="text" value={editingItem.pixKey} onChange={e => setEditingItem({...editingItem, pixKey: e.target.value})} placeholder="CPF, E-mail ou Celular" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.pixKey} onChange={e => setEditingItem({ ...editingItem, pixKey: e.target.value })} placeholder="CPF, E-mail ou Celular" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CNH (Categoria)</label>
-                      <input type="text" value={editingItem.cnhCategory} onChange={e => setEditingItem({...editingItem, cnhCategory: e.target.value})} placeholder="E" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.cnhCategory} onChange={e => setEditingItem({ ...editingItem, cnhCategory: e.target.value })} placeholder="E" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="md:col-span-2 space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade CNH</label>
-                      <input type="date" value={editingItem.cnhValidity} onChange={e => setEditingItem({...editingItem, cnhValidity: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="date" value={editingItem.cnhValidity} onChange={e => setEditingItem({ ...editingItem, cnhValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                   </>
                 )}
@@ -405,23 +414,23 @@ const Setup: React.FC<SetupProps> = ({
                   <>
                     <div className="md:col-span-2 space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Razão Social / Nome Fantasia</label>
-                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} placeholder="Transportadora Parceira" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Transportadora Parceira" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CNPJ</label>
-                      <input type="text" value={editingItem.cnpj} onChange={e => setEditingItem({...editingItem, cnpj: e.target.value})} placeholder="00.000.000/0001-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.cnpj} onChange={e => setEditingItem({ ...editingItem, cnpj: e.target.value })} placeholder="00.000.000/0001-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Dias p/ Pagamento</label>
-                      <input type="number" value={editingItem.avgPaymentDays} onChange={e => setEditingItem({...editingItem, avgPaymentDays: Number(e.target.value)})} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="number" value={editingItem.avgPaymentDays} onChange={e => setEditingItem({ ...editingItem, avgPaymentDays: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">E-mail Financeiro</label>
-                      <input type="email" value={editingItem.email} onChange={e => setEditingItem({...editingItem, email: e.target.value})} placeholder="financeiro@empresa.com" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="email" value={editingItem.email} onChange={e => setEditingItem({ ...editingItem, email: e.target.value })} placeholder="financeiro@empresa.com" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Telefone</label>
-                      <input type="text" value={editingItem.phone} onChange={e => setEditingItem({...editingItem, phone: e.target.value})} placeholder="(00) 0000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input type="text" value={editingItem.phone} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} placeholder="(00) 0000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                     </div>
                   </>
                 )}
@@ -429,7 +438,7 @@ const Setup: React.FC<SetupProps> = ({
             </div>
 
             <footer className="p-8 border-t border-slate-800 bg-slate-900/50 backdrop-blur-md">
-              <button 
+              <button
                 onClick={handleSave}
                 className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-3"
               >
