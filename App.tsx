@@ -10,6 +10,7 @@ import NewTrip from './components/NewTrip';
 import FleetHealth from './components/FleetHealth';
 import Setup from './components/Setup';
 import Auth from './components/Auth';
+import LandingPage from './components/LandingPage';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
 import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle } from 'lucide-react';
@@ -44,6 +45,8 @@ const App: React.FC = () => {
 
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
+  const [showLandingPreview, setShowLandingPreview] = useState(true); // FORÇANDO PREVIEW
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -92,11 +95,11 @@ const App: React.FC = () => {
         }
 
         // Fetch Others
-        const { data: vData } = await supabase.from('vehicles').select('*');
-        const { data: dData } = await supabase.from('drivers').select('*');
-        const { data: sData } = await supabase.from('shippers').select('*');
-        const { data: tData } = await supabase.from('trips').select('*').order('departure_date', { ascending: false });
-        const { data: mData } = await supabase.from('maintenance_records').select('*');
+        const { data: vData } = await supabase.from('vehicles').select('*').eq('user_id', userId);
+        const { data: dData } = await supabase.from('drivers').select('*').eq('user_id', userId);
+        const { data: sData } = await supabase.from('shippers').select('*').eq('user_id', userId);
+        const { data: tData } = await supabase.from('trips').select('*').eq('user_id', userId).order('departure_date', { ascending: false });
+        const { data: mData } = await supabase.from('maintenance_records').select('*').eq('user_id', userId);
 
         if (vData) setVehicles(vData.map(v => ({ ...v, totalKmAccumulated: Number(v.total_km_accumulated), lastMaintenanceKm: Number(v.last_maintenance_km), societySplitFactor: v.society_split_factor })));
         if (dData) setDrivers(dData.map(d => ({ ...d, cnhCategory: d.cnh_category, cnhValidity: d.cnh_validity, pixKey: d.pix_key })));
@@ -453,8 +456,25 @@ const App: React.FC = () => {
     return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-emerald-500">Carregando...</div>;
   }
 
+  if (showLandingPreview) {
+    return <LandingPage onGetStarted={() => setShowLandingPreview(false)} />;
+  }
+
   if (!session) {
-    return <Auth />;
+    if (showAuth) {
+      return (
+        <div className="relative">
+          <button
+            onClick={() => setShowAuth(false)}
+            className="fixed top-6 left-6 z-50 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-full text-xs font-bold border border-white/10 transition-all"
+          >
+            ← Voltar para Início
+          </button>
+          <Auth />
+        </div>
+      );
+    }
+    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
   }
 
   return (
