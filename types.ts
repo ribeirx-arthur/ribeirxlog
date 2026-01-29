@@ -18,6 +18,9 @@ export interface UserProfile {
     showTips: boolean;
     theme?: 'light' | 'dark';
   };
+  plan_type?: 'none' | 'mensal' | 'anual' | 'lifetime';
+  payment_status?: 'unpaid' | 'paid' | 'trial';
+  trial_ends_at?: string;
 }
 
 export enum VehiclePropertyType {

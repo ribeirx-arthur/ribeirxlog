@@ -11,6 +11,7 @@ import FleetHealth from './components/FleetHealth';
 import Setup from './components/Setup';
 import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
+import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
 import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle } from 'lucide-react';
@@ -406,6 +407,26 @@ const App: React.FC = () => {
     setMaintenances(data.maintenances || []);
   };
 
+  const handleVerifyPayment = async () => {
+    if (!session) return;
+
+    // SIMULAÇÃO: No mundo real, isso seria feito via Webhook do Mercado Pago/Stripe
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        payment_status: 'paid',
+        plan_type: 'mensal' // Assume mensal por padrão na simulação
+      })
+      .eq('id', session.user.id);
+
+    if (error) {
+      alert("Erro ao verificar pagamento: " + error.message);
+    } else {
+      setProfile(prev => ({ ...prev, payment_status: 'paid', plan_type: 'mensal' }));
+      alert("Pagamento Identificado! Seu acesso foi liberado. Bem-vindo ao Ribeirx Log!");
+    }
+  };
+
   const handleResetData = async () => {
     if (window.confirm("Tem certeza que deseja apagar TODOS os seus dados?")) {
       await supabase.from('trips').delete().eq('user_id', session?.user.id);
@@ -475,6 +496,17 @@ const App: React.FC = () => {
       );
     }
     return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+  }
+
+  // GATE DE PAGAMENTO
+  if (profile.payment_status !== 'paid' && !showLandingPreview) {
+    return (
+      <Paywall
+        profile={profile}
+        onVerifyPayment={handleVerifyPayment}
+        onSignOut={() => supabase.auth.signOut()}
+      />
+    );
   }
 
   return (
