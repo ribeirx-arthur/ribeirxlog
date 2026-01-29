@@ -47,7 +47,6 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
-  const [showLandingPreview, setShowLandingPreview] = useState(true); // FORÇANDO PREVIEW
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -472,14 +471,6 @@ const App: React.FC = () => {
       default: return null;
     }
   };
-
-  if (loadingSession) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-emerald-500">Carregando...</div>;
-  }
-
-  if (showLandingPreview) {
-    return <LandingPage onGetStarted={() => setShowLandingPreview(false)} />;
-  }
 
   if (!session) {
     if (showAuth) {
