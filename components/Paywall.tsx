@@ -17,14 +17,22 @@ import { UserProfile } from '../types';
 
 interface PaywallProps {
     profile: UserProfile;
+    onRefreshProfile: () => void;
     onSignOut: () => void;
 }
 
 const PIX_KEY = "13988205888";
 const WHATSAPP_NUMBER = "5513988205888";
 
-const Paywall: React.FC<PaywallProps> = ({ profile, onSignOut }) => {
+const Paywall: React.FC<PaywallProps> = ({ profile, onRefreshProfile, onSignOut }) => {
     const [copied, setCopied] = React.useState(false);
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        await onRefreshProfile();
+        setTimeout(() => setIsRefreshing(false), 1000);
+    };
 
     const handleCopyPix = () => {
         navigator.clipboard.writeText(PIX_KEY);
@@ -90,7 +98,14 @@ const Paywall: React.FC<PaywallProps> = ({ profile, onSignOut }) => {
                     >
                         <MessageCircle className="w-5 h-5" /> Enviar Comprovante no WhatsApp
                     </button>
-                    <p className="text-[10px] text-center text-slate-500 uppercase font-black tracking-widest flex items-center justify-center gap-2">
+                    <button
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl flex items-center justify-center gap-3 border border-white/10 transition-all text-xs uppercase tracking-widest disabled:opacity-50"
+                    >
+                        {isRefreshing ? "Verificando..." : "Já paguei, verificar acesso"}
+                    </button>
+                    <p className="text-[10px] text-center text-slate-400 uppercase font-black tracking-widest flex items-center justify-center gap-2 pt-2">
                         <ShieldCheck className="w-3 h-3 text-emerald-500" /> Liberação manual imediata após o envio
                     </p>
                 </div>

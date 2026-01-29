@@ -426,6 +426,30 @@ const App: React.FC = () => {
     }
   };
 
+  const handleRefreshProfile = async () => {
+    if (!session) return;
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profileData) {
+      setProfile({
+        ...profileData,
+        companyName: profileData.company_name,
+        logoUrl: profileData.logo_url,
+        signatureUrl: profileData.signature_url,
+      } as any);
+
+      if (profileData.payment_status === 'paid') {
+        alert("Acesso Liberado! Aproveite o sistema.");
+      } else {
+        alert("Ainda não identificamos o pagamento. Se já pagou, aguarde alguns instantes.");
+      }
+    }
+  };
+
   const handleResetData = async () => {
     if (window.confirm("Tem certeza que deseja apagar TODOS os seus dados?")) {
       await supabase.from('trips').delete().eq('user_id', session?.user.id);
@@ -498,7 +522,7 @@ const App: React.FC = () => {
     return (
       <Paywall
         profile={profile}
-        onVerifyPayment={handleVerifyPayment}
+        onRefreshProfile={handleRefreshProfile}
         onSignOut={() => supabase.auth.signOut()}
       />
     );

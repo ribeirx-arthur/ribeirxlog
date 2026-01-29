@@ -21,6 +21,7 @@ export interface UserProfile {
   plan_type?: 'none' | 'mensal' | 'anual' | 'lifetime';
   payment_status?: 'unpaid' | 'paid' | 'trial';
   trial_ends_at?: string;
+  subscription_expires_at?: string;
 }
 
 export enum VehiclePropertyType {

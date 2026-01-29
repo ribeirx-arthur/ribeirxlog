@@ -152,7 +152,12 @@ const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotificat
           className="flex items-center gap-3 pl-2 pr-1 py-1 bg-slate-800/50 rounded-full border border-slate-700/50 hover:border-emerald-500/30 transition-all group"
         >
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors">{profile.name}</p>
+            <div className="flex items-center justify-end gap-2">
+              <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase ${profile.payment_status === 'paid' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                {profile.plan_type || 'Sem Plano'}
+              </span>
+              <p className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors">{profile.name}</p>
+            </div>
             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{profile.companyName}</p>
           </div>
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-slate-900 overflow-hidden">
