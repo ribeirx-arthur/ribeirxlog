@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ribeirx Log ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+      /* DARK MODE DEFAULTS (SLATE-950 base) */
+      :root {
+        --bg-main: #020617; /* slate-950 */
+        --bg-card: #0f172a; /* slate-900 */
+        --text-primary: #f8fafc; /* slate-50 */
+        --text-secondary: #94a3b8; /* slate-400 */
+        --border-color: #1e293b; /* slate-800 */
+      }
+
+      /* LIGHT MODE OVERRIDES */
+      html.light-mode {
+        --bg-main: #f8fafc; /* slate-50 */
+        --bg-card: #ffffff; /* white */
+        --text-primary: #0f172a; /* slate-900 */
+        --text-secondary: #64748b; /* slate-500 */
+        --border-color: #e2e8f0; /* slate-200 */
+      }
+
+      /* Base Application Styles using Variables */
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        transition: background-color 0.3s, color 0.3s;
+        margin: 0;
+        overflow-x: hidden;
+      }
+      
+      /* Utility class forcing for certain elements if not using Tailwind dark: modifier explicitly everywhere yet */
+      html.light-mode .bg-slate-950 { background-color: #f8fafc !important; }
+      html.light-mode .bg-slate-900 { background-color: #ffffff !important; border-color: #e2e8f0 !important; }
+      html.light-mode .text-slate-400 { color: #64748b !important; }
+      html.light-mode .text-white { color: #0f172a !important; }
+      html.light-mode .border-slate-800 { border-color: #e2e8f0 !important; }
+      
+      /* Input overrides */
+      html.light-mode input { 
+        background-color: #f1f5f9 !important; 
+        color: #0f172a !important; 
+        border-color: #cbd5e1 !important;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1e293b;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+      }
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #trip-printable-area, #trip-printable-area * {
+          visibility: visible;
+        }
+        #trip-printable-area {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          background: white !important;
+          color: black !important;
+        }
+      }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "lucide-react": "https://esm.sh/lucide-react@0.460.0?external=react",
+    "recharts": "https://esm.sh/recharts@2.12.7?external=react,react-dom",
+    "@google/genai": "https://esm.sh/@google/genai@0.2.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
