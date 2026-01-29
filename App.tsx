@@ -472,6 +472,10 @@ const App: React.FC = () => {
     }
   };
 
+  if (loadingSession) {
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-emerald-500">Carregando...</div>;
+  }
+
   if (!session) {
     if (showAuth) {
       return (
@@ -490,7 +494,7 @@ const App: React.FC = () => {
   }
 
   // GATE DE PAGAMENTO
-  if (profile.payment_status !== 'paid' && !showLandingPreview) {
+  if (profile.payment_status !== 'paid') {
     return (
       <Paywall
         profile={profile}
