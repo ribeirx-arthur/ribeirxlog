@@ -16,15 +16,13 @@ import {
     Star
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { PIX_KEY, WHATSAPP_NUMBER } from '../pricing';
 
 interface SubscriptionViewProps {
     profile: UserProfile;
     initialPlanIntent?: string | null;
     onClearIntent?: () => void;
 }
-
-const PIX_KEY = "13988205888";
-const WHATSAPP_NUMBER = "5513988205888";
 
 const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPlanIntent, onClearIntent }) => {
     const [copied, setCopied] = React.useState(false);
@@ -43,7 +41,10 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
     };
 
     const handleWhatsApp = (plan: string) => {
-        const message = encodeURIComponent(`Olá Arthur! Acabei de me cadastrar no Ribeirx Log e gostaria de confirmar o pagamento do plano ${plan} (Email: ${profile.email}). Segue o comprovante de transferência.`);
+        const isConfirming = plan === 'de Interesse' || plan === 'Suporte';
+        const message = isConfirming
+            ? encodeURIComponent(`Olá Arthur! Estou no Ribeirx Log e gostaria de tirar uma dúvida ou confirmar meu interesse em assinar um plano.`)
+            : encodeURIComponent(`Olá Arthur! Acabei de me cadastrar no Ribeirx Log e gostaria de confirmar o pagamento do plano ${plan} (Email: ${profile.email}). Segue o comprovante.`);
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
@@ -155,11 +156,11 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                         <Step num="3" title="Envio do Comprovante" desc="Após o Pix, clique no botão para nos avisar no WhatsApp." />
 
                         <button
-                            onClick={() => handleWhatsApp('de Interesse')}
+                            onClick={() => handleWhatsApp('Suporte')}
                             className="w-full py-8 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-[2.5rem] flex items-center justify-center gap-4 shadow-2xl shadow-emerald-500/30 transition-all uppercase tracking-widest text-lg group"
                         >
                             <MessageCircle className="w-8 h-8 group-hover:scale-110 transition-transform" />
-                            Confirmar Pagamento
+                            Falar com Arthur no WhatsApp
                         </button>
 
                         <div className="flex items-start gap-3 p-6 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">

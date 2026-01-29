@@ -30,6 +30,7 @@ import {
 import {
   INITIAL_PROFILE
 } from './constants';
+import { WHATSAPP_NUMBER } from './pricing';
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
@@ -329,6 +330,8 @@ const App: React.FC = () => {
   };
 
   const handleLandingPurchase = (plan: string) => {
+    const message = encodeURIComponent(`Olá Arthur! Estou na Landing Page e tenho interesse no plano ${plan}. Como faço para prosseguir com o pagamento?`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     setPendingPlanIntent(plan);
     setShowAuth(true);
   };
