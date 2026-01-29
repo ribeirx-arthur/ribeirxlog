@@ -25,22 +25,17 @@ import {
   MaintenanceThresholds
 } from './types';
 import {
-  INITIAL_PROFILE,
-  MOCK_VEHICLES,
-  MOCK_DRIVERS,
-  MOCK_SHIPPERS,
-  MOCK_TRIPS,
-  MOCK_MAINTENANCE
+  INITIAL_PROFILE
 } from './constants';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
-  const [vehicles, setVehicles] = useState<Vehicle[]>(MOCK_VEHICLES);
-  const [drivers, setDrivers] = useState<Driver[]>(MOCK_DRIVERS);
-  const [shippers, setShippers] = useState<Shipper[]>(MOCK_SHIPPERS);
-  const [trips, setTrips] = useState<Trip[]>(MOCK_TRIPS);
-  const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>(MOCK_MAINTENANCE);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [shippers, setShippers] = useState<Shipper[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
 
