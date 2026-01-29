@@ -49,6 +49,7 @@ const App: React.FC = () => {
   const [loadingSession, setLoadingSession] = useState(true);
   const [loadingData, setLoadingData] = useState(true); // NEW
   const [showAuth, setShowAuth] = useState(false);
+  const [pendingPlanIntent, setPendingPlanIntent] = useState<string | null>(null); // NEW
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -320,6 +321,11 @@ const App: React.FC = () => {
 
   const handleUpdateVehicleThresholds = (vehicleId: string, thresholds: MaintenanceThresholds) => {
     setVehicles(prev => prev.map(v => v.id === vehicleId ? { ...v, thresholds } : v));
+  };
+
+  const handleLandingPurchase = (plan: string) => {
+    setPendingPlanIntent(plan);
+    setShowAuth(true);
   };
 
   const handleUpdateProfile = async (newProfile: UserProfile) => {
@@ -603,7 +609,7 @@ const App: React.FC = () => {
         </div>
       );
     }
-    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+    return <LandingPage onGetStarted={() => setShowAuth(true)} onPurchase={handleLandingPurchase} />;
   }
 
   // GATE DE PAGAMENTO

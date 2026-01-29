@@ -15,9 +15,10 @@ import {
 
 interface LandingPageProps {
     onGetStarted: () => void;
+    onPurchase: (plan: string) => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) => {
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 font-sans antialiased overflow-x-hidden">
             {/* Background Decorativo - Grid Digital */}
@@ -125,7 +126,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                                 "Alertas de Manutenção"
                             ]}
                             buttonText="Assinar Mensal"
-                            onClick={onGetStarted}
+                            onClick={() => onPurchase('Mensal')}
                         />
 
                         {/* Plano Anual - Popular Choice */}
@@ -144,7 +145,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                                 "Suporte Prioritário VIP"
                             ]}
                             buttonText="Quero Plano Profissional"
-                            onClick={onGetStarted}
+                            onClick={() => onPurchase('Anual')}
                         />
 
                         {/* Licença Única / Lifetime Option */}
@@ -161,7 +162,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                                 "Sem custos de manutenção"
                             ]}
                             buttonText="Comprar Licença"
-                            onClick={onGetStarted}
+                            onClick={() => onPurchase('Vitalício')}
                         />
                     </div>
                 </div>
