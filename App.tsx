@@ -30,7 +30,6 @@ import {
 import {
   INITIAL_PROFILE
 } from './constants';
-import SubscriptionView from './components/SubscriptionView'; // NEW
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
