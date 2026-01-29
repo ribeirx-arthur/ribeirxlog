@@ -64,7 +64,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             </nav>
 
             {/* Hero Section - Premium & Impactful */}
-            <section className="relative pt-44 pb-32 px-6">
+            <section className="relative pt-36 md:pt-44 pb-32 px-6">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] pointer-events-none">
                     <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-emerald-500/20 blur-[150px] rounded-full animate-pulse" />
                     <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-sky-500/10 blur-[120px] rounded-full" />
@@ -74,8 +74,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-10">
                         <ShieldCheck className="w-3 h-3" /> Gestão Logística de Nova Geração
                     </div>
-                    <h1 className="text-6xl md:text-9xl font-black text-white tracking-[ -0.05em] leading-[0.85] mb-10">
-                        A Inteligência que seu <br />
+                    <h1 className="text-5xl md:text-9xl font-black text-white tracking-[-0.05em] leading-[0.9] md:leading-[0.85] mb-8 md:mb-10">
+                        A Inteligência que seu <br className="hidden md:block" />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">Lucro Precisava.</span>
                     </h1>
                     <p className="text-lg md:text-2xl text-slate-400 max-w-3xl mx-auto mb-16 font-medium leading-relaxed">

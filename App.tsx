@@ -15,7 +15,7 @@ import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw } from 'lucide-react';
 import {
   UserProfile,
   Vehicle,
@@ -32,7 +32,17 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
+const APP_VERSION = '1.0.4';
+
 const App: React.FC = () => {
+  useEffect(() => {
+    const lastVersion = localStorage.getItem('app_version');
+    if (lastVersion !== APP_VERSION) {
+      localStorage.setItem('app_version', APP_VERSION);
+      // Force reload from server bypassing cache
+      window.location.reload();
+    }
+  }, []);
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
   // Force Settings if profile is incomplete (First Visit) 
   const [activeTab, setActiveTab] = useState<TabType>(() => {
@@ -50,7 +60,8 @@ const App: React.FC = () => {
   const [loadingSession, setLoadingSession] = useState(true);
   const [loadingData, setLoadingData] = useState(true); // NEW
   const [showAuth, setShowAuth] = useState(false);
-  const [pendingPlanIntent, setPendingPlanIntent] = useState<string | null>(null); // NEW
+  const [pendingPlanIntent, setPendingPlanIntent] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -668,6 +679,10 @@ const App: React.FC = () => {
           onReadNotification={() => { }}
           setActiveTab={setActiveTab}
           activeTab={activeTab}
+          onRefresh={() => {
+            localStorage.removeItem('app_version');
+            window.location.reload();
+          }}
         />
         <main className="md:ml-64 p-4 md:p-8">
           <div className="max-w-7xl mx-auto pb-24 md:pb-8">
@@ -691,15 +706,114 @@ const App: React.FC = () => {
         onReadNotification={(id) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))}
         setActiveTab={setActiveTab}
         activeTab={activeTab}
+        onRefresh={() => {
+          localStorage.removeItem('app_version');
+          window.location.reload();
+        }}
       />
       <main className="md:ml-64 p-4 md:p-8">
         <div className="max-w-7xl mx-auto pb-24 md:pb-8">{renderContent()}</div>
       </main>
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 px-6 py-4 flex justify-between items-center z-50">
-        <button onClick={() => setActiveTab('dashboard')} className={activeTab === 'dashboard' ? 'text-emerald-500' : 'text-slate-500'}><LayoutDashboard /></button>
-        <button onClick={() => setActiveTab('trips')} className={activeTab === 'trips' ? 'text-emerald-500' : 'text-slate-500'}><Truck /></button>
-        <button onClick={() => setActiveTab('new-trip')} className={activeTab === 'new-trip' ? 'text-sky-500' : 'text-slate-500'}><PlusCircle /></button>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-lg border-t border-white/5 px-6 py-4 flex justify-between items-center z-[150] shadow-2xl">
+        <button
+          onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'dashboard' ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
+        >
+          <LayoutDashboard className="w-6 h-6" />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Início</span>
+        </button>
+        <button
+          onClick={() => { setActiveTab('trips'); setIsMobileMenuOpen(false); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'trips' ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
+        >
+          <Truck className="w-6 h-6" />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Viagens</span>
+        </button>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={`flex flex-col items-center gap-1 transition-all ${isMobileMenuOpen ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6 text-rose-500" /> : <Menu className="w-6 h-6 border-2 border-slate-700 rounded-lg p-0.5" />}
+          <span className="text-[10px] font-black uppercase tracking-tighter">Menu</span>
+        </button>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[140] bg-slate-950/95 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 duration-300 md:hidden pt-28 pb-36 px-6 overflow-y-auto">
+          <div className="flex items-center gap-3 mb-12 px-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Truck className="text-slate-950 w-7 h-7" />
+            </div>
+            <div>
+              <span className="font-black text-2xl tracking-tight text-white uppercase italic block leading-none">RIBEIRX<span className="text-emerald-500">LOG</span></span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Controle de Frota v2.0</span>
+            </div>
+          </div>
+
+          <nav className="grid grid-cols-1 gap-3">
+            {[
+              { id: 'dashboard', label: 'Painel Geral', icon: LayoutDashboard },
+              { id: 'trips', label: 'Minhas Viagens', icon: Truck },
+              { id: 'new-trip', label: 'Novo Lançamento', icon: PlusCircle, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20 shadow-lg shadow-sky-500/5' },
+              { id: 'performance', label: 'Estatísticas & BI', icon: TrendingUp },
+              { id: 'maintenance', label: 'Manutenção', icon: ShieldAlert },
+              { id: 'setup', label: 'Cadastros Base', icon: Users },
+              { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
+              { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              const isLocked = profile.payment_status !== 'paid' && !['subscription', 'settings'].includes(item.id);
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id as TabType);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between p-5 rounded-[2.5rem] transition-all border ${isActive
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 shadow-xl shadow-emerald-500/5'
+                    : item.bg ? `${item.bg} text-white` : 'bg-slate-900/50 border-white/5 text-slate-400 hover:bg-slate-800'
+                    } ${isLocked ? 'opacity-50 grayscale select-none' : ''}`}
+                >
+                  <div className="flex items-center gap-5">
+                    <Icon className={`w-6 h-6 ${isActive ? 'scale-110' : ''}`} />
+                    <span className={`font-black text-sm uppercase tracking-widest ${isActive ? 'text-white' : ''}`}>{item.label}</span>
+                  </div>
+                  {isLocked ? (
+                    <ShieldAlert className="w-5 h-5 text-amber-500/50" />
+                  ) : (
+                    isActive && <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  )}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => { supabase.auth.signOut(); setIsMobileMenuOpen(false); }}
+              className="w-full mt-6 flex items-center gap-5 p-5 rounded-[2.5rem] bg-rose-500/10 border border-rose-500/20 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
+            >
+              <X className="w-6 h-6" />
+              <span className="font-black text-sm uppercase tracking-widest">Sair do Sistema</span>
+            </button>
+
+            <div className="mt-10 p-6 rounded-[2.5rem] bg-white/5 border border-white/10 text-center">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Versão do Sistema: <span className="text-emerald-500">v{APP_VERSION}</span></p>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('app_version');
+                  window.location.href = window.location.origin + '?v=' + Date.now();
+                }}
+                className="inline-flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition-colors"
+              >
+                <RefreshCcw className="w-3 h-3" /> Forçar Atualização
+              </button>
+            </div>
+          </nav>
+        </div>
+      )}
 
       {/* Toast Notification System */}
       {toast && (

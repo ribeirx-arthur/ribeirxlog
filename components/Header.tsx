@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Bell, Search, HelpCircle, User, X, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Bell, Search, HelpCircle, User, X, AlertTriangle, ChevronRight, RefreshCcw } from 'lucide-react';
 import { UserProfile, AppNotification, TabType } from '../types';
 
 interface HeaderProps {
@@ -9,9 +9,10 @@ interface HeaderProps {
   onReadNotification: (id: string) => void;
   setActiveTab: (tab: TabType) => void;
   activeTab: TabType;
+  onRefresh?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotification, setActiveTab, activeTab }) => {
+const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotification, setActiveTab, activeTab, onRefresh }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFaq, setShowFaq] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -98,7 +99,7 @@ const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotificat
 
             {/* Creative FAQ Modal */}
             {showFaq && (
-              <div className="absolute right-0 mt-4 w-96 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[110]">
+              <div className="fixed md:absolute inset-x-4 md:inset-x-auto right-auto md:right-0 top-20 md:top-auto md:mt-4 md:w-96 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[110]">
                 <div className="h-32 bg-gradient-to-br from-emerald-600 to-teal-800 relative p-6 flex flex-col justify-end overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   <h3 className="text-xl font-black text-white relative z-10">Central de Ajuda</h3>
@@ -145,29 +146,39 @@ const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotificat
           </div>
         </div>
 
-        <div className="h-8 w-px bg-slate-800"></div>
+        <div className="flex items-center gap-3">
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-emerald-500 transition-all hover:border-emerald-500/30 group hidden md:flex"
+              title="Forçar Atualização"
+            >
+              <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+            </button>
+          )}
 
-        <button
-          onClick={() => setActiveTab('settings')}
-          className="flex items-center gap-3 pl-2 pr-1 py-1 bg-slate-800/50 rounded-full border border-slate-700/50 hover:border-emerald-500/30 transition-all group"
-        >
-          <div className="text-right hidden sm:block">
-            <div className="flex items-center justify-end gap-2">
-              <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase ${profile.payment_status === 'paid' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-500'}`}>
-                {profile.plan_type || 'Sem Plano'}
-              </span>
-              <p className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors">{profile.name}</p>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className="flex items-center gap-3 py-1.5 pl-1.5 pr-4 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800/80 transition-all group"
+          >
+            <div className="text-right hidden sm:block">
+              <div className="flex items-center justify-end gap-2">
+                <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase ${profile.payment_status === 'paid' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                  {profile.plan_type || 'Sem Plano'}
+                </span>
+                <p className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors">{profile.name}</p>
+              </div>
+              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{profile.companyName}</p>
             </div>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{profile.companyName}</p>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-slate-900 overflow-hidden">
-            {profile.logoUrl ? (
-              <img src={profile.logoUrl} className="w-full h-full object-cover" />
-            ) : (
-              profile.name.split(' ').map(n => n[0]).join('')
-            )}
-          </div>
-        </button>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-slate-900 overflow-hidden">
+              {profile.logoUrl ? (
+                <img src={profile.logoUrl} className="w-full h-full object-cover" />
+              ) : (
+                profile.name.split(' ').map(n => n[0]).join('')
+              )}
+            </div>
+          </button>
+        </div>
       </div>
     </header>
   );
