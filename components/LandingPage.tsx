@@ -18,8 +18,10 @@ import {
     Lock,
     QrCode,
     MessageSquare,
-    MousePointerClick
+    MousePointerClick,
+    MessageCircle
 } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '../pricing';
 
 interface LandingPageProps {
     onGetStarted: () => void;
@@ -27,6 +29,11 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) => {
+    const handleWhatsAppContact = () => {
+        const message = encodeURIComponent("Olá Arthur! Vi o Ribeirx Log e gostaria de tirar algumas dúvidas sobre os planos.");
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+    };
+
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-emerald-500/30 font-sans antialiased overflow-x-hidden">
             {/* Background Decorativo - Grid Digital */}
@@ -115,7 +122,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 </div>
             </section>
 
-            {/* Pricing - A Página que o Usuário Gostou (Ported from SubscriptionView) */}
+            {/* Pricing */}
             <section id="planos" className="py-32 relative">
                 <div className="max-w-7xl mx-auto px-6 mb-20 text-center space-y-4">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-500 text-[10px] font-black uppercase tracking-widest">
@@ -154,7 +161,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 </div>
             </section>
 
-            {/* Como Funciona - NEW */}
+            {/* Como Funciona */}
             <section className="py-24 bg-slate-900 border-y border-white/5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-emerald-500/5 blur-[120px] rounded-full -translate-x-1/2 translate-y-1/2 pointer-events-none" />
 
@@ -167,25 +174,35 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     <StepItem
                         icon={MousePointerClick}
                         step="01"
-                        title="Escolha seu Plano"
-                        desc="Selecione acima a licença que melhor atende o tamanho da sua operação atual."
+                        title="Crie sua Conta"
+                        desc="Clique em 'Acessar Sistema' e crie sua conta em segundos para vincular sua licença."
                     />
                     <StepItem
                         icon={QrCode}
                         step="02"
                         title="Pagamento Pix"
-                        desc="Após o login, você receberá a chave Pix para realizar o pagamento de forma segura."
+                        desc="Dentro do painel, você verá a chave Pix para realizar o pagamento do plano escolhido."
                     />
                     <StepItem
                         icon={MessageSquare}
                         step="03"
-                        title="Liberação Instantânea"
-                        desc="Envie o comprovante pelo WhatsApp e nossa equipe liberará seu painel em minutos."
+                        title="Liberação Arthur"
+                        desc="Envie o comprovante pelo WhatsApp. Nossa equipe liberará seu acesso em minutos."
+                        action={{ label: "Chamar Arthur", onClick: handleWhatsAppContact }}
                     />
+                </div>
+
+                <div className="mt-20 text-center relative z-10">
+                    <button
+                        onClick={handleWhatsAppContact}
+                        className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 font-bold hover:bg-emerald-500 hover:text-slate-950 transition-all group"
+                    >
+                        <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" /> Ainda com dúvidas? Fale conosco no WhatsApp
+                    </button>
                 </div>
             </section>
 
-            {/* Tabela Comparativa Detalhada (The "Interested" part) */}
+            {/* Tabela Comparativa Detalhada */}
             <section className="py-32 relative">
                 <div className="max-w-5xl mx-auto px-6">
                     <div className="bg-slate-900 border border-slate-800 rounded-[3rem] overflow-hidden shadow-2xl relative">
@@ -293,7 +310,7 @@ const LandingTableRow = ({ label, v1, v2, v3 }: any) => (
     </tr>
 );
 
-const StepItem = ({ icon: Icon, step, title, desc }: any) => (
+const StepItem = ({ icon: Icon, step, title, desc, action }: any) => (
     <div className="flex flex-col items-center text-center group">
         <div className="relative mb-8">
             <div className="w-20 h-20 bg-slate-800 border border-white/10 rounded-[2rem] flex items-center justify-center shadow-xl group-hover:bg-emerald-500/10 group-hover:border-emerald-500/50 transition-all">
@@ -304,7 +321,15 @@ const StepItem = ({ icon: Icon, step, title, desc }: any) => (
             </div>
         </div>
         <h4 className="text-xl font-bold text-white mb-3">{title}</h4>
-        <p className="text-slate-400 text-sm leading-relaxed max-w-[250px]">{desc}</p>
+        <p className="text-slate-400 text-sm leading-relaxed max-w-[250px] mb-4">{desc}</p>
+        {action && (
+            <button
+                onClick={action.onClick}
+                className="text-xs text-emerald-500 font-black uppercase tracking-widest flex items-center gap-2 hover:text-emerald-400 transition-colors"
+            >
+                {action.label} <ArrowRight className="w-4 h-4" />
+            </button>
+        )}
     </div>
 );
 

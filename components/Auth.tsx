@@ -1,22 +1,39 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../services/supabase';
-import { Truck, LogIn, Lock } from 'lucide-react';
+import { Truck, LogIn, Lock, UserPlus, ArrowRight } from 'lucide-react';
 
 export default function Auth() {
     const [loading, setLoading] = useState(false);
+    const [isSignup, setIsSignup] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-            if (error) throw error;
+            if (isSignup) {
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: email.split('@')[0], // Nome temporário
+                        }
+                    }
+                });
+                if (error) throw error;
+                alert('Conta criada com sucesso! Você já pode entrar.');
+                setIsSignup(false);
+            } else {
+                const { error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (error) throw error;
+            }
         } catch (error: any) {
             alert(error.error_description || error.message);
         } finally {
@@ -36,11 +53,11 @@ export default function Auth() {
                     </div>
                     <h1 className="text-3xl font-bold text-white tracking-tight mb-2">RIBEIRX <span className="text-emerald-500">LOG</span></h1>
                     <p className="text-slate-400 text-xs font-bold tracking-widest uppercase">
-                        <span className="text-emerald-500/80">Gestão Inteligente</span>
+                        <span className="text-emerald-500/80">{isSignup ? 'Crie sua conta' : 'Gestão Inteligente'}</span>
                     </p>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-semibold text-slate-500 uppercase mb-2 ml-1">Email Corporativo</label>
@@ -75,12 +92,22 @@ export default function Auth() {
                         className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed group"
                     >
                         {loading ? (
-                            <span className="animate-pulse">Autenticando...</span>
+                            <span className="animate-pulse">Aguarde...</span>
                         ) : (
                             <>
-                                Entrar no Sistema <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                {isSignup ? 'Criar Conta' : 'Entrar no Sistema'}
+                                {isSignup ? <UserPlus className="w-5 h-5 group-hover:translate-x-1 transition-transform" /> : <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                             </>
                         )}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setIsSignup(!isSignup)}
+                        className="w-full text-xs font-bold text-slate-500 hover:text-emerald-500 transition-colors uppercase tracking-widest pt-2 flex items-center justify-center gap-2"
+                    >
+                        {isSignup ? 'Já tem uma conta? Faça Login' : 'Novo por aqui? Crie sua conta'}
+                        <ArrowRight className="w-3 h-3" />
                     </button>
                 </form>
 
