@@ -47,6 +47,7 @@ const App: React.FC = () => {
 
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
+  const [loadingData, setLoadingData] = useState(true); // NEW
   const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
@@ -122,6 +123,8 @@ const App: React.FC = () => {
           totalKm: Number(t.total_km)
         })));
         if (mData) setMaintenances(mData.map(m => ({ ...m, vehicleId: m.vehicle_id, kmAtMaintenance: Number(m.km_at_maintenance), totalCost: Number(m.total_cost) })));
+
+        setLoadingData(false);
       };
       loadData();
     }
@@ -337,32 +340,51 @@ const App: React.FC = () => {
   };
 
   const handleUpdateVehicles = async (updatedVehicles: Vehicle[]) => {
-    const deleted = vehicles.filter(v => !updatedVehicles.find(uv => uv.id === v.id));
-    for (const v of deleted) {
-      if (v.id.length > 20) await supabase.from('vehicles').delete().eq('id', v.id);
-    }
+    if (loadingData) return;
+
+    setVehicles(currentVehicles => {
+      const deleted = currentVehicles.filter(v => v.id.length > 20 && !updatedVehicles.find(uv => uv.id === v.id));
+      deleted.forEach(async v => await supabase.from('vehicles').delete().eq('id', v.id));
+      return updatedVehicles;
+    });
 
     const finalVehicles: Vehicle[] = [];
     for (const v of updatedVehicles) {
-      const { data, error } = await supabase.from('vehicles').upsert({
-        id: v.id.length > 20 ? v.id : undefined,
-        user_id: session?.user.id,
-        plate: v.plate,
-        name: v.name,
-        brand: v.brand,
-        model: v.model,
-        year: v.year,
-        type: v.type,
-        society_split_factor: v.societySplitFactor,
-        total_km_accumulated: v.totalKmAccumulated,
-        last_maintenance_km: v.lastMaintenanceKm,
-        photo_url: v.photoUrl,
-        thresholds: v.thresholds
-      }).select().single();
+      if (v.id.length <= 20) { // New item (local ID)
+        const { data } = await supabase.from('vehicles').upsert({
+          user_id: session?.user.id,
+          plate: v.plate,
+          name: v.name,
+          brand: v.brand,
+          model: v.model,
+          year: v.year,
+          type: v.type,
+          society_split_factor: v.societySplitFactor,
+          total_km_accumulated: v.totalKmAccumulated,
+          last_maintenance_km: v.lastMaintenanceKm,
+          photo_url: v.photoUrl,
+          thresholds: v.thresholds
+        }).select().single();
 
-      if (data) {
-        finalVehicles.push({ ...data, totalKmAccumulated: Number(data.total_km_accumulated), lastMaintenanceKm: Number(data.last_maintenance_km), societySplitFactor: data.society_split_factor });
-      } else {
+        if (data) {
+          finalVehicles.push({ ...data, totalKmAccumulated: Number(data.total_km_accumulated), lastMaintenanceKm: Number(data.last_maintenance_km), societySplitFactor: data.society_split_factor });
+        } else {
+          finalVehicles.push(v);
+        }
+      } else { // Existing item
+        await supabase.from('vehicles').update({
+          plate: v.plate,
+          name: v.name,
+          brand: v.brand,
+          model: v.model,
+          year: v.year,
+          type: v.type,
+          society_split_factor: v.societySplitFactor,
+          total_km_accumulated: v.totalKmAccumulated,
+          last_maintenance_km: v.lastMaintenanceKm,
+          photo_url: v.photoUrl,
+          thresholds: v.thresholds
+        }).eq('id', v.id);
         finalVehicles.push(v);
       }
     }
@@ -370,30 +392,47 @@ const App: React.FC = () => {
   };
 
   const handleUpdateDrivers = async (updatedDrivers: Driver[]) => {
-    const deleted = drivers.filter(d => !updatedDrivers.find(ud => ud.id === d.id));
-    for (const d of deleted) {
-      if (d.id.length > 20) await supabase.from('drivers').delete().eq('id', d.id);
-    }
+    if (loadingData) return;
+
+    setDrivers(currentDrivers => {
+      const deleted = currentDrivers.filter(d => d.id.length > 20 && !updatedDrivers.find(ud => ud.id === d.id));
+      deleted.forEach(async d => await supabase.from('drivers').delete().eq('id', d.id));
+      return updatedDrivers;
+    });
 
     const finalDrivers: Driver[] = [];
     for (const d of updatedDrivers) {
-      const { data, error } = await supabase.from('drivers').upsert({
-        id: d.id.length > 20 ? d.id : undefined,
-        user_id: session?.user.id,
-        name: d.name,
-        cpf: d.cpf,
-        phone: d.phone,
-        pix_key: d.pixKey,
-        cnh: d.cnh,
-        cnh_category: d.cnhCategory,
-        cnh_validity: d.cnhValidity,
-        status: d.status,
-        photo_url: d.photoUrl
-      }).select().single();
+      if (d.id.length <= 20) {
+        const { data } = await supabase.from('drivers').upsert({
+          user_id: session?.user.id,
+          name: d.name,
+          cpf: d.cpf,
+          phone: d.phone,
+          pix_key: d.pixKey,
+          cnh: d.cnh,
+          cnh_category: d.cnhCategory,
+          cnh_validity: d.cnhValidity,
+          status: d.status,
+          photo_url: d.photoUrl
+        }).select().single();
 
-      if (data) {
-        finalDrivers.push({ ...data, cnhCategory: data.cnh_category, cnhValidity: data.cnh_validity, pixKey: data.pix_key });
+        if (data) {
+          finalDrivers.push({ ...data, cnhCategory: data.cnh_category, cnhValidity: data.cnh_validity, pixKey: data.pix_key });
+        } else {
+          finalDrivers.push(d);
+        }
       } else {
+        await supabase.from('drivers').update({
+          name: d.name,
+          cpf: d.cpf,
+          phone: d.phone,
+          pix_key: d.pixKey,
+          cnh: d.cnh,
+          cnh_category: d.cnhCategory,
+          cnh_validity: d.cnhValidity,
+          status: d.status,
+          photo_url: d.photoUrl
+        }).eq('id', d.id);
         finalDrivers.push(d);
       }
     }
@@ -401,27 +440,41 @@ const App: React.FC = () => {
   };
 
   const handleUpdateShippers = async (updatedShippers: Shipper[]) => {
-    const deleted = shippers.filter(s => !updatedShippers.find(us => us.id === s.id));
-    for (const s of deleted) {
-      if (s.id.length > 20) await supabase.from('shippers').delete().eq('id', s.id);
-    }
+    if (loadingData) return;
+
+    setShippers(currentShippers => {
+      const deleted = currentShippers.filter(s => s.id.length > 20 && !updatedShippers.find(us => us.id === s.id));
+      deleted.forEach(async s => await supabase.from('shippers').delete().eq('id', s.id));
+      return updatedShippers;
+    });
 
     const finalShippers: Shipper[] = [];
     for (const s of updatedShippers) {
-      const { data, error } = await supabase.from('shippers').upsert({
-        id: s.id.length > 20 ? s.id : undefined,
-        user_id: session?.user.id,
-        name: s.name,
-        cnpj: s.cnpj,
-        email: s.email,
-        phone: s.phone,
-        avg_payment_days: s.avgPaymentDays,
-        logo_url: s.logoUrl
-      }).select().single();
+      if (s.id.length <= 20) {
+        const { data } = await supabase.from('shippers').upsert({
+          user_id: session?.user.id,
+          name: s.name,
+          cnpj: s.cnpj,
+          email: s.email,
+          phone: s.phone,
+          avg_payment_days: s.avgPaymentDays,
+          logo_url: s.logoUrl
+        }).select().single();
 
-      if (data) {
-        finalShippers.push({ ...data, avgPaymentDays: data.avg_payment_days });
+        if (data) {
+          finalShippers.push({ ...data, avgPaymentDays: data.avg_payment_days });
+        } else {
+          finalShippers.push(s);
+        }
       } else {
+        await supabase.from('shippers').update({
+          name: s.name,
+          cnpj: s.cnpj,
+          email: s.email,
+          phone: s.phone,
+          avg_payment_days: s.avgPaymentDays,
+          logo_url: s.logoUrl
+        }).eq('id', s.id);
         finalShippers.push(s);
       }
     }
@@ -527,8 +580,13 @@ const App: React.FC = () => {
     }
   };
 
-  if (loadingSession) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-emerald-500">Carregando...</div>;
+  if (loadingSession || (session && loadingData)) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+        <p className="text-emerald-500 font-black text-xs uppercase tracking-[0.2em] animate-pulse">Sincronizando Dados...</p>
+      </div>
+    );
   }
 
   if (!session) {
