@@ -15,7 +15,7 @@ import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2 } from 'lucide-react';
 import {
   UserProfile,
   Vehicle,
@@ -790,6 +790,24 @@ const App: React.FC = () => {
                 </button>
               );
             })}
+
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'Ribeirx Log ERP',
+                    text: 'Conheça o Ribeirx Log, o sistema que está transformando minha gestão de frota!',
+                    url: window.location.origin
+                  }).catch(() => { });
+                } else {
+                  window.open(`https://wa.me/?text=Conheça o Ribeirx Log, o sistema que está transformando minha gestão de frota! Veja aqui: ${window.location.origin}`, '_blank');
+                }
+              }}
+              className="w-full mt-3 flex items-center gap-5 p-5 rounded-[2.5rem] bg-emerald-500 text-slate-950 transition-all hover:bg-emerald-400 font-black shadow-lg shadow-emerald-500/20"
+            >
+              <Share2 className="w-6 h-6" />
+              <span className="text-sm uppercase tracking-widest">Indicar Amigos</span>
+            </button>
 
             <button
               onClick={() => { supabase.auth.signOut(); setIsMobileMenuOpen(false); }}

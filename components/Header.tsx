@@ -1,6 +1,9 @@
 
 import React, { useState } from 'react';
-import { Bell, Search, HelpCircle, User, X, AlertTriangle, ChevronRight, RefreshCcw } from 'lucide-react';
+import {
+  Bell, Search, HelpCircle, User, X, AlertTriangle, ChevronRight, RefreshCcw,
+  Share2
+} from 'lucide-react';
 import { UserProfile, AppNotification, TabType } from '../types';
 
 interface HeaderProps {
@@ -156,6 +159,24 @@ const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotificat
               <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
             </button>
           )}
+
+          <button
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Ribeirx Log ERP',
+                  text: 'Estou usando o Ribeirx Log para gerenciar minha logística. É sensacional!',
+                  url: window.location.origin
+                }).catch(err => console.log('Error sharing', err));
+              } else {
+                window.open(`https://wa.me/?text=Estou usando o Ribeirx Log para gerenciar minha logística. Veja aqui: ${window.location.origin}`, '_blank');
+              }
+            }}
+            className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-emerald-500 transition-all hover:border-emerald-500/30 group"
+            title="Compartilhar App"
+          >
+            <Share2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          </button>
 
           <button
             onClick={() => setActiveTab('settings')}
