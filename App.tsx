@@ -224,77 +224,115 @@ const App: React.FC = () => {
   }, [trips, vehicles, profile.config]);
 
   const handleSaveTrip = async (newTrip: Trip) => {
-    const { data: savedTrip, error } = await supabase.from('trips').insert({
-      origin: newTrip.origin,
-      destination: newTrip.destination,
-      vehicle_id: newTrip.vehicleId,
-      driver_id: newTrip.driverId,
-      shipper_id: newTrip.shipperId,
-      departure_date: newTrip.departureDate,
-      return_date: newTrip.returnDate,
-      receipt_date: newTrip.receiptDate,
-      frete_seco: newTrip.freteSeco,
-      diarias: newTrip.diarias,
-      adiantamento: newTrip.adiantamento,
-      combustivel: newTrip.combustivel,
-      liters_diesel: newTrip.litersDiesel,
-      outras_despesas: newTrip.outrasDespesas,
-      status: newTrip.status,
-      total_km: newTrip.totalKm,
-      user_id: session?.user.id
-    }).select().single();
-
-    if (error) {
-      console.error("Error saving trip:", error);
+    if (!session) {
+      showToast('Sessão expirada. Entre novamente.', 'error');
       return;
     }
 
-    const formattedTrip = { ...savedTrip, vehicleId: savedTrip.vehicle_id, driverId: savedTrip.driver_id, shipperId: savedTrip.shipper_id, departureDate: savedTrip.departure_date, returnDate: savedTrip.return_date, receiptDate: savedTrip.receipt_date, freteSeco: Number(savedTrip.frete_seco), diarias: Number(savedTrip.diarias), adiantamento: Number(savedTrip.adiantamento), combustivel: Number(savedTrip.combustivel), litersDiesel: Number(savedTrip.liters_diesel), outrasDespesas: Number(savedTrip.outras_despesas), totalKm: Number(savedTrip.total_km) };
+    showToast('Salvando viagem...', 'info');
 
-    setTrips([formattedTrip, ...trips]);
+    try {
+      const { data: savedTrip, error } = await supabase.from('trips').insert({
+        origin: newTrip.origin,
+        destination: newTrip.destination,
+        vehicle_id: newTrip.vehicleId,
+        driver_id: newTrip.driverId,
+        shipper_id: newTrip.shipperId,
+        departure_date: newTrip.departureDate,
+        return_date: newTrip.returnDate,
+        receipt_date: newTrip.receiptDate,
+        frete_seco: Number(newTrip.freteSeco),
+        diarias: Number(newTrip.diarias),
+        adiantamento: Number(newTrip.adiantamento),
+        combustivel: Number(newTrip.combustivel),
+        liters_diesel: Number(newTrip.litersDiesel),
+        outras_despesas: Number(newTrip.outrasDespesas),
+        status: newTrip.status,
+        total_km: Number(newTrip.totalKm),
+        user_id: session.user.id
+      }).select().single();
 
-    // Update vehicle KM in Supabase
-    const vehicle = vehicles.find(v => v.id === newTrip.vehicleId);
-    if (vehicle) {
-      const newKm = vehicle.totalKmAccumulated + newTrip.totalKm;
-      await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', newTrip.vehicleId);
-      setVehicles(prev => prev.map(v => v.id === newTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
+      if (error) throw error;
+
+      if (savedTrip) {
+        const formattedTrip = {
+          ...savedTrip,
+          vehicleId: savedTrip.vehicle_id,
+          driverId: savedTrip.driver_id,
+          shipperId: savedTrip.shipper_id,
+          departureDate: savedTrip.departure_date,
+          returnDate: savedTrip.return_date,
+          receiptDate: savedTrip.receipt_date,
+          freteSeco: Number(savedTrip.frete_seco),
+          diarias: Number(savedTrip.diarias),
+          adiantamento: Number(savedTrip.adiantamento),
+          combustivel: Number(savedTrip.combustivel),
+          litersDiesel: Number(savedTrip.liters_diesel),
+          outrasDespesas: Number(savedTrip.outras_despesas),
+          totalKm: Number(savedTrip.total_km)
+        };
+
+        setTrips([formattedTrip, ...trips]);
+
+        // Update vehicle KM in Supabase
+        const vehicle = vehicles.find(v => v.id === newTrip.vehicleId);
+        if (vehicle) {
+          const newKm = (vehicle.totalKmAccumulated || 0) + (newTrip.totalKm || 0);
+          await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', newTrip.vehicleId);
+          setVehicles(prev => prev.map(v => v.id === newTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
+        }
+
+        showToast('Viagem salva com sucesso!', 'success');
+        setActiveTab('trips');
+      }
+    } catch (err: any) {
+      console.error("Error saving trip:", err);
+      showToast(`Erro ao salvar viagem: ${err.message}`, 'error');
     }
-
-    setActiveTab('trips');
   };
 
   const handleUpdateTrip = async (updatedTrip: Trip) => {
-    await supabase.from('trips').update({
-      origin: updatedTrip.origin,
-      destination: updatedTrip.destination,
-      vehicle_id: updatedTrip.vehicleId,
-      driver_id: updatedTrip.driverId,
-      shipper_id: updatedTrip.shipperId,
-      departure_date: updatedTrip.departureDate,
-      return_date: updatedTrip.returnDate,
-      receipt_date: updatedTrip.receiptDate,
-      frete_seco: updatedTrip.freteSeco,
-      diarias: updatedTrip.diarias,
-      adiantamento: updatedTrip.adiantamento,
-      combustivel: updatedTrip.combustivel,
-      liters_diesel: updatedTrip.litersDiesel,
-      outras_despesas: updatedTrip.outrasDespesas,
-      status: updatedTrip.status,
-      total_km: updatedTrip.totalKm
-    }).eq('id', updatedTrip.id);
+    if (!session) return;
+    showToast('Atualizando viagem...', 'info');
 
-    const oldTrip = trips.find(t => t.id === updatedTrip.id);
-    if (oldTrip && oldTrip.totalKm !== updatedTrip.totalKm) {
-      const kmDiff = updatedTrip.totalKm - (oldTrip.totalKm || 0);
-      const vehicle = vehicles.find(v => v.id === updatedTrip.vehicleId);
-      if (vehicle) {
-        const newKm = vehicle.totalKmAccumulated + kmDiff;
-        await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', updatedTrip.vehicleId);
-        setVehicles(prev => prev.map(v => v.id === updatedTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
+    try {
+      const { error } = await supabase.from('trips').update({
+        origin: updatedTrip.origin,
+        destination: updatedTrip.destination,
+        vehicle_id: updatedTrip.vehicleId,
+        driver_id: updatedTrip.driverId,
+        shipper_id: updatedTrip.shipperId,
+        departure_date: updatedTrip.departureDate,
+        return_date: updatedTrip.returnDate,
+        receipt_date: updatedTrip.receiptDate,
+        frete_seco: Number(updatedTrip.freteSeco),
+        diarias: Number(updatedTrip.diarias),
+        adiantamento: Number(updatedTrip.adiantamento),
+        combustivel: Number(updatedTrip.combustivel),
+        liters_diesel: Number(updatedTrip.litersDiesel),
+        outras_despesas: Number(updatedTrip.outrasDespesas),
+        status: updatedTrip.status,
+        total_km: Number(updatedTrip.totalKm)
+      }).eq('id', updatedTrip.id);
+
+      if (error) throw error;
+
+      const oldTrip = trips.find(t => t.id === updatedTrip.id);
+      if (oldTrip && oldTrip.totalKm !== updatedTrip.totalKm) {
+        const kmDiff = (updatedTrip.totalKm || 0) - (oldTrip.totalKm || 0);
+        const vehicle = vehicles.find(v => v.id === updatedTrip.vehicleId);
+        if (vehicle) {
+          const newKm = (vehicle.totalKmAccumulated || 0) + kmDiff;
+          await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', updatedTrip.vehicleId);
+          setVehicles(prev => prev.map(v => v.id === updatedTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
+        }
       }
+      setTrips(prev => prev.map(t => t.id === updatedTrip.id ? updatedTrip : t));
+      showToast('Viagem atualizada!', 'success');
+    } catch (err: any) {
+      console.error("Error updating trip:", err);
+      showToast(`Erro ao atualizar: ${err.message}`, 'error');
     }
-    setTrips(prev => prev.map(t => t.id === updatedTrip.id ? updatedTrip : t));
   };
 
   const handleSaveMaintenance = async (record: MaintenanceRecord) => {
