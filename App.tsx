@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.4.9';
+const APP_VERSION = '1.5.1';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -255,13 +255,18 @@ const App: React.FC = () => {
                   const { count: tripCount } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
                   const { count: vehicleCount } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
 
-                  // Aggressive trigger: if less than a full fleet, regenerate
                   if ((tripCount || 0) < 5 || (vehicleCount || 0) === 0) {
                     console.log("Universalizing demo data for preview user...");
-                    await generateMockData(session.user.id);
-                    hasGeneratedMockData.current = true;
-                    setRefreshTrigger(prev => prev + 1);
-                    return; // Retrying fetch with new data
+                    showToast('Sincronizando ambiente de demonstração...', 'info');
+                    const success = await generateMockData(session.user.id);
+                    if (success) {
+                      hasGeneratedMockData.current = true;
+                      setRefreshTrigger(prev => prev + 1);
+                      showToast('Dados de demonstração sincronizados!', 'success');
+                      return; // Retrying fetch with new data
+                    } else {
+                      showToast('Erro ao gerar dados de demonstração', 'error');
+                    }
                   }
                 }
               } catch (demoErr) {
@@ -270,6 +275,7 @@ const App: React.FC = () => {
             } else {
               // CREATE DEFAULT PROFILE if it doesn't exist
               try {
+                console.log("No profile found, creating default...");
                 const defaultProfile = {
                   id: session.user.id,
                   email: session.user.email,
@@ -279,7 +285,13 @@ const App: React.FC = () => {
                   config: INITIAL_PROFILE.config
                 };
 
-                await supabase.from('profiles').insert(defaultProfile);
+                const { error: insertError } = await supabase.from('profiles').insert(defaultProfile);
+                if (insertError) {
+                  console.error("Profile insertion error:", insertError);
+                  showToast(`Erro ao criar perfil: ${insertError.message}`, 'error');
+                } else {
+                  showToast('Perfil de demonstração criado!', 'success');
+                }
                 setProfile(prev => ({
                   ...prev,
                   email: session.user.email || '',
@@ -291,9 +303,11 @@ const App: React.FC = () => {
                 // Seed data
                 if (!hasGeneratedMockData.current) {
                   hasGeneratedMockData.current = true;
-                  await generateMockData(session.user.id);
-                  setRefreshTrigger(prev => prev + 1);
-                  return;
+                  const success = await generateMockData(session.user.id);
+                  if (success) {
+                    setRefreshTrigger(prev => prev + 1);
+                    return;
+                  }
                 }
               } catch (initErr) {
                 console.error("Error creating default profile:", initErr);
