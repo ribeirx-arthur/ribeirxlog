@@ -26,7 +26,7 @@ import {
    Coins
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, Shipper, UserProfile, MaintenanceRecord } from '../types';
-import { calculateTripFinance } from '../services/finance';
+import { calculateTripFinance, normalizeDestination } from '../services/finance';
 
 interface PerformanceProps {
    trips: Trip[];
@@ -85,8 +85,17 @@ const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shi
          vStat.km += t.totalKm;
          stats.vehicleMap.set(v.id, vStat);
 
-         const rKey = t.destination;
-         const rStat = stats.routeMap.get(rKey) || { name: rKey, profit: 0, count: 0, revenue: 0, km: 0 };
+         const rKey = normalizeDestination(t.destination);
+         const rStat = stats.routeMap.get(rKey) || { name: t.destination, profit: 0, count: 0, revenue: 0, km: 0 };
+
+         // Lógica de "Melhor Nome": prefere o nome mais completo ou que contenha hífen (UF)
+         const currentName = rStat.name;
+         const newName = t.destination;
+         const isNewBetter = (newName.includes('-') && !currentName.includes('-')) ||
+            (newName.length > currentName.length);
+
+         if (isNewBetter) rStat.name = newName;
+
          rStat.profit += fin.lucroLiquidoReal;
          rStat.revenue += fin.totalBruto;
          rStat.count += 1;

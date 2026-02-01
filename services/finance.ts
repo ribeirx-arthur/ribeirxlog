@@ -8,7 +8,7 @@ export const calculateTripFinance = (
   profile: UserProfile
 ): FinancialResults => {
   const { freteSeco, diarias, adiantamento, combustivel, outrasDespesas } = trip;
-  
+
   // Commission logic
   const percFrete = driver.customCommission?.frete ?? profile.config.percMotFrete;
   const percDiaria = driver.customCommission?.diaria ?? profile.config.percMotDiaria;
@@ -16,9 +16,9 @@ export const calculateTripFinance = (
   const totalBruto = freteSeco + diarias;
   const comissaoMotorista = (freteSeco * (percFrete / 100)) + (diarias * (percDiaria / 100));
   const saldoAReceber = totalBruto - adiantamento;
-  
+
   const lucroLiquidoReal = totalBruto - (comissaoMotorista + combustivel + outrasDespesas);
-  
+
   let lucroSociety = lucroLiquidoReal;
   if (vehicle.type === 'Sociedade') {
     lucroSociety = lucroLiquidoReal * (vehicle.societySplitFactor / 100);
@@ -31,4 +31,15 @@ export const calculateTripFinance = (
     lucroLiquidoReal,
     lucroSociety
   };
+};
+
+export const normalizeDestination = (dest: string): string => {
+  if (!dest) return '';
+  return dest
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .split('-')[0] // Take only the city part
+    .trim();
 };

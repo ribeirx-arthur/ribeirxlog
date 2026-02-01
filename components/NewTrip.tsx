@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   MapPin,
   Navigation,
@@ -23,6 +23,7 @@ import {
   History
 } from 'lucide-react';
 import { Vehicle, Driver, Shipper, Trip, UserProfile, PaymentStatus } from '../types';
+import { normalizeDestination } from '../services/finance';
 
 interface NewTripProps {
   vehicles: Vehicle[];
@@ -59,6 +60,32 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     status: 'Pendente' as PaymentStatus,
     totalKm: 0
   });
+
+  const uniqueOrigins = useMemo(() => {
+    const map = new Map<string, string>();
+    trips.forEach(t => {
+      if (!t.origin) return;
+      const key = normalizeDestination(t.origin);
+      const existing = map.get(key);
+      if (!existing || (t.origin.includes('-') && !existing.includes('-')) || t.origin.length > existing.length) {
+        map.set(key, t.origin);
+      }
+    });
+    return Array.from(map.values()).sort();
+  }, [trips]);
+
+  const uniqueDestinations = useMemo(() => {
+    const map = new Map<string, string>();
+    trips.forEach(t => {
+      if (!t.destination) return;
+      const key = normalizeDestination(t.destination);
+      const existing = map.get(key);
+      if (!existing || (t.destination.includes('-') && !existing.includes('-')) || t.destination.length > existing.length) {
+        map.set(key, t.destination);
+      }
+    });
+    return Array.from(map.values()).sort();
+  }, [trips]);
 
   const suggestedTrip = trips.slice().reverse().find(t =>
     t.destination.toLowerCase() === formData.destination.toLowerCase() &&
@@ -150,7 +177,7 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-sky-500 outline-none transition-all font-bold"
                   />
                   <datalist id="origins-list">
-                    {Array.from(new Set(trips.map(t => t.origin).filter(Boolean))).map(o => (
+                    {uniqueOrigins.map(o => (
                       <option key={o} value={o} />
                     ))}
                   </datalist>
@@ -169,7 +196,7 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-emerald-500 outline-none transition-all font-bold"
                   />
                   <datalist id="destinations-list">
-                    {Array.from(new Set(trips.map(t => t.destination).filter(Boolean))).map(d => (
+                    {uniqueDestinations.map(d => (
                       <option key={d} value={d} />
                     ))}
                   </datalist>
