@@ -19,7 +19,8 @@ import {
   Fuel,
   Coins,
   Activity,
-  ExternalLink
+  ExternalLink,
+  History
 } from 'lucide-react';
 import { Vehicle, Driver, Shipper, Trip, UserProfile, PaymentStatus } from '../types';
 
@@ -29,6 +30,7 @@ interface NewTripProps {
   shippers: Shipper[];
   onSave: (trip: Trip) => void;
   profile: UserProfile;
+  trips: Trip[];
 }
 
 const formatDate = (dateStr: string) => {
@@ -38,7 +40,7 @@ const formatDate = (dateStr: string) => {
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
 };
 
-const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, profile }) => {
+const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, profile, trips }) => {
   const [formData, setFormData] = useState({
     origin: '',
     destination: '',
@@ -57,6 +59,28 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     status: 'Pendente' as PaymentStatus,
     totalKm: 0
   });
+
+  const suggestedTrip = trips.slice().reverse().find(t =>
+    t.destination.toLowerCase() === formData.destination.toLowerCase() &&
+    t.shipperId === formData.shipperId &&
+    formData.destination !== '' &&
+    formData.shipperId !== ''
+  );
+
+  const handleQuickFill = () => {
+    if (suggestedTrip) {
+      setFormData({
+        ...formData,
+        freteSeco: suggestedTrip.freteSeco,
+        diarias: suggestedTrip.diarias,
+        combustivel: suggestedTrip.combustivel,
+        litersDiesel: suggestedTrip.litersDiesel,
+        outrasDespesas: suggestedTrip.outrasDespesas,
+        totalKm: suggestedTrip.totalKm,
+        origin: suggestedTrip.origin || formData.origin
+      });
+    }
+  };
 
   const isSimple = profile.config.appMode === 'simple';
   const isIntermediate = profile.config.appMode === 'intermediate';
@@ -140,6 +164,27 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                 </div>
               </div>
             </div>
+
+            {suggestedTrip && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center justify-between animate-in zoom-in-95 duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <History className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Rota Recorrente Detectada</p>
+                    <p className="text-xs text-slate-400 font-medium">Encontramos dados de uma viagem anterior para este destino.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleQuickFill}
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                >
+                  Preencher dados automaticamente
+                </button>
+              </div>
+            )}
+
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
