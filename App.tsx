@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.4.5';
+const APP_VERSION = '1.4.6';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -61,6 +61,7 @@ const App: React.FC = () => {
   // Force Settings if profile is incomplete (First Visit) 
   const [activeTab, setActiveTab] = useState<TabType>('setup');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const hasGeneratedMockData = React.useRef(false);
 
   // THEME HANDLER
   useEffect(() => {
@@ -249,39 +250,51 @@ const App: React.FC = () => {
               }));
 
               // 1.1 Special Logic for PREVIEW users: Auto-populate if empty
-              if (profileData.payment_status === 'preview' || !profileData.payment_status) {
-                const { count } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
-                if (count === 0) {
-                  console.log("Generating mock data for preview user...");
+              try {
+                if ((profileData.payment_status === 'preview' || !profileData.payment_status) && !hasGeneratedMockData.current) {
+                  const { count } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
+                  if (count === 0) {
+                    console.log("Generating mock data for preview user...");
+                    hasGeneratedMockData.current = true;
+                    await generateMockData(session.user.id);
+                    setRefreshTrigger(prev => prev + 1);
+                    return; // Retrying fetch with new data
+                  }
+                }
+              } catch (demoErr) {
+                console.error("Non-critical error in demo setup:", demoErr);
+              }
+            } else {
+              // CREATE DEFAULT PROFILE if it doesn't exist
+              try {
+                const defaultProfile = {
+                  id: session.user.id,
+                  email: session.user.email,
+                  name: session.user.user_metadata?.full_name || '',
+                  payment_status: 'preview',
+                  plan_type: 'none',
+                  config: INITIAL_PROFILE.config
+                };
+
+                await supabase.from('profiles').insert(defaultProfile);
+                setProfile(prev => ({
+                  ...prev,
+                  email: session.user.email || '',
+                  name: session.user.user_metadata?.full_name || '',
+                  payment_status: 'preview',
+                  plan_type: 'none'
+                }));
+
+                // Seed data
+                if (!hasGeneratedMockData.current) {
+                  hasGeneratedMockData.current = true;
                   await generateMockData(session.user.id);
                   setRefreshTrigger(prev => prev + 1);
                   return;
                 }
+              } catch (initErr) {
+                console.error("Error creating default profile:", initErr);
               }
-            } else {
-              // CREATE DEFAULT PROFILE if it doesn't exist
-              const defaultProfile = {
-                id: session.user.id,
-                email: session.user.email,
-                name: session.user.user_metadata?.full_name || '',
-                payment_status: 'preview',
-                plan_type: 'none',
-                config: INITIAL_PROFILE.config
-              };
-
-              await supabase.from('profiles').insert(defaultProfile);
-              setProfile(prev => ({
-                ...prev,
-                email: session.user.email || '',
-                name: session.user.user_metadata?.full_name || '',
-                payment_status: 'preview',
-                plan_type: 'none'
-              }));
-
-              // Seed data
-              await generateMockData(session.user.id);
-              setRefreshTrigger(prev => prev + 1);
-              return;
             }
           } catch (err) {
             console.error("Error loading profile:", err);
