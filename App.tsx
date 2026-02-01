@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.4.3';
+const APP_VERSION = '1.4.4';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -60,6 +60,7 @@ const App: React.FC = () => {
 
   // Force Settings if profile is incomplete (First Visit) 
   const [activeTab, setActiveTab] = useState<TabType>('setup');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // THEME HANDLER
   useEffect(() => {
@@ -253,7 +254,8 @@ const App: React.FC = () => {
                 if (count === 0) {
                   console.log("Generating mock data for preview user...");
                   await generateMockData(session.user.id);
-                  window.location.reload();
+                  setRefreshTrigger(prev => prev + 1);
+                  return;
                 }
               }
             } else {
@@ -278,7 +280,8 @@ const App: React.FC = () => {
 
               // Seed data
               await generateMockData(session.user.id);
-              window.location.reload();
+              setRefreshTrigger(prev => prev + 1);
+              return;
             }
           } catch (err) {
             console.error("Error loading profile:", err);
@@ -361,7 +364,7 @@ const App: React.FC = () => {
 
       fetchData();
     }
-  }, [session]);
+  }, [session, refreshTrigger]);
   const handleLandingPurchase = (plan: string) => {
     const message = encodeURIComponent(`Olá Arthur! Estou na Landing Page e tenho interesse no plano ${plan}. Como faço para prosseguir com o pagamento?`);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');

@@ -13,8 +13,8 @@ export const generateMockData = async (userId: string) => {
         model: 'R450',
         year: 2022,
         type: 'Próprio',
-        totalKmAccumulated: 154200,
-        lastMaintenanceKm: 150000
+        total_km_accumulated: 154200,
+        last_maintenance_km: 150000
     });
 
     // 2. Create a dummy driver
@@ -26,8 +26,8 @@ export const generateMockData = async (userId: string) => {
         cpf: '000.000.000-00',
         phone: '(11) 99999-9999',
         cnh: '123456789',
-        cnhCategory: 'E',
-        cnhValidity: '2025-12-31',
+        cnh_category: 'E',
+        cnh_validity: '2025-12-31',
         status: 'Ativo'
     });
 
@@ -37,8 +37,9 @@ export const generateMockData = async (userId: string) => {
         id: shipperId,
         user_id: userId,
         name: 'Logística Transparente SA',
+        customer_name: 'Logística Transparente SA', // Fallback for some older schemas
         cnpj: '00.000.000/0001-00',
-        avgPaymentDays: 15
+        avg_payment_days: 15
     });
 
     // 4. Create some dummy trips
@@ -48,20 +49,20 @@ export const generateMockData = async (userId: string) => {
         user_id: userId,
         origin: 'Santos/SP',
         destination: 'Cuiabá/MT',
-        vehicleId: vehicleId,
-        driverId: driverId,
-        shipperId: shipperId,
-        departureDate: '2024-01-10',
-        returnDate: '2024-01-15',
-        receiptDate: '2024-01-20',
-        freteSeco: 8500,
+        vehicle_id: vehicleId,
+        driver_id: driverId,
+        shipper_id: shipperId,
+        departure_date: '2024-01-10',
+        return_date: '2024-01-15',
+        receipt_date: '2024-01-20',
+        frete_seco: 8500,
         diarias: 500,
         adiantamento: 2000,
         combustivel: 3200,
-        litersDiesel: 550,
-        outrasDespesas: 150,
+        liters_diesel: 550,
+        outras_despesas: 150,
         status: 'Pago',
-        totalKm: 1200
+        total_km: 1200
     });
 
     return true;
