@@ -780,7 +780,16 @@ const App: React.FC = () => {
           }}
         />
         <main className="md:ml-64 p-4 md:p-8">
-          <div className="max-w-7xl mx-auto pb-24 md:pb-8">{renderContent()}</div>
+          <div className="max-w-7xl mx-auto pb-24 md:pb-8">
+            <Suspense fallback={
+              <div className="w-full h-96 flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                <p className="text-emerald-500 font-black text-xs uppercase tracking-[0.2em] animate-pulse">Carregando Módulo...</p>
+              </div>
+            }>
+              {renderContent()}
+            </Suspense>
+          </div>
         </main>
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-lg border-t border-white/5 px-6 py-4 flex justify-between items-center z-[150] shadow-2xl">
           <button
