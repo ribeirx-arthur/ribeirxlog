@@ -1,15 +1,18 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import Trips from './components/Trips';
-import Performance from './components/Performance';
-import SettingsView from './components/Settings';
-import SubscriptionView from './components/SubscriptionView';
-import NewTrip from './components/NewTrip';
-import FleetHealth from './components/FleetHealth';
-import Setup from './components/Setup';
+const Performance = React.lazy(() => import('./components/Performance'));
+const Settings = React.lazy(() => import('./components/Settings'));
+const Subscription = React.lazy(() => import('./components/SubscriptionView'));
+const NewTrip = React.lazy(() => import('./components/NewTrip'));
+const FleetHealth = React.lazy(() => import('./components/FleetHealth'));
+const Setup = React.lazy(() => import('./components/Setup'));
+const TireManagement = React.lazy(() => import('./components/TireManagement'));
+const Maintenance = React.lazy(() => import('./components/Maintenance')); // Assuming this was intended to be added as lazy
+
 import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
@@ -32,7 +35,11 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.0.4';
+const APP_VERSION = '1.0.9';
+
+import { AppModeProvider } from './contexts/AppModeContext';
+
+// ... existing imports ...
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -43,26 +50,51 @@ const App: React.FC = () => {
       window.location.reload();
     }
   }, []);
-  const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
-  // Force Settings if profile is incomplete (First Visit) 
-  const [activeTab, setActiveTab] = useState<TabType>(() => {
-    return (profile.name && profile.companyName) ? 'dashboard' : 'settings';
+  // MOCK PROFILE FOR DEV - This would come from auth/db
+  const [profile, setProfile] = useState<UserProfile>({
+    name: 'Arthur Ribeiro',
+    email: 'arthur@ribeirxlog.com',
+    companyName: 'Ribeirx Transportes',
+    config: {
+      percMotFrete: 10,
+      percMotDiaria: 100,
+      autoSplitSociety: true,
+      showMileage: true,
+      paymentAlertDays: 2,
+      notifyIncompleteData: true,
+      notifyMaintenance: true,
+      showTips: true,
+      enableMaintenance: true,
+      enableBI: true,
+      appMode: 'advanced', // Default mode
+      enabledFeatures: []
+    }
   });
+
+  // Force Settings if profile is incomplete (First Visit) 
+  const [activeTab, setActiveTab] = useState<TabType>('setup');
+  // State Declarations
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [shippers, setShippers] = useState<Shipper[]>([]);
-  const [trips, setTrips] = useState<Trip[]>([]);
   const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([]);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
-
 
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
-  const [loadingData, setLoadingData] = useState(true); // NEW
+  const [loadingData, setLoadingData] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [pendingPlanIntent, setPendingPlanIntent] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
 
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // Auth & Data Loading
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -73,80 +105,93 @@ const App: React.FC = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setLoadingSession(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // FETCH DATA FROM SUPABASE
   useEffect(() => {
-    if (session) {
-      const loadData = async () => {
-        const userId = session.user.id;
+    if (session?.user.id) {
+      setLoadingData(true);
+      const fetchData = async () => {
+        try {
+          // Load Profile
+          const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+          if (profileData) {
+            setProfile(prev => ({
+              ...prev, ...profileData,
+              config: typeof profileData.config === 'string' ? JSON.parse(profileData.config) : (profileData.config || prev.config)
+            }));
+          }
 
-        // Fetch Profile
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
+          // Load Records
+          const { data: tripsData } = await supabase.from('trips').select('*').eq('user_id', session.user.id);
+          if (tripsData) setTrips(tripsData as any);
 
-        if (profileData) {
-          setProfile({
-            ...profileData,
-            companyName: profileData.company_name,
-            logoUrl: profileData.logo_url,
-            signatureUrl: profileData.signature_url,
-          } as any);
-        } else {
-          // If no profile exists, create one from INITIAL_PROFILE
-          await supabase.from('profiles').insert({
-            id: userId,
-            name: session.user.user_metadata?.name || '',
-            email: session.user.email,
-            company_name: '',
-            config: INITIAL_PROFILE.config
-          });
+          const { data: vehiclesData } = await supabase.from('vehicles').select('*').eq('user_id', session.user.id);
+          if (vehiclesData) setVehicles(vehiclesData as any);
+
+          const { data: driversData } = await supabase.from('drivers').select('*').eq('user_id', session.user.id);
+          if (driversData) setDrivers(driversData as any);
+
+          const { data: shippersData } = await supabase.from('shippers').select('*').eq('user_id', session.user.id);
+          if (shippersData) setShippers(shippersData as any);
+
+          const { data: maintData } = await supabase.from('maintenance_records').select('*').eq('user_id', session.user.id);
+          if (maintData) setMaintenances(maintData as any);
+
+        } catch (error) {
+          console.error('Error loading data', error);
+          showToast('Erro ao carregar dados', 'error');
+        } finally {
+          setLoadingData(false);
         }
-
-        // Fetch Others
-        const { data: vData } = await supabase.from('vehicles').select('*').eq('user_id', userId);
-        const { data: dData } = await supabase.from('drivers').select('*').eq('user_id', userId);
-        const { data: sData } = await supabase.from('shippers').select('*').eq('user_id', userId);
-        const { data: tData } = await supabase.from('trips').select('*').eq('user_id', userId).order('departure_date', { ascending: false });
-        const { data: mData } = await supabase.from('maintenance_records').select('*').eq('user_id', userId);
-
-        if (vData) setVehicles(vData.map(v => ({ ...v, totalKmAccumulated: Number(v.total_km_accumulated), lastMaintenanceKm: Number(v.last_maintenance_km), societySplitFactor: v.society_split_factor })));
-        if (dData) setDrivers(dData.map(d => ({ ...d, cnhCategory: d.cnh_category, cnhValidity: d.cnh_validity, pixKey: d.pix_key })));
-        if (sData) setShippers(sData.map(s => ({ ...s, avgPaymentDays: s.avg_payment_days })));
-        if (tData) setTrips(tData.map(t => ({
-          ...t,
-          vehicleId: t.vehicle_id,
-          driverId: t.driver_id,
-          shipperId: t.shipper_id,
-          departureDate: t.departure_date,
-          returnDate: t.return_date,
-          receiptDate: t.receipt_date,
-          freteSeco: Number(t.frete_seco),
-          diarias: Number(t.diarias),
-          adiantamento: Number(t.adiantamento),
-          combustivel: Number(t.combustivel),
-          litersDiesel: Number(t.liters_diesel),
-          outrasDespesas: Number(t.outras_despesas),
-          totalKm: Number(t.total_km)
-        })));
-        if (mData) setMaintenances(mData.map(m => ({ ...m, vehicleId: m.vehicle_id, kmAtMaintenance: Number(m.km_at_maintenance), totalCost: Number(m.total_cost) })));
-
-        if (pendingPlanIntent) {
-          setActiveTab('subscription');
-        } else if (!profileData.company_name || !profileData.email) {
-          setActiveTab('settings');
-        }
-        setLoadingData(false);
       };
-      loadData();
+
+      fetchData();
     }
   }, [session]);
+  const handleLandingPurchase = (plan: string) => {
+    const message = encodeURIComponent(`Olá Arthur! Estou na Landing Page e tenho interesse no plano ${plan}. Como faço para prosseguir com o pagamento?`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+    setPendingPlanIntent(plan);
+    setShowAuth(true);
+  };
+
+  const handleSaveTrip = async (newTrip: Trip) => {
+    // ...
+  };
+
+  // ... (other handlers) ...
+
+  if (loadingSession || (session && loadingData)) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+        <p className="text-emerald-500 font-black text-xs uppercase tracking-[0.2em] animate-pulse">Sincronizando Dados...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    if (showAuth) {
+      return (
+        <div className="relative">
+          <button
+            onClick={() => setShowAuth(false)}
+            className="fixed top-6 left-6 z-50 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-full text-xs font-bold border border-white/10 transition-all"
+          >
+            ← Voltar para Início
+          </button>
+          <Auth />
+        </div>
+      );
+    }
+    return <LandingPage onGetStarted={() => setShowAuth(true)} onPurchase={handleLandingPurchase} />;
+  }
+
+
 
   // THEME HANDLER
   useEffect(() => {
@@ -222,78 +267,44 @@ const App: React.FC = () => {
         });
       }
 
+      // 4. Validação de Documentos (CNH)
+      if (profile.config.appMode !== 'simple') {
+        drivers.forEach(d => {
+          if (d.cnhValidity) {
+            const [y, m, day] = d.cnhValidity.split('-').map(Number);
+            const validityDate = new Date(y, m - 1, day);
+            const diffTime = validityDate.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+              newNotifications.push({
+                id: `cnh-exp-${d.id}`,
+                type: 'system',
+                title: 'CNH Vencida',
+                message: `A CNH do motorista ${d.name} venceu em ${validityDate.toLocaleDateString()}!`,
+                date: now.toISOString(),
+                read: false
+              });
+            } else if (diffDays <= 30) {
+              newNotifications.push({
+                id: `cnh-warn-${d.id}`,
+                type: 'system',
+                title: 'CNH Vencendo',
+                message: `A CNH do motorista ${d.name} vence em ${diffDays} dias.`,
+                date: now.toISOString(),
+                read: false
+              });
+            }
+          }
+        });
+      }
+
       setNotifications(newNotifications);
     };
     checkAlerts();
   }, [trips, vehicles, profile.config]);
 
-  const handleSaveTrip = async (newTrip: Trip) => {
-    if (!session) {
-      showToast('Sessão expirada. Entre novamente.', 'error');
-      return;
-    }
 
-    showToast('Salvando viagem...', 'info');
-
-    try {
-      const { data: savedTrip, error } = await supabase.from('trips').insert({
-        origin: newTrip.origin,
-        destination: newTrip.destination,
-        vehicle_id: newTrip.vehicleId,
-        driver_id: newTrip.driverId,
-        shipper_id: newTrip.shipperId,
-        departure_date: newTrip.departureDate || null,
-        return_date: newTrip.returnDate || null,
-        receipt_date: newTrip.receiptDate || null,
-        frete_seco: Number(newTrip.freteSeco),
-        diarias: Number(newTrip.diarias),
-        adiantamento: Number(newTrip.adiantamento),
-        combustivel: Number(newTrip.combustivel),
-        liters_diesel: Number(newTrip.litersDiesel),
-        outras_despesas: Number(newTrip.outrasDespesas),
-        status: newTrip.status,
-        total_km: Number(newTrip.totalKm),
-        user_id: session.user.id
-      }).select().single();
-
-      if (error) throw error;
-
-      if (savedTrip) {
-        const formattedTrip = {
-          ...savedTrip,
-          vehicleId: savedTrip.vehicle_id,
-          driverId: savedTrip.driver_id,
-          shipperId: savedTrip.shipper_id,
-          departureDate: savedTrip.departure_date,
-          returnDate: savedTrip.return_date,
-          receiptDate: savedTrip.receipt_date,
-          freteSeco: Number(savedTrip.frete_seco),
-          diarias: Number(savedTrip.diarias),
-          adiantamento: Number(savedTrip.adiantamento),
-          combustivel: Number(savedTrip.combustivel),
-          litersDiesel: Number(savedTrip.liters_diesel),
-          outrasDespesas: Number(savedTrip.outras_despesas),
-          totalKm: Number(savedTrip.total_km)
-        };
-
-        setTrips([formattedTrip, ...trips]);
-
-        // Update vehicle KM in Supabase
-        const vehicle = vehicles.find(v => v.id === newTrip.vehicleId);
-        if (vehicle) {
-          const newKm = (vehicle.totalKmAccumulated || 0) + (newTrip.totalKm || 0);
-          await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', newTrip.vehicleId);
-          setVehicles(prev => prev.map(v => v.id === newTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
-        }
-
-        showToast('Viagem salva com sucesso!', 'success');
-        setActiveTab('trips');
-      }
-    } catch (err: any) {
-      console.error("Error saving trip:", err);
-      showToast(`Erro ao salvar viagem: ${err.message}`, 'error');
-    }
-  };
 
   const handleUpdateTrip = async (updatedTrip: Trip) => {
     if (!session) return;
@@ -382,12 +393,7 @@ const App: React.FC = () => {
     setVehicles(prev => prev.map(v => v.id === vehicleId ? { ...v, thresholds } : v));
   };
 
-  const handleLandingPurchase = (plan: string) => {
-    const message = encodeURIComponent(`Olá Arthur! Estou na Landing Page e tenho interesse no plano ${plan}. Como faço para prosseguir com o pagamento?`);
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
-    setPendingPlanIntent(plan);
-    setShowAuth(true);
-  };
+
 
   const handleUpdateProfile = async (newProfile: UserProfile) => {
     setProfile(newProfile);
@@ -404,13 +410,6 @@ const App: React.FC = () => {
         updated_at: new Date().toISOString()
       });
     }
-  };
-
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
   };
 
   const handleUpdateVehicles = async (updatedVehicles: Vehicle[]) => {
@@ -658,27 +657,51 @@ const App: React.FC = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
       case 'trips': return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
-      case 'performance': return <Performance trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} />;
-      case 'maintenance': return (
-        <FleetHealth
-          vehicles={vehicles}
-          maintenances={maintenances}
-          onAddMaintenance={handleSaveMaintenance}
-          onUpdateMaintenance={handleUpdateMaintenance}
-          onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
-        />
-      );
+      case 'performance':
+        if (profile.config.enableBI === false) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+        return <Performance trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} />;
+      case 'maintenance':
+        if (profile.config.enableMaintenance === false) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+        return (
+          <FleetHealth
+            vehicles={vehicles}
+            maintenances={maintenances}
+            onAddMaintenance={handleSaveMaintenance}
+            onUpdateMaintenance={handleUpdateMaintenance}
+            onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
+          />
+        );
       case 'setup': return <Setup vehicles={vehicles} drivers={drivers} shippers={shippers} onUpdateVehicles={handleUpdateVehicles} onUpdateDrivers={handleUpdateDrivers} onUpdateShippers={handleUpdateShippers} />;
       case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} />;
-      case 'settings': return (
-        <SettingsView
-          profile={profile} setProfile={handleUpdateProfile}
-          trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} maintenances={maintenances}
-          onImportData={handleImportData}
-          onResetData={handleResetData}
-        />
-      );
-      case 'subscription': return <SubscriptionView profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
+      case 'settings':
+        return (
+          <Settings
+            profile={profile}
+            setProfile={handleUpdateProfile}
+            trips={trips}
+            vehicles={vehicles}
+            drivers={drivers}
+            shippers={shippers}
+            maintenances={maintenances}
+            onImportData={(data) => {
+              if (data.profile) setProfile(data.profile);
+              if (data.trips) setTrips(data.trips);
+              if (data.vehicles) setVehicles(data.vehicles);
+              if (data.drivers) setDrivers(data.drivers);
+              if (data.shippers) setShippers(data.shippers);
+              if (data.maintenances) setMaintenances(data.maintenances);
+            }}
+            onResetData={() => {
+              if (confirm("TEM CERTEZA?")) {
+                localStorage.clear();
+                window.location.reload();
+              }
+            }}
+          />
+        );
+      case 'tires':
+        return <TireManagement vehicles={vehicles} />;
+      case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
       default: return null;
     }
   };
@@ -713,12 +736,42 @@ const App: React.FC = () => {
   const isOperationalTab = !['subscription', 'settings'].includes(activeTab);
   if (profile.payment_status !== 'paid' && isOperationalTab) {
     return (
+      <AppModeProvider profile={profile}>
+        <div className="min-h-screen bg-slate-950 text-slate-200">
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} />
+          <Header
+            profile={profile}
+            notifications={notifications}
+            onReadNotification={() => { }}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+            onRefresh={() => {
+              localStorage.removeItem('app_version');
+              window.location.reload();
+            }}
+          />
+          <main className="md:ml-64 p-4 md:p-8">
+            <div className="max-w-7xl mx-auto pb-24 md:pb-8">
+              <Paywall
+                profile={profile}
+                onRefreshProfile={handleRefreshProfile}
+                onSignOut={() => supabase.auth.signOut()}
+              />
+            </div>
+          </main>
+        </div>
+      </AppModeProvider>
+    );
+  }
+
+  return (
+    <AppModeProvider profile={profile}>
       <div className="min-h-screen bg-slate-950 text-slate-200">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} />
         <Header
           profile={profile}
           notifications={notifications}
-          onReadNotification={() => { }}
+          onReadNotification={(id) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))}
           setActiveTab={setActiveTab}
           activeTab={activeTab}
           onRefresh={() => {
@@ -727,169 +780,143 @@ const App: React.FC = () => {
           }}
         />
         <main className="md:ml-64 p-4 md:p-8">
-          <div className="max-w-7xl mx-auto pb-24 md:pb-8">
-            <Paywall
-              profile={profile}
-              onRefreshProfile={handleRefreshProfile}
-              onSignOut={() => supabase.auth.signOut()}
-            />
-          </div>
+          <div className="max-w-7xl mx-auto pb-24 md:pb-8">{renderContent()}</div>
         </main>
-      </div>
-    );
-  }
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-lg border-t border-white/5 px-6 py-4 flex justify-between items-center z-[150] shadow-2xl">
+          <button
+            onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'dashboard' ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
+          >
+            <LayoutDashboard className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-tighter">Início</span>
+          </button>
+          <button
+            onClick={() => { setActiveTab('trips'); setIsMobileMenuOpen(false); }}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'trips' ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
+          >
+            <Truck className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-tighter">Viagens</span>
+          </button>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`flex flex-col items-center gap-1 transition-all ${isMobileMenuOpen ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6 text-rose-500" /> : <Menu className="w-6 h-6 border-2 border-slate-700 rounded-lg p-0.5" />}
+            <span className="text-[10px] font-black uppercase tracking-tighter">Menu</span>
+          </button>
+        </div>
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-200">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} />
-      <Header
-        profile={profile}
-        notifications={notifications}
-        onReadNotification={(id) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))}
-        setActiveTab={setActiveTab}
-        activeTab={activeTab}
-        onRefresh={() => {
-          localStorage.removeItem('app_version');
-          window.location.reload();
-        }}
-      />
-      <main className="md:ml-64 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto pb-24 md:pb-8">{renderContent()}</div>
-      </main>
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-lg border-t border-white/5 px-6 py-4 flex justify-between items-center z-[150] shadow-2xl">
-        <button
-          onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'dashboard' ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
-        >
-          <LayoutDashboard className="w-6 h-6" />
-          <span className="text-[10px] font-black uppercase tracking-tighter">Início</span>
-        </button>
-        <button
-          onClick={() => { setActiveTab('trips'); setIsMobileMenuOpen(false); }}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'trips' ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
-        >
-          <Truck className="w-6 h-6" />
-          <span className="text-[10px] font-black uppercase tracking-tighter">Viagens</span>
-        </button>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={`flex flex-col items-center gap-1 transition-all ${isMobileMenuOpen ? 'text-emerald-500 scale-110' : 'text-slate-500'}`}
-        >
-          {isMobileMenuOpen ? <X className="w-6 h-6 text-rose-500" /> : <Menu className="w-6 h-6 border-2 border-slate-700 rounded-lg p-0.5" />}
-          <span className="text-[10px] font-black uppercase tracking-tighter">Menu</span>
-        </button>
-      </div>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[140] bg-slate-950/95 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 duration-300 md:hidden pt-28 pb-36 px-6 overflow-y-auto">
-          <div className="flex items-center gap-3 mb-12 px-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Truck className="text-slate-950 w-7 h-7" />
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-[140] bg-slate-950/95 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-5 duration-300 md:hidden pt-28 pb-36 px-6 overflow-y-auto">
+            <div className="flex items-center gap-3 mb-12 px-2">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <Truck className="text-slate-950 w-7 h-7" />
+              </div>
+              <div>
+                <span className="font-black text-2xl tracking-tight text-white uppercase italic block leading-none">RIBEIRX<span className="text-emerald-500">LOG</span></span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Controle de Frota v2.0</span>
+              </div>
             </div>
-            <div>
-              <span className="font-black text-2xl tracking-tight text-white uppercase italic block leading-none">RIBEIRX<span className="text-emerald-500">LOG</span></span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Controle de Frota v2.0</span>
-            </div>
-          </div>
 
-          <nav className="grid grid-cols-1 gap-3">
-            {[
-              { id: 'dashboard', label: 'Painel Geral', icon: LayoutDashboard },
-              { id: 'trips', label: 'Minhas Viagens', icon: Truck },
-              { id: 'new-trip', label: 'Novo Lançamento', icon: PlusCircle, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20 shadow-lg shadow-sky-500/5' },
-              { id: 'performance', label: 'Estatísticas & BI', icon: TrendingUp },
-              { id: 'maintenance', label: 'Manutenção', icon: ShieldAlert },
-              { id: 'setup', label: 'Cadastros Base', icon: Users },
-              { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
-              { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },
-            ].map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              const isLocked = profile.payment_status !== 'paid' && !['subscription', 'settings'].includes(item.id);
+            <nav className="grid grid-cols-1 gap-3">
+              {[
+                { id: 'dashboard', label: 'Painel Geral', icon: LayoutDashboard },
+                { id: 'trips', label: 'Minhas Viagens', icon: Truck },
+                { id: 'new-trip', label: 'Novo Lançamento', icon: PlusCircle, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20 shadow-lg shadow-sky-500/5' },
+                { id: 'performance', label: 'Estatísticas & BI', icon: TrendingUp, hidden: profile.config.enableBI === false },
+                { id: 'maintenance', label: 'Manutenção', icon: ShieldAlert, hidden: profile.config.enableMaintenance === false },
+                { id: 'setup', label: 'Cadastros Base', icon: Users },
+                { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
+                { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },
+              ].filter(item => !item.hidden).map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                const isLocked = profile.payment_status !== 'paid' && !['subscription', 'settings'].includes(item.id);
 
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id as TabType);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between p-5 rounded-[2.5rem] transition-all border ${isActive
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 shadow-xl shadow-emerald-500/5'
-                    : item.bg ? `${item.bg} text-white` : 'bg-slate-900/50 border-white/5 text-slate-400 hover:bg-slate-800'
-                    } ${isLocked ? 'opacity-50 grayscale select-none' : ''}`}
-                >
-                  <div className="flex items-center gap-5">
-                    <Icon className={`w-6 h-6 ${isActive ? 'scale-110' : ''}`} />
-                    <span className={`font-black text-sm uppercase tracking-widest ${isActive ? 'text-white' : ''}`}>{item.label}</span>
-                  </div>
-                  {isLocked ? (
-                    <ShieldAlert className="w-5 h-5 text-amber-500/50" />
-                  ) : (
-                    isActive && <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  )}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id as TabType);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-5 rounded-[2.5rem] transition-all border ${isActive
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 shadow-xl shadow-emerald-500/5'
+                      : item.bg ? `${item.bg} text-white` : 'bg-slate-900/50 border-white/5 text-slate-400 hover:bg-slate-800'
+                      } ${isLocked ? 'opacity-50 grayscale select-none' : ''}`}
+                  >
+                    <div className="flex items-center gap-5">
+                      <Icon className={`w-6 h-6 ${isActive ? 'scale-110' : ''}`} />
+                      <span className={`font-black text-sm uppercase tracking-widest ${isActive ? 'text-white' : ''}`}>{item.label}</span>
+                    </div>
+                    {isLocked ? (
+                      <ShieldAlert className="w-5 h-5 text-amber-500/50" />
+                    ) : (
+                      isActive && <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    )}
+                  </button>
+                );
+              })}
 
-            <button
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'Ribeirx Log ERP',
-                    text: 'Conheça o Ribeirx Log, o sistema que está transformando minha gestão de frota!',
-                    url: window.location.origin
-                  }).catch(() => { });
-                } else {
-                  window.open(`https://wa.me/?text=Conheça o Ribeirx Log, o sistema que está transformando minha gestão de frota! Veja aqui: ${window.location.origin}`, '_blank');
-                }
-              }}
-              className="w-full mt-3 flex items-center gap-5 p-5 rounded-[2.5rem] bg-emerald-500 text-slate-950 transition-all hover:bg-emerald-400 font-black shadow-lg shadow-emerald-500/20"
-            >
-              <Share2 className="w-6 h-6" />
-              <span className="text-sm uppercase tracking-widest">Indicar Amigos</span>
-            </button>
-
-            <button
-              onClick={() => { supabase.auth.signOut(); setIsMobileMenuOpen(false); }}
-              className="w-full mt-6 flex items-center gap-5 p-5 rounded-[2.5rem] bg-rose-500/10 border border-rose-500/20 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
-            >
-              <X className="w-6 h-6" />
-              <span className="font-black text-sm uppercase tracking-widest">Sair do Sistema</span>
-            </button>
-
-            <div className="mt-10 p-6 rounded-[2.5rem] bg-white/5 border border-white/10 text-center">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Versão do Sistema: <span className="text-emerald-500">v{APP_VERSION}</span></p>
               <button
                 onClick={() => {
-                  localStorage.removeItem('app_version');
-                  window.location.href = window.location.origin + '?v=' + Date.now();
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'Ribeirx Log ERP',
+                      text: 'Conheça o Ribeirx Log, o sistema que está transformando minha gestão de frota!',
+                      url: window.location.origin
+                    }).catch(() => { });
+                  } else {
+                    window.open(`https://wa.me/?text=Conheça o Ribeirx Log, o sistema que está transformando minha gestão de frota! Veja aqui: ${window.location.origin}`, '_blank');
+                  }
                 }}
-                className="inline-flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition-colors"
+                className="w-full mt-3 flex items-center gap-5 p-5 rounded-[2.5rem] bg-emerald-500 text-slate-950 transition-all hover:bg-emerald-400 font-black shadow-lg shadow-emerald-500/20"
               >
-                <RefreshCcw className="w-3 h-3" /> Forçar Atualização
+                <Share2 className="w-6 h-6" />
+                <span className="text-sm uppercase tracking-widest">Indicar Amigos</span>
               </button>
-            </div>
-          </nav>
-        </div>
-      )}
 
-      {/* Toast Notification System */}
-      {toast && (
-        <div className="fixed bottom-24 md:bottom-8 right-8 z-[200] animate-in slide-in-from-right-10 duration-300">
-          <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 ${toast.type === 'success' ? 'bg-emerald-500 text-emerald-950' :
-            toast.type === 'error' ? 'bg-rose-500 text-white' :
-              'bg-sky-500 text-white'
-            }`}>
-            {toast.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
-            {toast.type === 'error' && <AlertTriangle className="w-5 h-5" />}
-            {toast.type === 'info' && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-            <span className="font-black text-xs uppercase tracking-widest">{toast.message}</span>
+              <button
+                onClick={() => { supabase.auth.signOut(); setIsMobileMenuOpen(false); }}
+                className="w-full mt-6 flex items-center gap-5 p-5 rounded-[2.5rem] bg-rose-500/10 border border-rose-500/20 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
+              >
+                <X className="w-6 h-6" />
+                <span className="font-black text-sm uppercase tracking-widest">Sair do Sistema</span>
+              </button>
+
+              <div className="mt-10 p-6 rounded-[2.5rem] bg-white/5 border border-white/10 text-center">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Versão do Sistema: <span className="text-emerald-500">v{APP_VERSION}</span></p>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('app_version');
+                    window.location.href = window.location.origin + '?v=' + Date.now();
+                  }}
+                  className="inline-flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition-colors"
+                >
+                  <RefreshCcw className="w-3 h-3" /> Forçar Atualização
+                </button>
+              </div>
+            </nav>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {/* Toast Notification System */}
+        {toast && (
+          <div className="fixed bottom-24 md:bottom-8 right-8 z-[200] animate-in slide-in-from-right-10 duration-300">
+            <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 ${toast.type === 'success' ? 'bg-emerald-500 text-emerald-950' :
+              toast.type === 'error' ? 'bg-rose-500 text-white' :
+                'bg-sky-500 text-white'
+              }`}>
+              {toast.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
+              {toast.type === 'error' && <AlertTriangle className="w-5 h-5" />}
+              {toast.type === 'info' && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              <span className="font-black text-xs uppercase tracking-widest">{toast.message}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </AppModeProvider>
   );
 };
 

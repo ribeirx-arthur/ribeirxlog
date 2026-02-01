@@ -136,14 +136,16 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       </header>
 
       {/* AI Section with Fade In Animation */}
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <AIInsights
-          insights={aiInsights}
-          trips={trips}
-          vehicles={vehicles}
-          shippers={shippers}
-        />
-      </div>
+      {profile.config.enableBI !== false && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <AIInsights
+            insights={aiInsights}
+            trips={trips}
+            vehicles={vehicles}
+            shippers={shippers}
+          />
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

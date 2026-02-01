@@ -13,6 +13,8 @@ export const INITIAL_PROFILE: UserProfile = {
     paymentAlertDays: 7,
     notifyIncompleteData: true,
     notifyMaintenance: true,
-    showTips: true
+    showTips: true,
+    enableMaintenance: true,
+    enableBI: true
   }
 };

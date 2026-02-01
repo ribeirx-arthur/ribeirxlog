@@ -17,6 +17,10 @@ export interface UserProfile {
     notifyMaintenance: boolean;
     showTips: boolean;
     theme?: 'light' | 'dark';
+    enableMaintenance: boolean;
+    enableBI: boolean;
+    appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
+    enabledFeatures?: string[];
   };
   plan_type?: 'none' | 'mensal' | 'anual' | 'lifetime';
   payment_status?: 'unpaid' | 'paid' | 'trial';
@@ -132,4 +136,32 @@ export interface FinancialResults {
   lucroSociety: number;
 }
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription';
+
+export interface Tire {
+  id: string;
+  brand: string;
+  model: string;
+  size: string;
+  serialNumber?: string;
+  status: 'new' | 'good' | 'warning' | 'critical' | 'disposed';
+  location: 'stock' | 'vehicle';
+  vehicleId?: string;
+  position?: string; // e.g., "front-left", "rear-right-outer"
+  currentKm: number;
+  installDate?: string;
+  cost: number;
+}
+
+export interface TireMaintenance {
+  id: string;
+  tireId: string;
+  date: string;
+  type: 'rotation' | 'repair' | 'retread' | 'install';
+  cost: number;
+  description: string;
+  kmAtMaintenance: number;
+}
+
+export type TirePosition = 'fl' | 'fr' | 'dl1o' | 'dl1i' | 'dr1i' | 'dr1o' | 'dl2o' | 'dl2i' | 'dr2i' | 'dr2o';
+
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires';

@@ -24,8 +24,16 @@ import {
    CloudLightning,
    Gauge,
    Sun,
-   Moon
+   Moon,
+   Wrench,
+   TrendingUp,
+   Layers,
+   List,
+   Settings2,
+   Sparkles,
+   Check
 } from 'lucide-react';
+import { useAppMode } from '../contexts/AppModeContext';
 import { UserProfile, Vehicle, Driver, Shipper, Trip, MaintenanceRecord } from '../types';
 
 interface SettingsProps {
@@ -41,7 +49,7 @@ interface SettingsProps {
    onResetData: () => void;
 }
 
-type SettingsSubTab = 'profile' | 'calculations' | 'notifications' | 'data';
+type SettingsSubTab = 'profile' | 'mode' | 'calculations' | 'notifications' | 'data';
 
 const Settings: React.FC<SettingsProps> = ({
    profile, setProfile,
@@ -136,6 +144,7 @@ const Settings: React.FC<SettingsProps> = ({
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <aside className="lg:col-span-3 space-y-2">
                <NavButton id="profile" label="Meu Perfil" icon={User} active={activeSubTab} onClick={setActiveSubTab} />
+               <NavButton id="mode" label="Modo de Aplicação" icon={Layers} active={activeSubTab} onClick={setActiveSubTab} />
                <NavButton id="calculations" label="Regras de Cálculo" icon={ShieldCheck} active={activeSubTab} onClick={setActiveSubTab} />
                <NavButton id="notifications" label="Alertas e IA" icon={Bell} active={activeSubTab} onClick={setActiveSubTab} />
                <NavButton id="data" label="Backup e Dados" icon={Database} active={activeSubTab} onClick={setActiveSubTab} />
@@ -227,7 +236,162 @@ const Settings: React.FC<SettingsProps> = ({
                   </div>
                )}
 
-               {/* ABA CÁLCULOS */}
+               {/* ABA MODO DE APLICAÇÃO */}
+               {activeSubTab === 'mode' && (
+                  <div className="space-y-6 animate-in slide-in-from-right-4">
+                     <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-10 space-y-8 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                           <Layers className="w-64 h-64" />
+                        </div>
+
+                        <header className="flex items-center justify-between border-b border-slate-800 pb-6 relative z-10">
+                           <h3 className="text-xl font-black text-white flex items-center gap-3 uppercase tracking-tighter">
+                              <Layers className="text-purple-500" /> Complexidade do Sistema
+                           </h3>
+                           <span className="bg-purple-500/10 text-purple-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">
+                              Modo Atual: {profile.config.appMode || 'advanced'}
+                           </span>
+                        </header>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                           {/* MODO SIMPLES */}
+                           <button
+                              onClick={() => handleConfigChange('appMode', 'simple')}
+                              className={`group text-left p-6 rounded-3xl border transition-all relative overflow-hidden ${profile.config.appMode === 'simple'
+                                 ? 'bg-slate-800 border-purple-500 shadow-xl shadow-purple-500/10'
+                                 : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                                 }`}
+                           >
+                              <div className="relative z-10 space-y-4">
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'simple' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                    <List className="w-6 h-6" />
+                                 </div>
+                                 <div>
+                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'simple' ? 'text-white' : 'text-slate-300'}`}>Simples</h4>
+                                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                                       Ideal para autônomos. Foca apenas no registro básico de receitas e despesas. Sem manutenção detalhada ou BI complexo.
+                                    </p>
+                                 </div>
+                                 <ul className="space-y-2">
+                                    <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
+                                       <Check className="w-3 h-3 text-emerald-500" /> Registro de Viagens
+                                    </li>
+                                    <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
+                                       <Check className="w-3 h-3 text-emerald-500" /> Controle de Caixa
+                                    </li>
+                                 </ul>
+                              </div>
+                           </button>
+
+                           {/* MODO INTERMEDIÁRIO */}
+                           <button
+                              onClick={() => handleConfigChange('appMode', 'intermediate')}
+                              className={`group text-left p-6 rounded-3xl border transition-all relative overflow-hidden ${profile.config.appMode === 'intermediate'
+                                 ? 'bg-slate-800 border-purple-500 shadow-xl shadow-purple-500/10'
+                                 : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                                 }`}
+                           >
+                              <div className="relative z-10 space-y-4">
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'intermediate' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                    <Layers className="w-6 h-6" />
+                                 </div>
+                                 <div>
+                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'intermediate' ? 'text-white' : 'text-slate-300'}`}>Intermediário</h4>
+                                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                                       Adiciona gestão básica de manutenção e resultados por veículo. Ótimo para quem tem 2-3 caminhões.
+                                    </p>
+                                 </div>
+                                 <ul className="space-y-2">
+                                    <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
+                                       <Check className="w-3 h-3 text-emerald-500" /> Manutenção Preventiva
+                                    </li>
+                                    <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
+                                       <Check className="w-3 h-3 text-emerald-500" /> Resultados por Placa
+                                    </li>
+                                 </ul>
+                              </div>
+                           </button>
+
+                           {/* MODO AVANÇADO */}
+                           <button
+                              onClick={() => handleConfigChange('appMode', 'advanced')}
+                              className={`group text-left p-6 rounded-3xl border transition-all relative overflow-hidden ${profile.config.appMode === 'advanced'
+                                 ? 'bg-slate-800 border-purple-500 shadow-xl shadow-purple-500/10'
+                                 : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                                 }`}
+                           >
+                              <div className="relative z-10 space-y-4">
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'advanced' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                    <Sparkles className="w-6 h-6" />
+                                 </div>
+                                 <div>
+                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'advanced' ? 'text-white' : 'text-slate-300'}`}>Avançado (ERP)</h4>
+                                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                                       Experiência completa. BI, Gestão de Pneus, Sócios, Motoristas e Auditoria. Para gestores de frota.
+                                    </p>
+                                 </div>
+                                 <ul className="space-y-2">
+                                    <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
+                                       <Check className="w-3 h-3 text-emerald-500" /> Tudo Incluso + Pneus
+                                    </li>
+                                    <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
+                                       <Check className="w-3 h-3 text-emerald-500" /> BI & Inteligência
+                                    </li>
+                                 </ul>
+                              </div>
+                           </button>
+
+                           {/* MODO PERSONALIZADO */}
+                           <button
+                              onClick={() => handleConfigChange('appMode', 'custom')}
+                              className={`group text-left p-6 rounded-3xl border transition-all relative overflow-hidden ${profile.config.appMode === 'custom'
+                                 ? 'bg-slate-800 border-purple-500 shadow-xl shadow-purple-500/10'
+                                 : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                                 }`}
+                           >
+                              <div className="relative z-10 space-y-4">
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'custom' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                    <Settings2 className="w-6 h-6" />
+                                 </div>
+                                 <div>
+                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'custom' ? 'text-white' : 'text-slate-300'}`}>Personalizado</h4>
+                                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                                       Configure manualmente quais módulos deseja ver ativos na aba "Alertas e IA".
+                                    </p>
+                                 </div>
+                                 <ul className="space-y-2">
+                                    <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
+                                       <Check className="w-3 h-3 text-emerald-500" /> Flexibilidade Total
+                                    </li>
+                                 </ul>
+                              </div>
+                           </button>
+                        </div>
+
+                        {profile.config.appMode === 'custom' && (
+                           <div className="pt-8 border-t border-slate-800 animate-in slide-in-from-bottom-4">
+                              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Módulos Ativos</p>
+                              <div className="space-y-4 bg-slate-950/50 p-6 rounded-2xl border border-slate-800">
+                                 <ToggleOption
+                                    label="Manutenção Completa"
+                                    description="Controle de óleo, peças e serviços."
+                                    checked={profile.config.enableMaintenance ?? true}
+                                    onChange={v => handleConfigChange('enableMaintenance', v)}
+                                    icon={Wrench}
+                                 />
+                                 <ToggleOption
+                                    label="Business Intelligence"
+                                    description="Gráficos e relatórios de performance."
+                                    checked={profile.config.enableBI ?? true}
+                                    onChange={v => handleConfigChange('enableBI', v)}
+                                    icon={TrendingUp}
+                                 />
+                              </div>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+               )}
                {activeSubTab === 'calculations' && (
                   <div className="space-y-6 animate-in slide-in-from-right-4">
                      <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-10 space-y-8 shadow-2xl">
@@ -287,6 +451,8 @@ const Settings: React.FC<SettingsProps> = ({
                            </div>
 
                            <div className="space-y-4">
+                              <ToggleOption label="Módulo de Manutenção" description="Habilita aba de gestão de frotas, trocas de óleo e pneus." checked={profile.config.enableMaintenance} onChange={v => handleConfigChange('enableMaintenance', v)} icon={Wrench} />
+                              <ToggleOption label="Business Intelligence Avançado" description="Habilita painel de performance, rankings e análise de lucro por KM." checked={profile.config.enableBI} onChange={v => handleConfigChange('enableBI', v)} icon={TrendingUp} />
                               <ToggleOption label="Integridade de Dados" description="Avisa se foram detectadas viagens sem KM ou valores de combustível preenchidos." checked={profile.config.notifyIncompleteData} onChange={v => handleConfigChange('notifyIncompleteData', v)} icon={FileSearch} />
                               <ToggleOption label="Saúde Predutiva" description="Gera alertas de manutenção quando um veículo atinge 90% da vida útil de algum componente." checked={profile.config.notifyMaintenance} onChange={v => handleConfigChange('notifyMaintenance', v)} icon={AlertTriangle} />
                               <ToggleOption label="Dicas de Performance (IA)" description="Habilita o motor de sugestões estratégicas no dashboard de BI." checked={profile.config.showTips} onChange={v => handleConfigChange('showTips', v)} icon={Lightbulb} />

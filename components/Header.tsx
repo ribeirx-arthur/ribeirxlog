@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotificat
 
             {/* Dropdown de Notificações */}
             {showNotifications && (
-              <div className="absolute right-0 mt-4 w-80 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              <div className="fixed md:absolute inset-x-4 md:inset-x-auto right-auto md:right-0 top-20 md:top-auto md:mt-4 md:w-80 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[110]">
                 <header className="p-5 border-b border-slate-800 flex items-center justify-between">
                   <h4 className="text-xs font-black text-white uppercase tracking-widest">Central de Avisos</h4>
                   <button onClick={() => setShowNotifications(false)} className="p-1 hover:bg-slate-800 rounded-lg">

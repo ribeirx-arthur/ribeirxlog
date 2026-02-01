@@ -9,7 +9,8 @@ import {
   Users,
   ShieldAlert,
   LogOut,
-  CreditCard
+  CreditCard,
+  Disc
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { TabType, UserProfile } from '../types';
@@ -24,8 +25,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
-    { id: 'performance', label: 'BI & Performance', icon: TrendingUp },
-    { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !profile.config.showMileage },
+    { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: profile.config.enableBI === false },
+    { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: profile.config.enableMaintenance === false },
+    { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: profile.config.enableMaintenance === false || profile.config.appMode === 'simple' },
     { id: 'setup', label: 'Cadastros', icon: Users },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
     { id: 'settings', label: 'Configurações', icon: Settings },

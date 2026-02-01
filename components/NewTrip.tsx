@@ -58,17 +58,27 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     totalKm: 0
   });
 
+  const isSimple = profile.config.appMode === 'simple';
+  const isIntermediate = profile.config.appMode === 'intermediate';
+  const isAdvanced = !isSimple && !isIntermediate;
+
   const handleSave = () => {
-    const isMissingCrucial = !formData.vehicleId || !formData.driverId || !formData.shipperId || !formData.origin || !formData.destination;
+    const isSimple = profile.config.appMode === 'simple';
+    const isMissingCrucial = !formData.origin || !formData.destination ||
+      (!isSimple && (!formData.vehicleId || !formData.driverId || !formData.shipperId));
 
     if (isMissingCrucial) {
-      alert("Campos Obrigatórios: Origem, Destino, Veículo, Motorista e Transportadora.");
+      alert("Campos Obrigatórios: Origem, Destino" + (isSimple ? "." : ", Veículo, Motorista e Transportadora."));
       return;
     }
 
     const newTrip: Trip = {
       id: Math.random().toString(36).substr(2, 9),
-      ...formData
+      ...formData,
+      // Default Generic IDs in Simple Mode if not set
+      vehicleId: formData.vehicleId || 'generic-vehicle',
+      driverId: formData.driverId || 'generic-driver',
+      shipperId: formData.shipperId || 'generic-shipper',
     } as Trip;
     onSave(newTrip);
   };
@@ -147,47 +157,49 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
             </div>
           </section>
 
-          {/* 2. ALOCAÇÃO DE RECURSOS */}
-          <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-8 shadow-2xl">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                <Truck className="w-5 h-5 text-emerald-500" />
+          {/* 2. ALOCAÇÃO DE RECURSOS - Hidden in Simple Mode */}
+          {!isSimple && (
+            <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-8 shadow-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-emerald-500" />
+                </div>
+                <h3 className="text-sm font-black text-white uppercase tracking-widest">2. Alocação de Recursos</h3>
               </div>
-              <h3 className="text-sm font-black text-white uppercase tracking-widest">2. Alocação de Recursos</h3>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Veículo</label>
-                <select value={formData.vehicleId} onChange={e => setFormData({ ...formData, vehicleId: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-emerald-500 appearance-none">
-                  <option value="">Selecionar...</option>
-                  {vehicles.map(v => <option key={v.id} value={v.id}>{v.plate} - {v.name}</option>)}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Veículo</label>
+                  <select value={formData.vehicleId} onChange={e => setFormData({ ...formData, vehicleId: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-emerald-500 appearance-none">
+                    <option value="">Selecionar...</option>
+                    {vehicles.map(v => <option key={v.id} value={v.id}>{v.plate} - {v.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Motorista</label>
+                  <select value={formData.driverId} onChange={e => setFormData({ ...formData, driverId: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-emerald-500 appearance-none">
+                    <option value="">Selecionar...</option>
+                    {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Transportadora</label>
+                  <select value={formData.shipperId} onChange={e => setFormData({ ...formData, shipperId: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-emerald-500 appearance-none">
+                    <option value="">Selecionar...</option>
+                    {shippers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Status Financeiro</label>
+                  <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as PaymentStatus })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-black outline-none focus:border-emerald-500 appearance-none">
+                    <option value="Pendente">Aguardando Recebimento</option>
+                    <option value="Parcial">Recebido Parcial</option>
+                    <option value="Pago">Totalmente Liquidado</option>
+                  </select>
+                </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Motorista</label>
-                <select value={formData.driverId} onChange={e => setFormData({ ...formData, driverId: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-emerald-500 appearance-none">
-                  <option value="">Selecionar...</option>
-                  {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </select>
-              </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Transportadora</label>
-                <select value={formData.shipperId} onChange={e => setFormData({ ...formData, shipperId: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-emerald-500 appearance-none">
-                  <option value="">Selecionar...</option>
-                  {shippers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Status Financeiro</label>
-                <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as PaymentStatus })} className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-black outline-none focus:border-emerald-500 appearance-none">
-                  <option value="Pendente">Aguardando Recebimento</option>
-                  <option value="Parcial">Recebido Parcial</option>
-                  <option value="Pago">Totalmente Liquidado</option>
-                </select>
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* 3. FINANCEIRO E TELEMETRIA */}
           <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-8 shadow-2xl">
