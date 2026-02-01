@@ -15,6 +15,7 @@ export const INITIAL_PROFILE: UserProfile = {
     notifyMaintenance: true,
     showTips: true,
     enableMaintenance: true,
-    enableBI: true
+    enableBI: true,
+    appMode: 'simple'
   }
 };

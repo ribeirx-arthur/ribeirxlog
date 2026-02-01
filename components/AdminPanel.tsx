@@ -48,10 +48,19 @@ export const AdminPanel = () => {
         }
     };
 
-    const filteredUsers = users.filter(u =>
-        (u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.name?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (statusFilter === 'all' || u.payment_status === statusFilter)
-    );
+    const filteredUsers = users.filter(u => {
+        const emailMatch = (u.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const nameMatch = (u.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const statusMatch = statusFilter === 'all' || u.payment_status === statusFilter;
+        return (emailMatch || nameMatch) && statusMatch;
+    });
+
+    useEffect(() => {
+        if (users.length > 0) {
+            console.log(`AdminPanel: Loaded ${users.length} profiles. Filtered to ${filteredUsers.length}.`);
+            console.table(users.map(u => ({ id: u.id, email: u.email, name: u.name, status: u.payment_status })));
+        }
+    }, [users, filteredUsers.length]);
 
     return (
         <div className="space-y-8 p-6 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

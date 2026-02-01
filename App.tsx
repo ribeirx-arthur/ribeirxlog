@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.5.4';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -249,14 +249,27 @@ const App: React.FC = () => {
                 plan_type: profileData.plan_type || 'none'
               }));
 
+              // 1.0 Retroactive Fix: If profile is missing secondary info, update it
+              if (!profileData.email || !profileData.name || !profileData.company_name) {
+                supabase.from('profiles').update({
+                  email: profileData.email || session.user.email,
+                  name: profileData.name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+                  company_name: profileData.company_name || profileData.companyName || 'Minha Empresa Demo'
+                }).eq('id', session.user.id).then(({ error }) => {
+                  if (error) console.error("Error repairing profile:", error);
+                  else console.log("Profile repaired automatically.");
+                });
+              }
+
               // 1.1 Special Logic for PREVIEW users: Auto-populate if empty
               try {
                 if ((profileData.payment_status === 'preview' || !profileData.payment_status) && !hasGeneratedMockData.current) {
                   const { count: tripCount } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
                   const { count: vehicleCount } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
+                  const { count: driverCount } = await supabase.from('drivers').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
 
-                  if ((tripCount || 0) < 5 || (vehicleCount || 0) === 0) {
-                    console.log("Universalizing demo data for preview user...");
+                  if ((tripCount || 0) < 5 || (vehicleCount || 0) === 0 || (driverCount || 0) === 0) {
+                    console.log("Universalizing demo data (v1.5.4)...");
                     showToast('Sincronizando ambiente de demonstração...', 'info');
                     const success = await generateMockData(session.user.id);
                     if (success) {
@@ -264,8 +277,6 @@ const App: React.FC = () => {
                       setRefreshTrigger(prev => prev + 1);
                       showToast('Dados de demonstração sincronizados!', 'success');
                       return; // Retrying fetch with new data
-                    } else {
-                      showToast('Erro ao gerar dados de demonstração', 'error');
                     }
                   }
                 }
@@ -273,31 +284,33 @@ const App: React.FC = () => {
                 console.error("Non-critical error in demo setup:", demoErr);
               }
             } else {
-              // CREATE DEFAULT PROFILE if it doesn't exist
+              // CREATE/ENSURE DEFAULT PROFILE
               try {
-                console.log("No profile found, creating default...");
+                console.log("No profile found, ensuring creation...");
                 const defaultProfile = {
                   id: session.user.id,
-                  email: session.user.email,
-                  name: session.user.user_metadata?.full_name || '',
+                  email: session.user.email || '',
+                  name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Usuário Demo',
                   payment_status: 'preview',
                   plan_type: 'none',
+                  company_name: 'Minha Empresa Demo',
                   config: INITIAL_PROFILE.config
                 };
 
-                const { error: insertError } = await supabase.from('profiles').insert(defaultProfile);
-                if (insertError) {
-                  console.error("Profile insertion error:", insertError);
-                  showToast(`Erro ao criar perfil: ${insertError.message}`, 'error');
+                const { error: upsertError } = await supabase.from('profiles').upsert(defaultProfile);
+                if (upsertError) {
+                  console.error("Profile creation error:", upsertError);
+                  showToast(`Erro ao criar perfil: ${upsertError.message}`, 'error');
                 } else {
-                  showToast('Perfil de demonstração criado!', 'success');
+                  showToast('Perfil de demonstração garantido!', 'success');
                 }
                 setProfile(prev => ({
                   ...prev,
                   email: session.user.email || '',
-                  name: session.user.user_metadata?.full_name || '',
+                  name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Usuário Demo',
                   payment_status: 'preview',
-                  plan_type: 'none'
+                  plan_type: 'none',
+                  companyName: 'Minha Empresa Demo'
                 }));
 
                 // Seed data
