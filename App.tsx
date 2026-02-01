@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.4.8';
+const APP_VERSION = '1.4.9';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -252,11 +252,14 @@ const App: React.FC = () => {
               // 1.1 Special Logic for PREVIEW users: Auto-populate if empty
               try {
                 if ((profileData.payment_status === 'preview' || !profileData.payment_status) && !hasGeneratedMockData.current) {
-                  const { count } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
-                  if (count < 5) {
-                    console.log("Generating mock data for preview user...");
-                    hasGeneratedMockData.current = true;
+                  const { count: tripCount } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
+                  const { count: vehicleCount } = await supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
+
+                  // Aggressive trigger: if less than a full fleet, regenerate
+                  if ((tripCount || 0) < 5 || (vehicleCount || 0) === 0) {
+                    console.log("Universalizing demo data for preview user...");
                     await generateMockData(session.user.id);
+                    hasGeneratedMockData.current = true;
                     setRefreshTrigger(prev => prev + 1);
                     return; // Retrying fetch with new data
                   }
