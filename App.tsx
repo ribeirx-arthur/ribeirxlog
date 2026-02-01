@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.4.7';
+const APP_VERSION = '1.4.8';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -253,7 +253,7 @@ const App: React.FC = () => {
               try {
                 if ((profileData.payment_status === 'preview' || !profileData.payment_status) && !hasGeneratedMockData.current) {
                   const { count } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
-                  if (count === 0) {
+                  if (count < 5) {
                     console.log("Generating mock data for preview user...");
                     hasGeneratedMockData.current = true;
                     await generateMockData(session.user.id);

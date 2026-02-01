@@ -42,14 +42,21 @@ export const generateMockData = async (userId: string) => {
         avg_payment_days: 15
     });
 
-    // 4. Create some diverse dummy trips
+    // 4. Create some diverse dummy trips (Use relative dates so they show up in filters)
+    const now = new Date();
+    const getRelDate = (daysAgo: number) => {
+        const d = new Date();
+        d.setDate(now.getDate() - daysAgo);
+        return d.toISOString().split('T')[0];
+    };
+
     const tripData = [
-        { origin: 'Santos/SP', destination: 'Cuiabá/MT', frete: 8500, date: '2024-01-10', diesel: 3200 },
-        { origin: 'Paranaguá/PR', destination: 'Rio Verde/GO', frete: 7200, date: '2024-01-15', diesel: 2800 },
-        { origin: 'Rondonópolis/MT', destination: 'Santos/SP', frete: 9800, date: '2024-01-22', diesel: 3800 },
-        { origin: 'Sorriso/MT', destination: 'Miritituba/PA', frete: 6500, date: '2024-01-28', diesel: 2500 },
-        { origin: 'Uberlândia/MG', destination: 'Vitória/ES', frete: 5400, date: '2024-02-02', diesel: 2100 },
-        { origin: 'Dourados/MS', destination: 'Paranaguá/PR', frete: 8100, date: '2024-02-05', diesel: 3000 },
+        { origin: 'Santos/SP', destination: 'Cuiabá/MT', frete: 8500, date: getRelDate(2), diesel: 3200 },
+        { origin: 'Paranaguá/PR', destination: 'Rio Verde/GO', frete: 7200, date: getRelDate(5), diesel: 2800 },
+        { origin: 'Rondonópolis/MT', destination: 'Santos/SP', frete: 9800, date: getRelDate(12), diesel: 3800 },
+        { origin: 'Sorriso/MT', destination: 'Miritituba/PA', frete: 6500, date: getRelDate(18), diesel: 2500 },
+        { origin: 'Uberlândia/MG', destination: 'Vitória/ES', frete: 5400, date: getRelDate(25), diesel: 2100 },
+        { origin: 'Dourados/MS', destination: 'Paranaguá/PR', frete: 8100, date: getRelDate(40), diesel: 3000 },
     ];
 
     for (const trip of tripData) {
