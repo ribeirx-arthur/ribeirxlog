@@ -19,24 +19,28 @@ import {
   AlertTriangle,
   Save
 } from 'lucide-react';
-import { Vehicle, Driver, Shipper, VehiclePropertyType } from '../types';
+import { Vehicle, Driver, Shipper, VehiclePropertyType, Buggy } from '../types';
 
 interface SetupProps {
   vehicles: Vehicle[];
   drivers: Driver[];
   shippers: Shipper[];
+  buggies: Buggy[];
   onUpdateVehicles: (v: Vehicle[]) => void;
   onUpdateDrivers: (d: Driver[]) => void;
   onUpdateShippers: (s: Shipper[]) => void;
+  onUpdateBuggies: (b: Buggy[]) => void;
+  initialSubTab?: SetupTab;
 }
 
-type SetupTab = 'vehicles' | 'drivers' | 'shippers';
+type SetupTab = 'vehicles' | 'drivers' | 'shippers' | 'buggies';
 
 const Setup: React.FC<SetupProps> = ({
-  vehicles, drivers, shippers,
-  onUpdateVehicles, onUpdateDrivers, onUpdateShippers
+  vehicles, drivers, shippers, buggies,
+  onUpdateVehicles, onUpdateDrivers, onUpdateShippers, onUpdateBuggies,
+  initialSubTab
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<SetupTab>('vehicles');
+  const [activeSubTab, setActiveSubTab] = useState<SetupTab>(initialSubTab || 'vehicles');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -47,6 +51,7 @@ const Setup: React.FC<SetupProps> = ({
   const filteredVehicles = vehicles.filter(v => v.plate.toLowerCase().includes(searchTerm.toLowerCase()) || v.name.toLowerCase().includes(searchTerm.toLowerCase()));
   const filteredDrivers = drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.cpf.includes(searchTerm));
   const filteredShippers = shippers.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.cnpj.includes(searchTerm));
+  const filteredBuggies = buggies.filter(b => b.plate.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleOpenModal = (item?: any) => {
     if (item) {
@@ -56,9 +61,10 @@ const Setup: React.FC<SetupProps> = ({
       const initialStates = {
         vehicles: { id: '', plate: '', name: '', brand: '', model: '', year: new Date().getFullYear(), type: VehiclePropertyType.PROPRIO, societySplitFactor: 100, totalKmAccumulated: 0, lastMaintenanceKm: 0 },
         drivers: { id: '', name: '', cpf: '', phone: '', cnh: '', cnhCategory: 'E', cnhValidity: '', status: 'Ativo' as const },
-        shippers: { id: '', name: '', cnpj: '', avgPaymentDays: 15 }
+        shippers: { id: '', name: '', cnpj: '', avgPaymentDays: 15 },
+        buggies: { id: '', plate: '', brand: '', model: '', axles: 3, tireType: 'dual' }
       };
-      setEditingItem({ ...initialStates[activeSubTab], id: Math.random().toString(36).substr(2, 9) });
+      setEditingItem({ ...initialStates[activeSubTab as keyof typeof initialStates], id: Math.random().toString(36).substr(2, 9) });
     }
     setIsModalOpen(true);
   };
@@ -79,9 +85,12 @@ const Setup: React.FC<SetupProps> = ({
       } else if (activeSubTab === 'drivers') {
         const exists = drivers.find(d => d.id === editingItem.id);
         await onUpdateDrivers(exists ? drivers.map(d => d.id === editingItem.id ? editingItem : d) : [editingItem, ...drivers]);
-      } else {
+      } else if (activeSubTab === 'shippers') {
         const exists = shippers.find(s => s.id === editingItem.id);
         await onUpdateShippers(exists ? shippers.map(s => s.id === editingItem.id ? editingItem : s) : [editingItem, ...shippers]);
+      } else if (activeSubTab === 'buggies') {
+        const exists = buggies.find(b => b.id === editingItem.id);
+        await onUpdateBuggies(exists ? buggies.map(b => b.id === editingItem.id ? editingItem : b) : [editingItem, ...buggies]);
       }
       handleCloseModal();
     } catch (err) {
@@ -96,6 +105,7 @@ const Setup: React.FC<SetupProps> = ({
     if (deleteConfirm.type === 'vehicles') onUpdateVehicles(vehicles.filter(v => v.id !== deleteConfirm.id));
     if (deleteConfirm.type === 'drivers') onUpdateDrivers(drivers.filter(d => d.id !== deleteConfirm.id));
     if (deleteConfirm.type === 'shippers') onUpdateShippers(shippers.filter(s => s.id !== deleteConfirm.id));
+    if (deleteConfirm.type === 'buggies') onUpdateBuggies(buggies.filter(b => b.id !== deleteConfirm.id));
     setDeleteConfirm(null);
   };
 
@@ -153,6 +163,13 @@ const Setup: React.FC<SetupProps> = ({
         >
           <Building2 className="w-4 h-4" />
           Transportadoras
+        </button>
+        <button
+          onClick={() => { setActiveSubTab('buggies'); setSearchTerm(''); }}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'buggies' ? 'bg-slate-800 text-amber-500 shadow-inner' : 'text-slate-500 hover:text-slate-300'}`}
+        >
+          <Plus className="w-4 h-4" />
+          Implementos / Buggy
         </button>
       </div>
 
@@ -308,6 +325,43 @@ const Setup: React.FC<SetupProps> = ({
             </div>
           </div>
         ))}
+
+        {activeSubTab === 'buggies' && filteredBuggies.map(b => (
+          <div key={b.id} className="bg-slate-800/40 border border-slate-700/50 rounded-[2rem] p-6 hover:bg-slate-800/60 transition-all group overflow-hidden">
+            <div className="flex justify-between items-start mb-6">
+              <div className="relative w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 overflow-hidden border border-slate-700 font-black">
+                {b.plate.slice(0, 2)}
+              </div>
+              <div className="px-3 py-1 bg-slate-900 border border-slate-700 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                {b.axles} Eixos
+              </div>
+            </div>
+            <div className="space-y-1 mb-6">
+              <h4 className="text-xl font-black text-white group-hover:text-amber-400 transition-colors uppercase">{b.plate}</h4>
+              <p className="text-slate-500 text-xs font-bold uppercase tracking-tighter">{b.brand} {b.model}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 py-4 border-t border-slate-700/50 text-[10px]">
+              <div>
+                <p className="text-slate-500 font-black uppercase tracking-tighter">Tipo Rodagem</p>
+                <p className="text-white font-black text-sm uppercase">{b.tireType === 'dual' ? 'Dupla' : 'Simples'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <button
+                onClick={() => handleOpenModal(b)}
+                className="flex-1 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-[10px] font-black uppercase text-slate-400 hover:text-white transition-all"
+              >
+                Editar
+              </button>
+              <button
+                onClick={() => setDeleteConfirm({ id: b.id, type: 'buggies' })}
+                className="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Slide-over Modal for Add/Edit */}
@@ -431,6 +485,36 @@ const Setup: React.FC<SetupProps> = ({
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Telefone</label>
                       <input type="text" value={editingItem.phone} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} placeholder="(00) 0000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                    </div>
+                  </>
+                )}
+
+                {activeSubTab === 'buggies' && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Placa do Implemento</label>
+                      <input type="text" value={editingItem.plate} onChange={e => setEditingItem({ ...editingItem, plate: e.target.value.toUpperCase() })} placeholder="AAA-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Marca</label>
+                      <input type="text" value={editingItem.brand} onChange={e => setEditingItem({ ...editingItem, brand: e.target.value })} placeholder="Ex: Randon" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Modelo</label>
+                      <input type="text" value={editingItem.model} onChange={e => setEditingItem({ ...editingItem, model: e.target.value })} placeholder="Ex: Graneleira" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Quantidade de Eixos</label>
+                      <select value={editingItem.axles} onChange={e => setEditingItem({ ...editingItem, axles: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
+                        {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Eixos</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Tipo de Rodagem</label>
+                      <select value={editingItem.tireType} onChange={e => setEditingItem({ ...editingItem, tireType: e.target.value as 'single' | 'dual' })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
+                        <option value="dual">Rodado Duplo</option>
+                        <option value="single">Rodado Simples</option>
+                      </select>
                     </div>
                   </>
                 )}

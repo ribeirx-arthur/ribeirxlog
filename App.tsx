@@ -18,12 +18,14 @@ import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2 } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Layers } from 'lucide-react';
 import {
   UserProfile,
   Vehicle,
+  Buggy,
   Driver,
   Shipper,
+  Tire,
   Trip,
   TabType,
   AppNotification,
@@ -35,7 +37,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.0.9';
+const APP_VERSION = '1.1.1';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 
@@ -89,8 +91,10 @@ const App: React.FC = () => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [buggies, setBuggies] = useState<Buggy[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [shippers, setShippers] = useState<Shipper[]>([]);
+  const [tires, setTires] = useState<Tire[]>([]);
   const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([]);
 
   const [session, setSession] = useState<Session | null>(null);
@@ -310,6 +314,19 @@ const App: React.FC = () => {
               ...s,
               avgPaymentDays: s.avg_payment_days,
               logoUrl: s.logo_url
+            })),
+            loadTable('buggies', setBuggies, (b) => ({
+              ...b,
+              tireType: b.tire_type
+            })),
+            loadTable('tires', setTires, (t) => ({
+              ...t,
+              serialNumber: t.serial_number,
+              vehicleId: t.vehicle_id,
+              buggyId: t.buggy_id,
+              currentKm: Number(t.current_km),
+              cost: Number(t.cost),
+              installDate: t.install_date
             })),
             loadTable('maintenance_records', setMaintenances)
           ]);
@@ -646,6 +663,95 @@ const App: React.FC = () => {
     showToast('Tomadores atualizados!');
   };
 
+  const handleUpdateBuggies = async (updatedBuggies: Buggy[]) => {
+    if (loadingData) return;
+    showToast('Salvando implementos...', 'info');
+
+    const buggiesToDelete = buggies.filter(b => b.id.length > 20 && !updatedBuggies.find(ub => ub.id === b.id));
+    for (const b of buggiesToDelete) {
+      await supabase.from('buggies').delete().eq('id', b.id);
+    }
+
+    const finalBuggies: Buggy[] = [];
+    for (const b of updatedBuggies) {
+      const dbPayload = {
+        user_id: session?.user.id,
+        plate: b.plate,
+        brand: b.brand,
+        model: b.model,
+        axles: b.axles,
+        tire_type: b.tireType
+      };
+
+      try {
+        const isExisting = b.id && b.id.length > 20 && b.id.includes('-');
+        if (!isExisting) {
+          const { data, error } = await supabase.from('buggies').insert(dbPayload).select().single();
+          if (error) throw error;
+          if (data) finalBuggies.push({ ...data, tireType: data.tire_type });
+        } else {
+          const { error } = await supabase.from('buggies').update(dbPayload).eq('id', b.id);
+          if (error) throw error;
+          finalBuggies.push(b);
+        }
+      } catch (err: any) {
+        console.error('Persistence error for buggy:', b.plate, err);
+        showToast(`Erro ao salvar carreta ${b.plate}: ${err.message}`, 'error');
+        finalBuggies.push(b);
+      }
+    }
+    setBuggies(finalBuggies);
+    showToast('Implementos atualizados!');
+  };
+
+  const handleUpdateTires = async (updatedTires: Tire[]) => {
+    if (loadingData) return;
+
+    const finalTires: Tire[] = [];
+    for (const t of updatedTires) {
+      const dbPayload = {
+        user_id: session?.user.id,
+        vehicle_id: t.vehicleId,
+        buggy_id: t.buggyId,
+        serial_number: t.serialNumber,
+        brand: t.brand,
+        model: t.model,
+        size: t.size,
+        status: t.status,
+        location: t.location,
+        position: t.position,
+        current_km: t.currentKm,
+        cost: t.cost,
+        install_date: t.installDate
+      };
+
+      try {
+        const isExisting = t.id && t.id.length > 20 && t.id.includes('-');
+        if (!isExisting) {
+          const { data, error } = await supabase.from('tires').insert(dbPayload).select().single();
+          if (error) throw error;
+          if (data) finalTires.push({
+            ...data,
+            serialNumber: data.serial_number,
+            vehicleId: data.vehicle_id,
+            buggyId: data.buggy_id,
+            currentKm: Number(data.current_km),
+            cost: Number(data.cost),
+            installDate: data.install_date
+          });
+        } else {
+          const { error } = await supabase.from('tires').update(dbPayload).eq('id', t.id);
+          if (error) throw error;
+          finalTires.push(t);
+        }
+      } catch (err: any) {
+        console.error('Persistence error for tire:', t.serialNumber, err);
+        finalTires.push(t);
+      }
+    }
+    setTires(finalTires);
+  };
+
   const handleImportData = (data: any) => {
     setProfile(data.profile);
     setTrips(data.trips);
@@ -724,6 +830,8 @@ const App: React.FC = () => {
       case 'performance':
         if (profile.config.enableBI === false) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
         return <Performance trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} />;
+      case 'tires':
+        return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={handleUpdateTires} />;
       case 'maintenance':
         if (profile.config.enableMaintenance === false) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
         return (
@@ -735,7 +843,31 @@ const App: React.FC = () => {
             onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
           />
         );
-      case 'setup': return <Setup vehicles={vehicles} drivers={drivers} shippers={shippers} onUpdateVehicles={handleUpdateVehicles} onUpdateDrivers={handleUpdateDrivers} onUpdateShippers={handleUpdateShippers} />;
+      case 'setup': return (
+        <Setup
+          vehicles={vehicles}
+          drivers={drivers}
+          shippers={shippers}
+          buggies={buggies}
+          onUpdateVehicles={handleUpdateVehicles}
+          onUpdateDrivers={handleUpdateDrivers}
+          onUpdateShippers={handleUpdateShippers}
+          onUpdateBuggies={handleUpdateBuggies}
+        />
+      );
+      case 'buggies': return (
+        <Setup
+          vehicles={vehicles}
+          drivers={drivers}
+          shippers={shippers}
+          buggies={buggies}
+          initialSubTab="buggies"
+          onUpdateVehicles={handleUpdateVehicles}
+          onUpdateDrivers={handleUpdateDrivers}
+          onUpdateShippers={handleUpdateShippers}
+          onUpdateBuggies={handleUpdateBuggies}
+        />
+      );
       case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
       case 'settings':
         return (
@@ -899,6 +1031,8 @@ const App: React.FC = () => {
                 { id: 'new-trip', label: 'Novo Lançamento', icon: PlusCircle, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20 shadow-lg shadow-sky-500/5' },
                 { id: 'performance', label: 'Estatísticas & BI', icon: TrendingUp, hidden: profile.config.enableBI === false },
                 { id: 'maintenance', label: 'Manutenção', icon: ShieldAlert, hidden: profile.config.enableMaintenance === false },
+                { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: profile.config.enableMaintenance === false },
+                { id: 'buggies', label: 'Implementos', icon: Layers },
                 { id: 'setup', label: 'Cadastros Base', icon: Users },
                 { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
                 { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },

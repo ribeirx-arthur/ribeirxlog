@@ -144,12 +144,22 @@ export interface Tire {
   size: string;
   serialNumber?: string;
   status: 'new' | 'good' | 'warning' | 'critical' | 'disposed';
-  location: 'stock' | 'vehicle';
+  location: 'stock' | 'vehicle' | 'buggy';
   vehicleId?: string;
-  position?: string; // e.g., "front-left", "rear-right-outer"
+  buggyId?: string;
+  position?: string;
   currentKm: number;
   installDate?: string;
   cost: number;
+}
+
+export interface Buggy {
+  id: string;
+  plate: string;
+  brand: string;
+  model: string;
+  axles: number;
+  tireType: 'single' | 'dual';
 }
 
 export interface TireMaintenance {
@@ -162,6 +172,6 @@ export interface TireMaintenance {
   kmAtMaintenance: number;
 }
 
-export type TirePosition = 'fl' | 'fr' | 'dl1o' | 'dl1i' | 'dr1i' | 'dr1o' | 'dl2o' | 'dl2i' | 'dr2i' | 'dr2o';
+export type TirePosition = 'fl' | 'fr' | 'dl1o' | 'dl1i' | 'dr1i' | 'dr1o' | 'dl2o' | 'dl2i' | 'dr2i' | 'dr2o' | string;
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies';
