@@ -149,8 +149,8 @@ export const AdminPanel = () => {
                                             value={user.payment_status || 'unpaid'}
                                             onChange={(e) => updatePlan(user.email, { payment_status: e.target.value as any })}
                                             className={`rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none border transition-all ${user.payment_status === 'paid' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                    user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
-                                                        'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                                                user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
+                                                    'bg-rose-500/10 border-rose-500/20 text-rose-500'
                                                 }`}
                                         >
                                             <option value="unpaid">Pendente</option>
@@ -186,3 +186,4 @@ export const AdminPanel = () => {
         </div>
     );
 };
+export default AdminPanel;
