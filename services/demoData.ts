@@ -42,28 +42,38 @@ export const generateMockData = async (userId: string) => {
         avg_payment_days: 15
     });
 
-    // 4. Create some dummy trips
-    const tripId = uuidv4();
-    await supabase.from('trips').insert({
-        id: tripId,
-        user_id: userId,
-        origin: 'Santos/SP',
-        destination: 'Cuiabá/MT',
-        vehicle_id: vehicleId,
-        driver_id: driverId,
-        shipper_id: shipperId,
-        departure_date: '2024-01-10',
-        return_date: '2024-01-15',
-        receipt_date: '2024-01-20',
-        frete_seco: 8500,
-        diarias: 500,
-        adiantamento: 2000,
-        combustivel: 3200,
-        liters_diesel: 550,
-        outras_despesas: 150,
-        status: 'Pago',
-        total_km: 1200
-    });
+    // 4. Create some diverse dummy trips
+    const tripData = [
+        { origin: 'Santos/SP', destination: 'Cuiabá/MT', frete: 8500, date: '2024-01-10', diesel: 3200 },
+        { origin: 'Paranaguá/PR', destination: 'Rio Verde/GO', frete: 7200, date: '2024-01-15', diesel: 2800 },
+        { origin: 'Rondonópolis/MT', destination: 'Santos/SP', frete: 9800, date: '2024-01-22', diesel: 3800 },
+        { origin: 'Sorriso/MT', destination: 'Miritituba/PA', frete: 6500, date: '2024-01-28', diesel: 2500 },
+        { origin: 'Uberlândia/MG', destination: 'Vitória/ES', frete: 5400, date: '2024-02-02', diesel: 2100 },
+        { origin: 'Dourados/MS', destination: 'Paranaguá/PR', frete: 8100, date: '2024-02-05', diesel: 3000 },
+    ];
+
+    for (const trip of tripData) {
+        await supabase.from('trips').insert({
+            id: uuidv4(),
+            user_id: userId,
+            origin: trip.origin,
+            destination: trip.destination,
+            vehicle_id: vehicleId,
+            driver_id: driverId,
+            shipper_id: shipperId,
+            departure_date: trip.date,
+            return_date: trip.date, // Simplifying for demo
+            receipt_date: trip.date,
+            frete_seco: trip.frete,
+            diarias: 500,
+            adiantamento: 2000,
+            combustivel: trip.diesel,
+            liters_diesel: 550,
+            outras_despesas: 150,
+            status: 'Pago',
+            total_km: 1200
+        });
+    }
 
     return true;
 };

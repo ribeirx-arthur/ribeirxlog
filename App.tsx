@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.4.6';
+const APP_VERSION = '1.4.7';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -1030,16 +1030,17 @@ const App: React.FC = () => {
               <div className="relative">
                 {profile.payment_status === 'preview' && (
                   <>
-                    <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center overflow-hidden opacity-10 select-none">
-                      <div className="text-[20vw] font-black uppercase tracking-tighter text-slate-500 -rotate-12 whitespace-nowrap">
-                        PREVIEW ONLY • PREVIEW ONLY • PREVIEW ONLY
+                    {activeTab !== 'subscription' && (
+                      <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center overflow-hidden opacity-5 select-none">
+                        <div className="text-[20vw] font-black uppercase tracking-tighter text-slate-500 -rotate-12 whitespace-nowrap">
+                          PREVIEW ONLY • PREVIEW ONLY • PREVIEW ONLY
+                        </div>
                       </div>
-                    </div>
-                    <div className="absolute top-4 right-4 z-[110] flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 px-4 py-2 rounded-full backdrop-blur-md">
+                    )}
+                    <div className="fixed top-24 right-8 z-[110] flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 px-4 py-2 rounded-full backdrop-blur-md shadow-2xl animate-pulse">
                       <Lock className="w-4 h-4 text-purple-400" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Modo Demonstração (Somente Visual)</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Modo Demonstração</span>
                     </div>
-                    {/* Darker overlay on specific actions could be added here, but simplicity first */}
                   </>
                 )}
                 {renderContent()}
