@@ -254,9 +254,9 @@ const App: React.FC = () => {
 
               setProfile(prev => ({
                 ...prev,
-                name: profileData.name,
-                email: profileData.email,
-                companyName: profileData.company_name || profileData.companyName,
+                name: profileData.name || session.user.user_metadata?.full_name || '',
+                email: profileData.email || session.user.email || '',
+                companyName: profileData.company_name || profileData.companyName || '',
                 logoUrl: profileData.logo_url,
                 signatureUrl: profileData.signature_url,
                 phone: profileData.phone,
@@ -266,15 +266,37 @@ const App: React.FC = () => {
               }));
 
               // 1.1 Special Logic for PREVIEW users: Auto-populate if empty
-              if (profileData.payment_status === 'preview') {
+              if (profileData.payment_status === 'preview' || !profileData.payment_status) {
                 const { count } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
                 if (count === 0) {
                   console.log("Generating mock data for preview user...");
                   await generateMockData(session.user.id);
-                  // Trigger reload of data after generation
                   window.location.reload();
                 }
               }
+            } else {
+              // CREATE DEFAULT PROFILE if it doesn't exist
+              const defaultProfile = {
+                id: session.user.id,
+                email: session.user.email,
+                name: session.user.user_metadata?.full_name || '',
+                payment_status: 'preview',
+                plan_type: 'none',
+                config: INITIAL_PROFILE.config
+              };
+
+              await supabase.from('profiles').insert(defaultProfile);
+              setProfile(prev => ({
+                ...prev,
+                email: session.user.email || '',
+                name: session.user.user_metadata?.full_name || '',
+                payment_status: 'preview',
+                plan_type: 'none'
+              }));
+
+              // Seed data
+              await generateMockData(session.user.id);
+              window.location.reload();
             }
           } catch (err) {
             console.error("Error loading profile:", err);
