@@ -230,34 +230,52 @@ const App: React.FC = () => {
       setLoadingData(true);
       const fetchData = async () => {
         try {
-          // Load Profile
-          const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-          if (profileData) {
-            setProfile(prev => ({
-              ...prev, ...profileData,
-              config: typeof profileData.config === 'string' ? JSON.parse(profileData.config) : (profileData.config || prev.config)
-            }));
+          // 1. Load Profile (Safe Parsing)
+          try {
+            const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            if (profileData) {
+              let parsedConfig = profile.config;
+              try {
+                if (typeof profileData.config === 'string') {
+                  parsedConfig = JSON.parse(profileData.config);
+                } else if (profileData.config) {
+                  parsedConfig = profileData.config;
+                }
+              } catch (e) {
+                console.error("Error parsing profile config:", e);
+              }
+
+              setProfile(prev => ({
+                ...prev, ...profileData,
+                config: parsedConfig
+              }));
+            }
+          } catch (err) {
+            console.error("Error loading profile:", err);
           }
 
-          // Load Records
-          const { data: tripsData } = await supabase.from('trips').select('*').eq('user_id', session.user.id);
-          if (tripsData) setTrips(tripsData as any);
+          // 2. Load Records (Independent Fetches)
+          const loadTable = async (table: string, setter: (data: any) => void) => {
+            try {
+              const { data, error } = await supabase.from(table).select('*').eq('user_id', session.user.id);
+              if (error) throw error;
+              if (data) setter(data);
+            } catch (e) {
+              console.error(`Error loading ${table}:`, e);
+            }
+          };
 
-          const { data: vehiclesData } = await supabase.from('vehicles').select('*').eq('user_id', session.user.id);
-          if (vehiclesData) setVehicles(vehiclesData as any);
-
-          const { data: driversData } = await supabase.from('drivers').select('*').eq('user_id', session.user.id);
-          if (driversData) setDrivers(driversData as any);
-
-          const { data: shippersData } = await supabase.from('shippers').select('*').eq('user_id', session.user.id);
-          if (shippersData) setShippers(shippersData as any);
-
-          const { data: maintData } = await supabase.from('maintenance_records').select('*').eq('user_id', session.user.id);
-          if (maintData) setMaintenances(maintData as any);
+          await Promise.all([
+            loadTable('trips', setTrips),
+            loadTable('vehicles', setVehicles),
+            loadTable('drivers', setDrivers),
+            loadTable('shippers', setShippers),
+            loadTable('maintenance_records', setMaintenances)
+          ]);
 
         } catch (error) {
-          console.error('Error loading data', error);
-          showToast('Erro ao carregar dados', 'error');
+          console.error('Critical error in data loader', error);
+          showToast('Erro crítico ao carregar dados', 'error');
         } finally {
           setLoadingData(false);
         }
