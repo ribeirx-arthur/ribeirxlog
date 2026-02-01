@@ -11,14 +11,15 @@ const NewTrip = React.lazy(() => import('./components/NewTrip'));
 const FleetHealth = React.lazy(() => import('./components/FleetHealth'));
 const Setup = React.lazy(() => import('./components/Setup'));
 const TireManagement = React.lazy(() => import('./components/TireManagement'));
-const Maintenance = React.lazy(() => import('./components/Maintenance')); // Assuming this was intended to be added as lazy
+const StrategicIntelligence = React.lazy(() => import('./components/StrategicIntelligence'));
+const Maintenance = React.lazy(() => import('./components/Maintenance'));
 
 import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Layers } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain } from 'lucide-react';
 import {
   UserProfile,
   Vehicle,
@@ -37,7 +38,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.1.1';
+const APP_VERSION = '1.2.0';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 
@@ -855,17 +856,16 @@ const App: React.FC = () => {
           onUpdateBuggies={handleUpdateBuggies}
         />
       );
-      case 'buggies': return (
-        <Setup
+      case 'intelligence': return (
+        <StrategicIntelligence
+          trips={trips}
           vehicles={vehicles}
           drivers={drivers}
           shippers={shippers}
+          profile={profile}
+          maintenances={maintenances}
+          tires={tires}
           buggies={buggies}
-          initialSubTab="buggies"
-          onUpdateVehicles={handleUpdateVehicles}
-          onUpdateDrivers={handleUpdateDrivers}
-          onUpdateShippers={handleUpdateShippers}
-          onUpdateBuggies={handleUpdateBuggies}
         />
       );
       case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
@@ -1032,7 +1032,7 @@ const App: React.FC = () => {
                 { id: 'performance', label: 'Estatísticas & BI', icon: TrendingUp, hidden: profile.config.enableBI === false },
                 { id: 'maintenance', label: 'Manutenção', icon: ShieldAlert, hidden: profile.config.enableMaintenance === false },
                 { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: profile.config.enableMaintenance === false },
-                { id: 'buggies', label: 'Implementos', icon: Layers },
+                { id: 'intelligence', label: 'Inteligência', icon: Brain },
                 { id: 'setup', label: 'Cadastros Base', icon: Users },
                 { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
                 { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },

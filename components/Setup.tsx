@@ -459,7 +459,32 @@ const Setup: React.FC<SetupProps> = ({
                     </div>
                     <div className="md:col-span-2 space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade CNH</label>
-                      <input type="date" value={editingItem.cnhValidity} onChange={e => setEditingItem({ ...editingItem, cnhValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      <input
+                        type="date"
+                        value={editingItem.cnhValidity}
+                        onChange={e => setEditingItem({ ...editingItem, cnhValidity: e.target.value })}
+                        className={`w-full bg-slate-950 border rounded-xl px-4 py-3.5 text-sm text-white outline-none transition-all
+                          ${editingItem.cnhValidity && new Date(editingItem.cnhValidity).getTime() < new Date().getTime() ? 'border-rose-500' :
+                            editingItem.cnhValidity && new Date(editingItem.cnhValidity).getTime() < new Date().getTime() + (30 * 24 * 60 * 60 * 1000) ? 'border-amber-500' :
+                              'border-slate-800 focus:border-emerald-500'}`}
+                      />
+                    </div>
+                    <div className="md:col-span-2 space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">URL da Foto da CNH (Opcional)</label>
+                      <div className="flex gap-4">
+                        <input
+                          type="text"
+                          placeholder="https://exemplo.com/cnh.jpg"
+                          value={editingItem.cnhPhotoUrl || ''}
+                          onChange={e => setEditingItem({ ...editingItem, cnhPhotoUrl: e.target.value })}
+                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none"
+                        />
+                        {editingItem.cnhPhotoUrl && (
+                          <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden flex-shrink-0">
+                            <img src={editingItem.cnhPhotoUrl} alt="CNH" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </>
                 )}
