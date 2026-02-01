@@ -87,6 +87,11 @@ export const generateMockData = async (userId: string) => {
             if (tErr) console.error("Demo Trip creation fail:", tErr);
         }
 
+        if (vErr) {
+            console.error("Critical Demo pieces failed.");
+            return false;
+        }
+
         return true;
     } catch (err) {
         console.error("Critical Demo generation error:", err);

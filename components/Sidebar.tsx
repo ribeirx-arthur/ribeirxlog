@@ -35,9 +35,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
     { id: 'intelligence', label: 'Inteligência', icon: Brain },
     { id: 'setup', label: 'Cadastros', icon: Users },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
-    { id: 'settings', label: 'Configurações', icon: Settings },
     { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com'].includes(profile.email?.trim().toLowerCase() || '') },
   ];
+
+  const adminEmails = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com'];
+  const isAdmin = adminEmails.includes(profile.email?.trim().toLowerCase() || '');
 
   return (
     <div className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto hidden md:flex z-50">
@@ -53,7 +55,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
           {menuItems.filter(item => !item.hidden).map((item) => {
             const Icon = item.icon;
-            const isLocked = profile.payment_status !== 'paid' && !['subscription', 'settings'].includes(item.id);
+            const isLocked = profile.payment_status !== 'paid' &&
+              !['subscription', 'settings', 'admin', 'intelligence'].includes(item.id) &&
+              !isAdmin;
             return (
               <button
                 key={item.id}
@@ -94,6 +98,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
           <LogOut className="w-4 h-4" />
           Sair do Sistema
         </button>
+
+        <div className="mt-4 pt-4 border-t border-slate-800/50 flex flex-col items-center">
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Ribeirx Log ERP</p>
+          <p className="text-[9px] font-bold text-slate-700 mt-1">v1.5.5 - BUILD 2026.02.01</p>
+        </div>
       </div>
     </div>
   );

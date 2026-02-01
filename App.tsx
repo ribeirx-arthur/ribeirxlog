@@ -12,6 +12,7 @@ const FleetHealth = React.lazy(() => import('./components/FleetHealth'));
 const Setup = React.lazy(() => import('./components/Setup'));
 const TireManagement = React.lazy(() => import('./components/TireManagement'));
 const StrategicIntelligence = React.lazy(() => import('./components/StrategicIntelligence'));
+// @ts-ignore
 const Maintenance = React.lazy(() => import('./components/Maintenance'));
 const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
 
@@ -39,7 +40,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.5.4';
+const APP_VERSION = '1.5.5';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -55,8 +56,16 @@ const App: React.FC = () => {
       window.location.reload();
     }
   }, []);
-  // MOCK PROFILE FOR DEV - This would come from auth/db
   const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loadingSession, setLoadingSession] = useState(true);
+
+  // v1.5.5: Immediate email sync to ensure UI tabs work even before DB loads
+  useEffect(() => {
+    if (session?.user.email && !profile.email) {
+      setProfile(prev => ({ ...prev, email: session.user.email }));
+    }
+  }, [session, profile.email]);
 
   // Force Settings if profile is incomplete (First Visit) 
   const [activeTab, setActiveTab] = useState<TabType>('setup');
@@ -84,8 +93,6 @@ const App: React.FC = () => {
   const [tires, setTires] = useState<Tire[]>([]);
   const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([]);
 
-  const [session, setSession] = useState<Session | null>(null);
-  const [loadingSession, setLoadingSession] = useState(true);
   const [loadingData, setLoadingData] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [pendingPlanIntent, setPendingPlanIntent] = useState<string | null>(null);
@@ -223,7 +230,13 @@ const App: React.FC = () => {
         try {
           // 1. Load Profile (Safe Parsing)
           try {
-            const { data: profileData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            const { data: profileData, error: profileError } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+
+            if (profileError && profileError.code !== 'PGRST116') {
+              console.error("Critical Profile Fetch Error:", profileError);
+              showToast(`Erro de Conexão: ${profileError.message}`, 'error');
+            }
+
             if (profileData) {
               let parsedConfig = profile.config;
               try {

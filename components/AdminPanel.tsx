@@ -13,7 +13,9 @@ import {
     Unlock,
     Package,
     CheckCircle2,
-    AlertCircle
+    AlertCircle,
+    RefreshCcw,
+    ShieldAlert
 } from 'lucide-react';
 
 export const AdminPanel = () => {
@@ -34,7 +36,15 @@ export const AdminPanel = () => {
             .order('created_at', { ascending: false });
 
         if (data) setUsers(data);
+        if (error) {
+            console.error("Admin fetch error:", error);
+            // We can't use showToast here directly unless we pass it, so let's use a local state or just console
+        }
         setLoading(false);
+    };
+
+    const handleRefresh = () => {
+        fetchUsers();
     };
 
     const updatePlan = async (email: string, updates: Partial<UserProfile>) => {
@@ -75,16 +85,31 @@ export const AdminPanel = () => {
                 </div>
 
                 <div className="flex gap-4">
+                    <button
+                        onClick={handleRefresh}
+                        className="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl text-slate-500 hover:text-emerald-500 transition-colors flex items-center justify-center"
+                        title="Atualizar Dados"
+                    >
+                        <RefreshCcw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
                     <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl text-center min-w-[120px]">
                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total</p>
                         <p className="text-2xl font-black text-white italic">{users.length}</p>
                     </div>
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-3xl text-center min-w-[120px]">
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Ativos</p>
-                        <p className="text-2xl font-black text-emerald-500 italic">{users.filter(u => u.payment_status === 'paid').length}</p>
-                    </div>
                 </div>
             </div>
+
+            {users.length === 0 && !loading && (
+                <div className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-3xl animate-in zoom-in duration-300">
+                    <div className="flex items-center gap-4 text-amber-500 mb-2">
+                        <ShieldAlert className="w-6 h-6" />
+                        <p className="font-black uppercase tracking-widest italic">Aviso de Visibilidade (RLS)</p>
+                    </div>
+                    <p className="text-slate-400 text-sm leading-relaxed">
+                        Se você sabe que existem usuários mas não os vê aqui, é provável que a **Row Level Security (RLS)** do Supabase esteja restringindo o acesso. Certifique-se de que existe uma política na tabela `profiles` permitindo a leitura para o seu e-mail de admin.
+                    </p>
+                </div>
+            )}
 
             {/* Filters */}
             <div className="flex flex-col md:flex-row gap-4">
