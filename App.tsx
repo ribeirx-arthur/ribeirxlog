@@ -73,6 +73,18 @@ const App: React.FC = () => {
 
   // Force Settings if profile is incomplete (First Visit) 
   const [activeTab, setActiveTab] = useState<TabType>('setup');
+
+  // THEME HANDLER
+  useEffect(() => {
+    if (profile.config.theme === 'light') {
+      document.documentElement.classList.add('light-mode');
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.remove('light-mode');
+      document.documentElement.classList.add('dark');
+    }
+  }, [profile.config.theme]);
+
   // State Declarations
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -88,6 +100,108 @@ const App: React.FC = () => {
   const [pendingPlanIntent, setPendingPlanIntent] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
+
+  // MONITOR DE NOTIFICAÇÕES INTELIGENTES
+  useEffect(() => {
+    if (!trips.length && !vehicles.length) return; // Skip if data not loaded
+
+    const checkAlerts = () => {
+      const now = new Date();
+      const newNotifications: AppNotification[] = [];
+
+      // 1. Alertas de Inadimplência Configuráveis
+      trips.forEach(trip => {
+        if (trip.status !== 'Pago' && trip.returnDate) {
+          try {
+            const [y, m, d] = trip.returnDate.split('-').map(Number);
+            const returnDate = new Date(y, m - 1, d);
+            const diffDays = Math.ceil(Math.abs(now.getTime() - returnDate.getTime()) / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= (profile.config.paymentAlertDays || 10)) {
+              newNotifications.push({
+                id: `delay-${trip.id}`,
+                type: 'payment_delay',
+                title: 'Recebimento Crítico',
+                message: `Viagem para ${trip.destination} excedeu o limite de ${profile.config.paymentAlertDays} dias.`,
+                date: now.toISOString(),
+                read: false,
+                tripId: trip.id
+              });
+            }
+          } catch (e) {
+            console.error("Error processing alert for trip:", trip.id, e);
+          }
+        }
+
+        // 2. Alertas de Dados Incompletos
+        if (profile.config.notifyIncompleteData) {
+          if (trip.totalKm <= 0 || trip.combustivel <= 0) {
+            newNotifications.push({
+              id: `inc-${trip.id}`,
+              type: 'incomplete',
+              title: 'Dados Incompletos',
+              message: `Lançamento para ${trip.destination} está sem KM ou Combustível.`,
+              date: now.toISOString(),
+              read: false
+            });
+          }
+        }
+      });
+
+      // 3. Alertas de Manutenção Preventiva
+      if (profile.config.notifyMaintenance) {
+        vehicles.forEach(v => {
+          const kmSinceLast = v.totalKmAccumulated - v.lastMaintenanceKm;
+          const threshold = v.thresholds?.oilChangeKm || 10000;
+          if (kmSinceLast >= (threshold * 0.9)) {
+            newNotifications.push({
+              id: `maint-${v.id}`,
+              type: 'maintenance',
+              title: 'Manutenção Perto',
+              message: `Veículo ${v.plate} atingiu 90% do ciclo de óleo.`,
+              date: now.toISOString(),
+              read: false
+            });
+          }
+        });
+      }
+
+      // 4. Validação de Documentos (CNH)
+      if (profile.config.appMode !== 'simple') {
+        drivers.forEach(d => {
+          if (d.cnhValidity) {
+            const [y, m, day] = d.cnhValidity.split('-').map(Number);
+            const validityDate = new Date(y, m - 1, day);
+            const diffTime = validityDate.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+              newNotifications.push({
+                id: `cnh-exp-${d.id}`,
+                type: 'system',
+                title: 'CNH Vencida',
+                message: `A CNH do motorista ${d.name} venceu em ${validityDate.toLocaleDateString()}!`,
+                date: now.toISOString(),
+                read: false
+              });
+            } else if (diffDays <= 30) {
+              newNotifications.push({
+                id: `cnh-warn-${d.id}`,
+                type: 'system',
+                title: 'CNH Vencendo',
+                message: `A CNH do motorista ${d.name} vence em ${diffDays} dias.`,
+                date: now.toISOString(),
+                read: false
+              });
+            }
+          }
+        });
+      }
+
+      setNotifications(newNotifications);
+    };
+    checkAlerts();
+  }, [trips, vehicles, drivers, profile.config]); // Added drivers to dependency array as it is used
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ message, type });
@@ -193,116 +307,7 @@ const App: React.FC = () => {
 
 
 
-  // THEME HANDLER
-  useEffect(() => {
-    if (profile.config.theme === 'light') {
-      document.documentElement.classList.add('light-mode');
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.remove('light-mode');
-      document.documentElement.classList.add('dark');
-    }
-  }, [profile.config.theme]);
 
-  // MONITOR DE NOTIFICAÇÕES INTELIGENTES
-  useEffect(() => {
-    const checkAlerts = () => {
-      const now = new Date();
-      const newNotifications: AppNotification[] = [];
-
-      // 1. Alertas de Inadimplência Configuráveis
-      trips.forEach(trip => {
-        if (trip.status !== 'Pago' && trip.returnDate) {
-          try {
-            const [y, m, d] = trip.returnDate.split('-').map(Number);
-            const returnDate = new Date(y, m - 1, d);
-            const diffDays = Math.ceil(Math.abs(now.getTime() - returnDate.getTime()) / (1000 * 60 * 60 * 24));
-
-            if (diffDays >= (profile.config.paymentAlertDays || 10)) {
-              newNotifications.push({
-                id: `delay-${trip.id}`,
-                type: 'payment_delay',
-                title: 'Recebimento Crítico',
-                message: `Viagem para ${trip.destination} excedeu o limite de ${profile.config.paymentAlertDays} dias.`,
-                date: now.toISOString(),
-                read: false,
-                tripId: trip.id
-              });
-            }
-          } catch (e) {
-            console.error("Error processing alert for trip:", trip.id, e);
-          }
-        }
-
-        // 2. Alertas de Dados Incompletos
-        if (profile.config.notifyIncompleteData) {
-          if (trip.totalKm <= 0 || trip.combustivel <= 0) {
-            newNotifications.push({
-              id: `inc-${trip.id}`,
-              type: 'incomplete',
-              title: 'Dados Incompletos',
-              message: `Lançamento para ${trip.destination} está sem KM ou Combustível.`,
-              date: now.toISOString(),
-              read: false
-            });
-          }
-        }
-      });
-
-      // 3. Alertas de Manutenção Preventiva
-      if (profile.config.notifyMaintenance) {
-        vehicles.forEach(v => {
-          const kmSinceLast = v.totalKmAccumulated - v.lastMaintenanceKm;
-          const threshold = v.thresholds?.oilChangeKm || 10000;
-          if (kmSinceLast >= (threshold * 0.9)) {
-            newNotifications.push({
-              id: `maint-${v.id}`,
-              type: 'maintenance',
-              title: 'Manutenção Perto',
-              message: `Veículo ${v.plate} atingiu 90% do ciclo de óleo.`,
-              date: now.toISOString(),
-              read: false
-            });
-          }
-        });
-      }
-
-      // 4. Validação de Documentos (CNH)
-      if (profile.config.appMode !== 'simple') {
-        drivers.forEach(d => {
-          if (d.cnhValidity) {
-            const [y, m, day] = d.cnhValidity.split('-').map(Number);
-            const validityDate = new Date(y, m - 1, day);
-            const diffTime = validityDate.getTime() - now.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            if (diffDays < 0) {
-              newNotifications.push({
-                id: `cnh-exp-${d.id}`,
-                type: 'system',
-                title: 'CNH Vencida',
-                message: `A CNH do motorista ${d.name} venceu em ${validityDate.toLocaleDateString()}!`,
-                date: now.toISOString(),
-                read: false
-              });
-            } else if (diffDays <= 30) {
-              newNotifications.push({
-                id: `cnh-warn-${d.id}`,
-                type: 'system',
-                title: 'CNH Vencendo',
-                message: `A CNH do motorista ${d.name} vence em ${diffDays} dias.`,
-                date: now.toISOString(),
-                read: false
-              });
-            }
-          }
-        });
-      }
-
-      setNotifications(newNotifications);
-    };
-    checkAlerts();
-  }, [trips, vehicles, profile.config]);
 
 
 
