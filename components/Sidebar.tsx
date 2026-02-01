@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
     { id: 'setup', label: 'Cadastros', icon: Users },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
     { id: 'settings', label: 'Configurações', icon: Settings },
-    { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: profile.email !== 'arthur@ribeirxlog.com' },
+    { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: profile.email?.toLowerCase() !== 'arthur@ribeirxlog.com' },
   ];
 
   return (

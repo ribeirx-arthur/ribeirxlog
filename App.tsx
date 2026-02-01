@@ -261,8 +261,8 @@ const App: React.FC = () => {
                 signatureUrl: profileData.signature_url,
                 phone: profileData.phone,
                 config: parsedConfig,
-                payment_status: profileData.payment_status,
-                plan_type: profileData.plan_type
+                payment_status: profileData.payment_status || 'preview',
+                plan_type: profileData.plan_type || 'none'
               }));
 
               // 1.1 Special Logic for PREVIEW users: Auto-populate if empty
@@ -916,7 +916,7 @@ const App: React.FC = () => {
         return <TireManagement vehicles={vehicles} />;
       case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
       case 'admin':
-        if (profile.email !== 'arthur@ribeirxlog.com') return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+        if (profile.email?.toLowerCase() !== 'arthur@ribeirxlog.com') return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
         return <AdminPanel />;
       default: return null;
     }
@@ -1075,7 +1075,7 @@ const App: React.FC = () => {
                 { id: 'setup', label: 'Cadastros Base', icon: Users },
                 { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
                 { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },
-                { id: 'admin', label: 'Painel Admin', icon: ShieldCheck, hidden: profile.email !== 'arthur@ribeirxlog.com' },
+                { id: 'admin', label: 'Painel Admin', icon: ShieldCheck, hidden: profile.email?.toLowerCase() !== 'arthur@ribeirxlog.com' },
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
