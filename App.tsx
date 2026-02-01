@@ -40,7 +40,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.5.5';
+const APP_VERSION = '1.5.6';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -312,8 +312,8 @@ const App: React.FC = () => {
 
                 const { error: upsertError } = await supabase.from('profiles').upsert(defaultProfile);
                 if (upsertError) {
-                  console.error("Profile creation error:", upsertError);
-                  showToast(`Erro ao criar perfil: ${upsertError.message}`, 'error');
+                  console.error("Critical Profile creation failure:", upsertError);
+                  showToast(`Erro Crítico de Banco: ${upsertError.message}. Verifique o RLS no Supabase.`, 'error');
                 } else {
                   showToast('Perfil de demonstração garantido!', 'success');
                 }
