@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.2';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
@@ -56,25 +56,7 @@ const App: React.FC = () => {
     }
   }, []);
   // MOCK PROFILE FOR DEV - This would come from auth/db
-  const [profile, setProfile] = useState<UserProfile>({
-    name: 'Arthur Ribeiro',
-    email: 'arthur@ribeirxlog.com',
-    companyName: 'Ribeirx Transportes',
-    config: {
-      percMotFrete: 10,
-      percMotDiaria: 100,
-      autoSplitSociety: true,
-      showMileage: true,
-      paymentAlertDays: 2,
-      notifyIncompleteData: true,
-      notifyMaintenance: true,
-      showTips: true,
-      enableMaintenance: true,
-      enableBI: true,
-      appMode: 'advanced', // Default mode
-      enabledFeatures: []
-    }
-  });
+  const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
 
   // Force Settings if profile is incomplete (First Visit) 
   const [activeTab, setActiveTab] = useState<TabType>('setup');
@@ -938,7 +920,7 @@ const App: React.FC = () => {
         return <TireManagement vehicles={vehicles} />;
       case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
       case 'admin':
-        if (profile.email?.toLowerCase() !== 'arthur@ribeirxlog.com') return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+        if (profile.email?.trim().toLowerCase() !== 'arthur@ribeirxlog.com') return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
         return <AdminPanel />;
       default: return null;
     }
@@ -1097,7 +1079,7 @@ const App: React.FC = () => {
                 { id: 'setup', label: 'Cadastros Base', icon: Users },
                 { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
                 { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },
-                { id: 'admin', label: 'Painel Admin', icon: ShieldCheck, hidden: profile.email?.toLowerCase() !== 'arthur@ribeirxlog.com' },
+                { id: 'admin', label: 'Painel Admin', icon: ShieldCheck, hidden: profile.email?.trim().toLowerCase() !== 'arthur@ribeirxlog.com' },
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
