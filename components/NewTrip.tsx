@@ -145,9 +145,15 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                     type="text"
                     placeholder="Cidade - UF"
                     value={formData.origin}
+                    list="origins-list"
                     onChange={e => setFormData({ ...formData, origin: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-sky-500 outline-none transition-all font-bold"
                   />
+                  <datalist id="origins-list">
+                    {Array.from(new Set(trips.map(t => t.origin).filter(Boolean))).map(o => (
+                      <option key={o} value={o} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
               <div className="space-y-3">
@@ -158,9 +164,15 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                     type="text"
                     placeholder="Cidade - UF"
                     value={formData.destination}
+                    list="destinations-list"
                     onChange={e => setFormData({ ...formData, destination: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-emerald-500 outline-none transition-all font-bold"
                   />
+                  <datalist id="destinations-list">
+                    {Array.from(new Set(trips.map(t => t.destination).filter(Boolean))).map(d => (
+                      <option key={d} value={d} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
             </div>

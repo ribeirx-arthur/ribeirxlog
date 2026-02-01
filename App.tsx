@@ -246,7 +246,13 @@ const App: React.FC = () => {
               }
 
               setProfile(prev => ({
-                ...prev, ...profileData,
+                ...prev,
+                name: profileData.name,
+                email: profileData.email,
+                companyName: profileData.company_name,
+                logoUrl: profileData.logo_url,
+                signatureUrl: profileData.signature_url,
+                phone: profileData.phone,
                 config: parsedConfig
               }));
             }

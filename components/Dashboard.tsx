@@ -43,7 +43,9 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         return receiptDate >= sevenDaysAgo;
       }
       if (timeFilter === 'mensal') {
-        return receiptDate.getMonth() === now.getMonth() && receiptDate.getFullYear() === now.getFullYear();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(now.getDate() - 30);
+        return receiptDate >= thirtyDaysAgo;
       }
       if (timeFilter === 'anual') {
         return receiptDate.getFullYear() === now.getFullYear();
