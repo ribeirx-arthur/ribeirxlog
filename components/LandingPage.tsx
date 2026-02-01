@@ -65,9 +65,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
 
             {/* Hero Section - Premium & Impactful */}
             <section className="relative pt-36 md:pt-44 pb-32 px-6">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] pointer-events-none">
-                    <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-emerald-500/20 blur-[150px] rounded-full animate-pulse" />
-                    <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-sky-500/10 blur-[120px] rounded-full" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] pointer-events-none">
+                    <div className="absolute top-[10%] left-[20%] w-[300px] h-[300px] bg-emerald-500/10 blur-[80px] rounded-full animate-pulse" />
+                    <div className="absolute top-[20%] right-[10%] w-[250px] h-[250px] bg-sky-500/5 blur-[60px] rounded-full" />
                 </div>
 
                 <div className="max-w-7xl mx-auto relative z-10 text-center">

@@ -11,10 +11,12 @@ import {
   LogOut,
   CreditCard,
   Disc,
-  Brain
+  Brain,
+  ShieldCheck
 } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { useAppMode } from '../contexts/AppModeContext';
 import { TabType, UserProfile } from '../types';
+import { supabase } from '../services/supabase';
 
 interface SidebarProps {
   activeTab: TabType;
@@ -23,16 +25,18 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) => {
+  const { features } = useAppMode();
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
-    { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: profile.config.enableBI === false },
-    { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: profile.config.enableMaintenance === false },
-    { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: profile.config.enableMaintenance === false },
+    { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI },
+    { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !features.canAccessFullMaintenance },
+    { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: !features.canAccessTires },
     { id: 'intelligence', label: 'Inteligência', icon: Brain },
     { id: 'setup', label: 'Cadastros', icon: Users },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
     { id: 'settings', label: 'Configurações', icon: Settings },
+    { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: profile.email !== 'arthur@ribeirxlog.com' },
   ];
 
   return (

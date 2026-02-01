@@ -23,7 +23,7 @@ export interface UserProfile {
     enabledFeatures?: string[];
   };
   plan_type?: 'none' | 'mensal' | 'anual' | 'lifetime';
-  payment_status?: 'unpaid' | 'paid' | 'trial';
+  payment_status?: 'unpaid' | 'paid' | 'trial' | 'preview';
   trial_ends_at?: string;
   subscription_expires_at?: string;
 }
@@ -175,4 +175,4 @@ export interface TireMaintenance {
 
 export type TirePosition = 'fl' | 'fr' | 'dl1o' | 'dl1i' | 'dr1i' | 'dr1o' | 'dl2o' | 'dl2i' | 'dr2i' | 'dr2o' | string;
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin';

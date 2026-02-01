@@ -263,16 +263,19 @@ const Settings: React.FC<SettingsProps> = ({
                                  }`}
                            >
                               <div className="relative z-10 space-y-4">
-                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'simple' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${profile.config.appMode === 'simple' ? 'bg-purple-500 text-white translate-y-[-2px]' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
                                     <List className="w-6 h-6" />
                                  </div>
-                                 <div>
-                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'simple' ? 'text-white' : 'text-slate-300'}`}>Simples</h4>
+                                 <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                       <h4 className={`text-sm font-black uppercase tracking-wide ${profile.config.appMode === 'simple' ? 'text-white' : 'text-slate-300'}`}>Simples</h4>
+                                       {profile.config.appMode === 'simple' && <Check className="w-4 h-4 text-emerald-500" />}
+                                    </div>
                                     <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
                                        Ideal para autônomos. Foca apenas no registro básico de receitas e despesas. Sem manutenção detalhada ou BI complexo.
                                     </p>
                                  </div>
-                                 <ul className="space-y-2">
+                                 <ul className="space-y-2 pt-2">
                                     <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
                                        <Check className="w-3 h-3 text-emerald-500" /> Registro de Viagens
                                     </li>
@@ -292,16 +295,19 @@ const Settings: React.FC<SettingsProps> = ({
                                  }`}
                            >
                               <div className="relative z-10 space-y-4">
-                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'intermediate' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${profile.config.appMode === 'intermediate' ? 'bg-purple-500 text-white translate-y-[-2px]' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
                                     <Layers className="w-6 h-6" />
                                  </div>
-                                 <div>
-                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'intermediate' ? 'text-white' : 'text-slate-300'}`}>Intermediário</h4>
+                                 <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                       <h4 className={`text-sm font-black uppercase tracking-wide ${profile.config.appMode === 'intermediate' ? 'text-white' : 'text-slate-300'}`}>Intermediário</h4>
+                                       {profile.config.appMode === 'intermediate' && <Check className="w-4 h-4 text-emerald-500" />}
+                                    </div>
                                     <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
                                        Adiciona gestão básica de manutenção e resultados por veículo. Ótimo para quem tem 2-3 caminhões.
                                     </p>
                                  </div>
-                                 <ul className="space-y-2">
+                                 <ul className="space-y-2 pt-2">
                                     <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
                                        <Check className="w-3 h-3 text-emerald-500" /> Manutenção Preventiva
                                     </li>
@@ -321,16 +327,19 @@ const Settings: React.FC<SettingsProps> = ({
                                  }`}
                            >
                               <div className="relative z-10 space-y-4">
-                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'advanced' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${profile.config.appMode === 'advanced' ? 'bg-purple-500 text-white translate-y-[-2px]' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
                                     <Sparkles className="w-6 h-6" />
                                  </div>
-                                 <div>
-                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'advanced' ? 'text-white' : 'text-slate-300'}`}>Avançado (ERP)</h4>
+                                 <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                       <h4 className={`text-sm font-black uppercase tracking-wide ${profile.config.appMode === 'advanced' ? 'text-white' : 'text-slate-300'}`}>Avançado (ERP)</h4>
+                                       {profile.config.appMode === 'advanced' && <Check className="w-4 h-4 text-emerald-500" />}
+                                    </div>
                                     <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
                                        Experiência completa. BI, Gestão de Pneus, Sócios, Motoristas e Auditoria. Para gestores de frota.
                                     </p>
                                  </div>
-                                 <ul className="space-y-2">
+                                 <ul className="space-y-2 pt-2">
                                     <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
                                        <Check className="w-3 h-3 text-emerald-500" /> Tudo Incluso + Pneus
                                     </li>
@@ -350,16 +359,19 @@ const Settings: React.FC<SettingsProps> = ({
                                  }`}
                            >
                               <div className="relative z-10 space-y-4">
-                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${profile.config.appMode === 'custom' ? 'bg-purple-500 text-white' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${profile.config.appMode === 'custom' ? 'bg-purple-500 text-white translate-y-[-2px]' : 'bg-slate-900 text-slate-500 group-hover:bg-slate-800'}`}>
                                     <Settings2 className="w-6 h-6" />
                                  </div>
-                                 <div>
-                                    <h4 className={`text-sm font-black uppercase tracking-wide mb-2 ${profile.config.appMode === 'custom' ? 'text-white' : 'text-slate-300'}`}>Personalizado</h4>
+                                 <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                       <h4 className={`text-sm font-black uppercase tracking-wide ${profile.config.appMode === 'custom' ? 'text-white' : 'text-slate-300'}`}>Personalizado</h4>
+                                       {profile.config.appMode === 'custom' && <Check className="w-4 h-4 text-emerald-500" />}
+                                    </div>
                                     <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
                                        Configure manualmente quais módulos deseja ver ativos na aba "Alertas e IA".
                                     </p>
                                  </div>
-                                 <ul className="space-y-2">
+                                 <ul className="space-y-2 pt-2">
                                     <li className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400">
                                        <Check className="w-3 h-3 text-emerald-500" /> Flexibilidade Total
                                     </li>

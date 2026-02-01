@@ -13,13 +13,14 @@ const Setup = React.lazy(() => import('./components/Setup'));
 const TireManagement = React.lazy(() => import('./components/TireManagement'));
 const StrategicIntelligence = React.lazy(() => import('./components/StrategicIntelligence'));
 const Maintenance = React.lazy(() => import('./components/Maintenance'));
+const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
 
 import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain, ShieldCheck } from 'lucide-react';
 import {
   UserProfile,
   Vehicle,
@@ -41,6 +42,7 @@ import { WHATSAPP_NUMBER } from './pricing';
 const APP_VERSION = '1.3.0';
 
 import { AppModeProvider } from './contexts/AppModeContext';
+import { generateMockData } from './services/demoData';
 
 // ... existing imports ...
 
@@ -254,12 +256,25 @@ const App: React.FC = () => {
                 ...prev,
                 name: profileData.name,
                 email: profileData.email,
-                companyName: profileData.company_name,
+                companyName: profileData.company_name || profileData.companyName,
                 logoUrl: profileData.logo_url,
                 signatureUrl: profileData.signature_url,
                 phone: profileData.phone,
-                config: parsedConfig
+                config: parsedConfig,
+                payment_status: profileData.payment_status,
+                plan_type: profileData.plan_type
               }));
+
+              // 1.1 Special Logic for PREVIEW users: Auto-populate if empty
+              if (profileData.payment_status === 'preview') {
+                const { count } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id);
+                if (count === 0) {
+                  console.log("Generating mock data for preview user...");
+                  await generateMockData(session.user.id);
+                  // Trigger reload of data after generation
+                  window.location.reload();
+                }
+              }
             }
           } catch (err) {
             console.error("Error loading profile:", err);
@@ -489,6 +504,8 @@ const App: React.FC = () => {
         signature_url: newProfile.signatureUrl,
         phone: newProfile.phone,
         config: newProfile.config,
+        payment_status: newProfile.payment_status,
+        plan_type: newProfile.plan_type,
         updated_at: new Date().toISOString()
       });
     }
@@ -898,6 +915,9 @@ const App: React.FC = () => {
       case 'tires':
         return <TireManagement vehicles={vehicles} />;
       case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
+      case 'admin':
+        if (profile.email !== 'arthur@ribeirxlog.com') return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+        return <AdminPanel />;
       default: return null;
     }
   };
@@ -929,8 +949,11 @@ const App: React.FC = () => {
   }
 
   // GATE DE PAGAMENTO - Somente para abas operacionais
+  // Permitimos acesso à visualização se o status for 'paid' OU 'preview'
   const isOperationalTab = !['subscription', 'settings'].includes(activeTab);
-  if (profile.payment_status !== 'paid' && isOperationalTab) {
+  const hasAccess = profile.payment_status === 'paid' || profile.payment_status === 'preview';
+
+  if (!hasAccess && isOperationalTab) {
     return (
       <AppModeProvider profile={profile}>
         <div className="min-h-screen bg-slate-950 text-slate-200">
@@ -983,7 +1006,23 @@ const App: React.FC = () => {
                 <p className="text-emerald-500 font-black text-xs uppercase tracking-[0.2em] animate-pulse">Carregando Módulo...</p>
               </div>
             }>
-              {renderContent()}
+              <div className="relative">
+                {profile.payment_status === 'preview' && (
+                  <>
+                    <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center overflow-hidden opacity-10 select-none">
+                      <div className="text-[20vw] font-black uppercase tracking-tighter text-slate-500 -rotate-12 whitespace-nowrap">
+                        PREVIEW ONLY • PREVIEW ONLY • PREVIEW ONLY
+                      </div>
+                    </div>
+                    <div className="absolute top-4 right-4 z-[110] flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 px-4 py-2 rounded-full backdrop-blur-md">
+                      <Lock className="w-4 h-4 text-purple-400" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Modo Demonstração (Somente Visual)</span>
+                    </div>
+                    {/* Darker overlay on specific actions could be added here, but simplicity first */}
+                  </>
+                )}
+                {renderContent()}
+              </div>
             </Suspense>
           </div>
         </main>
@@ -1029,17 +1068,26 @@ const App: React.FC = () => {
                 { id: 'dashboard', label: 'Painel Geral', icon: LayoutDashboard },
                 { id: 'trips', label: 'Minhas Viagens', icon: Truck },
                 { id: 'new-trip', label: 'Novo Lançamento', icon: PlusCircle, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20 shadow-lg shadow-sky-500/5' },
-                { id: 'performance', label: 'Estatísticas & BI', icon: TrendingUp, hidden: profile.config.enableBI === false },
-                { id: 'maintenance', label: 'Manutenção', icon: ShieldAlert, hidden: profile.config.enableMaintenance === false },
-                { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: profile.config.enableMaintenance === false },
                 { id: 'intelligence', label: 'Inteligência', icon: Brain },
+                { id: 'performance', label: 'Estatísticas & BI', icon: TrendingUp },
+                { id: 'maintenance', label: 'Manutenção', icon: ShieldAlert },
+                { id: 'tires', label: 'Gestão de Pneus', icon: Disc },
                 { id: 'setup', label: 'Cadastros Base', icon: Users },
                 { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
                 { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },
-              ].filter(item => !item.hidden).map((item) => {
+                { id: 'admin', label: 'Painel Admin', icon: ShieldCheck, hidden: profile.email !== 'arthur@ribeirxlog.com' },
+              ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 const isLocked = profile.payment_status !== 'paid' && !['subscription', 'settings'].includes(item.id);
+
+                // Replicated feature flag logic for mobile menu since we are inside App where context might be tricky to use purely for the menu array filter
+                const isHidden =
+                  (item.id === 'performance' && profile.config.enableBI === false) ||
+                  (item.id === 'maintenance' && profile.config.enableMaintenance === false) ||
+                  (item.id === 'tires' && profile.config.enableMaintenance === false);
+
+                if (isHidden) return null;
 
                 return (
                   <button
