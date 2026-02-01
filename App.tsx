@@ -254,22 +254,57 @@ const App: React.FC = () => {
             console.error("Error loading profile:", err);
           }
 
-          // 2. Load Records (Independent Fetches)
-          const loadTable = async (table: string, setter: (data: any) => void) => {
+          // 2. Load Records (Independent Fetches with Mapping)
+          const loadTable = async (table: string, setter: (data: any) => void, mapper?: (item: any) => any) => {
             try {
               const { data, error } = await supabase.from(table).select('*').eq('user_id', session.user.id);
               if (error) throw error;
-              if (data) setter(data);
+              if (data) {
+                const mappedData = mapper ? data.map(mapper) : data;
+                setter(mappedData);
+              }
             } catch (e) {
               console.error(`Error loading ${table}:`, e);
             }
           };
 
           await Promise.all([
-            loadTable('trips', setTrips),
-            loadTable('vehicles', setVehicles),
-            loadTable('drivers', setDrivers),
-            loadTable('shippers', setShippers),
+            loadTable('trips', setTrips, (t) => ({
+              ...t,
+              vehicleId: t.vehicle_id,
+              driverId: t.driver_id,
+              shipperId: t.shipper_id,
+              departureDate: t.departure_date,
+              returnDate: t.return_date,
+              receiptDate: t.receipt_date,
+              freteSeco: Number(t.frete_seco || 0),
+              litersDiesel: Number(t.liters_diesel || 0),
+              outrasDespesas: Number(t.outras_despesas || 0),
+              totalKm: Number(t.total_km || 0),
+              diarias: Number(t.diarias || 0),
+              adiantamento: Number(t.adiantamento || 0),
+              combustivel: Number(t.combustivel || 0)
+            })),
+            loadTable('vehicles', setVehicles, (v) => ({
+              ...v,
+              societySplitFactor: v.society_split_factor,
+              totalKmAccumulated: v.total_km_accumulated,
+              lastMaintenanceKm: v.last_maintenance_km,
+              photoUrl: v.photo_url
+            })),
+            loadTable('drivers', setDrivers, (d) => ({
+              ...d,
+              pixKey: d.pix_key,
+              cnhCategory: d.cnh_category,
+              cnhValidity: d.cnh_validity,
+              photoUrl: d.photo_url,
+              customCommission: d.custom_commission
+            })),
+            loadTable('shippers', setShippers, (s) => ({
+              ...s,
+              avgPaymentDays: s.avg_payment_days,
+              logoUrl: s.logo_url
+            })),
             loadTable('maintenance_records', setMaintenances)
           ]);
 
