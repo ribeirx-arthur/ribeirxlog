@@ -25,7 +25,7 @@ export default function Auth() {
                     }
                 });
                 if (error) throw error;
-                alert('Conta criada com sucesso! Você já pode entrar.');
+                alert('Conta criada com sucesso! Por favor, verifique seu e-mail para confirmar a conta antes de entrar. (DICA: Verifique também sua pasta de SPAM)');
                 setIsSignup(false);
             } else {
                 const { error } = await supabase.auth.signInWithPassword({

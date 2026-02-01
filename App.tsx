@@ -920,7 +920,8 @@ const App: React.FC = () => {
         return <TireManagement vehicles={vehicles} />;
       case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
       case 'admin':
-        if (profile.email?.trim().toLowerCase() !== 'arthur@ribeirxlog.com') return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+        const isAdmin = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com'].includes(profile.email?.trim().toLowerCase() || '');
+        if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
         return <AdminPanel />;
       default: return null;
     }
@@ -1079,7 +1080,7 @@ const App: React.FC = () => {
                 { id: 'setup', label: 'Cadastros Base', icon: Users },
                 { id: 'subscription', label: 'Minha Assinatura', icon: CreditCard },
                 { id: 'settings', label: 'Perfis & Opções', icon: SettingsIcon },
-                { id: 'admin', label: 'Painel Admin', icon: ShieldCheck, hidden: profile.email?.trim().toLowerCase() !== 'arthur@ribeirxlog.com' },
+                { id: 'admin', label: 'Painel Admin', icon: ShieldCheck, hidden: !['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com'].includes(profile.email?.trim().toLowerCase() || '') },
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
