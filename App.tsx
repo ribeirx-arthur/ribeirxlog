@@ -20,7 +20,7 @@ import LandingPage from './components/LandingPage';
 import Paywall from './components/Paywall';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain, ShieldCheck } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain, ShieldCheck, Lock } from 'lucide-react';
 import {
   UserProfile,
   Vehicle,
@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { WHATSAPP_NUMBER } from './pricing';
 
-const APP_VERSION = '1.4.4';
+const APP_VERSION = '1.4.5';
 
 import { AppModeProvider } from './contexts/AppModeContext';
 import { generateMockData } from './services/demoData';
