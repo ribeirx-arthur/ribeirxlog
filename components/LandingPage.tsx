@@ -273,9 +273,9 @@ const FeatureCard = ({ icon: Icon, title, desc, color }: any) => (
 );
 
 const LandingPricingCard = ({ title, price, period, desc, features, isPopular, onSelect }: any) => (
-    <div className={`p-8 md:p-12 rounded-[3.5rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 scale-105 shadow-2xl z-10' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
+    <div className={`p-6 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 scale-105 shadow-2xl z-10' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
         {isPopular && (
-            <div className="absolute top-10 right-10 px-4 py-1.5 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest">
+            <div className="absolute top-4 right-4 md:top-6 md:right-6 px-3 py-1 md:px-4 md:py-1.5 bg-emerald-500 text-slate-950 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest">
                 Recomendado
             </div>
         )}

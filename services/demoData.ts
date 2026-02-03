@@ -55,12 +55,16 @@ export const generateMockData = async (userId: string) => {
         };
 
         const tripData = [
-            { origin: 'Santos/SP', destination: 'Cuiabá/MT', frete: 8500, date: getRelDate(2), diesel: 3200 },
-            { origin: 'Paranaguá/PR', destination: 'Rio Verde/GO', frete: 7200, date: getRelDate(5), diesel: 2800 },
-            { origin: 'Rondonópolis/MT', destination: 'Santos/SP', frete: 9800, date: getRelDate(12), diesel: 3800 },
-            { origin: 'Sorriso/MT', destination: 'Miritituba/PA', frete: 6500, date: getRelDate(18), diesel: 2500 },
-            { origin: 'Uberlândia/MG', destination: 'Vitória/ES', frete: 5400, date: getRelDate(25), diesel: 2100 },
-            { origin: 'Dourados/MS', destination: 'Paranaguá/PR', frete: 8100, date: getRelDate(40), diesel: 3000 },
+            { origin: 'Santos/SP', destination: 'Cuiabá/MT', frete: 8500, date: getRelDate(2), diesel: 3200, status: 'Pago', km: 1600 },
+            { origin: 'Paranaguá/PR', destination: 'Rio Verde/GO', frete: 7200, date: getRelDate(5), diesel: 2800, status: 'Pendente', km: 1100 },
+            { origin: 'Rondonópolis/MT', destination: 'Santos/SP', frete: 9800, date: getRelDate(12), diesel: 3800, status: 'Pago', km: 1550 },
+            { origin: 'Sorriso/MT', destination: 'Miritituba/PA', frete: 6500, date: getRelDate(18), diesel: 2500, status: 'Em Andamento', km: 1400 },
+            { origin: 'Uberlândia/MG', destination: 'Vitória/ES', frete: 5400, date: getRelDate(25), diesel: 2100, status: 'Pago', km: 950 },
+            { origin: 'Dourados/MS', destination: 'Paranaguá/PR', frete: 8100, date: getRelDate(40), diesel: 3000, status: 'Pago', km: 1200 },
+            { origin: 'Brasília/DF', destination: 'São Paulo/SP', frete: 4200, date: getRelDate(1), diesel: 1800, status: 'Pendente', km: 900 },
+            { origin: 'Belém/PA', destination: 'São Luís/MA', frete: 3500, date: getRelDate(8), diesel: 1200, status: 'Pago', km: 600 },
+            { origin: 'Recife/PE', destination: 'Salvador/BA', frete: 2800, date: getRelDate(15), diesel: 900, status: 'Pago', km: 800 },
+            { origin: 'Curitiba/PR', destination: 'Porto Alegre/RS', frete: 3100, date: getRelDate(22), diesel: 1100, status: 'Pago', km: 700 },
         ];
 
         for (const trip of tripData) {
@@ -81,8 +85,8 @@ export const generateMockData = async (userId: string) => {
                 combustivel: trip.diesel,
                 liters_diesel: 550,
                 outras_despesas: 150,
-                status: 'Pago',
-                total_km: 1200
+                status: trip.status,
+                total_km: trip.km
             });
             if (tErr) console.error("Demo Trip creation fail:", tErr);
         }
