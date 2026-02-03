@@ -429,7 +429,69 @@ const App: React.FC = () => {
   };
 
   const handleSaveTrip = async (newTrip: Trip) => {
-    // ...
+    if (!session) return;
+    showToast('Salvando viagem...', 'info');
+
+    try {
+      const { data, error } = await supabase.from('trips').insert({
+        user_id: session.user.id,
+        origin: newTrip.origin,
+        destination: newTrip.destination,
+        vehicle_id: newTrip.vehicleId === 'generic-vehicle' ? null : newTrip.vehicleId,
+        driver_id: newTrip.driverId === 'generic-driver' ? null : newTrip.driverId,
+        shipper_id: newTrip.shipperId === 'generic-shipper' ? null : newTrip.shipperId,
+        departure_date: newTrip.departureDate || null,
+        return_date: newTrip.returnDate || null,
+        receipt_date: newTrip.receiptDate || null,
+        frete_seco: Number(newTrip.freteSeco || 0),
+        diarias: Number(newTrip.diarias || 0),
+        adiantamento: Number(newTrip.adiantamento || 0),
+        combustivel: Number(newTrip.combustivel || 0),
+        liters_diesel: Number(newTrip.litersDiesel || 0),
+        outras_despesas: Number(newTrip.outrasDespesas || 0),
+        status: newTrip.status || 'Pendente',
+        total_km: Number(newTrip.totalKm || 0)
+      }).select().single();
+
+      if (error) throw error;
+
+      if (data) {
+        const formattedTrip = {
+          ...data,
+          vehicleId: data.vehicle_id,
+          driverId: data.driver_id,
+          shipperId: data.shipper_id,
+          departureDate: data.departure_date,
+          returnDate: data.return_date,
+          receiptDate: data.receipt_date,
+          freteSeco: Number(data.frete_seco || 0),
+          diarias: Number(data.diarias || 0),
+          adiantamento: Number(data.adiantamento || 0),
+          combustivel: Number(data.combustivel || 0),
+          litersDiesel: Number(data.liters_diesel || 0),
+          outrasDespesas: Number(data.outras_despesas || 0),
+          totalKm: Number(data.total_km || 0)
+        };
+
+        setTrips(prev => [formattedTrip, ...prev]);
+
+        // Update vehicle cumulative KM if applicable
+        if (data.vehicle_id && data.total_km > 0) {
+          const vehicle = vehicles.find(v => v.id === data.vehicle_id);
+          if (vehicle) {
+            const newKm = (vehicle.totalKmAccumulated || 0) + Number(data.total_km);
+            await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', data.vehicle_id);
+            setVehicles(prev => prev.map(v => v.id === data.vehicle_id ? { ...v, totalKmAccumulated: newKm } : v));
+          }
+        }
+
+        showToast('Viagem salva com sucesso!', 'success');
+        setActiveTab('trips');
+      }
+    } catch (err: any) {
+      console.error("Error saving trip:", err);
+      showToast(`Erro ao salvar: ${err.message}`, 'error');
+    }
   };
 
   // ... (other handlers) ...

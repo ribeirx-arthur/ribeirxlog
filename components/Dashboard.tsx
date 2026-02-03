@@ -61,16 +61,15 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
     let driverCommissions = 0;
 
     filteredTrips.forEach(trip => {
-      const vehicle = vehicles.find(v => v.id === trip.vehicleId);
-      const driver = drivers.find(d => d.id === trip.driverId);
-      if (vehicle && driver) {
-        const finance = calculateTripFinance(trip, vehicle, driver, profile);
-        totalRevenue += finance.totalBruto;
-        totalProfit += finance.lucroSociety;
-        driverCommissions += finance.comissaoMotorista;
-        if (trip.status === 'Pendente' || trip.status === 'Parcial') {
-          pendingReceivables += finance.saldoAReceber;
-        }
+      const vehicle = vehicles.find(v => v.id === trip.vehicleId) || { plate: 'GENERIC', type: 'Próprio' } as Vehicle;
+      const driver = drivers.find(d => d.id === trip.driverId) || { name: 'Generic' } as Driver;
+
+      const finance = calculateTripFinance(trip, vehicle, driver, profile);
+      totalRevenue += finance.totalBruto;
+      totalProfit += finance.lucroSociety;
+      driverCommissions += finance.comissaoMotorista;
+      if (trip.status === 'Pendente' || trip.status === 'Parcial') {
+        pendingReceivables += finance.saldoAReceber;
       }
     });
 
@@ -86,16 +85,16 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         value: filteredTrips
           .filter(t => new Date(t.receiptDate).getMonth() === i)
           .reduce((acc, t) => {
-            const v = vehicles.find(veh => veh.id === t.vehicleId);
-            const d = drivers.find(drv => drv.id === t.driverId);
-            return acc + (v && d ? calculateTripFinance(t, v, d, profile).lucroSociety : 0);
+            const v = vehicles.find(veh => veh.id === t.vehicleId) || { plate: 'GENERIC', type: 'Próprio' } as Vehicle;
+            const d = drivers.find(drv => drv.id === t.driverId) || { name: 'Generic' } as Driver;
+            return acc + calculateTripFinance(t, v, d, profile).lucroSociety;
           }, 0)
       }));
     }
     // For weekly/monthly, just show last few items or days
     return filteredTrips.slice(-10).map(t => ({
-      name: t.receiptDate.split('-').reverse().slice(0, 2).join('/'),
-      value: calculateTripFinance(t, vehicles.find(v => v.id === t.vehicleId)!, drivers.find(d => d.id === t.driverId)!, profile).lucroSociety
+      name: (t.receiptDate || '').split('-').reverse().slice(0, 2).join('/'),
+      value: calculateTripFinance(t, vehicles.find(v => v.id === t.vehicleId) || { plate: 'GENERIC' } as Vehicle, drivers.find(d => d.id === t.driverId) || { name: 'Generic' } as Driver, profile).lucroSociety
     }));
   }, [filteredTrips, timeFilter, vehicles, drivers, profile]);
 

@@ -40,7 +40,6 @@ export const generateMockData = async (userId: string) => {
             id: shipperId,
             user_id: userId,
             name: 'Logística Transparente SA',
-            customer_name: 'Logística Transparente SA',
             cnpj: '00.000.000/0001-00',
             avg_payment_days: 15
         });
@@ -58,7 +57,7 @@ export const generateMockData = async (userId: string) => {
             { origin: 'Santos/SP', destination: 'Cuiabá/MT', frete: 8500, date: getRelDate(2), diesel: 3200, status: 'Pago', km: 1600 },
             { origin: 'Paranaguá/PR', destination: 'Rio Verde/GO', frete: 7200, date: getRelDate(5), diesel: 2800, status: 'Pendente', km: 1100 },
             { origin: 'Rondonópolis/MT', destination: 'Santos/SP', frete: 9800, date: getRelDate(12), diesel: 3800, status: 'Pago', km: 1550 },
-            { origin: 'Sorriso/MT', destination: 'Miritituba/PA', frete: 6500, date: getRelDate(18), diesel: 2500, status: 'Em Andamento', km: 1400 },
+            { origin: 'Sorriso/MT', destination: 'Miritituba/PA', frete: 6500, date: getRelDate(18), diesel: 2500, status: 'Pendente', km: 1400 },
             { origin: 'Uberlândia/MG', destination: 'Vitória/ES', frete: 5400, date: getRelDate(25), diesel: 2100, status: 'Pago', km: 950 },
             { origin: 'Dourados/MS', destination: 'Paranaguá/PR', frete: 8100, date: getRelDate(40), diesel: 3000, status: 'Pago', km: 1200 },
             { origin: 'Brasília/DF', destination: 'São Paulo/SP', frete: 4200, date: getRelDate(1), diesel: 1800, status: 'Pendente', km: 900 },

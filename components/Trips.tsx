@@ -193,9 +193,8 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, vehicles, 
       {/* Listagem de Viagens */}
       <div className="grid grid-cols-1 gap-4">
         {filteredAndSortedTrips.map(trip => {
-          const vehicle = vehicles.find(v => v.id === trip.vehicleId);
-          const driver = drivers.find(d => d.id === trip.driverId);
-          if (!vehicle || !driver) return null;
+          const vehicle = vehicles.find(v => v.id === trip.vehicleId) || { plate: 'DOC. PENDENTE', name: 'Veículo não vinculado' } as Vehicle;
+          const driver = drivers.find(d => d.id === trip.driverId) || { name: 'Motorista não vinculado' } as Driver;
           const tripFinance = calculateTripFinance(trip, vehicle, driver, profile);
           return (
             <div key={trip.id} className="bg-slate-800/40 border border-slate-700/50 rounded-3xl p-6 hover:bg-slate-800/60 transition-all group relative">
