@@ -15,7 +15,10 @@ import {
     CheckCircle2,
     AlertCircle,
     RefreshCcw,
-    ShieldAlert
+    ShieldAlert,
+    Database,
+    HardDrive,
+    Zap
 } from 'lucide-react';
 
 export const AdminPanel = () => {
@@ -23,6 +26,7 @@ export const AdminPanel = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [totalTrips, setTotalTrips] = useState(0);
 
     useEffect(() => {
         fetchUsers();
@@ -38,8 +42,15 @@ export const AdminPanel = () => {
         if (data) setUsers(data);
         if (error) {
             console.error("Admin fetch error:", error);
-            // We can't use showToast here directly unless we pass it, so let's use a local state or just console
         }
+
+        // Fetch system-wide trip count
+        const { count, error: tripError } = await supabase
+            .from('trips')
+            .select('*', { count: 'exact', head: true });
+
+        if (!tripError && count !== null) setTotalTrips(count);
+
         setLoading(false);
     };
 
@@ -134,6 +145,46 @@ export const AdminPanel = () => {
                             {f === 'all' ? 'Tudo' : f === 'paid' ? 'Pagos' : f === 'preview' ? 'Demo' : 'Pendentes'}
                         </button>
                     ))}
+                </div>
+            </div>
+
+            {/* Database Capacity Heatmap */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 bg-slate-900/50 border border-slate-800 rounded-[2.5rem] p-8 flex items-center justify-between relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
+                        <Database className="w-32 h-32" />
+                    </div>
+                    <div className="relative z-10 w-full">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-emerald-500/10 rounded-2xl flex items-center justify-center">
+                                <HardDrive className="w-5 h-5 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-white font-black italic uppercase tracking-tighter">Capacidade do Banco (500MB Free)</h3>
+                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest italic">Monitoramento de Escalabilidade</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{Math.min(((totalTrips * 2) / 512000) * 100, 100).toFixed(2)}% de Uso Estimado</span>
+                                <span className="text-xs font-black text-white italic">{(totalTrips * 2 / 1024).toFixed(1)}MB / 500MB</span>
+                            </div>
+                            <div className="h-3 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-white/5">
+                                <div
+                                    className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 rounded-full transition-all duration-1000"
+                                    style={{ width: `${Math.max(1, Math.min(((totalTrips * 2) / 512000) * 100, 100))}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[2.5rem] p-8 flex flex-col justify-center text-center">
+                    <Zap className="w-8 h-8 text-emerald-500 mx-auto mb-4" />
+                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Total de Viagens</p>
+                    <p className="text-4xl font-black text-white italic tracking-tighter uppercase">{totalTrips.toLocaleString()}</p>
+                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-2">+ de {Math.floor(500000 - totalTrips).toLocaleString()} viagens disponíveis no plano free</p>
                 </div>
             </div>
 
