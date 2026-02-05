@@ -14,9 +14,9 @@ import {
   Brain,
   ShieldCheck
 } from 'lucide-react';
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { useAppMode } from '../contexts/AppModeContext';
 import { TabType, UserProfile } from '../types';
-import { supabase } from '../services/supabase';
 
 interface SidebarProps {
   activeTab: TabType;
@@ -26,7 +26,10 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) => {
   const { features } = useAppMode();
+  const { signOut } = useAuth();
+
   const menuItems = [
+    // ... existing items ...
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI },
@@ -44,15 +47,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
   return (
     <div className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto hidden md:flex z-50">
       <div className="p-6">
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-            <Truck className="text-white w-5 h-5" />
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <Truck className="text-white w-6 h-6" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-white">RIBEIRX<span className="text-emerald-500">LOG</span></span>
+          <div>
+            <span className="font-black text-xl tracking-tighter text-white">RIBEIRX<span className="text-emerald-500">LOG</span></span>
+            <p className="text-[9px] font-bold text-slate-500 tracking-widest uppercase">Inteligência Logística</p>
+          </div>
         </div>
 
-        <nav className="space-y-2">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
+        <nav className="space-y-1.5">
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-4 ml-2">Main Navigation</p>
           {menuItems.filter(item => !item.hidden).map((item) => {
             const Icon = item.icon;
             const isLocked = profile.payment_status !== 'paid' &&
@@ -62,46 +68,50 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id as TabType)}
-                disabled={isLocked && activeTab === item.id} // Don't disable but maybe show locked
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id
+                className={`w-full group flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === item.id
                   ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
-                  } ${isLocked ? 'opacity-50 cursor-not-allowed group' : ''}`}
+                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100'
+                  } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon className={`w-5 h-5 transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110'}`} />
+                  <span className="font-bold text-sm">{item.label}</span>
                 </div>
                 {isLocked && <ShieldAlert className="w-4 h-4 text-slate-500 group-hover:text-amber-500 transition-colors" />}
+                {activeTab === item.id && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />}
               </button>
             );
           })}
         </nav>
       </div>
 
-      <div className="mt-auto p-6">
+      <div className="mt-auto p-6 space-y-4">
         <button
           onClick={() => setActiveTab('new-trip')}
-          className={`w-full flex items-center justify-center gap-2 font-black py-4 rounded-2xl transition-all shadow-lg ${activeTab === 'new-trip'
-            ? 'bg-sky-500 text-white shadow-sky-500/20'
-            : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
+          className={`w-full flex items-center justify-center gap-2 font-black py-4 rounded-2xl transition-all shadow-xl hover:scale-[1.02] active:scale-95 ${activeTab === 'new-trip'
+            ? 'bg-sky-500 text-white shadow-sky-500/30'
+            : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
             }`}
         >
           <PlusCircle className="w-5 h-5" />
           Novo Lançamento
         </button>
 
-        <button
-          onClick={() => supabase.auth.signOut()}
-          className="w-full mt-4 flex items-center justify-center gap-2 text-slate-400 hover:text-red-400 transition-colors py-2 text-sm font-medium"
-        >
-          <LogOut className="w-4 h-4" />
-          Sair do Sistema
-        </button>
+        <div className="p-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-10 h-10 rounded-xl" } }} />
+            <div className="flex flex-col">
+              <span className="text-xs font-black text-white truncate w-24">{profile.name || 'Usuário'}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Conta Grátis</span>
+            </div>
+          </div>
+          <button onClick={() => signOut()} className="p-2 text-slate-500 hover:text-rose-500 transition-colors">
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
 
-        <div className="mt-4 pt-4 border-t border-slate-800/50 flex flex-col items-center">
-          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Ribeirx Log ERP</p>
-          <p className="text-[9px] font-bold text-slate-700 mt-1">v1.5.5 - BUILD 2026.02.01</p>
+        <div className="pt-2 flex flex-col items-center">
+          <p className="text-[10px] font-black text-slate-700 tracking-[0.3em] uppercase">v1.6.0</p>
         </div>
       </div>
     </div>

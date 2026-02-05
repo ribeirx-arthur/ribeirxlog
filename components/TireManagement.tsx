@@ -161,7 +161,7 @@ const TireManagement: React.FC<TireManagementProps> = ({ vehicles, buggies, tire
                             />
                         ) : (
                             <BuggyMap
-                                asset={selectedAsset}
+                                asset={selectedAsset as Buggy}
                                 tires={assetTires}
                                 onSlotClick={(posId) => setSelectedPosition({ id: posId, type: 'buggy' })}
                                 onRemoveTire={handleRemoveTire}

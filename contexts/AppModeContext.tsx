@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import { UserProfile } from './types';
+import { UserProfile } from '../types';
 
 type AppMode = 'simple' | 'intermediate' | 'advanced' | 'custom';
 

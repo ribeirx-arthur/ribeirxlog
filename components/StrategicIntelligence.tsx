@@ -49,7 +49,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
 
         // --- 1. FINANCIAL ANALYSIS ---
         const monthTrips = trips.filter(t => {
-            const d = new Date(t.date);
+            const d = new Date(t.departureDate);
             return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
         });
 
@@ -85,10 +85,10 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
             const vehicleTrips = trips.filter(t => t.vehicleId === v.id);
             if (vehicleTrips.length > 2) {
                 const last30DaysTrips = vehicleTrips.filter(t => {
-                    const d = new Date(t.date);
+                    const d = new Date(t.departureDate);
                     return (now.getTime() - d.getTime()) < (30 * 24 * 60 * 60 * 1000);
                 });
-                const avgKmPerMonth = last30DaysTrips.reduce((acc, t) => acc + (t.kmEnd - t.kmStart), 0);
+                const avgKmPerMonth = last30DaysTrips.reduce((acc, t) => acc + t.totalKm, 0);
                 const kmRemaining = (v.lastMaintenanceKm + (v.thresholds?.oilChangeKm || 10000)) - v.totalKmAccumulated;
 
                 if (kmRemaining > 0 && avgKmPerMonth > 0) {
