@@ -176,4 +176,4 @@ export interface TireMaintenance {
 
 export type TirePosition = 'fl' | 'fr' | 'dl1o' | 'dl1i' | 'dr1i' | 'dr1o' | 'dl2o' | 'dl2i' | 'dr2i' | 'dr2o' | string;
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator';

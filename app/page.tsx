@@ -13,7 +13,8 @@ const NewTrip = React.lazy(() => import('../components/NewTrip'));
 const FleetHealth = React.lazy(() => import('../components/FleetHealth'));
 const Setup = React.lazy(() => import('../components/Setup'));
 const TireManagement = React.lazy(() => import('../components/TireManagement'));
-const StrategicIntelligence = React.lazy(() => import('../components/StrategicIntelligence'));
+const Intelligence = React.lazy(() => import('../components/StrategicIntelligence'));
+const FreightCalculator = React.lazy(() => import('../components/FreightCalculator'));
 const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
 
 import LandingPage from '../components/LandingPage';
@@ -503,7 +504,8 @@ export default function Home() {
             );
             case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
             case 'settings': return <Settings profile={profile} setProfile={handleUpdateProfile} trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} maintenances={maintenances} onImportData={() => { }} onResetData={() => { }} />;
-            case 'intelligence': return <StrategicIntelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
+            case 'intelligence': return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
+            case 'freight-calculator': return <FreightCalculator vehicles={vehicles} profile={profile} />;
             case 'tires': return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
             case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
             case 'admin':
@@ -559,7 +561,13 @@ export default function Home() {
     return (
         <AppModeProvider profile={profile}>
             <div className="min-h-screen bg-slate-950 text-slate-200">
-                <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} />
+                <Sidebar
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    profile={profile}
+                    isOpen={isMobileMenuOpen}
+                    onClose={() => setIsMobileMenuOpen(false)}
+                />
                 <Header
                     profile={profile}
                     notifications={notifications}
@@ -567,6 +575,8 @@ export default function Home() {
                     setActiveTab={setActiveTab}
                     activeTab={activeTab}
                     onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+                    isMobileMenuOpen={isMobileMenuOpen}
+                    setIsMobileMenuOpen={setIsMobileMenuOpen}
                 />
                 <main className="md:ml-64 p-4 md:p-8">
                     <div className="max-w-7xl mx-auto pb-24 md:pb-8">

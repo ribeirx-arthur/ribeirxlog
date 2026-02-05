@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import {
   Bell, Search, HelpCircle, User, X, AlertTriangle, ChevronRight, RefreshCcw,
-  Share2
+  Share2, Menu
 } from 'lucide-react';
 import { UserProfile, AppNotification, TabType } from '../types';
 
@@ -13,16 +13,28 @@ interface HeaderProps {
   setActiveTab: (tab: TabType) => void;
   activeTab: TabType;
   onRefresh?: () => void;
+  isMobileMenuOpen?: boolean;
+  setIsMobileMenuOpen?: (open: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ profile, notifications, onReadNotification, setActiveTab, activeTab, onRefresh }) => {
+const Header: React.FC<HeaderProps> = ({
+  profile, notifications, onReadNotification, setActiveTab, activeTab, onRefresh,
+  isMobileMenuOpen, setIsMobileMenuOpen
+}) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFaq, setShowFaq] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <header className="h-20 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-[100] md:ml-64">
+    <header className="h-20 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 sticky top-0 z-[100] md:ml-64">
       <div className="flex items-center gap-4 flex-1">
+        <button
+          onClick={() => setIsMobileMenuOpen?.(!isMobileMenuOpen)}
+          className="p-2 bg-slate-800 rounded-xl text-slate-400 md:hidden flex items-center justify-center border border-slate-700"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
         {activeTab === 'trips' && (
           <div className="hidden lg:flex items-center gap-3 px-5 py-2.5 bg-slate-800/50 rounded-2xl border border-slate-700/50 w-96 group focus-within:border-emerald-500/50 transition-all">
             <Search className="w-4 h-4 text-slate-500 group-focus-within:text-emerald-500" />
