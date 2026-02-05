@@ -18,7 +18,7 @@ const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
 
 import LandingPage from '../components/LandingPage';
 import Paywall from '../components/Paywall';
-import { supabase } from '../services/supabase';
+import { supabase, createClerkSupabaseClient } from '../services/supabase';
 import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain, ShieldCheck, Lock, Gauge, ArrowRightLeft } from 'lucide-react';
 import {
     UserProfile,
@@ -38,14 +38,14 @@ import {
 } from '../constants';
 import { WHATSAPP_NUMBER } from '../pricing';
 
-const APP_VERSION = '1.6.0-next';
+const APP_VERSION = '1.7.0';
 
 import { AppModeProvider } from '../contexts/AppModeContext';
 import { generateMockData } from '../services/demoData';
 
 export default function Home() {
     const { isLoaded, isSignedIn, user } = useUser();
-    const { signOut } = useAuth();
+    const { signOut, getToken } = useAuth();
 
     const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
     const [loadingData, setLoadingData] = useState(false);
@@ -57,6 +57,7 @@ export default function Home() {
     const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [mounted, setMounted] = useState(false);
+    const [authenticatedClient, setAuthenticatedClient] = useState<any>(supabase);
 
     useEffect(() => {
         setMounted(true);
@@ -101,7 +102,19 @@ export default function Home() {
             setLoadingData(true);
             const fetchData = async () => {
                 try {
-                    const { data: profileData, error: profileError } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+                    let token = null;
+                    try {
+                        token = await getToken({ template: 'supabase' });
+                    } catch (e) {
+                        console.warn("Clerk Supabase Token Error: Verifique se o template 'supabase' foi criado no painel do Clerk.");
+                    }
+                    const client = token ? createClerkSupabaseClient(token) : supabase;
+                    setAuthenticatedClient(client);
+
+                    console.log("[DEBUG] Fetching profile for User ID:", user.id);
+                    const { data: profileData, error: profileError } = await client.from('profiles').select('*').eq('id', user.id).single();
+                    console.log("[DEBUG] Profile Data:", profileData);
+                    console.log("[DEBUG] Profile Error:", profileError);
 
                     if (profileData) {
                         let parsedConfig = INITIAL_PROFILE.config;
@@ -120,16 +133,25 @@ export default function Home() {
                         // but the original logic had it for "preview" users.
                     } else if (profileError?.code === 'PGRST116') {
                         // New User - Create Profile
-                        await supabase.from('profiles').insert({
+                        console.log("Creating new profile for:", user.id);
+                        const { error: insertError } = await client.from('profiles').insert({
                             id: user.id,
                             email: user.primaryEmailAddress?.emailAddress,
-                            name: user.fullName || user.username
+                            name: user.fullName || user.username,
+                            company_name: 'Minha Transportadora'
                         });
+                        if (insertError) console.error("Error creating profile:", insertError);
                     }
 
                     const loadTable = async (table: string, setter: any, mapper?: any) => {
-                        const { data, error } = await supabase.from(table).select('*').eq('user_id', user.id);
-                        if (!error && data) setter(mapper ? data.map(mapper) : data);
+                        console.log(`[DEBUG] Loading table: ${table} for User ID: ${user.id}`);
+                        const { data, error } = await client.from(table).select('*').eq('user_id', user.id);
+                        if (error) {
+                            console.error(`[DEBUG] Error loading ${table}:`, error);
+                        } else if (data) {
+                            console.log(`[DEBUG] Loaded ${data.length} records from ${table}`);
+                            setter(mapper ? data.map(mapper) : data);
+                        }
                     };
 
                     await Promise.all([
@@ -206,7 +228,10 @@ export default function Home() {
         if (!user) return;
         showToast('Salvando viagem...', 'info');
         try {
-            const { data, error } = await supabase.from('trips').insert({
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { data, error } = await client.from('trips').insert({
                 user_id: user.id,
                 origin: newTrip.origin,
                 destination: newTrip.destination,
@@ -256,7 +281,10 @@ export default function Home() {
         if (!user) return;
         showToast('Atualizando viagem...', 'info');
         try {
-            const { error } = await supabase.from('trips').update({
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('trips').update({
                 origin: updatedTrip.origin,
                 destination: updatedTrip.destination,
                 vehicle_id: updatedTrip.vehicleId,
@@ -283,7 +311,7 @@ export default function Home() {
                 const vehicle = vehicles.find(v => v.id === updatedTrip.vehicleId);
                 if (vehicle) {
                     const newKm = (vehicle.totalKmAccumulated || 0) + kmDiff;
-                    await supabase.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', updatedTrip.vehicleId);
+                    await client.from('vehicles').update({ total_km_accumulated: newKm }).eq('id', updatedTrip.vehicleId);
                     setVehicles(prev => prev.map(v => v.id === updatedTrip.vehicleId ? { ...v, totalKmAccumulated: newKm } : v));
                 }
             }
@@ -294,9 +322,94 @@ export default function Home() {
         }
     };
 
+    const handleDeleteTrip = async (tripId: string) => {
+        if (!user) return;
+        showToast('Excluindo viagem...', 'info');
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('trips').delete().eq('id', tripId);
+            if (error) throw error;
+
+            setTrips(prev => prev.filter(t => t.id !== tripId));
+            showToast('Viagem excluída!', 'success');
+        } catch (err: any) {
+            showToast(`Erro ao excluir: ${err.message}`, 'error');
+        }
+    };
+
+    const handleDeleteVehicle = async (vehicleId: string) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('vehicles').delete().eq('id', vehicleId);
+            if (error) throw error;
+
+            setVehicles(prev => prev.filter(v => v.id !== vehicleId));
+            showToast('Veículo excluído!', 'success');
+        } catch (err: any) {
+            showToast(`Erro ao excluir veículo: ${err.message}`, 'error');
+        }
+    };
+
+    const handleDeleteDriver = async (driverId: string) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('drivers').delete().eq('id', driverId);
+            if (error) throw error;
+
+            setDrivers(prev => prev.filter(d => d.id !== driverId));
+            showToast('Motorista excluído!', 'success');
+        } catch (err: any) {
+            showToast(`Erro ao excluir motorista: ${err.message}`, 'error');
+        }
+    };
+
+    const handleDeleteShipper = async (shipperId: string) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('shippers').delete().eq('id', shipperId);
+            if (error) throw error;
+
+            setShippers(prev => prev.filter(s => s.id !== shipperId));
+            showToast('Transportadora excluída!', 'success');
+        } catch (err: any) {
+            showToast(`Erro ao excluir transportadora: ${err.message}`, 'error');
+        }
+    };
+
+    const handleDeleteBuggy = async (buggyId: string) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('buggies').delete().eq('id', buggyId);
+            if (error) throw error;
+
+            setBuggies(prev => prev.filter(b => b.id !== buggyId));
+            showToast('Implemento excluído!', 'success');
+        } catch (err: any) {
+            showToast(`Erro ao excluir implemento: ${err.message}`, 'error');
+        }
+    };
+
+
     const handleSaveMaintenance = async (record: MaintenanceRecord) => {
         if (!user) return;
-        const { data: saved, error } = await supabase.from('maintenance_records').insert({
+        const token = await getToken({ template: 'supabase' });
+        const client = token ? createClerkSupabaseClient(token) : supabase;
+
+        const { data: saved, error } = await client.from('maintenance_records').insert({
             vehicle_id: record.vehicleId,
             date: record.date,
             km_at_maintenance: record.kmAtMaintenance,
@@ -315,7 +428,7 @@ export default function Home() {
         const formatted = { ...saved, vehicleId: saved.vehicle_id, kmAtMaintenance: Number(saved.km_at_maintenance), totalCost: Number(saved.total_cost) };
         setMaintenances([formatted, ...maintenances]);
 
-        await supabase.from('vehicles').update({ last_maintenance_km: record.kmAtMaintenance }).eq('id', record.vehicleId);
+        await client.from('vehicles').update({ last_maintenance_km: record.kmAtMaintenance }).eq('id', record.vehicleId);
         setVehicles(prev => prev.map(v => v.id === record.vehicleId ? { ...v, lastMaintenanceKm: record.kmAtMaintenance } : v));
         showToast('Manutenção salva!', 'success');
     };
@@ -327,7 +440,10 @@ export default function Home() {
     const handleUpdateProfile = async (newProfile: UserProfile) => {
         setProfile(newProfile);
         if (user) {
-            await supabase.from('profiles').upsert({
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            await client.from('profiles').upsert({
                 id: user.id,
                 name: newProfile.name,
                 email: user.primaryEmailAddress?.emailAddress,
@@ -346,7 +462,7 @@ export default function Home() {
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
-            case 'trips': return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+            case 'trips': return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} onDeleteTrip={handleDeleteTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
             case 'setup': return (
                 <Setup
                     vehicles={vehicles}
@@ -357,6 +473,10 @@ export default function Home() {
                     onUpdateDrivers={handleUpdateDrivers}
                     onUpdateShippers={handleUpdateShippers}
                     onUpdateBuggies={handleUpdateBuggies}
+                    onDeleteVehicle={handleDeleteVehicle}
+                    onDeleteDriver={handleDeleteDriver}
+                    onDeleteShipper={handleDeleteShipper}
+                    onDeleteBuggy={handleDeleteBuggy}
                 />
             );
             case 'maintenance': return (
@@ -370,9 +490,9 @@ export default function Home() {
             case 'tires': return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
             case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
             case 'admin':
-                const isAdmin = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthurpsantos01@gmail.com'].includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
+                const isAdmin = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthurpsantos01@gmail.com', 'arthur.riberix@gmail.com', 'arthur_ribeiro09@outlook.com'].includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
-                return <AdminPanel />;
+                return <AdminPanel supabaseClient={authenticatedClient} />;
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
         }
     };

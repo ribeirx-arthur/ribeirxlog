@@ -29,7 +29,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
   const { signOut } = useAuth();
 
   const menuItems = [
-    // ... existing items ...
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI },
@@ -38,10 +37,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
     { id: 'intelligence', label: 'Inteligência', icon: Brain },
     { id: 'setup', label: 'Cadastros', icon: Users },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
-    { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com'].includes(profile.email?.trim().toLowerCase() || '') },
+    { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthur_ribeiro09@outlook.com'].includes(profile.email?.trim().toLowerCase() || '') },
   ];
 
-  const adminEmails = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com'];
+  const adminEmails = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthur_ribeiro09@outlook.com'];
   const isAdmin = adminEmails.includes(profile.email?.trim().toLowerCase() || '');
 
   return (
@@ -102,7 +101,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
             <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-10 h-10 rounded-xl" } }} />
             <div className="flex flex-col">
               <span className="text-xs font-black text-white truncate w-24">{profile.name || 'Usuário'}</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Conta Grátis</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                {profile.plan_type === 'lifetime' ? 'Plano Vitalício' :
+                  profile.plan_type === 'anual' ? 'Plano Anual' :
+                    profile.plan_type === 'mensal' ? 'Plano Mensal' : 'Conta Grátis'}
+              </span>
             </div>
           </div>
           <button onClick={() => signOut()} className="p-2 text-slate-500 hover:text-rose-500 transition-colors">
@@ -111,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
         </div>
 
         <div className="pt-2 flex flex-col items-center">
-          <p className="text-[10px] font-black text-slate-700 tracking-[0.3em] uppercase">v1.6.0</p>
+          <p className="text-[10px] font-black text-slate-700 tracking-[0.3em] uppercase">v1.7.0</p>
         </div>
       </div>
     </div>

@@ -36,6 +36,7 @@ interface TripsProps {
   trips: Trip[];
   setTrips: (trips: Trip[]) => void;
   onUpdateTrip: (trip: Trip) => void;
+  onDeleteTrip: (tripId: string) => void;
   vehicles: Vehicle[];
   drivers: Driver[];
   shippers: Shipper[];
@@ -53,7 +54,7 @@ const formatDate = (dateStr: string) => {
   return `${day}/${month}/${year}`;
 };
 
-const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, vehicles, drivers, shippers, profile }) => {
+const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTrip, vehicles, drivers, shippers, profile }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
@@ -309,8 +310,39 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, vehicles, 
           </div>
         </div>
       )}
+      {/* Modal de Exclusão */}
+      {tripToDeleteId && (
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700/50 rounded-[2.5rem] w-full max-w-md p-8 text-center space-y-6 animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-10 h-10 text-rose-500" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-black text-white">Excluir Viagem?</h3>
+              <p className="text-slate-400 text-sm">
+                Esta ação é irreversível. O registro da viagem será removido permanentemente do sistema.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <button
+                onClick={() => setTripToDeleteId(null)}
+                className="py-4 bg-slate-800 text-slate-300 font-black rounded-2xl hover:bg-slate-700 transition-all text-xs uppercase tracking-widest"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { onDeleteTrip(tripToDeleteId); setTripToDeleteId(null); }}
+                className="py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20"
+              >
+                Sim, Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default Trips;

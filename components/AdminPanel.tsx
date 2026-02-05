@@ -21,31 +21,39 @@ import {
     Zap
 } from 'lucide-react';
 
-export const AdminPanel = () => {
+import { SupabaseClient } from '@supabase/supabase-js';
+
+interface AdminPanelProps {
+    supabaseClient?: SupabaseClient;
+}
+
+export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [totalTrips, setTotalTrips] = useState(0);
 
+    const client = supabaseClient || supabase;
+
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [supabaseClient]);
 
     const fetchUsers = async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        const { data, error } = await client
             .from('profiles')
             .select('*')
             .order('created_at', { ascending: false });
 
         if (data) setUsers(data);
         if (error) {
-            console.error("Admin fetch error:", error);
+            console.error("Admin fetch error:", error.message || error, error.details, error.hint);
         }
 
         // Fetch system-wide trip count
-        const { count, error: tripError } = await supabase
+        const { count, error: tripError } = await client
             .from('trips')
             .select('*', { count: 'exact', head: true });
 
@@ -59,7 +67,7 @@ export const AdminPanel = () => {
     };
 
     const updatePlan = async (email: string, updates: Partial<UserProfile>) => {
-        const { error } = await supabase
+        const { error } = await client
             .from('profiles')
             .update(updates)
             .eq('email', email);

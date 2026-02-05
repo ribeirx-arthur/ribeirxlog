@@ -30,6 +30,10 @@ interface SetupProps {
   onUpdateDrivers: (d: Driver[]) => void;
   onUpdateShippers: (s: Shipper[]) => void;
   onUpdateBuggies: (b: Buggy[]) => void;
+  onDeleteVehicle: (id: string) => void;
+  onDeleteDriver: (id: string) => void;
+  onDeleteShipper: (id: string) => void;
+  onDeleteBuggy: (id: string) => void;
   initialSubTab?: SetupTab;
 }
 
@@ -38,6 +42,7 @@ type SetupTab = 'vehicles' | 'drivers' | 'shippers' | 'buggies';
 const Setup: React.FC<SetupProps> = ({
   vehicles, drivers, shippers, buggies,
   onUpdateVehicles, onUpdateDrivers, onUpdateShippers, onUpdateBuggies,
+  onDeleteVehicle, onDeleteDriver, onDeleteShipper, onDeleteBuggy,
   initialSubTab
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<SetupTab>(initialSubTab || 'vehicles');
@@ -102,10 +107,10 @@ const Setup: React.FC<SetupProps> = ({
 
   const handleDelete = () => {
     if (!deleteConfirm) return;
-    if (deleteConfirm.type === 'vehicles') onUpdateVehicles(vehicles.filter(v => v.id !== deleteConfirm.id));
-    if (deleteConfirm.type === 'drivers') onUpdateDrivers(drivers.filter(d => d.id !== deleteConfirm.id));
-    if (deleteConfirm.type === 'shippers') onUpdateShippers(shippers.filter(s => s.id !== deleteConfirm.id));
-    if (deleteConfirm.type === 'buggies') onUpdateBuggies(buggies.filter(b => b.id !== deleteConfirm.id));
+    if (deleteConfirm.type === 'vehicles') onDeleteVehicle(deleteConfirm.id);
+    if (deleteConfirm.type === 'drivers') onDeleteDriver(deleteConfirm.id);
+    if (deleteConfirm.type === 'shippers') onDeleteShipper(deleteConfirm.id);
+    if (deleteConfirm.type === 'buggies') onDeleteBuggy(deleteConfirm.id);
     setDeleteConfirm(null);
   };
 
