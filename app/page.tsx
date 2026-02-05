@@ -370,7 +370,7 @@ export default function Home() {
             case 'tires': return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
             case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
             case 'admin':
-                const isAdmin = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com'].includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
+                const isAdmin = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthurpsantos01@gmail.com'].includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
                 return <AdminPanel />;
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
