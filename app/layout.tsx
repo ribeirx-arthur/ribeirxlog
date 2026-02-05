@@ -12,8 +12,9 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const clerkKey = "pk_test_YmVsb3ZlZC1kb3J5LTIzLmNsZXJrLmFjY291bnRzLmRldiQ";
     return (
-        <ClerkProvider>
+        <ClerkProvider publishableKey={clerkKey}>
             <html lang="pt-BR">
                 <head>
                     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
