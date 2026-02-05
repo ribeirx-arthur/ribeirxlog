@@ -322,6 +322,23 @@ export default function Home() {
         }
     };
 
+    const handlePopulateDemoData = async () => {
+        if (!user) return;
+        showToast('Populando dados de teste...', 'info');
+        try {
+            const success = await generateMockData(user.id);
+            if (success) {
+                showToast('Interface alimentada com sucesso!', 'success');
+                setRefreshTrigger(prev => prev + 1);
+            } else {
+                showToast('Falha ao gerar dados.', 'error');
+            }
+        } catch (err) {
+            showToast('Erro ao popular dados.', 'error');
+        }
+    };
+
+
     const handleDeleteTrip = async (tripId: string) => {
         if (!user) return;
         showToast('Excluindo viagem...', 'info');
@@ -461,7 +478,7 @@ export default function Home() {
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+            case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
             case 'trips': return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} onDeleteTrip={handleDeleteTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
             case 'setup': return (
                 <Setup

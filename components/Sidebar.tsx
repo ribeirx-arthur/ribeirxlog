@@ -57,6 +57,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile }) =
         </div>
 
         <nav className="space-y-1.5">
+          {profile.payment_status !== 'paid' && !isAdmin && (
+            <div className="mx-2 mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+              <div className="flex items-center gap-2 mb-1">
+                <ShieldAlert className="w-4 h-4 text-amber-500" />
+                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Versão Gratuita</span>
+              </div>
+              <p className="text-[9px] text-slate-400 font-bold leading-relaxed">Sua conta possui limites de registros. Faça upgrade para acesso total.</p>
+            </div>
+          )}
           <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-4 ml-2">Main Navigation</p>
           {menuItems.filter(item => !item.hidden).map((item) => {
             const Icon = item.icon;

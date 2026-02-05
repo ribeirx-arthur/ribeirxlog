@@ -24,12 +24,16 @@ interface DashboardProps {
   drivers: Driver[];
   shippers: Shipper[];
   profile: UserProfile;
+  onPopulateDemo?: () => void;
 }
 
 type TimeFilter = 'semanal' | 'mensal' | 'anual' | 'total';
 
-const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shippers, profile }) => {
+const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shippers, profile, onPopulateDemo }) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('mensal');
+  const isAdmin = ['arthur@ribeirxlog.com', 'arthur_ribeiro09@outlook.com'].includes(profile.email?.trim().toLowerCase() || '');
+  const isFree = profile.payment_status !== 'paid' && !isAdmin;
+
 
   const filteredTrips = useMemo(() => {
     const now = new Date();
@@ -115,26 +119,45 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
   return (
     <div className="space-y-6">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Bem-vindo de volta, {profile.name}!</h1>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-white">Bem-vindo de volta, {profile.name}!</h1>
+            {isFree && (
+              <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[10px] font-black text-amber-500 uppercase tracking-widest">
+                Versão Gratuita
+              </span>
+            )}
+          </div>
           <p className="text-slate-400">Aqui está o resumo operacional da sua frota.</p>
         </div>
 
-        <div className="flex items-center p-1 bg-slate-800 rounded-xl border border-slate-700">
-          {(['semanal', 'mensal', 'anual', 'total'] as TimeFilter[]).map((f) => (
+        <div className="flex items-center gap-4">
+          {isFree && onPopulateDemo && (
             <button
-              key={f}
-              onClick={() => setTimeFilter(f)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${timeFilter === f
-                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                : 'text-slate-400 hover:text-slate-200'
-                }`}
+              onClick={onPopulateDemo}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-black text-emerald-500 hover:bg-emerald-500/20 transition-all uppercase tracking-widest"
             >
-              {f}
+              <TrendingUp className="w-4 h-4" />
+              Testar Interface (Demo)
             </button>
-          ))}
+          )}
+          <div className="flex items-center p-1 bg-slate-800 rounded-xl border border-slate-700">
+            {(['semanal', 'mensal', 'anual', 'total'] as TimeFilter[]).map((f) => (
+              <button
+                key={f}
+                onClick={() => setTimeFilter(f)}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${timeFilter === f
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                  : 'text-slate-400 hover:text-slate-200'
+                  }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
+
 
       {/* AI Section with Fade In Animation */}
       {profile.config.enableBI !== false && (
