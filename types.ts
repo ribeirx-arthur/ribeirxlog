@@ -20,6 +20,7 @@ export interface UserProfile {
     theme?: 'light' | 'dark';
     enableMaintenance: boolean;
     enableBI: boolean;
+    enableFreightCalculator: boolean;
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
     enabledFeatures?: string[];
   };

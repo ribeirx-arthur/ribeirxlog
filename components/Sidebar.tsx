@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
     { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !features.canAccessFullMaintenance },
     { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: !features.canAccessTires },
     { id: 'intelligence', label: 'Inteligência', icon: Brain },
-    { id: 'freight-calculator', label: 'Cálculo de Frete', icon: Calculator },
+    { id: 'freight-calculator', label: 'Cálculo de Frete', icon: Calculator, hidden: profile.config.enableFreightCalculator === false },
     { id: 'setup', label: 'Cadastros', icon: Users },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
     { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthur_ribeiro09@outlook.com'].includes(profile.email?.trim().toLowerCase() || '') },

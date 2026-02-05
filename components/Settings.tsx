@@ -31,7 +31,8 @@ import {
    List,
    Settings2,
    Sparkles,
-   Check
+   Check,
+   Calculator
 } from 'lucide-react';
 import { useAppMode } from '../contexts/AppModeContext';
 import { UserProfile, Vehicle, Driver, Shipper, Trip, MaintenanceRecord } from '../types';
@@ -464,6 +465,7 @@ const Settings: React.FC<SettingsProps> = ({
 
                            <div className="space-y-4">
                               <ToggleOption label="Módulo de Manutenção" description="Habilita aba de gestão de frotas, trocas de óleo e pneus." checked={profile.config.enableMaintenance} onChange={v => handleConfigChange('enableMaintenance', v)} icon={Wrench} />
+                              <ToggleOption label="Cálculo de Frete Estratégico" description="Habilita a calculadora de frete com matriz de custo complexa." checked={profile.config.enableFreightCalculator ?? true} onChange={v => handleConfigChange('enableFreightCalculator', v)} icon={Calculator} />
                               <ToggleOption label="Business Intelligence Avançado" description="Habilita painel de performance, rankings e análise de lucro por KM." checked={profile.config.enableBI} onChange={v => handleConfigChange('enableBI', v)} icon={TrendingUp} />
                               <ToggleOption label="Integridade de Dados" description="Avisa se foram detectadas viagens sem KM ou valores de combustível preenchidos." checked={profile.config.notifyIncompleteData} onChange={v => handleConfigChange('notifyIncompleteData', v)} icon={FileSearch} />
                               <ToggleOption label="Saúde Predutiva" description="Gera alertas de manutenção quando um veículo atinge 90% da vida útil de algum componente." checked={profile.config.notifyMaintenance} onChange={v => handleConfigChange('notifyMaintenance', v)} icon={AlertTriangle} />

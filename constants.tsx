@@ -16,6 +16,7 @@ export const INITIAL_PROFILE: UserProfile = {
     showTips: true,
     enableMaintenance: true,
     enableBI: true,
+    enableFreightCalculator: true,
     appMode: 'simple'
   }
 };
