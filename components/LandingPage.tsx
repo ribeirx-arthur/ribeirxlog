@@ -10,6 +10,7 @@ import {
     ShieldCheck,
     BarChart3,
     DollarSign,
+    Calculator,
     ArrowRight,
     Zap,
     LayoutDashboard,
@@ -153,75 +154,117 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             </section>
 
             {/* Trusted By Section (Micro-social proof) */}
-            <section className="py-20 opacity-40">
-                <p className="text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-12">Empoderando Centenas de Transportadores por todo o Brasil</p>
-                <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-12 md:gap-24">
-                    <div className="text-2xl font-black text-white italic tracking-tighter hover:text-emerald-500 transition-colors">LOGISTX_PRO</div>
-                    <div className="text-2xl font-black text-white italic tracking-tighter hover:text-emerald-500 transition-colors">FREIGHT_INTEL</div>
-                    <div className="text-2xl font-black text-white italic tracking-tighter hover:text-emerald-500 transition-colors">CWB_CARGO</div>
-                    <div className="text-2xl font-black text-white italic tracking-tighter hover:text-emerald-500 transition-colors">BRAZIL_FROTA</div>
+            <section className="py-20 opacity-60">
+                <p className="text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-12">Focado em Eficiência, Controle e Retorno Financeiro Real</p>
+                <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-12 md:gap-24 grayscale group-hover:grayscale-0 transition-all duration-700">
+                    <div className="text-2xl font-black text-slate-400 italic tracking-tighter hover:text-emerald-500 transition-colors uppercase">RBS_Infrastructure</div>
+                    <div className="text-2xl font-black text-slate-400 italic tracking-tighter hover:text-emerald-500 transition-colors uppercase">Neural_Monitoring</div>
+                    <div className="text-2xl font-black text-slate-400 italic tracking-tighter hover:text-emerald-500 transition-colors uppercase">Tech_Logistics</div>
+                    <div className="text-2xl font-black text-slate-400 italic tracking-tighter hover:text-emerald-500 transition-colors uppercase">Data_Driven_Fleet</div>
                 </div>
             </section>
 
             {/* Features Section - Deep Details */}
             <section id="recursos" className="py-40 relative">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center mb-40">
-                        <div className="space-y-12">
-                            <div className="inline-flex p-4 bg-emerald-500/10 rounded-2xl text-emerald-500"><BarChart3 className="w-10 h-10" /></div>
+                    {/* Feature 1 */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center mb-60">
+                        <div className="space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
+                            <div className="inline-flex p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]"><BarChart3 className="w-10 h-10" /></div>
                             <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
                                 AUDITORIA DE <br />
                                 <span className="text-emerald-500">MARGEM LIMPA.</span>
                             </h2>
                             <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Pare de adivinhar quanto sobrou no fim do mês. O Ribeirx Log calcula automaticamente todos os custos ocultos: pneus, adiantamentos, impostos e combustível. Tenha uma visão cirúrgica do seu ROI por viagem.
+                                Pare de adivinhar quanto sobrou no fim do mês. O Ribeirx Log calcula automaticamente todos os seus custos reais. Tenha uma visão cirúrgica do seu retorno sobre investimento direto na sua tela.
                             </p>
                             <ul className="space-y-6">
-                                {["Cálculo de Diesel/KM em Tempo Real", "Monitoramento de taxas de transportadoras", "Alertas de prejuízo projetado"].map(item => (
+                                {["Cálculo de Diesel/KM Integrado", "Visão de custos em tempo real", "Monitoramento de taxas de frete"].map(item => (
                                     <li key={item} className="flex items-center gap-4 text-white font-black text-sm uppercase tracking-widest">
-                                        <Check className="w-5 h-5 text-emerald-500" /> {item}
+                                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                            <Check className="w-4 h-4 text-emerald-500" />
+                                        </div>
+                                        {item}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                        <div className="relative group">
-                            <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-75 opacity-0 group-hover:opacity-50 transition-all duration-1000"></div>
-                            <div className="glass-card rounded-[4rem] p-10 border-white/10 relative z-10 hover:translate-y-[-10px] transition-all duration-500">
-                                <div className="aspect-square bg-slate-950 rounded-[3rem] border border-white/5 flex items-center justify-center p-12">
-                                    {/* Place for AI Image de Lucro/Finanças */}
-                                    <DollarSign className="w-32 h-32 text-emerald-500 opacity-20" />
+                        <div className="relative group perspective-1000">
+                            <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
+                            <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-2 transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
+                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 flex items-center justify-center p-12 overflow-hidden relative">
+                                    {/* Abstract High-Tech Visual for Profitability */}
+                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #10b981 0, #10b981 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
+                                    <DollarSign className="w-40 h-40 text-emerald-500 opacity-20 animate-float" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                                    <div className="absolute bottom-12 left-12 right-12 p-6 glass-card rounded-2xl border-white/10">
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] mb-4">
+                                            <span>Real-Time Profit</span>
+                                            <TrendingUp className="w-4 h-4" />
+                                        </div>
+                                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-emerald-500 w-[78%] shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
+                    {/* Feature 2 - Intelligence */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center mb-60">
                         <div className="order-2 lg:order-1 relative group">
-                            <div className="absolute inset-0 bg-sky-500/20 blur-[100px] rounded-full scale-75 opacity-0 group-hover:opacity-50 transition-all duration-1000"></div>
-                            <div className="glass-card rounded-[4rem] p-10 border-white/10 relative z-10 hover:translate-y-[-10px] transition-all duration-500">
-                                <div className="aspect-square bg-slate-950 rounded-[3rem] border border-white/5 flex items-center justify-center p-12">
-                                    {/* Place for AI Image de IA/Cérebro */}
-                                    <BrainCircuit className="w-32 h-32 text-sky-500 opacity-20" />
+                            <div className="absolute inset-0 bg-sky-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
+                            <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-[-2deg] transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
+                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 flex items-center justify-center p-12 overflow-hidden relative">
+                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 10px 10px, #0ea5e9 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+                                    <BrainCircuit className="w-40 h-40 text-sky-500 opacity-20 animate-float" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent"></div>
                                 </div>
                             </div>
                         </div>
-                        <div className="order-1 lg:order-2 space-y-12">
-                            <div className="inline-flex p-4 bg-sky-500/10 rounded-2xl text-sky-500"><BrainCircuit className="w-10 h-10" /></div>
+                        <div className="order-1 lg:order-2 space-y-12 animate-in fade-in slide-in-from-right-8 duration-1000">
+                            <div className="inline-flex p-4 bg-sky-500/10 rounded-2xl text-sky-500 shadow-[0_0_20px_rgba(14,165,233,0.2)]"><Zap className="w-10 h-10" /></div>
                             <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
                                 INTELIGÊNCIA <br />
-                                <span className="text-sky-500">PREDITIVA RBS.</span>
+                                <span className="text-sky-500">PROATIVA RBS.</span>
                             </h2>
                             <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Nossa IA não apenas organiza, ela aprende. O sistema cruza dados de centenas de fretes para te dizer quais rotas pagarão melhor na próxima semana e quais mercadorias são economicamente mais vantajosas para sua frota.
+                                Nossa plataforma não apenas organiza, ela avisa. Identifique gargalos na manutenção e oportunidades de frete com base no histórico real dos seus veículos.
                             </p>
-                            <div className="p-8 bg-sky-500/5 border border-sky-500/20 rounded-3xl">
-                                <p className="text-sky-400 text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2 underline">
-                                    Dica Neural da Semana:
+                            <div className="p-8 bg-sky-500/5 border border-sky-500/10 rounded-[3rem] backdrop-blur-sm">
+                                <p className="text-sky-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Sistema em Operação
                                 </p>
-                                <p className="text-slate-300 text-sm italic">
-                                    "Rotas via BR-116/SP estão com margem 8% maior em cargas de frete seco tipo Grãos."
+                                <p className="text-slate-300 text-sm italic leading-relaxed">
+                                    "Otimização de custos disponível: Seus últimos 10 fretes indicam uma variação de margem de 12% dependendo da transportadora selecionada."
                                 </p>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* NEW: Smart Calculator Placeholder (The Future Addition) */}
+                    <div className="max-w-4xl mx-auto glass-card rounded-[4rem] p-12 md:p-20 text-center relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50"></div>
+                        <div className="relative z-10">
+                            <div className="inline-flex py-2 px-6 bg-slate-900 border border-white/5 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-12">
+                                Em Desenvolvimento
+                            </div>
+                            <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 italic uppercase">
+                                Calculadora <br /><span className="text-emerald-500">Inteligente RBS.</span>
+                            </h3>
+                            <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto mb-16">
+                                Em breve: Simule sua viagem completa antes mesmo de ligar o caminhão. Diesel, pedágio, manutenção e taxas — tudo calculado em segundos para garantir o seu preço final.
+                            </p>
+                            <div className="flex justify-center">
+                                <div className="w-full max-w-md h-20 bg-slate-950/50 border border-white/5 rounded-3xl flex items-center px-8 justify-between text-slate-700 italic text-sm">
+                                    <span>rbs_smart_calculator.exe</span>
+                                    <Clock className="w-5 h-5 animate-spin duration-1000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="absolute -bottom-20 -right-20 p-20 opacity-5 group-hover:opacity-10 transition-all duration-700">
+                            <Calculator className="w-64 h-64 text-emerald-500" />
                         </div>
                     </div>
                 </div>
