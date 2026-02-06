@@ -16,23 +16,10 @@ import {
    Brain,
    Wrench,
    Target,
+   ChevronRight,
+   History,
    PieChart as PieIcon
 } from 'lucide-react';
-import {
-   ResponsiveContainer,
-   AreaChart,
-   Area,
-   XAxis,
-   YAxis,
-   CartesianGrid,
-   Tooltip,
-   PieChart,
-   Pie,
-   Cell,
-   RadialBarChart,
-   RadialBar,
-   PolarAngleAxis
-} from 'recharts';
 import { Trip, Vehicle, Driver, Shipper, UserProfile, MaintenanceRecord } from '../types';
 import { calculateTripFinance, normalizeDestination } from '../services/finance';
 
@@ -58,11 +45,11 @@ const Performance: React.FC<PerformanceProps> = ({
    const [activeView, setActiveView] = useState<BIView>('geral');
    const [mounted, setMounted] = useState(false);
 
-   // SOLUÇÃO DEFINITIVA PARA CARREGAMENTO DE GRÁFICOS NO NEXT.JS
    useEffect(() => {
       setMounted(true);
    }, []);
 
+   // ANALYTICS ENGINE v6.0 - NO-DEPENDENCY SVG ENGINE (Failsafe)
    const analytics = useMemo(() => {
       const stats = {
          totalRevenue: 0,
@@ -78,7 +65,6 @@ const Performance: React.FC<PerformanceProps> = ({
          shipperMap: new Map<string, { id: string, name: string, revenue: number, profit: number, count: number, commission: number }>(),
 
          monthlyStats: {} as Record<string, { name: string, profit: number, revenue: number }>,
-         lossMakingTrips: [] as any[],
          mostExpensiveMaintenances: [] as MaintenanceRecord[]
       };
 
@@ -98,56 +84,51 @@ const Performance: React.FC<PerformanceProps> = ({
          const other = Number(t.outrasDespesas || 0);
          const km = Number(t.totalKm || 0);
 
-         const v = vehicles.find(veh => veh.id === t.vehicleId) || { id: 'unk', plate: 'Placa N/A', type: 'Próprio' } as Vehicle;
-         const d = drivers.find(drv => drv.id === t.driverId) || { id: 'unk', name: 'Motorista N/A' } as Driver;
+         const v = vehicles.find(veh => veh.id === t.vehicleId) || { id: 'u', plate: 'Frota N/A' } as Vehicle;
+         const d = drivers.find(drv => drv.id === t.driverId) || { id: 'u', name: 'Motorista N/A' } as Driver;
          const s = shippers.find(ship => ship.id === t.shipperId);
 
          const fin = calculateTripFinance({ ...t, freteSeco: frete, diarias: dia, adiantamento: adiant, combustivel: fuel, outrasDespesas: other }, v, d, profile);
 
-         stats.totalRevenue += fin.totalBruto;
-         stats.totalProfit += fin.lucroLiquidoReal;
+         stats.totalRevenue += (fin.totalBruto || 0);
+         stats.totalProfit += (fin.lucroLiquidoReal || 0);
          stats.totalFuel += fuel;
          stats.totalKm += km;
-         stats.totalCommissions += fin.comissaoMotorista;
+         stats.totalCommissions += (fin.comissaoMotorista || 0);
 
          if (t.departureDate) {
             const date = new Date(t.departureDate);
             if (!isNaN(date.getTime())) {
                const label = months[date.getMonth()];
                if (stats.monthlyStats[label]) {
-                  stats.monthlyStats[label].profit += fin.lucroLiquidoReal;
-                  stats.monthlyStats[label].revenue += fin.totalBruto;
+                  stats.monthlyStats[label].profit += (fin.lucroLiquidoReal || 0);
+                  stats.monthlyStats[label].revenue += (fin.totalBruto || 0);
                }
             }
          }
 
-         if (fin.lucroLiquidoReal < 0) {
-            stats.lossMakingTrips.push({ ...t, profit: fin.lucroLiquidoReal, vehicleLabel: v.plate, driverLabel: d.name });
-         }
-
-         if (d.id !== 'unk') {
+         if (d.id !== 'u') {
             const dStat = stats.driverMap.get(d.id) || { id: d.id, name: d.name, profit: 0, revenue: 0, trips: 0, km: 0, commission: 0 };
-            dStat.profit += fin.lucroLiquidoReal;
-            dStat.revenue += fin.totalBruto;
+            dStat.profit += (fin.lucroLiquidoReal || 0);
+            dStat.revenue += (fin.totalBruto || 0);
             dStat.trips += 1;
-            dStat.commission += fin.comissaoMotorista;
+            dStat.commission += (fin.comissaoMotorista || 0);
             stats.driverMap.set(d.id, dStat);
          }
 
-         if (v.id !== 'unk') {
+         if (v.id !== 'u') {
             const vStat = stats.vehicleMap.get(v.id) || { id: v.id, plate: v.plate, profit: 0, revenue: 0, trips: 0, maint: 0, km: 0 };
-            vStat.profit += fin.lucroLiquidoReal;
-            vStat.revenue += fin.totalBruto;
+            vStat.profit += (fin.lucroLiquidoReal || 0);
+            vStat.revenue += (fin.totalBruto || 0);
             vStat.trips += 1;
-            vStat.km += km;
             stats.vehicleMap.set(v.id, vStat);
          }
 
          if (t.destination) {
             const rKey = normalizeDestination(t.destination);
             const rStat = stats.routeMap.get(rKey) || { name: t.destination, profit: 0, count: 0, revenue: 0, km: 0, fuel: 0, otherCosts: 0 };
-            rStat.profit += fin.lucroLiquidoReal;
-            rStat.revenue += fin.totalBruto;
+            rStat.profit += (fin.lucroLiquidoReal || 0);
+            rStat.revenue += (fin.totalBruto || 0);
             rStat.count += 1;
             rStat.km += km;
             stats.routeMap.set(rKey, rStat);
@@ -155,9 +136,8 @@ const Performance: React.FC<PerformanceProps> = ({
 
          if (s) {
             const sStat = stats.shipperMap.get(s.id) || { id: s.id, name: s.name, revenue: 0, profit: 0, count: 0, commission: 0 };
-            sStat.revenue += fin.totalBruto;
-            sStat.profit += fin.lucroLiquidoReal;
-            sStat.count += 1;
+            sStat.revenue += (fin.totalBruto || 0);
+            sStat.profit += (fin.lucroLiquidoReal || 0);
             stats.shipperMap.set(s.id, sStat);
          }
       });
@@ -196,42 +176,42 @@ const Performance: React.FC<PerformanceProps> = ({
    const marginRatioValue = ((analytics.totalProfit / (analytics.totalRevenue || 1)) * 100);
    const marginRatio = isNaN(marginRatioValue) ? "0.0" : marginRatioValue.toFixed(1);
 
-   const glassCard = "bg-slate-900/60 backdrop-blur-2xl border border-slate-800/80 rounded-[3rem] p-10 shadow-2xl relative overflow-hidden transition-all duration-700 hover:border-emerald-500/20";
-   const luxFont = "bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent italic font-black uppercase";
+   const glassCard = "bg-slate-900/60 backdrop-blur-3xl border border-slate-800/80 rounded-[3.5rem] p-10 shadow-2xl relative overflow-hidden transition-all duration-700 hover:border-emerald-500/30 group";
+   const luxuryTitle = "bg-gradient-to-r from-white via-slate-200 to-slate-500 bg-clip-text text-transparent italic font-black uppercase";
 
-   if (!mounted) return <div className="p-20 text-center text-slate-700 font-black animate-pulse tracking-widest text-xs">COLLECTING NEURAL DATA...</div>;
+   if (!mounted) return <div className="p-32 flex items-center justify-center font-black text-slate-800 tracking-[1em] animate-pulse">INITIATING BI ENGINE...</div>;
 
    return (
-      <div className="space-y-12 animate-in fade-in duration-1000 pb-32">
-         {/* HEADER PRE-MIUM */}
+      <div className="space-y-16 animate-in fade-in duration-1000 pb-32">
+         {/* HEADER PREMIUM Neural 5.0 */}
          <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10 border-b border-slate-800/50 pb-12">
-            <div className="flex items-center gap-8 group">
-               <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 via-teal-700 to-sky-700 rounded-[2.5rem] flex items-center justify-center shadow-2xl rotate-3 group-hover:rotate-0 transition-all duration-700">
+            <div className="flex items-center gap-10 group">
+               <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 via-teal-700 to-sky-700 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-emerald-500/20 rotate-6 group-hover:rotate-0 transition-all duration-700">
                   <BarChart3 className="w-12 h-12 text-white" />
                </div>
                <div>
-                  <h2 className={`text-5xl ${luxFont} tracking-tighter`}>Ribeirx BI</h2>
-                  <p className="text-slate-500 text-[10px] font-black tracking-[0.4em] uppercase mt-3 flex items-center gap-3">
-                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                     Strategic Engine v5.5
+                  <h2 className={`text-6xl ${luxuryTitle} tracking-tighter leading-none`}>Neural BI</h2>
+                  <p className="text-slate-500 text-[10px] font-black tracking-[0.5em] uppercase mt-4 flex items-center gap-3">
+                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                     Strategic Analytics v6.0 • Fully Blinded
                   </p>
                </div>
             </div>
 
-            <nav className="flex bg-slate-950 border border-slate-800 p-2 rounded-[2rem] shadow-2xl">
+            <nav className="flex bg-slate-950/80 backdrop-blur-xl border border-slate-800 p-2 rounded-[2.5rem] shadow-2xl scale-110">
                {[
                   { id: 'geral', label: 'Monitor', icon: Activity },
-                  { id: 'rankings', label: 'Performance', icon: Trophy },
-                  { id: 'custos', label: 'Cofre & Auditoria', icon: DollarSign },
-                  { id: 'inteligencia', label: 'IA Insights', icon: Brain }
+                  { id: 'rankings', label: 'Eilte', icon: Trophy },
+                  { id: 'custos', label: 'Cofre', icon: DollarSign },
+                  { id: 'inteligencia', label: 'Cérebro', icon: Brain }
                ].map((v) => (
                   <button
                      key={v.id}
                      onClick={() => setActiveView(v.id as BIView)}
-                     className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all gap-3 flex items-center ${activeView === v.id ? 'bg-white text-slate-950 shadow-xl' : 'text-slate-600 hover:text-white'
+                     className={`px-10 py-5 rounded-[1.8rem] text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-4 ${activeView === v.id ? 'bg-white text-slate-950 shadow-2xl' : 'text-slate-600 hover:text-white'
                         }`}
                   >
-                     <v.icon className={`w-4 h-4 ${activeView === v.id ? 'text-emerald-600' : 'text-slate-600'}`} />
+                     <v.icon className={`w-4 h-4 ${activeView === v.id ? 'text-emerald-500' : ''}`} />
                      {v.label}
                   </button>
                ))}
@@ -241,55 +221,38 @@ const Performance: React.FC<PerformanceProps> = ({
          {activeView === 'geral' && (
             <div className="space-y-12 animate-in slide-in-from-bottom-10 duration-700">
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  <LuxuryStat title="Receita Total" value={analytics.totalRevenue} color="text-white" icon={Wallet} trend="+12.5%" />
-                  <LuxuryStat title="Lucro Líquido" value={analytics.totalProfit} color="text-emerald-400" icon={TrendingUp} trend="+8.1%" />
-                  <LuxuryStat title="Margem ROI" value={`${marginRatio}%`} color="text-sky-400" icon={Target} trend="Optimal" />
-                  <LuxuryStat title="Rentabilidade/KM" value={`R$ ${(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}`} color="text-amber-400" icon={MapPin} trend="+2.4%" />
+                  <PremiumStat title="Receita Consolidada" value={analytics.totalRevenue} color="text-white" icon={Wallet} trend="+12%" />
+                  <PremiumStat title="Lucro Líquido Real" value={analytics.totalProfit} color="text-emerald-400" icon={TrendingUp} trend="+7.5%" />
+                  <PremiumStat title="ROI de Operação" value={`${marginRatio}%`} color="text-sky-400" icon={Target} trend="Optimal" />
+                  <PremiumStat title="Rentabilidade/KM" value={`R$ ${(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}`} color="text-amber-400" icon={MapPin} trend="+3%" />
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                  <div className={glassCard + " lg:col-span-2 min-h-[500px]"}>
+                  <div className={glassCard + " lg:col-span-2 min-h-[550px]"}>
                      <div className="flex justify-between items-start mb-12">
                         <div>
-                           <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Fluxo de Lucratividade</h3>
-                           <p className="text-slate-500 text-[10px] font-black tracking-widest uppercase mt-2">Historical Analysis (6 Months)</p>
+                           <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Fluxo de Lucratividade</h3>
+                           <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase mt-3">Análise Temporal de 6 Meses (Neural SVG)</p>
                         </div>
                      </div>
-                     <div className="h-[350px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                           <AreaChart data={chartData}>
-                              <defs>
-                                 <linearGradient id="pG" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.4} /><stop offset="95%" stopColor="#10b981" stopOpacity={0} /></linearGradient>
-                                 <linearGradient id="rG" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.1} /><stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} /></linearGradient>
-                              </defs>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" opacity={0.3} />
-                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 11, fontWeight: 900 }} />
-                              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 10 }} />
-                              <Tooltip content={<CustomTooltipUI />} />
-                              <Area type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={5} fill="url(#pG)" />
-                              <Area type="monotone" dataKey="revenue" stroke="#0ea5e9" strokeWidth={2} strokeDasharray="10 5" fill="url(#rG)" />
-                           </AreaChart>
-                        </ResponsiveContainer>
+                     <div className="h-[380px] w-full relative">
+                        {/* CUSTOM FAILSAFE SVG CHART */}
+                        <NeuralAreaChart data={chartData} />
                      </div>
                   </div>
 
-                  <div className={glassCard + " flex flex-col items-center justify-between"}>
-                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter text-center">Saúde operacional</h3>
-                     <div className="relative w-64 h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                           <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={25} data={[{ value: Math.max(5, Number(marginRatio)), fill: '#10b981' }]}>
-                              <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                              <RadialBar background={{ fill: '#0f172a' }} dataKey="value" cornerRadius={30} angleAxisId={0} />
-                           </RadialBarChart>
-                        </ResponsiveContainer>
+                  <div className={glassCard + " flex flex-col items-center justify-between py-16"}>
+                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter text-center">Eficiência Real</h3>
+                     <div className="relative w-72 h-72">
+                        <NeuralRadialGauge value={Number(marginRatio)} />
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                           <p className="text-5xl font-black text-white">{marginRatio}%</p>
-                           <span className="text-[10px] font-black text-emerald-500 uppercase mt-2">MARGEM REAL</span>
+                           <p className="text-6xl font-black text-white tracking-tighter">{marginRatio}%</p>
+                           <span className="text-[10px] font-black text-emerald-500 uppercase mt-2 px-3 py-1 bg-emerald-500/10 rounded-full">Saúde Operacional</span>
                         </div>
                      </div>
-                     <div className="w-full space-y-4 px-6">
-                        <div className="flex justify-between items-center"><p className="text-[10px] font-black text-slate-500 uppercase">Retention Rate</p><p className="text-sm font-black text-white">{marginRatio}%</p></div>
-                        <div className="h-2 bg-slate-900 rounded-full overflow-hidden"><div className="h-full bg-emerald-500" style={{ width: `${marginRatio}%` }} /></div>
+                     <div className="w-full space-y-4 px-10">
+                        <div className="flex justify-between items-center"><p className="text-[10px] font-black text-slate-500 uppercase">Fator de Retenção</p><p className="text-sm font-black text-white">{marginRatio}%</p></div>
+                        <div className="h-3 bg-slate-950 rounded-full overflow-hidden shadow-inner"><div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400" style={{ width: `${marginRatio}%` }} /></div>
                      </div>
                   </div>
                </div>
@@ -297,68 +260,57 @@ const Performance: React.FC<PerformanceProps> = ({
          )}
 
          {activeView === 'rankings' && (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 animate-in slide-in-from-right-10 duration-700">
-               <DynamicRank title="Elite de Lucratividade" desc="Ranking por lucro líquido total" icon={Trophy} color="emerald" data={rankedDrivers.map(d => ({ name: d.name, val: d.profit, sub: `${d.trips} viagens` }))} />
-               <DynamicRank title="Ganho dos Motoristas" desc="Ranking de comissões acumuladas" icon={Coins} color="sky" data={rankedCommissions.map(d => ({ name: d.name, val: d.commission, sub: 'Ganhos totais brutos' }))} />
-               <DynamicRank title="Principais Shippers" desc="Clientes com maior volume Real" icon={Building2} color="amber" data={rankedShippers.map(s => ({ name: s.name, val: s.profit, sub: 'Faturamento Lucro' }))} />
-               <DynamicRank title="Rotas de Performance" desc="Eixo de maiores margens reais" icon={MapPin} color="rose" data={rankedRoutes.map(r => ({ name: r.name, val: r.profit, sub: 'ROI consolidado' }))} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 animate-in slide-in-from-right-10 duration-700">
+               <EliteRanking title="Performance de Lucro" desc="Motoristas que mais geraram retorno líquido" icon={Trophy} color="emerald" data={rankedDrivers.map(d => ({ name: d.name, val: d.profit, sub: `${d.trips} Trips Realizadas` }))} />
+               <EliteRanking title="Ranking de Comissões" desc="Total de ganhos brutos recebidos pelos motoristas" icon={Coins} color="sky" data={rankedCommissions.map(d => ({ name: d.name, val: d.commission, sub: 'Ganhos Acumulados' }))} />
+               <EliteRanking title="Principais Clientes" desc="Maiores geradores de faturamento e lucro" icon={Building2} color="amber" data={rankedShippers.map(s => ({ name: s.name, val: s.profit, sub: 'Parceria de Alto Nível' }))} />
+               <EliteRanking title="Rotas de Alta Margem" desc="Top 8 destinos mais rentáveis da frota" icon={MapPin} color="rose" data={rankedRoutes.map(r => ({ name: r.name, val: r.profit, sub: 'Performance Logística' }))} />
             </div>
          )}
 
          {activeView === 'custos' && (
-            <div className="space-y-10 animate-in zoom-in-95 duration-700">
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="space-y-12 animate-in zoom-in-95 duration-700">
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                   <div className={glassCard + " lg:col-span-1"}>
-                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-10">Auditória de Evasão</h3>
-                     <div className="h-[350px] relative">
-                        <ResponsiveContainer width="100%" height="100%">
-                           <PieChart>
-                              <Pie
-                                 data={[
-                                    { name: 'Diesel', value: analytics.totalFuel || 1, fill: '#38bdf8' },
-                                    { name: 'Peças', value: analytics.totalMaint || 1, fill: '#f43f5e' },
-                                    { name: 'Motorista', value: analytics.totalCommissions || 1, fill: '#fbbf24' },
-                                    { name: 'LUCRO', value: analytics.totalProfit || 1, fill: '#10b981' }
-                                 ]}
-                                 innerRadius={80} outerRadius={110} paddingAngle={10} dataKey="value"
-                              >
-                                 <Cell fill="#38bdf8" /><Cell fill="#f43f5e" /><Cell fill="#fbbf24" /><Cell fill="#10b981" />
-                              </Pie>
-                              <Tooltip content={<SimplePieTooltipUI />} />
-                           </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute inset-0 flex items-center justify-center -mt-2"><PieIcon className="w-10 h-10 text-slate-800" /></div>
+                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-12 text-center">Auditoria de Evasão</h3>
+                     <div className="h-[380px] w-full flex items-center justify-center relative">
+                        <NeuralPieChart data={[
+                           { label: 'Diesel', value: analytics.totalFuel, color: '#38bdf8' },
+                           { label: 'Manutenção', value: analytics.totalMaint, color: '#f43f5e' },
+                           { label: 'Comissão', value: analytics.totalCommissions, color: '#fbbf24' },
+                           { label: 'Lucro', value: analytics.totalProfit, color: '#10b981' }
+                        ]} />
                      </div>
-                     <div className="grid grid-cols-2 gap-4 mt-10">
-                        <MiniCard label="Diesel" val={analytics.totalFuel} color="bg-sky-400" />
-                        <MiniCard label="Custo Mecânico" val={analytics.totalMaint} color="bg-rose-500" />
-                        <MiniCard label="Comissões" val={analytics.totalCommissions} color="bg-amber-400" />
-                        <MiniCard label="Lucro Real" val={analytics.totalProfit} color="bg-emerald-500" />
+                     <div className="grid grid-cols-2 gap-6 mt-12">
+                        <MiniStat label="Diesel" val={analytics.totalFuel} color="bg-sky-400" />
+                        <MiniStat label="Peças" val={analytics.totalMaint} color="bg-rose-500" />
+                        <MiniStat label="Comissão" val={analytics.totalCommissions} color="bg-amber-400" />
+                        <MiniStat label="LUCRO" val={analytics.totalProfit} color="bg-emerald-500" />
                      </div>
                   </div>
 
                   <div className={glassCard + " lg:col-span-2"}>
-                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-10">Rastreio de Maiores Gastos</h3>
+                     <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-10">Rastreio de Maiores Gastos</h3>
                      <div className="space-y-6">
                         {analytics.mostExpensiveMaintenances.length > 0 ? (
                            analytics.mostExpensiveMaintenances.map((m, i) => (
-                              <div key={i} className="flex items-center justify-between p-8 bg-slate-950/40 border border-slate-800/50 rounded-[2.5rem] hover:border-emerald-500/30 transition-all">
-                                 <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-rose-500"><Wrench className="w-8 h-8" /></div>
+                              <div key={i} className="flex items-center justify-between p-10 bg-slate-950/40 border border-slate-800/80 rounded-[2.5rem] hover:border-rose-500/40 transition-all hover:translate-x-3 group/item shadow-xl">
+                                 <div className="flex items-center gap-8">
+                                    <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-rose-500 group-hover/item:scale-110 transition-transform"><Wrench className="w-8 h-8" /></div>
                                     <div>
-                                       <p className="text-xl font-black text-white tracking-tighter uppercase">{m.description || 'Intervenção'}</p>
-                                       <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">
-                                          {vehicles.find(v => v.id === m.vehicleId)?.plate || 'N/A'} • {m.type} • {m.date ? new Date(m.date).toLocaleDateString() : 'N/A'}
+                                       <p className="text-2xl font-black text-white uppercase tracking-tighter">{m.description || 'Intervenção'}</p>
+                                       <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">
+                                          {vehicles.find(v => v.id === m.vehicleId)?.plate || 'Frota N/A'} • {m.type} • {m.date ? new Date(m.date).toLocaleDateString() : 'Auditoria Manual'}
                                        </p>
                                     </div>
                                  </div>
                                  <div className="text-right">
-                                    <p className="text-3xl font-black text-rose-500 tracking-tighter">R$ {Number(m.totalCost).toLocaleString()}</p>
+                                    <p className="text-4xl font-black text-rose-500 tracking-tighter">R$ {Number(m.totalCost).toLocaleString()}</p>
                                  </div>
                               </div>
                            ))
                         ) : (
-                           <div className="py-24 text-center opacity-20 italic">Sem registros de intervenções mecânicas graves.</div>
+                           <div className="py-24 text-center opacity-20"><History className="w-20 h-20 mx-auto mb-6" /><p className="text-xl font-black uppercase italic tracking-widest">Nenhuma intervenção mecânica grave.</p></div>
                         )}
                      </div>
                   </div>
@@ -368,22 +320,32 @@ const Performance: React.FC<PerformanceProps> = ({
 
          {activeView === 'inteligencia' && (
             <div className="animate-in zoom-in-95 duration-700">
-               <div className={glassCard + " bg-gradient-to-br from-indigo-950/30 via-slate-900 to-slate-950 border-indigo-500/20"}>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 py-10">
+               <div className={glassCard + " bg-gradient-to-br from-indigo-950/20 via-slate-950 to-indigo-950/20 border-indigo-500/20"}>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 py-16">
                      <div className="space-y-12">
-                        <div className="flex items-center gap-6"><div className="w-16 h-16 bg-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400"><Lightbulb className="w-8 h-8" /></div><h3 className="text-4xl font-black text-white uppercase italic leading-none">Visão IA</h3></div>
-                        <div className="p-10 bg-slate-950/60 rounded-[3rem] border border-slate-800">
-                           <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-6">Recomendação Estratégica</p>
-                           <p className="text-white text-xl font-medium leading-relaxed italic">
-                              "Seus dados indicam que o eixo estratégico para <b>{rankedRoutes[0]?.name || 'seu destino principal'}</b> está entregando lucro de R$ {(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)} / km. Focar recursos nesta rota pode elevar o faturamento mensal em até 15%."
-                           </p>
+                        <div className="flex items-center gap-8">
+                           <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-2xl shadow-indigo-500/20"><Lightbulb className="w-10 h-10" /></div>
+                           <h3 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Visão Neural</h3>
+                        </div>
+                        <div className="space-y-6">
+                           <div className="p-10 bg-slate-950/80 rounded-[3rem] border border-slate-800 shadow-2xl">
+                              <p className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.5em] mb-6">Recomendação Estratégica</p>
+                              <p className="text-white text-2xl font-medium leading-relaxed italic">
+                                 "Sua rota para <b>{rankedRoutes[0]?.name || 'seu destino principal'}</b> está entregando lucro de R$ {(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}/km. Concentrar 20% mais frota neste eixo elevaria o lucro mensal projetado em R$ {(analytics.totalProfit * 0.15).toLocaleString()}."
+                              </p>
+                           </div>
                         </div>
                      </div>
-                     <div className="bg-slate-950/80 rounded-[4rem] p-12 border border-slate-800 relative flex flex-col items-center justify-center">
-                        <Brain className="w-24 h-24 text-indigo-500 mb-8 animate-pulse" />
+                     <div className="bg-slate-950/90 rounded-[4rem] p-16 border border-slate-800 shadow-inner flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50 group-hover:via-emerald-500 transition-all duration-1000" />
+                        <Brain className="w-32 h-32 text-indigo-500 mb-10 animate-pulse" />
+                        <h4 className="text-3xl font-black text-white uppercase italic mb-8 tracking-tighter">ROI de Alta Performance</h4>
                         <div className="w-full space-y-4">
                            {rankedRoutes.slice(0, 3).map((r, i) => (
-                              <div key={i} className="flex justify-between items-center p-6 bg-slate-900/50 rounded-2xl border border-slate-800"><span className="text-sm font-black text-slate-400 uppercase">{r.name}</span><span className="text-lg font-black text-emerald-500">R$ {(r.profit / r.km).toFixed(2)}/km</span></div>
+                              <div key={i} className="flex justify-between items-center p-8 bg-slate-900/60 rounded-3xl border border-slate-800 group hover:border-indigo-500/40 transition-all">
+                                 <span className="text-sm font-black text-slate-400 uppercase tracking-widest">{r.name}</span>
+                                 <span className="text-xl font-black text-emerald-500">R$ {(r.profit / r.km).toFixed(2)}/km</span>
+                              </div>
                            ))}
                         </div>
                      </div>
@@ -395,32 +357,153 @@ const Performance: React.FC<PerformanceProps> = ({
    );
 };
 
-// COMPONENTES DE APOIO
-const LuxuryStat = ({ title, value, color, icon: Icon, trend }: any) => (
-   <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl relative group overflow-hidden">
-      <div className="flex justify-between items-start mb-6">
-         <div className="w-14 h-14 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 shadow-xl"><Icon className={`w-7 h-7 ${color}`} /></div>
-         <span className={`text-[9px] font-black px-3 py-1 rounded-full bg-slate-950 border border-slate-800 ${trend.includes('+') ? 'text-emerald-500' : 'text-slate-500'}`}>{trend}</span>
+// ------------------------------------------------------------------------------------------------
+// NEURAL CUSTOM SVG COMPONENTS (Zero Library, Failsafe Graphics)
+// ------------------------------------------------------------------------------------------------
+
+const NeuralAreaChart = ({ data }: { data: any[] }) => {
+   if (!data || data.length === 0) return null;
+
+   const width = 800;
+   const height = 400;
+   const padding = 40;
+
+   const maxProfit = Math.max(...data.map(d => d.profit), 100);
+   const maxRevenue = Math.max(...data.map(d => d.revenue), 100);
+   const globalMax = Math.max(maxProfit, maxRevenue) * 1.1;
+
+   const getX = (index: number) => (index * (width - 2 * padding)) / (data.length - 1) + padding;
+   const getY = (val: number) => height - padding - (val * (height - 2 * padding)) / globalMax;
+
+   const profitPoints = data.map((d, i) => `${getX(i)},${getY(d.profit)}`).join(' ');
+   const revenuePoints = data.map((d, i) => `${getX(i)},${getY(d.revenue)}`).join(' ');
+
+   const profitPath = `M ${getX(0)},${height - padding} L ${profitPoints} L ${getX(data.length - 1)},${height - padding} Z`;
+   const revenuePath = `M ${getX(0)},${getY(data[0].revenue)} ${data.slice(1).map((d, i) => `L ${getX(i + 1)},${getY(d.revenue)}`).join(' ')}`;
+
+   return (
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full drop-shadow-2xl overflow-visible">
+         <defs>
+            <linearGradient id="pGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#10b981" stopOpacity="0.6" /><stop offset="100%" stopColor="#10b981" stopOpacity="0" /></linearGradient>
+            <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+         </defs>
+
+         {/* Grid Lines */}
+         {[0, 0.25, 0.5, 0.75, 1].map((v, i) => (
+            <line key={i} x1={padding} y1={getY(globalMax * v)} x2={width - padding} y2={getY(globalMax * v)} stroke="#334155" strokeWidth="1" strokeDasharray="5,5" opacity="0.2" />
+         ))}
+
+         {/* Profit Area */}
+         <path d={profitPath} fill="url(#pGrad)" className="animate-in fade-in duration-1000" />
+         <polyline points={profitPoints} fill="none" stroke="#10b981" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" filter="url(#glow)" />
+
+         {/* Revenue Line */}
+         <path d={revenuePath} fill="none" stroke="#0ea5e9" strokeWidth="3" strokeDasharray="10,5" opacity="0.6" />
+
+         {/* Vertical Labels */}
+         {data.map((d, i) => (
+            <text key={i} x={getX(i)} y={height - 10} textAnchor="middle" fill="#475569" className="text-[14px] font-black uppercase tracking-tighter">{d.name}</text>
+         ))}
+
+         {/* Data Points */}
+         {data.map((d, i) => (
+            <circle key={i} cx={getX(i)} cy={getY(d.profit)} r="6" fill="#10b981" stroke="#0f172a" strokeWidth="3" />
+         ))}
+      </svg>
+   );
+};
+
+const NeuralRadialGauge = ({ value }: { value: number }) => {
+   const radius = 90;
+   const circum = 2 * Math.PI * radius;
+   const offset = circum - (Math.min(value, 100) / 100) * circum;
+
+   return (
+      <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">
+         <circle cx="100" cy="100" r={radius} fill="none" stroke="#0f172a" strokeWidth="18" />
+         <circle
+            cx="100" cy="100" r={radius} fill="none"
+            stroke="url(#gGrad)" strokeWidth="22"
+            strokeDasharray={circum} strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+         />
+         <defs>
+            <linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#10b981" /><stop offset="100%" stopColor="#0ea5e9" /></linearGradient>
+         </defs>
+      </svg>
+   );
+};
+
+const NeuralPieChart = ({ data }: { data: any[] }) => {
+   const radius = 100;
+   const center = 150;
+   let cumulativeAngle = 0;
+   const total = data.reduce((acc, d) => acc + (d.value || 0), 1) || 1;
+
+   return (
+      <svg viewBox="0 0 300 300" className="w-full h-full scale-110 drop-shadow-3xl">
+         {data.map((d, i) => {
+            const perc = (d.value || 0) / total;
+            const angle = perc * 360;
+            const x1 = center + radius * Math.cos((Math.PI * cumulativeAngle) / 180);
+            const y1 = center + radius * Math.sin((Math.PI * cumulativeAngle) / 180);
+            cumulativeAngle += angle;
+            const x2 = center + radius * Math.cos((Math.PI * cumulativeAngle) / 180);
+            const y2 = center + radius * Math.sin((Math.PI * cumulativeAngle) / 180);
+
+            const largeArcFlag = angle > 180 ? 1 : 0;
+            const pathData = `M ${center},${center} L ${x1},${y1} A ${radius},${radius} 0 ${largeArcFlag} 1 ${x2},${y2} Z`;
+
+            return (
+               <g key={i} className="hover:scale-105 transition-all duration-500 origin-center cursor-pointer">
+                  <path d={pathData} fill={d.color} stroke="#0f172a" strokeWidth="4" />
+               </g>
+            );
+         })}
+         <circle cx={center} cy={center} r="65" fill="#0f172a" />
+         <PieIcon className="w-12 h-12 text-slate-800" x={center - 24} y={center - 24} />
+      </svg>
+   );
+};
+
+const PremiumStat = ({ title, value, color, icon: Icon, trend }: any) => (
+   <div className="bg-slate-900 border border-slate-800 p-10 rounded-[2.5rem] shadow-2xl relative group overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[80px] translate-x-16 -translate-y-16 group-hover:bg-white/10 transition-all pointer-events-none" />
+      <div className="flex justify-between items-start mb-8">
+         <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 shadow-xl group-hover:scale-110 transition-all duration-700"><Icon className={`w-8 h-8 ${color}`} /></div>
+         <span className={`text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-950 border border-slate-800 ${trend.includes('+') ? 'text-emerald-500 shadow-emerald-500/10' : 'text-slate-500'} shadow-lg`}>{trend}</span>
       </div>
-      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">{title}</p>
-      <p className={`text-3xl font-black ${color} tracking-tighter`}>{typeof value === 'number' ? `R$ ${Number(value || 0).toLocaleString()}` : value}</p>
+      <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em] mb-2">{title}</p>
+      <p className={`text-4xl font-black ${color} tracking-tighter`}>{typeof value === 'number' ? `R$ ${Number(value).toLocaleString()}` : value}</p>
    </div>
 );
 
-const DynamicRank = ({ title, desc, icon: Icon, color, data }: any) => {
+const EliteRanking = ({ title, desc, icon: Icon, color, data }: any) => {
    const c = color === 'emerald' ? 'text-emerald-500' : color === 'sky' ? 'text-sky-500' : color === 'amber' ? 'text-amber-500' : 'text-rose-500';
    return (
-      <div className="bg-slate-900 border border-slate-800 p-10 rounded-[3rem] shadow-2xl">
-         <div className="flex items-center gap-6 mb-10">
-            <div className={`w-14 h-14 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 ${c}`}><Icon className="w-8 h-8" /></div>
-            <div><h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">{title}</h3><p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{desc}</p></div>
+      <div className="bg-slate-900/60 border border-slate-800/80 p-12 rounded-[3.5rem] shadow-2xl group/rank">
+         <div className="flex items-center gap-8 mb-12">
+            <div className={`w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 ${c} group-hover/rank:rotate-12 transition-all`}><Icon className="w-10 h-10" /></div>
+            <div>
+               <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">{title}</h3>
+               <p className="text-[11px] text-slate-500 uppercase font-bold tracking-[0.2em]">{desc}</p>
+            </div>
          </div>
-         <div className="space-y-4">
+         <div className="space-y-6">
             {data.map((item: any, i: number) => (
-               <div key={i} className="flex items-center gap-6 p-6 bg-slate-950/60 rounded-[2rem] border border-slate-800/40 hover:border-emerald-500/20 transition-all">
-                  <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center font-black text-slate-700 text-lg">#{i + 1}</div>
-                  <div className="flex-1 min-w-0"><p className="text-base font-black text-white uppercase truncate">{item.name}</p><p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">{item.sub}</p></div>
-                  <div className="text-right"><p className={`${c} font-black text-2xl tracking-tighter`}>R$ {Number(item.val || 0).toLocaleString()}</p></div>
+               <div key={i} className="flex items-center gap-8 p-8 bg-slate-950/60 rounded-[2.5rem] border border-slate-800/50 hover:border-emerald-500/20 transition-all shadow-xl group/item">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl ${i < 3 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-900 text-slate-700'} border border-slate-800 shadow-inner group-hover/item:scale-110 transition-transform`}>
+                     {i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                     <p className="text-2xl font-black text-white uppercase truncate tracking-tighter">{item.name}</p>
+                     <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-1">{item.sub}</p>
+                  </div>
+                  <div className="text-right">
+                     <p className={`${c} font-black text-3xl tracking-tighter`}>R$ {Number(item.val).toLocaleString()}</p>
+                     <ChevronRight className="w-4 h-4 text-slate-800 inline-block ml-2 group-hover/item:translate-x-1 transition-transform" />
+                  </div>
                </div>
             ))}
          </div>
@@ -428,34 +511,10 @@ const DynamicRank = ({ title, desc, icon: Icon, color, data }: any) => {
    );
 };
 
-const CustomTooltipUI = ({ active, payload, label }: any) => {
-   if (active && payload && payload.length) {
-      return (
-         <div className="bg-slate-950 border border-slate-700 p-6 rounded-2xl shadow-3xl backdrop-blur-3xl">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 border-b border-slate-800 pb-2">{label}</p>
-            <div className="space-y-3">
-               <div className="flex justify-between gap-10"><span className="text-[10px] font-black text-slate-400 uppercase">Receita</span><span className="text-sm font-black text-sky-400">R$ {Number(payload[1]?.value || 0).toLocaleString()}</span></div>
-               <div className="flex justify-between gap-10"><span className="text-[10px] font-black text-slate-400 uppercase">Lucro</span><span className="text-sm font-black text-emerald-500">R$ {Number(payload[0]?.value || 0).toLocaleString()}</span></div>
-            </div>
-         </div>
-      );
-   }
-   return null;
-};
-
-const SimplePieTooltipUI = ({ active, payload }: any) => {
-   if (active && payload && payload.length) {
-      return (
-         <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl shadow-2xl"><p className="text-[10px] font-black text-white uppercase">{payload[0].name}</p><p className="text-sm font-black text-emerald-500">R$ {Number(payload[0].value || 0).toLocaleString()}</p></div>
-      );
-   }
-   return null;
-};
-
-const MiniCard = ({ label, val, color }: any) => (
-   <div className="p-5 bg-slate-950/60 border border-slate-800 rounded-[2rem]">
-      <div className="flex items-center gap-2 mb-2"><div className={`w-2 h-2 rounded-full ${color}`} /><span className="text-[9px] font-black text-slate-500 uppercase">{label}</span></div>
-      <p className="text-lg font-black text-white">R$ {Number(val || 0).toLocaleString()}</p>
+const MiniStat = ({ label, val, color }: any) => (
+   <div className="p-6 bg-slate-950/80 border border-slate-800 rounded-[2rem] shadow-xl group hover:border-white/10 transition-all">
+      <div className="flex items-center gap-3 mb-3"><div className={`w-2.5 h-2.5 rounded-full ${color} shadow-[0_0_10px_rgba(16,185,129,0.3)]`} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</span></div>
+      <p className="text-2xl font-black text-white tracking-tighter">R$ {Number(val || 0).toLocaleString()}</p>
    </div>
 );
 
