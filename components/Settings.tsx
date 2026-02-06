@@ -32,7 +32,11 @@ import {
    Settings2,
    Sparkles,
    Check,
-   Calculator
+   Calculator,
+   Disc,
+   CreditCard,
+   Users,
+   Brain
 } from 'lucide-react';
 import { useAppMode } from '../contexts/AppModeContext';
 import { UserProfile, Vehicle, Driver, Shipper, Trip, MaintenanceRecord } from '../types';
@@ -74,6 +78,14 @@ const Settings: React.FC<SettingsProps> = ({
          ...profile,
          config: { ...profile.config, [key]: value }
       });
+   };
+
+   const toggleFeature = (feature: string, enabled: boolean) => {
+      const current = profile.config.enabledFeatures || [];
+      const updated = enabled
+         ? [...current, feature]
+         : current.filter(f => f !== feature);
+      handleConfigChange('enabledFeatures', updated);
    };
 
    const handleProfileSave = () => {
@@ -383,21 +395,63 @@ const Settings: React.FC<SettingsProps> = ({
 
                         {profile.config.appMode === 'custom' && (
                            <div className="pt-8 border-t border-slate-800 animate-in slide-in-from-bottom-4">
-                              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Módulos Ativos</p>
-                              <div className="space-y-4 bg-slate-950/50 p-6 rounded-2xl border border-slate-800">
+                              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-2">Configuração Granular de Módulos</p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                  <ToggleOption
-                                    label="Manutenção Completa"
-                                    description="Controle de óleo, peças e serviços."
-                                    checked={profile.config.enableMaintenance ?? true}
-                                    onChange={v => handleConfigChange('enableMaintenance', v)}
+                                    label="Business Intelligence (BI)"
+                                    description="Gráficos avançados, auditoria e performance."
+                                    checked={(profile.config.enabledFeatures || []).includes('bi')}
+                                    onChange={v => toggleFeature('bi', v)}
+                                    icon={TrendingUp}
+                                 />
+                                 <ToggleOption
+                                    label="Manutenção de Frota"
+                                    description="Controle de óleo, gastos e histórico."
+                                    checked={(profile.config.enabledFeatures || []).includes('maintenance')}
+                                    onChange={v => toggleFeature('maintenance', v)}
                                     icon={Wrench}
                                  />
                                  <ToggleOption
-                                    label="Business Intelligence"
-                                    description="Gráficos e relatórios de performance."
-                                    checked={profile.config.enableBI ?? true}
-                                    onChange={v => handleConfigChange('enableBI', v)}
-                                    icon={TrendingUp}
+                                    label="Controle de Pneus"
+                                    description="Gestão de chips, sulcos e trocas."
+                                    checked={(profile.config.enabledFeatures || []).includes('tires')}
+                                    onChange={v => toggleFeature('tires', v)}
+                                    icon={Disc}
+                                 />
+                                 <ToggleOption
+                                    label="Financeiro Complexo"
+                                    description="Fluxo de caixa e divisões de lucro."
+                                    checked={(profile.config.enabledFeatures || []).includes('finance')}
+                                    onChange={v => toggleFeature('finance', v)}
+                                    icon={CreditCard}
+                                 />
+                                 <ToggleOption
+                                    label="Motoristas & Clientes"
+                                    description="Cadastros detalhados e rankings."
+                                    checked={(profile.config.enabledFeatures || []).includes('drivers')}
+                                    onChange={v => toggleFeature('drivers', v)}
+                                    icon={Users}
+                                 />
+                                 <ToggleOption
+                                    label="Calculadora de Frete"
+                                    description="Motor de cálculo de custo operacional."
+                                    checked={profile.config.enableFreightCalculator !== false}
+                                    onChange={v => handleConfigChange('enableFreightCalculator', v)}
+                                    icon={Calculator}
+                                 />
+                                 <ToggleOption
+                                    label="Motor de Inteligência (IA)"
+                                    description="Feed tático de insights e saúde operacional."
+                                    checked={profile.config.showTips !== false}
+                                    onChange={v => handleConfigChange('showTips', v)}
+                                    icon={Brain}
+                                 />
+                                 <ToggleOption
+                                    label="Autenticação de Docs"
+                                    description="Validação automática de CNH e RNTRC."
+                                    checked={(profile.config.enabledFeatures || []).includes('docs')}
+                                    onChange={v => toggleFeature('docs', v)}
+                                    icon={ShieldCheck}
                                  />
                               </div>
                            </div>

@@ -33,6 +33,7 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [totalTrips, setTotalTrips] = useState(0);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     const client = supabaseClient || supabase;
 
@@ -42,6 +43,7 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
 
     const fetchUsers = async () => {
         setLoading(true);
+        setErrorMsg(null);
         const { data, error } = await client
             .from('profiles')
             .select('*')
@@ -49,7 +51,8 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
 
         if (data) setUsers(data);
         if (error) {
-            console.error("Admin fetch error:", error.message || error, error.details, error.hint);
+            console.error("Admin fetch error:", error);
+            setErrorMsg(error.message);
         }
 
         // Fetch system-wide trip count
@@ -118,14 +121,21 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                 </div>
             </div>
 
-            {users.length === 0 && !loading && (
+            {errorMsg && (
+                <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-3xl mb-6 flex items-center gap-4 text-rose-500">
+                    <AlertCircle className="w-6 h-6" />
+                    <p className="font-bold">{errorMsg}</p>
+                </div>
+            )}
+
+            {users.length === 0 && !loading && !errorMsg && (
                 <div className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-3xl animate-in zoom-in duration-300">
                     <div className="flex items-center gap-4 text-amber-500 mb-2">
                         <ShieldAlert className="w-6 h-6" />
-                        <p className="font-black uppercase tracking-widest italic">Aviso de Visibilidade (RLS)</p>
+                        <p className="font-black uppercase tracking-widest italic">Nenhum Usuário Encontrado</p>
                     </div>
                     <p className="text-slate-400 text-sm leading-relaxed">
-                        Se você sabe que existem usuários mas não os vê aqui, é provável que a **Row Level Security (RLS)** do Supabase esteja restringindo o acesso. Certifique-se de que existe uma política na tabela `profiles` permitindo a leitura para o seu e-mail de admin.
+                        Não existem perfis registrados no banco de dados ou você não tem permissão para visualizá-los. Se você sabe que existem usuários mas não os vê aqui, é provável que a **Row Level Security (RLS)** do Supabase esteja restringindo o acesso. Certifique-se de que existe uma política na tabela `profiles` permitindo a leitura para o seu e-mail de admin.
                     </p>
                 </div>
             )}
@@ -276,7 +286,7 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                     </table>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 export default AdminPanel;

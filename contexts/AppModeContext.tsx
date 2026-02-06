@@ -18,6 +18,7 @@ interface AppModeContextType {
     features: FeatureFlags;
     isSimpleMode: boolean;
     isAdvancedMode: boolean;
+    uiStyle: 'minimal' | 'balanced' | 'neural' | 'deep';
 }
 
 const AppModeContext = createContext<AppModeContextType | undefined>(undefined);
@@ -86,11 +87,19 @@ export const AppModeProvider: React.FC<{ profile: UserProfile, children: React.R
         return flags;
     }, [mode, customFeatures]);
 
+    const uiStyle = useMemo((): 'minimal' | 'balanced' | 'neural' | 'deep' => {
+        if (mode === 'simple') return 'minimal';
+        if (mode === 'intermediate') return 'balanced';
+        if (mode === 'advanced') return 'neural';
+        return 'deep';
+    }, [mode]);
+
     const value = {
         mode,
         features,
         isSimpleMode: mode === 'simple',
-        isAdvancedMode: mode === 'advanced'
+        isAdvancedMode: mode === 'advanced',
+        uiStyle
     };
 
     return (

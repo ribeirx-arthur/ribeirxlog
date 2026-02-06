@@ -55,8 +55,8 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     litersDiesel: 0,
     outrasDespesas: 0,
     departureDate: new Date().toISOString().split('T')[0],
-    returnDate: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-    receiptDate: new Date(Date.now() + 86400000 * 15).toISOString().split('T')[0],
+    returnDate: '',
+    receiptDate: '',
     status: 'Pendente' as PaymentStatus,
     totalKm: 0
   });
@@ -251,11 +251,17 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                 <input type="date" value={formData.departureDate} onChange={e => setFormData({ ...formData, departureDate: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-bold outline-none focus:border-sky-500" />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Retorno Previsto</label>
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Retorno Previsto</label>
+                  <button onClick={() => setFormData({ ...formData, returnDate: '' })} className="text-[9px] font-black text-rose-500 uppercase hover:text-rose-400">Limpar</button>
+                </div>
                 <input type="date" value={formData.returnDate} onChange={e => setFormData({ ...formData, returnDate: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-bold outline-none focus:border-sky-500" />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Data Recebimento</label>
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Data Recebimento</label>
+                  <button onClick={() => setFormData({ ...formData, receiptDate: '' })} className="text-[9px] font-black text-rose-500 uppercase hover:text-rose-400">Limpar</button>
+                </div>
                 <input type="date" value={formData.receiptDate} onChange={e => setFormData({ ...formData, receiptDate: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-emerald-500 font-bold outline-none focus:border-emerald-500" />
               </div>
             </div>

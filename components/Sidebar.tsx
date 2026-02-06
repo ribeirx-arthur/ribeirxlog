@@ -29,8 +29,17 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isOpen, onClose }) => {
-  const { features } = useAppMode();
+  const { features, uiStyle } = useAppMode();
   const { signOut } = useAuth();
+
+  const adminEmails = [
+    'arthur@ribeirxlog.com',
+    'arthur.ribeirx@gmail.com',
+    'arthur.riberix@gmail.com',
+    'arthurpsantos01@gmail.com',
+    'arthur_ribeiro09@outlook.com'
+  ];
+  const isAdmin = adminEmails.includes(profile.email?.trim().toLowerCase() || '') || profile.name?.toLowerCase().includes('ribeirxlog');
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,15 +47,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI },
     { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !features.canAccessFullMaintenance },
     { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: !features.canAccessTires },
-    { id: 'intelligence', label: 'Inteligência', icon: Brain },
+    { id: 'intelligence', label: 'Inteligência', icon: Brain, hidden: profile.config.showTips === false },
     { id: 'freight-calculator', label: 'Cálculo de Frete', icon: Calculator, hidden: profile.config.enableFreightCalculator === false },
     { id: 'setup', label: 'Cadastros', icon: Users },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
-    { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthur_ribeiro09@outlook.com'].includes(profile.email?.trim().toLowerCase() || '') },
+    { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !isAdmin },
   ];
-
-  const adminEmails = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthur_ribeiro09@outlook.com'];
-  const isAdmin = adminEmails.includes(profile.email?.trim().toLowerCase() || '');
 
   return (
     <>
@@ -58,16 +64,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
         />
       )}
 
-      <div className={`w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto z-[150] transition-transform duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto z-[150] transition-transform duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} ${uiStyle === 'deep' ? 'shadow-[10px_0_30px_rgba(16,185,129,0.05)]' : ''}`}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <Truck className="text-white w-6 h-6" />
+            <div className={`flex items-center gap-3 ${uiStyle === 'deep' ? 'animate-in zoom-in-50 duration-500' : ''}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-500 ${uiStyle === 'minimal' ? 'bg-white text-black' : 'bg-emerald-500 text-white shadow-emerald-500/20'}`}>
+                <Truck className="w-6 h-6" />
               </div>
               <div>
-                <span className="font-black text-xl tracking-tighter text-white">RIBEIRX<span className="text-emerald-500">LOG</span></span>
-                <p className="text-[9px] font-bold text-slate-500 tracking-widest uppercase">Inteligência Logística</p>
+                <span className="font-black text-xl tracking-tighter text-white">RIBEIRX<span className={uiStyle === 'minimal' ? 'text-white/50' : 'text-emerald-500'}>LOG</span></span>
+                <p className="text-[9px] font-bold text-slate-500 tracking-widest uppercase">
+                  {uiStyle === 'minimal' ? 'Logística Simples' : uiStyle === 'deep' ? 'Neural OS RBS' : 'Inteligência Logística'}
+                </p>
               </div>
             </div>
             <button onClick={onClose} className="p-2 bg-slate-800 rounded-lg text-slate-400 md:hidden border border-slate-700">
@@ -85,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
                 <p className="text-[9px] text-slate-400 font-bold leading-relaxed">Sua conta possui limites de registros. Faça upgrade para acesso total.</p>
               </div>
             )}
-            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-4 ml-2">Main Navigation</p>
+            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-4 ml-2">Navegação {uiStyle === 'deep' ? 'Tática' : ''}</p>
             {menuItems.filter(item => !item.hidden).map((item) => {
               const Icon = item.icon;
               const isLocked = profile.payment_status !== 'paid' &&
@@ -96,16 +104,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
                   key={item.id}
                   onClick={() => { setActiveTab(item.id as TabType); onClose?.(); }}
                   className={`w-full group flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === item.id
-                    ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                    ? (uiStyle === 'neural' || uiStyle === 'deep'
+                      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]'
+                      : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20')
                     : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100'
                     } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={`w-5 h-5 transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110'}`} />
-                    <span className="font-bold text-sm">{item.label}</span>
+                    <span className="font-bold text-sm tracking-tight">{item.label}</span>
                   </div>
                   {isLocked && <ShieldAlert className="w-4 h-4 text-slate-500 group-hover:text-amber-500 transition-colors" />}
-                  {activeTab === item.id && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />}
+                  {activeTab === item.id && (
+                    <div className={`w-1.5 h-1.5 rounded-full ${uiStyle === 'deep' ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]' : (uiStyle === 'minimal' ? 'bg-white' : 'bg-emerald-500')}`} />
+                  )}
                 </button>
               );
             })}

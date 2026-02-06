@@ -113,8 +113,8 @@ export interface Trip {
   driverId: string;
   shipperId: string;
   departureDate: string;
-  returnDate: string;
-  receiptDate: string;
+  returnDate?: string;
+  receiptDate?: string;
   freteSeco: number;
   diarias: number;
   adiantamento: number;
