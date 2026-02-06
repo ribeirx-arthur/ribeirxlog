@@ -504,6 +504,11 @@ export default function Home() {
             );
             case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
             case 'settings': return <Settings profile={profile} setProfile={handleUpdateProfile} trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} maintenances={maintenances} onImportData={() => { }} onResetData={() => { }} />;
+            case 'performance': return (
+                <Suspense fallback={<div>Carregando BI...</div>}>
+                    <Performance trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} />
+                </Suspense>
+            );
             case 'intelligence': return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
             case 'freight-calculator': return <FreightCalculator vehicles={vehicles} profile={profile} />;
             case 'tires': return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;

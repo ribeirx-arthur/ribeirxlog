@@ -4,17 +4,16 @@ Este documento detalha o passo a passo para transformar a calculadora atual em u
 
 ---
 
-## 1. Precisão Geográfica (Google Maps API)
-O objetivo é eliminar a digitação manual de KM e prever rotas exatas.
+## 1. Roteirização Especializada (Caminhão vs Carro)
+O Google Maps padrão é ótimo para carros, mas para um SaaS de elite, ele é perigoso porque não conhece restrições de **ZMRC (Zonas de Restrição em São Paulo)**, pontes baixas ou limites de peso.
+
+### Ferramentas Recomendadas:
+1.  **Maplink API (Líder no Brasil):** A melhor para o mercado brasileiro. Já conhece todas as restrições de caminhões e zonas de rodízio/restrição das capitais.
+2.  **HERE Routing API (Padrão Global):** Utilizada pelas maiores transportadoras do mundo. Possui perfis específicos para caminhões (altura, largura, peso por eixo e materiais perigosos).
 
 ### Passo a Passo:
-1.  **Google Cloud Console:** Crie um projeto e gere uma API Key.
-2.  **Ativar APIs:** 
-    *   `Distance Matrix API` (para distância e tempo entre cidades).
-    *   `Places API` (para o autocompletar de endereços nos inputs).
-3.  **Implementação:**
-    *   Trocar os inputs de texto por `GooglePlacesAutocomplete`.
-    *   Ao selecionar destino, disparar um gatilho que calcula o KM real via rodovia e preenche o campo `distance`.
+*   **Perfil do Veículo:** Ao enviar a rota para a API, enviamos o "Truck Profile" com os dados que já temos no Ribeirx (número de eixos e peso total).
+*   **Evitar Restrições:** A API retornará uma rota que pode ser mais longa que a do Google, mas é a **única rota legal** onde o caminhão pode passar sem levar multa.
 
 ---
 

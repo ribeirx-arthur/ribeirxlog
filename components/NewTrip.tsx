@@ -61,6 +61,24 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     totalKm: 0
   });
 
+  // Carregar rascunho salvo ao montar o componente
+  React.useEffect(() => {
+    const savedDraft = localStorage.getItem('ribeirx_trip_draft');
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        setFormData(prev => ({ ...prev, ...parsed }));
+      } catch (e) {
+        console.error("Erro ao carregar rascunho:", e);
+      }
+    }
+  }, []);
+
+  // Salvar rascunho automaticamente sempre que houver alteração
+  React.useEffect(() => {
+    localStorage.setItem('ribeirx_trip_draft', JSON.stringify(formData));
+  }, [formData]);
+
   const uniqueOrigins = useMemo(() => {
     const map = new Map<string, string>();
     trips.forEach(t => {
@@ -131,7 +149,9 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
       driverId: formData.driverId || 'generic-driver',
       shipperId: formData.shipperId || 'generic-shipper',
     } as Trip;
+
     onSave(newTrip);
+    localStorage.removeItem('ribeirx_trip_draft');
   };
 
   const estimatedProfit = (formData.freteSeco + formData.diarias) - (formData.combustivel + formData.outrasDespesas);

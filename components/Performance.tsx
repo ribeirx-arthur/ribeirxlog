@@ -2,7 +2,8 @@
 import React, { useMemo, useState } from 'react';
 import {
    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-   Legend, PieChart, Pie, Cell, ComposedChart, Line, Area, AreaChart
+   Legend, PieChart, Pie, Cell, ComposedChart, Line, Area, AreaChart,
+   RadialBarChart, RadialBar, PolarAngleAxis
 } from 'recharts';
 import {
    TrendingUp,
@@ -23,7 +24,15 @@ import {
    Wrench,
    Percent,
    ChevronRight,
-   Coins
+   Coins,
+   Brain,
+   ArrowRight,
+   Info,
+   BarChart3,
+   Search,
+   DollarSign,
+   Calendar,
+   History
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, Shipper, UserProfile, MaintenanceRecord } from '../types';
 import { calculateTripFinance, normalizeDestination } from '../services/finance';
@@ -37,10 +46,12 @@ interface PerformanceProps {
    maintenances: MaintenanceRecord[];
 }
 
-const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shippers, profile, maintenances }) => {
-   const [activeView, setActiveView] = useState<'geral' | 'rankings' | 'custos'>('geral');
+type BIView = 'geral' | 'rankings' | 'custos' | 'inteligencia';
 
-   // ENGINE DE DADOS BI AVANÇADO
+const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shippers, profile, maintenances }) => {
+   const [activeView, setActiveView] = useState<BIView>('geral');
+
+   // SUPER ENGINE DE DADOS BI (ANALYTICS v3.0)
    const analytics = useMemo(() => {
       const stats = {
          totalRevenue: 0,
@@ -49,12 +60,27 @@ const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shi
          totalKm: 0,
          totalMaint: 0,
          totalCommissions: 0,
+         totalFixedCosts: (vehicles.length * 3500), // Estimativa de custos fixos
 
-         driverMap: new Map<string, { name: string, profit: number, revenue: number, trips: number, km: number, commission: number }>(),
-         vehicleMap: new Map<string, { plate: string, profit: number, revenue: number, trips: number, maint: number, km: number }>(),
-         routeMap: new Map<string, { name: string, profit: number, count: number, revenue: number, km: number }>(),
-         shipperMap: new Map<string, { name: string, revenue: number, profit: number, count: number }>()
+         driverMap: new Map<string, { id: string, name: string, profit: number, revenue: number, trips: number, km: number, commission: number }>(),
+         vehicleMap: new Map<string, { id: string, plate: string, profit: number, revenue: number, trips: number, maint: number, km: number }>(),
+         routeMap: new Map<string, { name: string, profit: number, count: number, revenue: number, km: number, fuel: number, otherCosts: number }>(),
+         shipperMap: new Map<string, { id: string, name: string, revenue: number, profit: number, count: number, commission: number }>(),
+
+         maintenanceCategories: {
+            'Preventiva': 0,
+            'Corretiva': 0,
+            'Preditiva': 0
+         },
+         mostExpensiveMaintenances: [] as MaintenanceRecord[],
+         lossMakingTrips: [] as any[],
+         monthlyData: [] as any[]
       };
+
+      // Limitar e ordenar as manutenções mais caras
+      stats.mostExpensiveMaintenances = [...maintenances]
+         .sort((a, b) => b.totalCost - a.totalCost)
+         .slice(0, 5);
 
       trips.forEach(t => {
          const v = vehicles.find(veh => veh.id === t.vehicleId);
@@ -70,7 +96,16 @@ const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shi
          stats.totalKm += t.totalKm;
          stats.totalCommissions += fin.comissaoMotorista;
 
-         const dStat = stats.driverMap.get(d.id) || { name: d.name, profit: 0, revenue: 0, trips: 0, km: 0, commission: 0 };
+         if (fin.lucroLiquidoReal < 0) {
+            stats.lossMakingTrips.push({
+               ...t,
+               profit: fin.lucroLiquidoReal,
+               vehicleLabel: v.plate,
+               driverLabel: d.name
+            });
+         }
+
+         const dStat = stats.driverMap.get(d.id) || { id: d.id, name: d.name, profit: 0, revenue: 0, trips: 0, km: 0, commission: 0 };
          dStat.profit += fin.lucroLiquidoReal;
          dStat.revenue += fin.totalBruto;
          dStat.trips += 1;
@@ -78,7 +113,7 @@ const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shi
          dStat.commission += fin.comissaoMotorista;
          stats.driverMap.set(d.id, dStat);
 
-         const vStat = stats.vehicleMap.get(v.id) || { plate: v.plate, profit: 0, revenue: 0, trips: 0, maint: 0, km: 0 };
+         const vStat = stats.vehicleMap.get(v.id) || { id: v.id, plate: v.plate, profit: 0, revenue: 0, trips: 0, maint: 0, km: 0 };
          vStat.profit += fin.lucroLiquidoReal;
          vStat.revenue += fin.totalBruto;
          vStat.trips += 1;
@@ -86,31 +121,29 @@ const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shi
          stats.vehicleMap.set(v.id, vStat);
 
          const rKey = normalizeDestination(t.destination);
-         const rStat = stats.routeMap.get(rKey) || { name: t.destination, profit: 0, count: 0, revenue: 0, km: 0 };
-
-         // Lógica de "Melhor Nome": prefere o nome mais completo ou que contenha hífen (UF)
-         const currentName = rStat.name;
-         const newName = t.destination;
-         const isNewBetter = (newName.includes('-') && !currentName.includes('-')) ||
-            (newName.length > currentName.length);
-
-         if (isNewBetter) rStat.name = newName;
-
+         const rStat = stats.routeMap.get(rKey) || { name: t.destination, profit: 0, count: 0, revenue: 0, km: 0, fuel: 0, otherCosts: 0 };
+         if (t.destination.length > rStat.name.length) rStat.name = t.destination;
          rStat.profit += fin.lucroLiquidoReal;
          rStat.revenue += fin.totalBruto;
          rStat.count += 1;
          rStat.km += t.totalKm;
+         rStat.fuel += t.combustivel;
+         rStat.otherCosts += t.outrasDespesas;
          stats.routeMap.set(rKey, rStat);
 
-         const sStat = stats.shipperMap.get(s.id) || { name: s.name, revenue: 0, profit: 0, count: 0 };
+         const sStat = stats.shipperMap.get(s.id) || { id: s.id, name: s.name, revenue: 0, profit: 0, count: 0, commission: 0 };
          sStat.revenue += fin.totalBruto;
          sStat.profit += fin.lucroLiquidoReal;
          sStat.count += 1;
+         sStat.commission += fin.comissaoMotorista;
          stats.shipperMap.set(s.id, sStat);
       });
 
       maintenances.forEach(m => {
          stats.totalMaint += m.totalCost;
+         if (stats.maintenanceCategories[m.type] !== undefined) {
+            stats.maintenanceCategories[m.type] += m.totalCost;
+         }
          const vStat = stats.vehicleMap.get(m.vehicleId);
          if (vStat) vStat.maint += m.totalCost;
       });
@@ -118,355 +151,297 @@ const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shi
       return stats;
    }, [trips, vehicles, drivers, shippers, profile, maintenances]);
 
-   const topDrivers = Array.from(analytics.driverMap.values()).sort((a, b) => b.profit - a.profit).slice(0, 5);
-   const topCommissions = Array.from(analytics.driverMap.values()).sort((a, b) => b.commission - a.commission).slice(0, 5);
-   const topVehicles = Array.from(analytics.vehicleMap.values()).sort((a, b) => b.profit - a.profit).slice(0, 5);
-   const topRoutes = Array.from(analytics.routeMap.values()).sort((a, b) => b.profit - a.profit).slice(0, 5);
-   const topShippers = Array.from(analytics.shipperMap.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+   // Data for Rankings
+   const rankedDrivers = useMemo(() => Array.from(analytics.driverMap.values()).sort((a, b) => b.profit - a.profit).slice(0, 10), [analytics]);
+   const rankedCommissions = useMemo(() => Array.from(analytics.driverMap.values()).sort((a, b) => b.commission - a.commission).slice(0, 10), [analytics]);
+   const rankedShippers = useMemo(() => Array.from(analytics.shipperMap.values()).sort((a, b) => b.profit - a.profit).slice(0, 10), [analytics]);
+   const rankedRoutes = useMemo(() => Array.from(analytics.routeMap.values()).sort((a, b) => b.profit - a.profit).slice(0, 10), [analytics]);
+   const rankedVehicles = useMemo(() => Array.from(analytics.vehicleMap.values()).sort((a, b) => b.profit - a.profit).slice(0, 10), [analytics]);
+   const rankedMaintVehicles = useMemo(() => Array.from(analytics.vehicleMap.values()).sort((a, b) => b.maint - a.maint).slice(0, 10), [analytics]);
 
-   const profitMargin = ((analytics.totalProfit / (analytics.totalRevenue || 1)) * 100).toFixed(1);
-   const kmEfficiency = (analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2);
-
-   const costDistributionData = [
-      { name: 'Diesel', value: analytics.totalFuel, color: '#38bdf8' },
-      { name: 'Manutenção', value: analytics.totalMaint, color: '#f43f5e' },
-      { name: 'Comissões', value: analytics.totalCommissions, color: '#f59e0b' },
-      { name: 'Outros', value: (analytics.totalRevenue - analytics.totalProfit - analytics.totalFuel - analytics.totalMaint - analytics.totalCommissions), color: '#64748b' },
-      { name: 'Lucro Real', value: analytics.totalProfit, color: '#10b981' }
-   ].filter(i => i.value > 0);
-
-   // MOTOR DE GESTÃO ESTRATÉGICA (DICAS DINÂMICAS)
-   const managementInsights = useMemo(() => {
-      const insights = [];
-      const maintRatio = (analytics.totalMaint / (analytics.totalRevenue || 1)) * 100;
-
-      if (maintRatio > 12) {
-         insights.push({
-            type: 'warning',
-            icon: AlertTriangle,
-            title: 'Custo de Ativos',
-            text: `A manutenção atingiu ${maintRatio.toFixed(1)}% da receita. Considere renovação de frota para os veículos com ROI negativo.`
-         });
-      }
-
-      if (topRoutes.length > 0) {
-         const best = topRoutes[0];
-         insights.push({
-            type: 'strategy',
-            icon: Target,
-            title: 'Expansão de Rota',
-            text: `A rota para ${best.name} é sua "Galinha dos Ovos de Ouro" com R$ ${(best.profit / best.km).toFixed(2)} de lucro/km.`
-         });
-      }
-
-      if (Number(kmEfficiency) < 2.5) {
-         insights.push({
-            type: 'action',
-            icon: TrendingDown,
-            title: 'Ajuste de Tarifa',
-            text: `Seu lucro médio por KM (R$ ${kmEfficiency}) está abaixo da meta de R$ 3,00. Revise as negociações de frete seco.`
-         });
-      }
-
-      return insights;
-   }, [analytics, topRoutes, kmEfficiency]);
+   const marginRatio = ((analytics.totalProfit / (analytics.totalRevenue || 1)) * 100).toFixed(1);
 
    return (
-      <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-               <h2 className="text-4xl font-black text-white tracking-tighter">Business Intelligence</h2>
-               <p className="text-slate-400 text-sm mt-1 uppercase font-bold tracking-widest flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-emerald-500" />
-                  Operação Ribeirx Log v2.0
-               </p>
+      <div className="space-y-8 animate-in fade-in duration-700 pb-24">
+         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 border-b border-slate-800 pb-10">
+            <div className="space-y-4">
+               <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-tr from-emerald-600 to-sky-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/20">
+                     <BarChart3 className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                     <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Super BI</h2>
+                     <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase mt-2 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        Análise de Performance Ribeirx v3.0
+                     </p>
+                  </div>
+               </div>
             </div>
 
-            <div className="flex bg-slate-900 border border-slate-800 p-1.5 rounded-2xl">
-               {['geral', 'rankings', 'custos'].map((v) => (
+            <nav className="flex bg-slate-900 border border-slate-800 p-2 rounded-3xl shadow-xl">
+               {[
+                  { id: 'geral', label: 'Geral', icon: Activity },
+                  { id: 'rankings', label: 'Rankings', icon: Trophy },
+                  { id: 'custos', label: 'Auditoria de Custos', icon: DollarSign },
+                  { id: 'inteligencia', label: 'Inteligência', icon: Lightbulb }
+               ].map((v) => (
                   <button
-                     key={v}
-                     onClick={() => setActiveView(v as any)}
-                     className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === v ? 'bg-emerald-500 text-emerald-950 shadow-lg' : 'text-slate-500 hover:text-slate-300'
+                     key={v.id}
+                     onClick={() => setActiveView(v.id as BIView)}
+                     className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 ${activeView === v.id ? 'bg-emerald-500 text-emerald-950 shadow-lg' : 'text-slate-500 hover:text-slate-200'
                         }`}
                   >
-                     {v}
+                     <v.icon className={`w-4 h-4 ${activeView === v.id ? 'text-emerald-950' : 'text-emerald-500'}`} />
+                     {v.label}
                   </button>
                ))}
-            </div>
+            </nav>
          </header>
 
-         {/* VISÃO DE RANKINGS - AUDITORIA DE PERFORMANCE */}
-         {activeView === 'rankings' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4">
-
-               <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-6">
-                  <div className="flex items-center justify-between">
-                     <h3 className="text-xl font-black text-white flex items-center gap-3">
-                        <Trophy className="text-amber-500" /> Hall da Fama (Motoristas)
-                     </h3>
-                     <span className="text-[10px] font-black text-slate-500 uppercase">Lucro Real</span>
-                  </div>
-                  <div className="space-y-4">
-                     {topDrivers.map((d, i) => (
-                        <div key={i} className="flex items-center gap-4 p-5 bg-slate-950/50 border border-slate-800 rounded-3xl hover:border-emerald-500/50 transition-all group">
-                           <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center font-black text-emerald-500 group-hover:scale-110 transition-transform">#{i + 1}</div>
-                           <div className="flex-1">
-                              <p className="text-white font-black">{d.name}</p>
-                              <p className="text-[9px] text-slate-500 font-bold uppercase">{d.trips} Viagens • R$ {(d.profit / d.km).toFixed(2)}/km</p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-emerald-500 font-black text-lg">R$ {d.profit.toLocaleString()}</p>
-                              <p className="text-[8px] text-slate-600 font-black uppercase">Lucro Acumulado</p>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </section>
-
-               <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-6">
-                  <div className="flex items-center justify-between">
-                     <h3 className="text-xl font-black text-white flex items-center gap-3">
-                        <Coins className="text-emerald-500" /> Ranking de Comissões (Salários)
-                     </h3>
-                     <span className="text-[10px] font-black text-slate-500 uppercase">Ganhos do Motorista</span>
-                  </div>
-                  <div className="space-y-4">
-                     {topCommissions.map((d, i) => (
-                        <div key={i} className="flex items-center gap-4 p-5 bg-slate-950/50 border border-slate-800 rounded-3xl hover:border-emerald-500/50 transition-all group">
-                           <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center font-black text-emerald-500 group-hover:scale-110 transition-transform">#{i + 1}</div>
-                           <div className="flex-1">
-                              <p className="text-white font-black">{d.name}</p>
-                              <p className="text-[9px] text-slate-500 font-bold uppercase">{d.trips} Viagens Realizadas</p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-emerald-500 font-black text-lg">R$ {d.commission.toLocaleString()}</p>
-                              <p className="text-[8px] text-slate-600 font-black uppercase">Salário Bruto (Comissão)</p>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </section>
-
-               <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-6">
-                  <div className="flex items-center justify-between">
-                     <h3 className="text-xl font-black text-white flex items-center gap-3">
-                        <Truck className="text-sky-500" /> ROI de Ativos (Frota)
-                     </h3>
-                     <span className="text-[10px] font-black text-slate-500 uppercase">Rentabilidade</span>
-                  </div>
-                  <div className="space-y-4">
-                     {topVehicles.map((v, i) => (
-                        <div key={i} className="flex items-center gap-4 p-5 bg-slate-950/50 border border-slate-800 rounded-3xl hover:border-sky-500/50 transition-all group">
-                           <div className="w-12 h-12 bg-sky-500/10 rounded-2xl flex items-center justify-center font-black text-sky-500 group-hover:scale-110 transition-transform">#{i + 1}</div>
-                           <div className="flex-1">
-                              <p className="text-white font-black">{v.plate}</p>
-                              <p className="text-[9px] text-slate-500 font-bold uppercase">{v.km.toLocaleString()} KM • {((v.profit / v.revenue) * 100).toFixed(1)}% Margem</p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-emerald-500 font-black text-lg">R$ {v.profit.toLocaleString()}</p>
-                              <p className="text-[8px] text-rose-500 font-black uppercase">R$ {v.maint.toLocaleString()} MANUT.</p>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </section>
-
-               <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-6">
-                  <div className="flex items-center justify-between">
-                     <h3 className="text-xl font-black text-white flex items-center gap-3">
-                        <MapPin className="text-rose-500" /> Melhores Destinos (Margem)
-                     </h3>
-                     <span className="text-[10px] font-black text-slate-500 uppercase">Inteligência Logística</span>
-                  </div>
-                  <div className="space-y-4">
-                     {topRoutes.map((r, i) => (
-                        <div key={i} className="flex items-center gap-4 p-5 bg-slate-950/50 border border-slate-800 rounded-3xl">
-                           <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center font-black text-rose-500">#{i + 1}</div>
-                           <div className="flex-1">
-                              <p className="text-white font-black">{r.name}</p>
-                              <p className="text-[9px] text-slate-500 font-bold uppercase">{r.count} Operações • R$ {r.revenue.toLocaleString()} Bruto</p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-white font-black text-lg">R$ {r.profit.toLocaleString()}</p>
-                              <div className="flex items-center justify-end gap-1">
-                                 <TrendingUp className="w-2.5 h-2.5 text-emerald-500" />
-                                 <p className="text-[9px] text-emerald-500 font-black uppercase">{((r.profit / r.revenue) * 100).toFixed(1)}%</p>
-                              </div>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </section>
-
-               <section className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-6">
-                  <div className="flex items-center justify-between">
-                     <h3 className="text-xl font-black text-white flex items-center gap-3">
-                        <Building2 className="text-emerald-500" /> Clientes VIP (Volume)
-                     </h3>
-                     <span className="text-[10px] font-black text-slate-500 uppercase">Comercial</span>
-                  </div>
-                  <div className="space-y-4">
-                     {topShippers.map((s, i) => (
-                        <div key={i} className="flex items-center gap-4 p-5 bg-slate-950/50 border border-slate-800 rounded-3xl">
-                           <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center font-black text-emerald-500">#{i + 1}</div>
-                           <div className="flex-1">
-                              <p className="text-white font-black">{s.name}</p>
-                              <p className="text-[9px] text-slate-500 font-bold uppercase">{s.count} Fretes Realizados</p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-white font-black text-lg">R$ {s.revenue.toLocaleString()}</p>
-                              <p className="text-[8px] text-slate-500 font-black uppercase">TOTAL FATURADO</p>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </section>
-            </div>
-         ) : activeView === 'custos' ? (
-            /* VISÃO DE CUSTOS - AUDITORIA FINANCEIRA */
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in slide-in-from-bottom-4">
-
-               <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 flex flex-col items-center">
-                  <h3 className="text-lg font-black text-white uppercase tracking-tighter mb-8">Composição de Gastos</h3>
-                  <div className="h-64 w-full">
-                     <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                           <Pie data={costDistributionData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={8} dataKey="value">
-                              {costDistributionData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                           </Pie>
-                           <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', color: '#fff' }} />
-                        </PieChart>
-                     </ResponsiveContainer>
-                  </div>
-                  <div className="w-full space-y-3 mt-6">
-                     {costDistributionData.map((item, i) => (
-                        <div key={i} className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                           <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
-                              {item.name}
-                           </div>
-                           <span className="text-white">R$ {item.value.toLocaleString()}</span>
-                        </div>
-                     ))}
-                  </div>
-               </div>
-
-               <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8">
-                  <h3 className="text-lg font-black text-white uppercase tracking-tighter mb-8">Auditoria Analítica</h3>
-                  <div className="overflow-x-auto">
-                     <table className="w-full text-left">
-                        <thead>
-                           <tr className="border-b border-slate-800">
-                              <th className="pb-4 text-[10px] font-black text-slate-500 uppercase">Centro de Custo</th>
-                              <th className="pb-4 text-[10px] font-black text-slate-500 uppercase">Total Bruto</th>
-                              <th className="pb-4 text-[10px] font-black text-slate-500 uppercase">% Receita</th>
-                              <th className="pb-4 text-right text-[10px] font-black text-slate-500 uppercase">Impacto</th>
-                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-800">
-                           <CostRow label="Diesel (Combustível)" value={analytics.totalFuel} total={analytics.totalRevenue} icon={Fuel} color="sky" />
-                           <CostRow label="Manutenção Frota" value={analytics.totalMaint} total={analytics.totalRevenue} icon={Wrench} color="rose" />
-                           <CostRow label="Comissão Equipe" value={analytics.totalCommissions} total={analytics.totalRevenue} icon={Percent} color="amber" />
-                           <CostRow label="Lucro Líquido" value={analytics.totalProfit} total={analytics.totalRevenue} icon={TrendingUp} color="emerald" />
-                        </tbody>
-                     </table>
-                  </div>
-
-                  <div className="mt-12 p-8 bg-slate-950/50 border border-slate-800 rounded-3xl flex items-center justify-between">
-                     <div>
-                        <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Taxa de Eficiência Real</h4>
-                        <p className="text-3xl font-black text-white tracking-tighter">{(analytics.totalProfit / (analytics.totalRevenue || 1) * 100).toFixed(1)}%</p>
-                     </div>
-                     <div className="text-right">
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Custo por KM Rodado</p>
-                        <p className="text-3xl font-black text-rose-500 tracking-tighter">R$ {((analytics.totalRevenue - analytics.totalProfit) / (analytics.totalKm || 1)).toFixed(2)}</p>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         ) : (
-            /* VISÃO GERAL - DASHBOARD INTELIGENTE */
+         {/* 1. VISÃO GERAL */}
+         {activeView === 'geral' && (
             <div className="space-y-8 animate-in fade-in">
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <StatCard title="Faturamento Bruto" value={`R$ ${analytics.totalRevenue.toLocaleString()}`} icon={Wallet} color="emerald" />
-                  <StatCard title="Lucro Líquido Real" value={`R$ ${analytics.totalProfit.toLocaleString()}`} icon={TrendingUp} color="sky" />
-                  <StatCard title="Margem de Lucro" value={`${profitMargin}%`} icon={Target} color="amber" />
-                  <StatCard title="Lucro por KM" value={`R$ ${kmEfficiency}`} icon={Activity} color="indigo" />
+                  <StatItem title="Faturamento Total" value={analytics.totalRevenue} color="text-white" icon={Wallet} />
+                  <StatItem title="Lucro Líquido Real" value={analytics.totalProfit} color="text-emerald-500" icon={TrendingUp} />
+                  <StatItem title="Eficiência (Margem)" value={`${marginRatio}%`} color="text-sky-400" icon={Target} />
+                  <StatItem title="Lucro p/ KM" value={`R$ ${(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}`} color="text-amber-400" icon={MapPin} />
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8">
-                     <div className="flex justify-between items-start mb-8">
-                        <div>
-                           <h3 className="text-xl font-black text-white tracking-tighter uppercase">Curva de Rentabilidade</h3>
-                           <p className="text-slate-500 text-[10px] font-black tracking-widest uppercase mt-1">Acumulado Operacional</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                           <span className="text-[9px] font-black text-slate-400 uppercase">Lucro Líquido</span>
-                        </div>
+                  <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-[3rem] p-10 shadow-2xl relative overflow-hidden group">
+                     <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:scale-110 transition-transform duration-1000">
+                        <LineChartIcon className="w-64 h-64" />
                      </div>
-                     <div className="h-72">
+                     <h3 className="text-xl font-black text-white uppercase italic mb-8">Fluxo de Lucratividade</h3>
+                     <div className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                            <AreaChart data={[
-                              { name: 'W1', val: analytics.totalProfit * 0.2 },
-                              { name: 'W2', val: analytics.totalProfit * 0.45 },
-                              { name: 'W3', val: analytics.totalProfit * 0.7 },
-                              { name: 'W4', val: analytics.totalProfit },
+                              { name: 'Início', profit: 0, revenue: 0 },
+                              { name: 'Operação', profit: analytics.totalProfit * 0.4, revenue: analytics.totalRevenue * 0.4 },
+                              { name: 'Atual', profit: analytics.totalProfit, revenue: analytics.totalRevenue },
                            ]}>
                               <defs>
-                                 <linearGradient id="colorP" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                 <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
                                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                  </linearGradient>
                               </defs>
-                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 10 }} />
-                              <Tooltip cursor={{ stroke: '#10b981' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px' }} />
-                              <Area type="monotone" dataKey="val" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorP)" />
+                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 10, fontWeight: 'bold' }} />
+                              <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', fontWeight: 'bold' }} />
+                              <Area type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={4} fill="url(#profitGrad)" />
+                              <Area type="monotone" dataKey="revenue" stroke="#38bdf8" strokeWidth={2} strokeDasharray="5 5" fill="none" />
                            </AreaChart>
                         </ResponsiveContainer>
                      </div>
                   </div>
 
-                  {/* PAINEL DE GESTÃO ESTRATÉGICA & INSIGHTS */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 flex flex-col overflow-hidden relative group">
-                     <div className="absolute -right-10 -bottom-10 opacity-5 group-hover:scale-125 transition-transform duration-1000">
-                        <Zap className="w-60 h-60" />
-                     </div>
-
-                     <header className="relative z-10 mb-8">
-                        <div className="w-14 h-14 bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/20 mb-6">
-                           <ShieldCheck className="w-7 h-7" />
+                  <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-10 shadow-2xl flex flex-col items-center text-center">
+                     <h3 className="text-xl font-black text-white uppercase italic mb-8">Saúde Financeira</h3>
+                     <div className="relative w-48 h-48 mb-8">
+                        <ResponsiveContainer width="100%" height="100%">
+                           <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={15} data={[{ name: 'ROI', value: Number(marginRatio), fill: '#10b981' }]}>
+                              <PolarAngleAxis type="number" domain={[0, 40]} angleAxisId={0} tick={false} />
+                              <RadialBar background dataKey="value" cornerRadius={30} angleAxisId={0} />
+                           </RadialBarChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                           <p className="text-4xl font-black text-white tracking-tighter">{marginRatio}%</p>
+                           <p className="text-[9px] font-black text-slate-500 uppercase">Margem Operacional</p>
                         </div>
-                        <h3 className="text-2xl font-black text-white leading-tight">Gestão Estratégica</h3>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">Dicas de Eficiência em Tempo Real</p>
-                     </header>
+                     </div>
+                     <div className="space-y-4 w-full">
+                        <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800">
+                           <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Custo Total / Receita</p>
+                           <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-rose-500" style={{ width: `${Math.min(100, (100 - Number(marginRatio)))}%` }} />
+                           </div>
+                        </div>
+                        <p className="text-[11px] text-slate-400 font-medium italic">
+                           Sua operação retém R$ {((analytics.totalProfit / analytics.totalRevenue) * 1).toLocaleString(undefined, { maximumFractionDigits: 2 })} de cada R$ 1,00 faturado.
+                        </p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
 
-                     <div className="space-y-4 relative z-10 flex-1 overflow-y-auto custom-scrollbar pr-2">
-                        {managementInsights.map((insight, idx) => (
-                           <div key={idx} className="p-5 bg-slate-950/50 border border-slate-800 rounded-3xl group/item hover:border-indigo-500/30 transition-all animate-in slide-in-from-right duration-500" style={{ animationDelay: `${idx * 150}ms` }}>
-                              <div className="flex items-start gap-4">
-                                 <div className={`mt-1 p-2.5 rounded-xl ${insight.type === 'warning' ? 'bg-rose-500/10 text-rose-500' : insight.type === 'strategy' ? 'bg-sky-500/10 text-sky-500' : insight.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                                    <insight.icon className="w-5 h-5" />
-                                 </div>
-                                 <div className="space-y-1">
-                                    <h4 className="text-[10px] font-black text-white uppercase tracking-widest">{insight.title}</h4>
-                                    <p className="text-[11px] text-slate-400 font-medium leading-relaxed italic line-clamp-2 group-hover/item:line-clamp-none transition-all">
-                                       {insight.text}
-                                    </p>
-                                 </div>
+         {/* 2. RANKINGS (HALL DA FAMA) */}
+         {activeView === 'rankings' && (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 animate-in slide-in-from-right-10 duration-500">
+               <RankingTable
+                  title="Motoristas Campeões (Lucro)"
+                  icon={Trophy}
+                  color="text-amber-400"
+                  data={rankedDrivers.map(d => ({ name: d.name, value: d.profit, subValue: `${d.trips} viagens` }))}
+               />
+               <RankingTable
+                  title="Ranking de Comissões Pago"
+                  icon={Coins}
+                  color="text-emerald-400"
+                  data={rankedCommissions.map(d => ({ name: d.name, value: d.commission, subValue: `Total acumulado` }))}
+               />
+               <RankingTable
+                  title="Transportadoras Rentáveis"
+                  icon={Building2}
+                  color="text-sky-400"
+                  data={rankedShippers.map(s => ({ name: s.name, value: s.profit, subValue: `Lucro Líquido Real` }))}
+               />
+               <RankingTable
+                  title="Custos por Veículo (Drenos)"
+                  icon={AlertTriangle}
+                  color="text-rose-500"
+                  data={rankedMaintVehicles.filter(v => v.maint > 0).map(v => ({ name: v.plate, value: v.maint, subValue: `Gastos Totais em Manutenção` }))}
+               />
+               <RankingTable
+                  title="Rotas Estratégicas (Margem)"
+                  icon={MapPin}
+                  color="text-rose-400"
+                  data={rankedRoutes.map(r => ({ name: r.name, value: r.profit, subValue: `R$ ${(r.profit / r.km).toFixed(2)} / km` }))}
+               />
+            </div>
+         )}
+
+         {/* 3. AUDITORIA DE CUSTOS */}
+         {activeView === 'custos' && (
+            <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-500">
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-[3rem] p-10">
+                     <h3 className="text-xl font-black text-white uppercase italic mb-8">Composição de Gastos</h3>
+                     <div className="h-64 mb-8">
+                        <ResponsiveContainer width="100%" height="100%">
+                           <PieChart>
+                              <Pie
+                                 data={[
+                                    { name: 'Diesel', value: analytics.totalFuel, fill: '#38bdf8' },
+                                    { name: 'Manutenção', value: analytics.totalMaint, fill: '#f43f5e' },
+                                    { name: 'Comissões', value: analytics.totalCommissions, fill: '#fbbf24' },
+                                    { name: 'Custos Fixos', value: analytics.totalFixedCosts, fill: '#6366f1' }
+                                 ].filter(i => i.value > 0)}
+                                 innerRadius={70}
+                                 outerRadius={90}
+                                 dataKey="value"
+                              >
+                                 <Cell fill="#38bdf8" />
+                                 <Cell fill="#f43f5e" />
+                                 <Cell fill="#fbbf24" />
+                                 <Cell fill="#6366f1" />
+                              </Pie>
+                              <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px' }} />
+                           </PieChart>
+                        </ResponsiveContainer>
+                     </div>
+                     <div className="space-y-4">
+                        {[
+                           { label: 'Diesel', value: analytics.totalFuel, color: 'bg-sky-400' },
+                           { label: 'Manutenção', value: analytics.totalMaint, color: 'bg-rose-500' },
+                           { label: 'Comissões', value: analytics.totalCommissions, color: 'bg-amber-400' },
+                           { label: 'Custos Fixos', value: analytics.totalFixedCosts, color: 'bg-indigo-500' }
+                        ].map(item => (
+                           <div key={item.label} className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                 <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                                 <span className="text-xs font-bold text-slate-400">{item.label}</span>
                               </div>
+                              <span className="text-xs font-black text-white">R$ {item.value.toLocaleString()}</span>
                            </div>
                         ))}
                      </div>
+                  </div>
 
-                     <div className="mt-8 pt-6 border-t border-slate-800 relative z-10">
-                        <div className="flex items-center justify-between text-[10px] font-black text-slate-500 uppercase">
-                           <span>Motor de BI v2.0</span>
-                           <span className="flex items-center gap-1 text-emerald-500 animate-pulse">
-                              <Activity className="w-3 h-3" /> ATIVO
-                           </span>
+                  <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-[3rem] p-10">
+                     <h3 className="text-xl font-black text-white uppercase italic mb-8">Manutenções mais Caras (Drenos de Caixa)</h3>
+                     <div className="space-y-4">
+                        {analytics.mostExpensiveMaintenances.length > 0 ? (
+                           analytics.mostExpensiveMaintenances.map((m, i) => (
+                              <div key={i} className="p-6 bg-slate-950 border border-slate-800 rounded-3xl flex items-center justify-between group hover:border-rose-500/50 transition-all">
+                                 <div className="flex items-center gap-5">
+                                    <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center text-rose-500">
+                                       <Wrench className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                       <p className="text-white font-black">{m.description || 'Manutenção não descrita'}</p>
+                                       <p className="text-[10px] text-slate-500 font-bold uppercase">
+                                          {vehicles.find(v => v.id === m.vehicleId)?.plate} • {m.type} • {new Date(m.date).toLocaleDateString()}
+                                       </p>
+                                    </div>
+                                 </div>
+                                 <div className="text-right">
+                                    <p className="text-rose-500 font-black text-xl">R$ {m.totalCost.toLocaleString()}</p>
+                                    <p className="text-[8px] text-slate-600 font-black uppercase">Custo Integral</p>
+                                 </div>
+                              </div>
+                           ))
+                        ) : (
+                           <div className="flex flex-col items-center justify-center h-full py-10 opacity-30 italic">Nenhum registro de manutenção.</div>
+                        )}
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
+
+         {/* 4. INTELIGÊNCIA ESTRATÉGICA */}
+         {activeView === 'inteligencia' && (
+            <div className="space-y-8 animate-in zoom-in-95 duration-500">
+               <div className="bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-500/10 rounded-[3rem] p-10 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-10 opacity-[0.05] group-hover:rotate-12 transition-transform duration-1000">
+                     <Brain className="w-64 h-64 text-indigo-500" />
+                  </div>
+                  <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div className="space-y-8">
+                        <header>
+                           <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic">Análise de ROI de Rotas</h3>
+                           <p className="text-indigo-400 font-bold text-xs uppercase tracking-widest mt-2">Está valendo a pena fazer essa viagem?</p>
+                        </header>
+                        <div className="space-y-6">
+                           {rankedRoutes.slice(0, 3).map((r, i) => (
+                              <div key={i} className="flex items-center justify-between p-6 bg-slate-950/80 rounded-3xl border border-slate-800">
+                                 <div>
+                                    <p className="text-white font-black uppercase text-sm tracking-tighter">{r.name}</p>
+                                    <div className="flex gap-4 mt-1">
+                                       <span className="text-[9px] text-emerald-500 font-bold uppercase">R$ {(r.profit / r.km).toFixed(2)} lucro/km</span>
+                                       <span className="text-[9px] text-slate-500 font-bold uppercase">{r.count} viagens</span>
+                                    </div>
+                                 </div>
+                                 <div className="text-right">
+                                    <div className="flex items-center gap-1 text-emerald-500 font-black">
+                                       <TrendingUp className="w-4 h-4" />
+                                       {((r.profit / r.revenue) * 100).toFixed(0)}%
+                                    </div>
+                                 </div>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+                     <div className="bg-slate-950/50 rounded-3xl p-8 border border-slate-800 space-y-6">
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Alerta: Viagens com Prejuízo</h4>
+                        {analytics.lossMakingTrips.length > 0 ? (
+                           analytics.lossMakingTrips.map((t, i) => (
+                              <div key={i} className="flex items-center gap-4 text-rose-500">
+                                 <AlertTriangle className="w-5 h-5 shrink-0" />
+                                 <div className="flex-1">
+                                    <p className="text-[11px] font-black uppercase">{t.destination}</p>
+                                    <p className="text-[9px] text-slate-500 font-medium">Veículo {t.vehicleLabel} • Prejuízo de R$ {Math.abs(t.profit).toLocaleString()}</p>
+                                 </div>
+                                 <ChevronRight className="w-4 h-4 text-slate-700" />
+                              </div>
+                           ))
+                        ) : (
+                           <div className="flex items-center gap-4 text-emerald-500 grayscale opacity-40">
+                              <ShieldCheck className="w-5 h-5" />
+                              <p className="text-xs font-bold italic">Nenhuma viagem registrando prejuízo operacional hoje.</p>
+                           </div>
+                        )}
+
+                        <div className="pt-8 border-t border-slate-800 mt-4">
+                           <div className="flex items-center gap-4 p-5 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+                              <Lightbulb className="w-8 h-8 text-indigo-400" />
+                              <p className="text-[10px] text-indigo-200 font-medium leading-relaxed italic">
+                                 "Sua rota aérea de {rankedRoutes[0]?.name || '---'} é a mais lucrativa por KM. Foque seus melhores veículos e motoristas nesta operação para maximizar o ROI."
+                              </p>
+                           </div>
                         </div>
                      </div>
                   </div>
@@ -477,55 +452,57 @@ const Performance: React.FC<PerformanceProps> = ({ trips, vehicles, drivers, shi
    );
 };
 
-const CostRow = ({ label, value, total, icon: Icon, color }: any) => {
-   const perc = ((value / (total || 1)) * 100).toFixed(1);
-   const colorMap: any = {
-      sky: 'text-sky-500 bg-sky-500/10',
-      rose: 'text-rose-500 bg-rose-500/10',
-      amber: 'text-amber-500 bg-amber-500/10',
-      emerald: 'text-emerald-500 bg-emerald-500/10'
-   };
-
-   return (
-      <tr className="group hover:bg-slate-800/30 transition-all">
-         <td className="py-5">
-            <div className="flex items-center gap-3">
-               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colorMap[color]}`}>
-                  <Icon className="w-4 h-4" />
-               </div>
-               <span className="text-xs font-bold text-slate-200">{label}</span>
-            </div>
-         </td>
-         <td className="py-5 text-sm font-black text-white">R$ {value.toLocaleString()}</td>
-         <td className="py-5">
-            <span className="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[9px] font-black text-slate-400">{perc}%</span>
-         </td>
-         <td className="py-5 text-right">
-            <div className="w-24 bg-slate-800 h-1 rounded-full overflow-hidden ml-auto">
-               <div className={`h-full ${color === 'emerald' ? 'bg-emerald-500' : color === 'sky' ? 'bg-sky-500' : 'bg-rose-500'}`} style={{ width: `${perc}%` }} />
-            </div>
-         </td>
-      </tr>
-   );
-};
-
-const StatCard = ({ title, value, icon: Icon, color }: any) => {
-   const themes: any = {
-      emerald: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/10',
-      sky: 'text-sky-500 bg-sky-500/10 border-sky-500/10',
-      amber: 'text-amber-500 bg-amber-500/10 border-amber-500/10',
-      indigo: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/10'
-   };
-
-   return (
-      <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] hover:bg-slate-800/50 transition-all group relative overflow-hidden">
-         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${themes[color]}`}>
-            <Icon className="w-6 h-6" />
+// COMPONENTES AUXILIARES
+const StatItem = ({ title, value, color, icon: Icon }: any) => (
+   <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] shadow-xl group hover:border-slate-700 transition-all">
+      <div className="flex items-center justify-between mb-6">
+         <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
+            <Icon className={`w-6 h-6 ${color}`} />
          </div>
-         <h4 className="text-slate-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2">{title}</h4>
-         <p className="text-2xl font-black text-white tracking-tight">{value}</p>
+         <div className="w-8 h-8 bg-slate-950 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <ArrowUpRight className="w-3 h-3 text-slate-600" />
+         </div>
       </div>
-   );
-};
+      <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">{title}</p>
+      <p className={`text-2xl font-black ${color} tracking-tighter`}>
+         {typeof value === 'number' ? `R$ ${value.toLocaleString()}` : value}
+      </p>
+   </div>
+);
+
+const RankingTable = ({ title, icon: Icon, color, data }: any) => (
+   <section className="bg-slate-900 border border-slate-800 rounded-[3rem] p-10 space-y-8 shadow-2xl">
+      <header className="flex items-center justify-between border-b border-slate-800 pb-6">
+         <h3 className="text-xl font-black text-white flex items-center gap-4 uppercase italic">
+            <Icon className={`w-6 h-6 ${color}`} /> {title}
+         </h3>
+      </header>
+      <div className="space-y-4">
+         {data.map((item: any, i: number) => (
+            <div key={i} className="flex items-center gap-6 p-6 bg-slate-950/50 border border-slate-800 rounded-[2rem] hover:border-emerald-500/30 transition-all group">
+               <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center font-black text-slate-500 group-hover:text-white transition-colors">
+                  #{i + 1}
+               </div>
+               <div className="flex-1">
+                  <p className="text-white font-black text-base tracking-tight uppercase">{item.name}</p>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{item.subValue}</p>
+               </div>
+               <div className="text-right">
+                  <p className={`${color} font-black text-xl tracking-tighter`}>R$ {item.value.toLocaleString()}</p>
+                  <p className="text-[8px] text-slate-600 font-black uppercase">Resultado</p>
+               </div>
+            </div>
+         ))}
+         {data.length === 0 && <p className="text-center py-10 opacity-20 italic">Sem dados suficientes.</p>}
+      </div>
+   </section>
+);
+
+const LineChartIcon = ({ className }: { className?: string }) => (
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M3 3v18h18" />
+      <path d="m19 9-5 5-4-4-3 3" />
+   </svg>
+);
 
 export default Performance;
