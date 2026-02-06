@@ -20,7 +20,9 @@ import {
     QrCode,
     MessageSquare,
     MousePointerClick,
-    MessageCircle
+    MessageCircle,
+    Users,
+    Building2
 } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../pricing';
 
@@ -89,63 +91,96 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 </div>
             </nav>
 
-            {/* Hero Section - The "Wow" Reveal */}
-            <section className="relative pt-48 md:pt-60 pb-32 px-6">
+            {/* Hero Section - Director's Control Center */}
+            <section className="relative pt-48 md:pt-56 pb-20 px-6">
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="flex flex-col items-center text-center">
-                        <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            Plataforma RBS Neural Engine v2.0 Ativa
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                        <div className="lg:col-span-7 space-y-10 text-left">
+                            <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] animate-in fade-in slide-in-from-left-4 duration-1000">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                RBS Intel v3.1 Enterprise
+                            </div>
+
+                            <h1 className="text-6xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
+                                ASSUMA O <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">COMANDO TOTAL.</span>
+                            </h1>
+
+                            <p className="text-xl md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
+                                Mais que um sistema, o RBS é o diretor estratégico da sua transportadora.
+                                Controle motoristas, transportadoras e frota em uma única interface neural de alta performance.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in zoom-in-95 duration-1000 delay-700">
+                                <button
+                                    onClick={onGetStarted}
+                                    className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-lg hover:scale-105 active:scale-95 group"
+                                >
+                                    ADQUIRIR ACESSO <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                                <a href="#planos" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
+                                    VER PLANOS
+                                </a>
+                            </div>
+
+                            {/* Core Modules Badges */}
+                            <div className="flex flex-wrap gap-4 pt-8 border-t border-white/5">
+                                {[
+                                    { icon: Users, label: "Driver CRM" },
+                                    { icon: Building2, label: "Carrier Logic" },
+                                    { icon: ShieldCheck, label: "Fleet Health" }
+                                ].map((item, i) => (
+                                    <div key={i} className="flex items-center gap-3 px-5 py-3 bg-slate-900/50 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                        <item.icon className="w-4 h-4 text-emerald-500" /> {item.label}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
-                        <h1 className="text-6xl md:text-[10rem] font-black text-white tracking-[-0.06em] leading-[0.82] mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-                            TRANSFORME <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">DADOS EM LUCRO.</span>
-                        </h1>
-
-                        <p className="text-xl md:text-3xl text-slate-400 max-w-4xl mx-auto mb-20 font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
-                            A tecnologia que as grandes transportadoras escondem, agora na palma da sua mão.
-                            Automatize o controle de fretes e otimize sua margem com inteligência preditiva.
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in zoom-in-95 duration-1000 delay-700">
-                            <button
-                                onClick={onGetStarted}
-                                className="w-full sm:w-auto px-12 py-6 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-[2rem] flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-xl hover:scale-105 active:scale-95 group"
-                            >
-                                COMEÇAR IMEDIATAMENTE <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                            <a href="#planos" className="w-full sm:w-auto px-12 py-6 bg-slate-900/50 hover:bg-slate-800 backdrop-blur-xl border border-white/10 text-white font-bold rounded-[2rem] transition-all text-xl">
-                                VER TABELA DE PLANOS
-                            </a>
-                        </div>
-                    </div>
-
-                    {/* Interactive Showcase Mockup Overlay */}
-                    <div className="mt-32 relative mx-auto max-w-6xl animate-in slide-in-from-bottom-20 duration-1000 delay-1000">
-                        <div className="absolute inset-0 bg-emerald-500/20 blur-[150px] rounded-full translate-y-20 scale-75 opacity-50"></div>
-                        <div className="relative glass-card rounded-[3rem] p-4 border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden">
-                            <div className="bg-slate-950 rounded-[2.5rem] aspect-video flex items-center justify-center overflow-hidden border border-white/5">
-                                {/* Imagem de alta tecnologia / Mockup do Dashboard */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent"></div>
-                                <Truck className="w-32 h-32 text-emerald-500/20 animate-float" />
-                                <div className="absolute bottom-10 left-10 p-6 glass-card rounded-2xl border-white/10 max-w-xs scale-90 md:scale-100">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-500"><TrendingUp className="w-4 h-4" /></div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Margin Insight</span>
+                        {/* Interactive Showcase - Compact & Dense */}
+                        <div className="lg:col-span-5 relative animate-in slide-in-from-right-12 duration-1000 delay-1000">
+                            <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full translate-y-20 scale-75 opacity-30"></div>
+                            <div className="relative glass-card rounded-[3rem] p-3 border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.5)] overflow-hidden hover:scale-105 transition-transform duration-700">
+                                <div className="bg-slate-950 rounded-[2.5rem] p-8 space-y-8 border border-white/5 min-h-[450px]">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-rose-500/50"></div>
+                                            <div className="w-3 h-3 rounded-full bg-amber-500/50"></div>
+                                            <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
+                                        </div>
+                                        <span className="text-[9px] font-black text-slate-700 tracking-widest uppercase">Director Terminal v3.1</span>
                                     </div>
-                                    <p className="text-white font-black text-2xl">R$ 14.280,00</p>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">Lucro Líquido Projetado p/ Mês</p>
-                                </div>
-                                <div className="hidden md:block absolute top-10 right-10 p-6 glass-card rounded-2xl border-white/10 scale-90 md:scale-100">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-2 bg-sky-500/20 rounded-lg text-sky-500"><BrainCircuit className="w-4 h-4" /></div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-sky-500">Neural Advice</span>
+
+                                    {/* Mockup Data Points */}
+                                    <div className="space-y-6">
+                                        <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                                            <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">Operational Profit</p>
+                                            <p className="text-3xl font-black text-white">R$ 142.800,00</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-4 bg-slate-900 border border-white/5 rounded-xl">
+                                                <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Drivers Online</p>
+                                                <p className="text-xl font-black text-white">24 / 24</p>
+                                            </div>
+                                            <div className="p-4 bg-slate-900 border border-white/5 rounded-xl">
+                                                <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Maintenance</p>
+                                                <p className="text-xl font-black text-rose-500">02 Alertas</p>
+                                            </div>
+                                        </div>
+                                        <div className="p-5 bg-sky-500/5 border border-sky-500/10 rounded-2xl flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-sky-500/20 rounded-lg flex items-center justify-center text-sky-500"><MessageCircle className="w-5 h-5" /></div>
+                                                <div>
+                                                    <p className="text-[9px] font-black text-sky-500 uppercase">Chat Intel Assistant</p>
+                                                    <p className="text-xs text-slate-400 italic">"Gargalo detectado em fretes via SP-Norte."</p>
+                                                </div>
+                                            </div>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></div>
+                                        </div>
                                     </div>
-                                    <p className="text-slate-300 text-xs leading-relaxed italic">"Desempenho da mercadoria em Curitiba/PR está 15% acima da média."</p>
                                 </div>
                             </div>
                         </div>
