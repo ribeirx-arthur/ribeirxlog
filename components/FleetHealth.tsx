@@ -19,7 +19,8 @@ import {
   Zap,
   Edit3,
   X,
-  Settings2
+  Settings2,
+  Trash2
 } from 'lucide-react';
 import { Vehicle, MaintenanceRecord, MaintenanceType, MaintenanceThresholds } from '../types';
 
@@ -28,6 +29,7 @@ interface FleetHealthProps {
   maintenances: MaintenanceRecord[];
   onAddMaintenance: (record: MaintenanceRecord) => void;
   onUpdateMaintenance: (record: MaintenanceRecord) => void;
+  onDeleteMaintenance: (id: string) => void;
   onUpdateVehicleThresholds: (vehicleId: string, thresholds: MaintenanceThresholds) => void;
   onResetComponent?: (vehicleId: string, component: 'oil' | 'tire' | 'brake' | 'engine') => void;
 }
@@ -37,6 +39,7 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
   maintenances,
   onAddMaintenance,
   onUpdateMaintenance,
+  onDeleteMaintenance,
   onUpdateVehicleThresholds,
   onResetComponent
 }) => {
@@ -45,6 +48,8 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const [filterPlate, setFilterPlate] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+
+  const glassCard = "bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-700";
 
   const [newRecord, setNewRecord] = useState<Partial<MaintenanceRecord>>({
     vehicleId: '',
@@ -336,19 +341,27 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
             const threshold = v.thresholds?.oilChangeKm || 10000;
 
             return (
-              <div key={v.id} className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 space-y-8 relative overflow-hidden group hover:border-emerald-500/30 transition-all">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Truck className="w-40 h-40 -mr-10 -mt-10" />
+              <div key={v.id} className={glassCard}>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -translate-x-10 -translate-y-10 group-hover:bg-emerald-500/10 transition-all duration-1000 pointer-events-none" />
+
+                {/* Decorative Tech Background */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+                  <svg width="100%" height="100%">
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
+                    </pattern>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                  </svg>
                 </div>
 
-                <div className="flex justify-between items-start relative z-10">
+                <div className="flex justify-between items-start relative z-10 mb-8">
                   <div className="flex items-center gap-5">
-                    <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 ${healthScore < 20 ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' : 'bg-slate-800 border-slate-700 text-emerald-500'}`}>
+                    <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 transition-all duration-700 ${healthScore < 20 ? 'bg-rose-500/20 border-rose-500/30 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.2)] animate-pulse' : 'bg-emerald-500/5 border-emerald-500/20 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.1)] rotate-3 group-hover:rotate-0'}`}>
                       <Truck className="w-8 h-8" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-white">{v.plate}</h3>
-                      <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em]">{v.name}</p>
+                      <h3 className="text-3xl font-black text-white tracking-tighter italic">{v.plate}</h3>
+                      <p className="text-slate-500 font-bold uppercase text-[9px] tracking-[0.3em] mt-1">{v.name}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -429,12 +442,20 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
                           <p className="text-sm font-black text-white">R$ {m.totalCost.toLocaleString()}</p>
                         </td>
                         <td className="px-8 py-6 text-right">
-                          <button
-                            onClick={() => handleEditClick(m)}
-                            className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 hover:text-emerald-500 transition-all opacity-0 group-hover:opacity-100"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => handleEditClick(m)}
+                              className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 hover:text-emerald-500 transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => onDeleteMaintenance(m.id)}
+                              className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-500 hover:text-rose-500 transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

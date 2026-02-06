@@ -218,7 +218,12 @@ export default function Home() {
                             cost: Number(t.cost),
                             installDate: t.install_date
                         })),
-                        loadTable('maintenance_records', setMaintenances)
+                        loadTable('maintenance_records', setMaintenances, (m: any) => ({
+                            ...m,
+                            vehicleId: m.vehicle_id,
+                            kmAtMaintenance: Number(m.km_at_maintenance),
+                            totalCost: Number(m.total_cost || 0)
+                        }))
                     ]);
                 } catch (error) {
                     console.error('Error loading data', error);
@@ -458,6 +463,7 @@ export default function Home() {
         const formatted = { ...saved, vehicleId: saved.vehicle_id, kmAtMaintenance: Number(saved.km_at_maintenance), totalCost: Number(saved.total_cost) };
         setMaintenances([formatted, ...maintenances]);
 
+        // Atualizar o odômetro e status do veículo
         await client.from('vehicles').update({
             last_maintenance_km: record.kmAtMaintenance,
             last_oil_change_km: record.description.toLowerCase().includes('óleo') ? record.kmAtMaintenance : undefined,
@@ -471,6 +477,48 @@ export default function Home() {
             lastBrakeCheckKm: record.description.toLowerCase().includes('freio') ? record.kmAtMaintenance : v.lastBrakeCheckKm,
         } : v));
         showToast('Manutenção salva!', 'success');
+    };
+
+    const handleUpdateMaintenance = async (record: MaintenanceRecord) => {
+        if (!user) return;
+        const token = await getToken({ template: 'supabase' });
+        const client = token ? createClerkSupabaseClient(token) : supabase;
+
+        const { error } = await client.from('maintenance_records').update({
+            vehicle_id: record.vehicleId,
+            date: record.date,
+            km_at_maintenance: record.kmAtMaintenance,
+            type: record.type,
+            description: record.description,
+            total_cost: record.totalCost,
+            provider: record.provider
+        }).eq('id', record.id);
+
+        if (error) {
+            showToast('Erro ao atualizar manutenção', 'error');
+            return;
+        }
+
+        setMaintenances(prev => prev.map(m => m.id === record.id ? record : m));
+        showToast('Manutenção atualizada!', 'success');
+    };
+
+    const handleDeleteMaintenance = async (id: string) => {
+        if (!user) return;
+        if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+
+        const token = await getToken({ template: 'supabase' });
+        const client = token ? createClerkSupabaseClient(token) : supabase;
+
+        const { error } = await client.from('maintenance_records').delete().eq('id', id);
+
+        if (error) {
+            showToast('Erro ao excluir manutenção', 'error');
+            return;
+        }
+
+        setMaintenances(prev => prev.filter(m => m.id !== id));
+        showToast('Registro removido!', 'success');
     };
 
     const handleUpdateVehicleThresholds = async (vehicleId: string, thresholds: MaintenanceThresholds) => {
@@ -590,7 +638,8 @@ export default function Home() {
                         vehicles={vehicles}
                         maintenances={maintenances}
                         onAddMaintenance={handleSaveMaintenance}
-                        onUpdateMaintenance={() => { }}
+                        onUpdateMaintenance={handleUpdateMaintenance}
+                        onDeleteMaintenance={handleDeleteMaintenance}
                         onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
                         onResetComponent={handleResetVehicleComponent}
                     />
