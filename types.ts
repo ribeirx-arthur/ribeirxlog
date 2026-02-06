@@ -54,6 +54,10 @@ export interface Vehicle {
   societySplitFactor: number;
   totalKmAccumulated: number;
   lastMaintenanceKm: number;
+  lastOilChangeKm?: number;
+  lastTireChangeKm?: number;
+  lastBrakeCheckKm?: number;
+  lastEngineRevKm?: number;
   photoUrl?: string;
   thresholds?: MaintenanceThresholds;
 }

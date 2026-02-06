@@ -202,8 +202,7 @@ const DashboardNeuralPie = ({ data }: { data: any[] }) => {
         const large = angle > 180 ? 1 : 0;
         return <path key={i} d={`M 50,50 L ${x1},${y1} A 40,40 0 ${large} 1 ${x2},${y2} Z`} fill={d.color} stroke="#0f172a" strokeWidth="2" />;
       })}
-      <circle cx="50" cy="50" r="25" fill="#1e293b" />
-      <PieIcon className="w-5 h-5 text-slate-700" x="40" y="40" />
+      <circle cx="50" cy="50" r="25" fill="#1e293b" opacity="0.6" />
     </svg>
   );
 };

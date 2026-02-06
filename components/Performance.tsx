@@ -461,8 +461,7 @@ const NeuralPieChart = ({ data }: { data: any[] }) => {
                </g>
             );
          })}
-         <circle cx={center} cy={center} r="65" fill="#0f172a" />
-         <PieIcon className="w-12 h-12 text-slate-800" x={center - 24} y={center - 24} />
+         <circle cx={center} cy={center} r="65" fill="#0f172a" opacity="0.5" />
       </svg>
    );
 };

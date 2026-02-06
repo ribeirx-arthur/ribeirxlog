@@ -44,6 +44,13 @@ const APP_VERSION = '1.7.0';
 import { AppModeProvider } from '../contexts/AppModeContext';
 import { generateMockData } from '../services/demoData';
 
+const INITIAL_THRESHOLDS: MaintenanceThresholds = {
+    oilChangeKm: 10000,
+    tireChangeKm: 40000,
+    brakeCheckKm: 15000,
+    engineRevKm: 100000
+};
+
 export default function Home() {
     const { isLoaded, isSignedIn, user } = useUser();
     const { signOut, getToken } = useAuth();
@@ -176,7 +183,12 @@ export default function Home() {
                             ...v,
                             totalKmAccumulated: Number(v.total_km_accumulated),
                             lastMaintenanceKm: Number(v.last_maintenance_km),
-                            societySplitFactor: v.society_split_factor,
+                            lastOilChangeKm: Number(v.last_oil_change_km || v.last_maintenance_km || 0),
+                            lastTireChangeKm: Number(v.last_tire_change_km || 0),
+                            lastBrakeCheckKm: Number(v.last_brake_check_km || v.last_maintenance_km || 0),
+                            lastEngineRevKm: Number(v.last_engine_rev_km || 0),
+                            thresholds: v.thresholds || INITIAL_THRESHOLDS,
+                            societySplitFactor: Number(v.society_split_factor),
                             photoUrl: v.photo_url
                         })),
                         loadTable('drivers', setDrivers, (d: any) => ({
@@ -446,9 +458,84 @@ export default function Home() {
         const formatted = { ...saved, vehicleId: saved.vehicle_id, kmAtMaintenance: Number(saved.km_at_maintenance), totalCost: Number(saved.total_cost) };
         setMaintenances([formatted, ...maintenances]);
 
-        await client.from('vehicles').update({ last_maintenance_km: record.kmAtMaintenance }).eq('id', record.vehicleId);
-        setVehicles(prev => prev.map(v => v.id === record.vehicleId ? { ...v, lastMaintenanceKm: record.kmAtMaintenance } : v));
+        await client.from('vehicles').update({
+            last_maintenance_km: record.kmAtMaintenance,
+            last_oil_change_km: record.description.toLowerCase().includes('óleo') ? record.kmAtMaintenance : undefined,
+            last_brake_check_km: record.description.toLowerCase().includes('freio') ? record.kmAtMaintenance : undefined,
+        }).eq('id', record.vehicleId);
+
+        setVehicles(prev => prev.map(v => v.id === record.vehicleId ? {
+            ...v,
+            lastMaintenanceKm: record.kmAtMaintenance,
+            lastOilChangeKm: record.description.toLowerCase().includes('óleo') ? record.kmAtMaintenance : v.lastOilChangeKm,
+            lastBrakeCheckKm: record.description.toLowerCase().includes('freio') ? record.kmAtMaintenance : v.lastBrakeCheckKm,
+        } : v));
         showToast('Manutenção salva!', 'success');
+    };
+
+    const handleUpdateVehicleThresholds = async (vehicleId: string, thresholds: MaintenanceThresholds) => {
+        if (!user) return;
+        console.log("[MAINT] Force-updating thresholds for vehicle:", vehicleId, thresholds);
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('vehicles').update({
+                thresholds: {
+                    oilChangeKm: Number(thresholds.oilChangeKm),
+                    tireChangeKm: Number(thresholds.tireChangeKm),
+                    brakeCheckKm: Number(thresholds.brakeCheckKm),
+                    engineRevKm: Number(thresholds.engineRevKm)
+                }
+            }).eq('id', vehicleId);
+
+            if (error) {
+                console.error("[MAINT] Supabase error updating thresholds:", error);
+                throw error;
+            }
+
+            setVehicles(prev => prev.map(v => v.id === vehicleId ? { ...v, thresholds } : v));
+            showToast('Metas de manutenção atualizadas!', 'success');
+        } catch (err: any) {
+            console.error("[MAINT] Catch error updating thresholds:", err);
+            showToast(`Erro ao atualizar metas: ${err.message}`, 'error');
+        }
+    };
+
+    const handleResetVehicleComponent = async (vehicleId: string, component: 'oil' | 'tire' | 'brake' | 'engine') => {
+        if (!user) return;
+        console.log("[MAINT] Force-resetting health for component:", component, "on vehicle:", vehicleId);
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+            const vehicle = vehicles.find(v => v.id === vehicleId);
+            if (!vehicle) return;
+
+            const currentKm = vehicle.totalKmAccumulated;
+            const updateField = {
+                oil: 'last_oil_change_km',
+                tire: 'last_tire_change_km',
+                brake: 'last_brake_check_km',
+                engine: 'last_engine_rev_km'
+            }[component];
+
+            const { error } = await client.from('vehicles').update({ [updateField]: currentKm }).eq('id', vehicleId);
+
+            if (error) {
+                console.error("[MAINT] Supabase error resetting component:", error);
+                throw error;
+            }
+
+            setVehicles(prev => prev.map(v => v.id === vehicleId ? {
+                ...v,
+                [component === 'oil' ? 'lastOilChangeKm' : component === 'tire' ? 'lastTireChangeKm' : component === 'brake' ? 'lastBrakeCheckKm' : 'lastEngineRevKm']: currentKm
+            } : v));
+
+            showToast('Saúde do componente resetada para 100%!', 'success');
+        } catch (err: any) {
+            console.error("[MAINT] Catch error resetting component health:", err);
+            showToast(`Erro ao resetar saúde: ${err.message}`, 'error');
+        }
     };
     const handleUpdateVehicles = () => setRefreshTrigger(prev => prev + 1);
     const handleUpdateDrivers = () => setRefreshTrigger(prev => prev + 1);
@@ -499,7 +586,14 @@ export default function Home() {
             );
             case 'maintenance': return (
                 <Suspense fallback={<div>Carregando...</div>}>
-                    <FleetHealth vehicles={vehicles} maintenances={maintenances} onAddMaintenance={handleSaveMaintenance} onUpdateMaintenance={() => { }} onUpdateVehicleThresholds={() => { }} />
+                    <FleetHealth
+                        vehicles={vehicles}
+                        maintenances={maintenances}
+                        onAddMaintenance={handleSaveMaintenance}
+                        onUpdateMaintenance={() => { }}
+                        onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
+                        onResetComponent={handleResetVehicleComponent}
+                    />
                 </Suspense>
             );
             case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
