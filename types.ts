@@ -181,4 +181,43 @@ export interface TireMaintenance {
 
 export type TirePosition = 'fl' | 'fr' | 'dl1o' | 'dl1i' | 'dr1i' | 'dr1o' | 'dl2o' | 'dl2i' | 'dr2i' | 'dr2o' | string;
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator';
+export interface VehicleLocation {
+  id: string;
+  vehicleId: string;
+  latitude: number;
+  longitude: number;
+  speed: number; // km/h
+  heading: number; // degrees (0-360)
+  accuracy: number; // meters
+  timestamp: string;
+  tripId?: string;
+  address?: string; // reverse geocoding
+  altitude?: number;
+  batteryLevel?: number;
+}
+
+export interface GPSAlert {
+  id: string;
+  vehicleId: string;
+  type: 'speed_limit' | 'geofence_exit' | 'stop_too_long' | 'route_deviation' | 'offline';
+  severity: 'low' | 'medium' | 'high';
+  message: string;
+  timestamp: string;
+  resolved: boolean;
+  resolvedAt?: string;
+  resolvedBy?: string;
+}
+
+export interface Geofence {
+  id: string;
+  name: string;
+  type: 'circle' | 'polygon';
+  center?: { lat: number; lng: number }; // for circle
+  radius?: number; // meters, for circle
+  coordinates?: Array<{ lat: number; lng: number }>; // for polygon
+  alertOnEntry: boolean;
+  alertOnExit: boolean;
+  active: boolean;
+}
+
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking';
