@@ -236,14 +236,23 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 flex-1 px-4 border-l border-slate-700/50">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 flex-1 px-4 border-l border-slate-700/50">
                   <div className="space-y-1">
                     <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Equipe & Cliente</p>
                     <p className="text-white text-sm font-bold truncate">{driver.name}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Rentabilidade</p>
-                    <p className="text-emerald-500 text-sm font-black">R$ {tripFinance.lucroLiquidoReal.toLocaleString()}</p>
+                    <p className="text-emerald-500 text-sm font-black">
+                      R$ {(vehicle.type === 'Sociedade' ? tripFinance.lucroSociety : tripFinance.lucroLiquidoReal).toLocaleString()}
+                    </p>
+                    {vehicle.type === 'Sociedade' && (
+                      <p className="text-[8px] text-slate-500 font-bold">({vehicle.societySplitFactor}% sociedade)</p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Saldo a Receber</p>
+                    <p className="text-sky-400 text-sm font-black">R$ {tripFinance.saldoAReceber.toLocaleString()}</p>
                   </div>
                   <div className="hidden md:block space-y-1">
                     <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Recebimento</p>
