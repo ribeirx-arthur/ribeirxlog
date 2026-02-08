@@ -52,7 +52,8 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                         latitude,
                         longitude,
                         speed: speed || 0,
-                        heading: heading || 0
+                        heading: heading || 0,
+                        accuracy: position.coords.accuracy || 0
                     });
 
                     // Send to backend via RPC

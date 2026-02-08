@@ -27,9 +27,12 @@ import {
   Navigation,
   Gauge,
   Droplets,
-  Wallet
+  Wallet,
+  ExternalLink,
+  FolderOpen
 } from 'lucide-react';
-import { Trip, Vehicle, Driver, Shipper, UserProfile, PaymentStatus } from '../types';
+import { supabase } from '../services/supabase';
+import { Trip, Vehicle, Driver, Shipper, UserProfile, PaymentStatus, TripProof } from '../types';
 import { calculateTripFinance } from '../services/finance';
 import { generateTripReceipt, generateMonthlyReport } from '../services/pdfGenerator';
 
@@ -61,6 +64,7 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [tripToDeleteId, setTripToDeleteId] = useState<string | null>(null);
+  const [viewingFilesTripId, setViewingFilesTripId] = useState<string | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -272,6 +276,7 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                   {menuOpenId === trip.id && (
                     <div className="absolute right-0 mt-3 w-56 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-20 py-2">
                       <button onClick={() => { setEditingTrip({ ...trip }); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-emerald-500 hover:bg-emerald-500/10 font-bold"> <Edit3 className="w-4 h-4" /> Editar </button>
+                      <button onClick={() => { setViewingFilesTripId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-sky-500 hover:bg-sky-500/10 font-bold"> <FileText className="w-4 h-4" /> Ver Rastreio & Docs </button>
                       <button onClick={() => { setTripToDeleteId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-rose-500 hover:bg-rose-500/10 font-bold"> <Trash2 className="w-4 h-4" /> Excluir </button>
                     </div>
                   )}
@@ -378,9 +383,112 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
           </div>
         </div>
       )}
+      {viewingFilesTripId && (
+        <TripDetailsModal tripId={viewingFilesTripId} onClose={() => setViewingFilesTripId(null)} />
+      )}
     </div>
   );
 };
 
+const TripDetailsModal = ({ tripId, onClose }: { tripId: string, onClose: () => void }) => {
+  const [proofs, setProofs] = useState<TripProof[]>([]);
+  const [lastLocation, setLastLocation] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const loadData = async () => {
+      const { data: proofsData } = await supabase.from('trip_proofs').select('*').eq('trip_id', tripId).order('uploaded_at', { ascending: false });
+      if (proofsData) setProofs(proofsData);
+
+      const { data: locData } = await supabase.from('vehicle_locations').select('*').eq('trip_id', tripId).order('timestamp', { ascending: false }).limit(1).single();
+      if (locData) setLastLocation(locData);
+
+      setLoading(false);
+    };
+    loadData();
+  }, [tripId]);
+
+  return (
+    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-700/50 rounded-[2.5rem] w-full max-w-2xl p-8 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-black text-white flex items-center gap-3">
+            <FolderOpen className="w-8 h-8 text-sky-500" /> Detalhes da Viagem
+          </h3>
+          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-all">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto custom-scrollbar space-y-8 pr-2">
+          {/* Rastreamento */}
+          <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-emerald-500" /> Última Localização
+            </h4>
+            {lastLocation ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-bold text-lg">
+                      {new Date(lastLocation.timestamp).toLocaleString('pt-BR')}
+                    </p>
+                    <p className="text-slate-400 text-sm">
+                      Velocidade: {Math.round(lastLocation.speed || 0 * 3.6)} km/h
+                    </p>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps?q=${lastLocation.latitude},${lastLocation.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold rounded-xl flex items-center gap-2"
+                  >
+                    <span className="hidden sm:inline">Ver no</span> Maps <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <p className="text-slate-400 text-sm italic">Nenhuma localização registrada para esta viagem.</p>
+            )}
+          </div>
+
+          {/* Comprovantes */}
+          <div>
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-sky-500" /> Comprovantes ({proofs.length})
+            </h4>
+            {proofs.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {proofs.map((proof) => (
+                  <div key={proof.id} className="bg-slate-800 rounded-xl p-4 border border-slate-700 flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-slate-500 bg-slate-900 px-2 py-0.5 rounded">{proof.type}</span>
+                        <p className="text-white font-bold text-sm mt-1 truncate max-w-[150px]">{proof.fileName}</p>
+                      </div>
+                      {proof.approved && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                    </div>
+                    <a
+                      href={proof.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-auto w-full py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold rounded-lg text-center flex items-center justify-center gap-2 transition-all"
+                    >
+                      <Download className="w-3 h-3" /> Baixar / Visualizar
+                    </a>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-slate-800/30 rounded-xl p-8 text-center border border-dashed border-slate-700">
+                <p className="text-slate-500 text-sm">Nenhum comprovante enviado pelo motorista.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default Trips;
