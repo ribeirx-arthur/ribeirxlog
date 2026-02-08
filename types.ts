@@ -91,7 +91,31 @@ export interface Driver {
     frete: number;
     diaria: number;
   };
+  // Access control
+  hasAppAccess: boolean;
+  accessToken?: string;
+  lastLogin?: string;
+  email?: string;
+  password?: string; // Hashed
 }
+
+export interface TripProof {
+  id: string;
+  tripId: string;
+  type: 'cte' | 'nfe' | 'receipt' | 'fuel' | 'toll' | 'expense' | 'delivery' | 'loading';
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  uploadedBy: 'driver' | 'manager';
+  uploadedAt: string;
+  description?: string;
+  amount?: number;
+  approved: boolean;
+  approvedBy?: string;
+  approvedAt?: string;
+}
+
+export type UserRole = 'owner' | 'manager' | 'driver';
 
 export interface Shipper {
   id: string;
