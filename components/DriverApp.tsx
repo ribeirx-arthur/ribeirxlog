@@ -442,7 +442,7 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             <div className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-10">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-xl font-black">Ribeirx Driver</h1>
+                        <h1 className="text-xl font-black">Ribeirx Driver v2</h1>
                         <p className="text-xs text-slate-400">{driver.name}</p>
                     </div>
                     <button
