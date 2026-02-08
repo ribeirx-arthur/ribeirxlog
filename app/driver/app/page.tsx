@@ -49,9 +49,42 @@ export default function DriverAppPage() {
                 // Don't block, maybe just no trip
             }
 
-            setDriver(driverData as unknown as Driver);
-            // Map RPC result to Trip type if needed, but assuming structure matches
-            setCurrentTrip(tripData ? (tripData as unknown as Trip) : null);
+            const typedDriverData: any = driverData;
+
+            setDriver({
+                ...typedDriverData,
+                id: typedDriverData.id,
+                name: typedDriverData.name,
+                cpf: typedDriverData.cpf,
+                phone: typedDriverData.phone,
+                cnh: typedDriverData.cnh,
+                cnhCategory: typedDriverData.cnh_category,
+                cnhValidity: typedDriverData.cnh_validity,
+                pixKey: typedDriverData.pix_key,
+                photoUrl: typedDriverData.photo_url,
+                hasAppAccess: typedDriverData.has_app_access,
+                accessToken: typedDriverData.access_token,
+                lastLogin: typedDriverData.last_login,
+                status: typedDriverData.status
+            } as Driver);
+
+            const typedTripData: any = tripData;
+
+            // Map RPC result to Trip type if needed, but assuming structure matches roughly or is used as any
+            const mappedTrip = tripData ? {
+                ...typedTripData,
+                driverId: typedTripData.driver_id,
+                vehicleId: typedTripData.vehicle_id,
+                departureDate: typedTripData.departure_date,
+                returnDate: typedTripData.return_date,
+                totalDistance: typedTripData.total_distance,
+                fuelConsumed: typedTripData.fuel_consumed,
+                expenses: typedTripData.expenses,
+                netRevenue: typedTripData.net_revenue,
+                status: typedTripData.status
+            } : null;
+
+            setCurrentTrip(mappedTrip as unknown as Trip);
 
         } catch (error) {
             console.error('Error loading driver data:', error);

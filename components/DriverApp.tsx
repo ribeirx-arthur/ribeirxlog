@@ -36,6 +36,45 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     const [uploading, setUploading] = useState(false);
     const [earnings, setEarnings] = useState({ pending: 0, paid: 0, total: 0 });
 
+    // GPS Tracking Logic
+    useEffect(() => {
+        let watchId: number;
+        if (isTracking && driver.accessToken) {
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const { latitude, longitude, speed, heading } = position.coords;
+
+                    // Visual feedback
+                    setLastLocation({
+                        id: 'local',
+                        vehicleId: 'local',
+                        timestamp: new Date().toISOString(),
+                        latitude,
+                        longitude,
+                        speed: speed || 0,
+                        heading: heading || 0
+                    });
+
+                    // Send to backend via RPC
+                    supabase.rpc('update_location', {
+                        p_driver_token: driver.accessToken,
+                        p_lat: latitude,
+                        p_long: longitude,
+                        p_speed: speed || 0,
+                        p_heading: heading || 0
+                    }).then(({ error }) => {
+                        if (error) console.error("GPS Sync Error:", error);
+                    });
+                },
+                (error) => console.error("GPS Error:", error),
+                { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+            );
+        }
+        return () => {
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+        };
+    }, [isTracking, driver.accessToken]);
+
     // Load proofs
     useEffect(() => {
         if (currentTrip) {
@@ -106,35 +145,36 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     };
 
     const startTrip = async () => {
-        if (!currentTrip) return;
+        if (!currentTrip || !driver.accessToken) return;
 
-        const { error } = await supabase
-            .from('trips')
-            .update({
-                departure_date: new Date().toISOString(),
-                status: 'Pendente'
-            })
-            .eq('id', currentTrip.id);
+        const { error } = await supabase.rpc('driver_start_trip', {
+            p_driver_token: driver.accessToken,
+            p_trip_id: currentTrip.id
+        });
 
         if (!error) {
-            alert('Viagem iniciada!');
+            alert('Viagem iniciada com sucesso! O rastreamento GPS foi ativado.');
             setIsTracking(true);
+            window.location.reload(); // Refresh to update UI state
+        } else {
+            alert('Erro ao iniciar viagem: ' + error.message);
         }
     };
 
     const endTrip = async () => {
-        if (!currentTrip) return;
+        if (!currentTrip || !driver.accessToken) return;
 
-        const { error } = await supabase
-            .from('trips')
-            .update({
-                return_date: new Date().toISOString(),
-            })
-            .eq('id', currentTrip.id);
+        const { error } = await supabase.rpc('driver_end_trip', {
+            p_driver_token: driver.accessToken,
+            p_trip_id: currentTrip.id
+        });
 
         if (!error) {
-            alert('Viagem finalizada!');
+            alert('Viagem finalizada com sucesso!');
             setIsTracking(false);
+            window.location.reload();
+        } else {
+            alert('Erro ao finalizar: ' + error.message);
         }
     };
 
@@ -172,13 +212,26 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-3">
                 {currentTrip && !currentTrip.returnDate && (
-                    <button
-                        onClick={endTrip}
-                        className="bg-rose-500 hover:bg-rose-600 rounded-2xl p-4 text-white transition-all"
-                    >
-                        <StopCircle className="w-8 h-8 mx-auto mb-2" />
-                        <p className="text-sm font-bold">Finalizar Viagem</p>
-                    </button>
+                    <>
+                        {/* Show Start Trip if not started (no departure date or future date) */}
+                        {(!currentTrip.departureDate || new Date(currentTrip.departureDate) > new Date()) ? (
+                            <button
+                                onClick={startTrip}
+                                className="bg-emerald-500 hover:bg-emerald-600 rounded-2xl p-4 text-white transition-all shadow-lg shadow-emerald-500/20 col-span-2"
+                            >
+                                <PlayCircle className="w-8 h-8 mx-auto mb-2" />
+                                <p className="text-sm font-bold">INICIAR VIAGEM</p>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={endTrip}
+                                className="bg-rose-500 hover:bg-rose-600 rounded-2xl p-4 text-white transition-all shadow-lg shadow-rose-500/20 col-span-2"
+                            >
+                                <StopCircle className="w-8 h-8 mx-auto mb-2" />
+                                <p className="text-sm font-bold">FINALIZAR VIAGEM</p>
+                            </button>
+                        )}
+                    </>
                 )}
 
                 <button
