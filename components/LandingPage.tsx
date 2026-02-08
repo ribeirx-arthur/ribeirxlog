@@ -22,7 +22,11 @@ import {
     MousePointerClick,
     MessageCircle,
     Users,
-    Building2
+    Building2,
+    MapPin,
+    Smartphone,
+    Navigation,
+    Globe
 } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../pricing';
 
@@ -71,7 +75,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         </div>
                     </div>
                     <div className="hidden lg:flex items-center gap-10">
-                        {['Recursos', 'Como Funciona', 'Planos', 'Contato'].map((item) => (
+                        {['Recursos', 'GPS Tracking', 'Planos', 'Contato'].map((item) => (
                             <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} className="text-xs font-black text-slate-400 hover:text-emerald-400 uppercase tracking-widest transition-all">
                                 {item}
                             </a>
@@ -111,7 +115,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
 
                             <p className="text-xl md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
                                 Mais que um sistema, o RBS é o diretor estratégico da sua transportadora.
-                                Controle motoristas, transportadoras e frota em uma única interface neural de alta performance.
+                                Controle motoristas com <span className="text-emerald-400 font-bold">GPS em Tempo Real</span>, finanças e frota em uma única interface neural.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in zoom-in-95 duration-1000 delay-700">
@@ -121,19 +125,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 >
                                     ADQUIRIR ACESSO <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                <a href="#planos" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
-                                    VER PLANOS
+                                <a href="#gps-tracking" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
+                                    VER NOVIDADES GPS
                                 </a>
                             </div>
 
                             {/* Core Modules Badges */}
                             <div className="flex flex-wrap gap-4 pt-8 border-t border-white/5">
                                 {[
+                                    { icon: MapPin, label: "Live GPS" },
+                                    { icon: Smartphone, label: "Driver App" },
                                     { icon: Users, label: "Driver CRM" },
                                     { icon: Building2, label: "Carrier Logic" },
-                                    { icon: ShieldCheck, label: "Fleet Health" }
                                 ].map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3 px-5 py-3 bg-slate-900/50 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                    <div key={i} className="flex items-center gap-3 px-5 py-3 bg-slate-900/50 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-emerald-400 hover:border-emerald-500/30 transition-all cursor-default">
                                         <item.icon className="w-4 h-4 text-emerald-500" /> {item.label}
                                     </div>
                                 ))}
@@ -156,6 +161,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
 
                                     {/* Mockup Data Points */}
                                     <div className="space-y-6">
+                                        {/* New GPS Alert Mockup */}
+                                        <div className="p-4 bg-slate-900 border border-emerald-500/20 rounded-2xl flex items-center justify-between relative overflow-hidden">
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                                                    <Navigation className="w-5 h-5 text-emerald-500 animate-pulse" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[9px] font-black text-emerald-500 uppercase">Frota em Movimento</p>
+                                                    <p className="text-white font-bold text-sm">Caminhão 04 - Chegando ao Destino</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-[9px] font-black bg-emerald-500 text-slate-950 px-2 py-1 rounded">LIVE</span>
+                                        </div>
+
                                         <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
                                             <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">Operational Profit</p>
                                             <p className="text-3xl font-black text-white">R$ 142.800,00</p>
@@ -166,19 +186,80 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                                 <p className="text-xl font-black text-white">24 / 24</p>
                                             </div>
                                             <div className="p-4 bg-slate-900 border border-white/5 rounded-xl">
-                                                <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Maintenance</p>
-                                                <p className="text-xl font-black text-rose-500">02 Alertas</p>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Smartphone className="w-3 h-3 text-sky-500" />
+                                                    <p className="text-[9px] font-bold text-slate-500 uppercase">App Ativo</p>
+                                                </div>
+                                                <p className="text-xl font-black text-sky-500">100%</p>
                                             </div>
                                         </div>
-                                        <div className="p-5 bg-sky-500/5 border border-sky-500/10 rounded-2xl flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-sky-500/20 rounded-lg flex items-center justify-center text-sky-500"><MessageCircle className="w-5 h-5" /></div>
-                                                <div>
-                                                    <p className="text-[9px] font-black text-sky-500 uppercase">Chat Intel Assistant</p>
-                                                    <p className="text-xs text-slate-400 italic">"Gargalo detectado em fretes via SP-Norte."</p>
-                                                </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* NEW: GPS TRACKING SECTION - FEATURE HIGHLIGHT */}
+            <section id="gps-tracking" className="py-40 relative overflow-hidden">
+                <div className="absolute inset-0 bg-slate-900/50 skew-y-3 transform origin-bottom-right z-0"></div>
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
+                        <div className="space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
+                            <div className="inline-flex p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                                <Globe className="w-10 h-10" />
+                            </div>
+                            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
+                                VISÃO GLOBAL <br />
+                                <span className="text-emerald-500">EM TEMPO REAL.</span>
+                            </h2>
+                            <p className="text-xl text-slate-400 font-medium leading-relaxed">
+                                Abandone os rastreadores caros. Com o <span className="text-white font-bold">Ribeirx Mobile Technology</span>, o celular do seu motorista vira um rastreador de alta precisão.
+                            </p>
+                            <ul className="space-y-6">
+                                {[
+                                    "Monitoramento de velocidade ao vivo",
+                                    "Histórico de rotas completo",
+                                    "Alertas de paradas não programadas",
+                                    "Economia média de R$ 150/mês por caminhão"
+                                ].map(item => (
+                                    <li key={item} className="flex items-center gap-4 text-white font-black text-sm uppercase tracking-widest">
+                                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                            <Check className="w-4 h-4 text-emerald-500" />
+                                        </div>
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                            <button onClick={onGetStarted} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl uppercase tracking-widest shadow-xl hover:scale-105 transition-all">
+                                Ativar Rastreamento Agora
+                            </button>
+                        </div>
+
+                        {/* Interactive Phone Mockup */}
+                        <div className="relative group perspective-1000">
+                            <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-75 opacity-50"></div>
+                            <div className="glass-card rounded-[3rem] border-white/10 relative z-10 p-4 rotate-[-6deg] hover:rotate-0 transition-all duration-700 shadow-2xl">
+                                <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden aspect-[9/19] relative">
+                                    {/* Mockup Content */}
+                                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop')] bg-cover opacity-20"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950/90"></div>
+
+                                    <div className="relative z-10 p-6 flex flex-col h-full justify-between">
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-white font-black text-lg">Ribeirx<span className="text-emerald-500">Driver</span></div>
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        </div>
+
+                                        <div className="space-y-4 mb-8">
+                                            <div className="bg-slate-900/80 backend-blur p-4 rounded-2xl border border-white/10">
+                                                <p className="text-[10px] text-slate-400 uppercase font-bold">Velocidade Atual</p>
+                                                <p className="text-4xl font-black text-white">82 <span className="text-sm text-slate-500">km/h</span></p>
                                             </div>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></div>
+                                            <div className="bg-emerald-500 p-4 rounded-2xl text-slate-950 font-black text-center shadow-lg shadow-emerald-500/20">
+                                                RASTREAMENTO ATIVO
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -246,14 +327,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         </div>
                     </div>
 
-                    {/* Feature 2 - Intelligence */}
+                    {/* Feature 2 - Intelligence & Driver App */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center mb-60">
                         <div className="order-2 lg:order-1 relative group">
                             <div className="absolute inset-0 bg-sky-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
                             <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-[-2deg] transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
                                 <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 flex items-center justify-center p-12 overflow-hidden relative">
                                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 10px 10px, #0ea5e9 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-                                    <BrainCircuit className="w-40 h-40 text-sky-500 opacity-20 animate-float" />
+                                    <Smartphone className="w-40 h-40 text-sky-500 opacity-20 animate-float" />
                                     <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent"></div>
                                 </div>
                             </div>
@@ -261,18 +342,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <div className="order-1 lg:order-2 space-y-12 animate-in fade-in slide-in-from-right-8 duration-1000">
                             <div className="inline-flex p-4 bg-sky-500/10 rounded-2xl text-sky-500 shadow-[0_0_20px_rgba(14,165,233,0.2)]"><Zap className="w-10 h-10" /></div>
                             <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
-                                INTELIGÊNCIA <br />
-                                <span className="text-sky-500">PROATIVA RBS.</span>
+                                APP DO MOTORISTA <br />
+                                <span className="text-sky-500">VIA WHATSAPP.</span>
                             </h2>
                             <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Nossa plataforma não apenas organiza, ela avisa. Identifique gargalos na manutenção e oportunidades de frete com base no histórico real dos seus veículos.
+                                Esqueça downloads complexos. Gere um link, envie no Zap e pronto: seu motorista tem um app completo para enviar comprovantes, iniciar viagens e ativar o GPS.
                             </p>
                             <div className="p-8 bg-sky-500/5 border border-sky-500/10 rounded-[3rem] backdrop-blur-sm">
                                 <p className="text-sky-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Sistema em Operação
+                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> App Instantâneo (PWA)
                                 </p>
                                 <p className="text-slate-300 text-sm italic leading-relaxed">
-                                    "Otimização de custos disponível: Seus últimos 10 fretes indicam uma variação de margem de 12% dependendo da transportadora selecionada."
+                                    "Motorista João iniciou a viagem SP → RJ. Rastreamento ativo. Previsão de chegada: 18:30."
                                 </p>
                             </div>
                         </div>
@@ -350,7 +431,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             price="R$ 59,90"
                             period="/mês"
                             desc="Para o motorista autônomo que quer parar de perder dinheiro."
-                            features={["Dashboard Fianceiro Base", "Controle de 1 Veículo", "Relatórios Trimestrais", "Suporte Comunitário"]}
+                            features={["Dashboard Fianceiro Base", "Controle de 1 Veículo", "Relatórios Trimestrais", "App do Motorista (Básico)"]}
                             onSelect={() => onPurchase('Mensal')}
                         />
                         <LandingPricingCard
@@ -361,11 +442,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             desc="O sistema completo para quem quer ser referência no mercado."
                             features={[
                                 "Frota Ilimitada",
+                                "GPS Tracking em Tempo Real",
+                                "App do Motorista (Completo)",
+                                "Gestão de Comprovantes Digitais",
                                 "Full AI Analysis (Neural Engine)",
-                                "Ranking Global de Performance",
-                                "Consultoria WhatsApp Prioritária",
-                                "Exportação de XML/Fechamentos",
-                                "Zero Taxa de Adesão"
+                                "Consultoria WhatsApp Prioritária"
                             ]}
                             onSelect={() => onPurchase('Anual')}
                         />
@@ -377,6 +458,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             features={[
                                 "Licença Perpétua p/ 1 Placa",
                                 "Sem Mensalidades",
+                                "GPS Vitalício",
                                 "Módulo de Manutenção Full",
                                 "Histórico para Auditoria"
                             ]}
@@ -391,7 +473,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                     {[
                         { icon: Lock, title: "DADOS PROTEGIDOS", desc: "Criptografia de ponta a ponta para seus dados financeiros." },
-                        { icon: MessageCircle, title: "SUPORTE ESPECIALIZADO", desc: "Arthur e time estão online no Zap para te ajudar." },
+                        { icon: MessageCircle, title: "SUPORTE NO ZAP", desc: "Arthur e time estão online no Zap para te ajudar." },
                         { icon: Infinity, title: "CLOUD SYNC", desc: "Acesse do computador, tablet ou celular em qualquer lugar." },
                         { icon: ShieldCheck, title: "REGRAS DA ANTT", desc: "Cálculos adaptados às normas e pedágios vigentes." },
                     ].map((item, i) => (
@@ -461,9 +543,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <h4 className="text-white font-black text-xs uppercase tracking-widest mb-8">Navegação</h4>
                         <ul className="space-y-4 text-sm text-slate-500 font-bold">
                             <li className="hover:text-emerald-500 cursor-pointer transition-colors">Dashboard</li>
-                            <li className="hover:text-emerald-500 cursor-pointer transition-colors">Manutenção</li>
+                            <li className="hover:text-emerald-500 cursor-pointer transition-colors">GPS Tracking</li>
+                            <li className="hover:text-emerald-500 cursor-pointer transition-colors">Digital Driver App</li>
                             <li className="hover:text-emerald-500 cursor-pointer transition-colors">Tabela de Fretes</li>
-                            <li className="hover:text-emerald-500 cursor-pointer transition-colors">Sistema de Gestão</li>
                         </ul>
                     </div>
                     <div>

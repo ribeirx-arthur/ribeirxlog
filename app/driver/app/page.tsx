@@ -25,14 +25,12 @@ export default function DriverAppPage() {
                 return;
             }
 
-            const { driverId } = JSON.parse(sessionStr);
+            const { token } = JSON.parse(sessionStr);
 
-            // Load driver
+            // Load driver using RPC (security definer)
             const { data: driverData, error: driverError } = await supabase
-                .from('drivers')
-                .select('*')
-                .eq('id', driverId)
-                .single();
+                .rpc('get_driver_profile', { p_driver_token: token })
+                .single(); // Expecting one driver
 
             if (driverError || !driverData) {
                 console.error('Error loading driver:', driverError);
@@ -41,18 +39,20 @@ export default function DriverAppPage() {
                 return;
             }
 
-            // Load current trip (active trip)
-            const { data: tripData } = await supabase
-                .from('trips')
-                .select('*')
-                .eq('driver_id', driverId)
-                .neq('status', 'Pago')
-                .order('departure_date', { ascending: false })
-                .limit(1)
+            // Load current trip using RPC (security definer)
+            const { data: tripData, error: tripError } = await supabase
+                .rpc('get_active_driver_trip', { p_driver_token: token })
                 .maybeSingle();
 
-            setDriver(driverData);
-            setCurrentTrip(tripData);
+            if (tripError) {
+                console.error('Error loading trip:', tripError);
+                // Don't block, maybe just no trip
+            }
+
+            setDriver(driverData as unknown as Driver);
+            // Map RPC result to Trip type if needed, but assuming structure matches
+            setCurrentTrip(tripData ? (tripData as unknown as Trip) : null);
+
         } catch (error) {
             console.error('Error loading driver data:', error);
             router.push('/driver/login');

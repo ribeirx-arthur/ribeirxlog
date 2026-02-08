@@ -58,7 +58,12 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
         setUploading(true);
         try {
-            // Upload to Supabase Storage
+            // 1. Retrieve session token
+            const sessionStr = localStorage.getItem('driver_session');
+            if (!sessionStr) throw new Error("Sessão inválida");
+            const { token } = JSON.parse(sessionStr);
+
+            // 2. Upload to Supabase Storage
             const fileExt = file.name.split('.').pop();
             const fileName = `${currentTrip.id}/${type}_${Date.now()}.${fileExt}`;
 
@@ -66,32 +71,35 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                 .from('trip-proofs')
                 .upload(fileName, file);
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                console.error("Storage Error:", uploadError);
+                throw new Error("Falha no upload do arquivo. Verifique permissões.");
+            }
 
-            // Get public URL
+            // 3. Get public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('trip-proofs')
                 .getPublicUrl(fileName);
 
-            // Save proof record
-            const { error: insertError } = await supabase.from('trip_proofs').insert({
-                trip_id: currentTrip.id,
-                type,
-                file_url: publicUrl,
-                file_name: file.name,
-                file_size: file.size,
-                uploaded_by: 'driver',
-                uploaded_at: new Date().toISOString(),
-                approved: false,
+            // 4. Save proof record via Secure RPC
+            const { error: rpcError } = await supabase.rpc('submit_trip_proof', {
+                p_driver_token: token,
+                p_trip_id: currentTrip.id,
+                p_type: type,
+                p_file_url: publicUrl,
+                p_file_name: file.name,
+                p_file_size: file.size,
+                p_description: `Upload via Driver App - ${type}`,
+                p_amount: 0
             });
 
-            if (insertError) throw insertError;
+            if (rpcError) throw rpcError;
 
             await loadProofs();
             alert('Comprovante enviado com sucesso!');
         } catch (error) {
             console.error('Erro ao enviar comprovante:', error);
-            alert('Erro ao enviar comprovante');
+            alert('Erro ao enviar comprovante. Tente novamente.');
         } finally {
             setUploading(false);
         }
