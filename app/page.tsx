@@ -16,6 +16,7 @@ const TireManagement = React.lazy(() => import('../components/TireManagement'));
 const Intelligence = React.lazy(() => import('../components/StrategicIntelligence'));
 const FreightCalculator = React.lazy(() => import('../components/FreightCalculator'));
 const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
+const DriverManagement = React.lazy(() => import('../components/DriverManagement'));
 
 import LandingPage from '../components/LandingPage';
 import Paywall from '../components/Paywall';
@@ -406,6 +407,75 @@ export default function Home() {
         }
     };
 
+    const handleAddDriver = async (newDriver: Partial<Driver>) => {
+        if (!user) return;
+        showToast('Adicionando motorista...', 'info');
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const dbDriver = {
+                name: newDriver.name,
+                cpf: newDriver.cpf,
+                phone: newDriver.phone,
+                cnh: newDriver.cnh,
+                cnh_category: newDriver.cnhCategory,
+                cnh_validity: newDriver.cnhValidity,
+                pix_key: newDriver.pixKey,
+                status: newDriver.status || 'Ativo',
+                user_id: user.id
+            };
+
+            const { data, error } = await client.from('drivers').insert(dbDriver).select().single();
+
+            if (error) throw error;
+
+            const createdDriver: Driver = {
+                ...data,
+                cnhCategory: data.cnh_category,
+                cnhValidity: data.cnh_validity,
+                pixKey: data.pix_key,
+                photoUrl: data.photo_url,
+                hasAppAccess: data.has_app_access,
+                accessToken: data.access_token,
+                lastLogin: data.last_login
+            };
+
+            setDrivers(prev => [...prev, createdDriver]);
+            showToast('Motorista adicionado!', 'success');
+        } catch (err: any) {
+            showToast(`Erro ao adicionar: ${err.message}`, 'error');
+        }
+    };
+
+    const handleUpdateDriver = async (updatedDriver: Driver) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+
+            const { error } = await client.from('drivers').update({
+                name: updatedDriver.name,
+                cpf: updatedDriver.cpf,
+                phone: updatedDriver.phone,
+                cnh: updatedDriver.cnh,
+                cnh_category: updatedDriver.cnhCategory,
+                cnh_validity: updatedDriver.cnhValidity,
+                pix_key: updatedDriver.pixKey,
+                status: updatedDriver.status,
+                has_app_access: updatedDriver.hasAppAccess,
+                access_token: updatedDriver.accessToken
+            }).eq('id', updatedDriver.id);
+
+            if (error) throw error;
+
+            setDrivers(prev => prev.map(d => d.id === updatedDriver.id ? updatedDriver : d));
+            showToast('Motorista atualizado!', 'success');
+        } catch (err: any) {
+            showToast(`Erro ao atualizar: ${err.message}`, 'error');
+        }
+    };
+
     const handleDeleteShipper = async (shipperId: string) => {
         if (!user) return;
         try {
@@ -615,6 +685,15 @@ export default function Home() {
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
+            case 'drivers': return (
+                <Suspense fallback={<div>Carregando Motoristas...</div>}>
+                    <DriverManagement
+                        drivers={drivers}
+                        onAddDriver={handleAddDriver}
+                        onUpdateDriver={handleUpdateDriver}
+                    />
+                </Suspense>
+            );
             case 'trips': return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} onDeleteTrip={handleDeleteTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
             case 'setup': return (
                 <Setup

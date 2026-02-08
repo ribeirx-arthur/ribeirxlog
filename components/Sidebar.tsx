@@ -14,7 +14,8 @@ import {
   Brain,
   ShieldCheck,
   X,
-  Calculator
+  Calculator,
+  Database
 } from 'lucide-react';
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { useAppMode } from '../contexts/AppModeContext';
@@ -44,12 +45,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
+    { id: 'drivers', label: 'Motoristas', icon: Users },
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI },
     { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !features.canAccessFullMaintenance },
     { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: !features.canAccessTires },
     { id: 'intelligence', label: 'Inteligência', icon: Brain, hidden: profile.config.showTips === false },
     { id: 'freight-calculator', label: 'Cálculo de Frete', icon: Calculator, hidden: profile.config.enableFreightCalculator === false },
-    { id: 'setup', label: 'Cadastros', icon: Users },
+    { id: 'setup', label: 'Cadastros', icon: Database },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
     { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !isAdmin },
   ];
