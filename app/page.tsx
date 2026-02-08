@@ -655,10 +655,112 @@ export default function Home() {
             showToast(`Erro ao resetar saúde: ${err.message}`, 'error');
         }
     };
-    const handleUpdateVehicles = () => setRefreshTrigger(prev => prev + 1);
-    const handleUpdateDrivers = () => setRefreshTrigger(prev => prev + 1);
-    const handleUpdateShippers = () => setRefreshTrigger(prev => prev + 1);
-    const handleUpdateBuggies = () => setRefreshTrigger(prev => prev + 1);
+    const handleAddVehicle = async (v: Partial<Vehicle>) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+            const dbV = {
+                user_id: user.id,
+                plate: v.plate?.toUpperCase(), name: v.name, brand: v.brand, model: v.model, year: v.year,
+                type: v.type, society_split_factor: v.societySplitFactor,
+                total_km_accumulated: v.totalKmAccumulated || 0,
+                photo_url: v.photoUrl
+            };
+            const { data, error } = await client.from('vehicles').insert(dbV).select().single();
+            if (error) throw error;
+            const newV = {
+                ...data,
+                totalKmAccumulated: Number(data.total_km_accumulated),
+                lastMaintenanceKm: Number(data.last_maintenance_km),
+                societySplitFactor: Number(data.society_split_factor),
+                photoUrl: data.photo_url,
+                thresholds: INITIAL_THRESHOLDS
+            };
+            setVehicles(prev => [...prev, newV]);
+            showToast('Veículo adicionado!', 'success');
+        } catch (e: any) { showToast(`Erro: ${e.message}`, 'error'); }
+    };
+
+    const handleUpdateVehicle = async (v: Vehicle) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+            const { error } = await client.from('vehicles').update({
+                plate: v.plate.toUpperCase(), name: v.name, brand: v.brand, model: v.model, year: v.year,
+                type: v.type, society_split_factor: v.societySplitFactor,
+                photo_url: v.photoUrl
+            }).eq('id', v.id);
+            if (error) throw error;
+            setVehicles(prev => prev.map(item => item.id === v.id ? v : item));
+            showToast('Veículo atualizado!', 'success');
+        } catch (e: any) { showToast(`Erro: ${e.message}`, 'error'); }
+    };
+
+    const handleAddShipper = async (s: Partial<Shipper>) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+            const dbS = {
+                user_id: user.id,
+                name: s.name, cnpj_cpf: s.cnpj, avg_payment_days: s.avgPaymentDays,
+                email: s.email, phone: s.phone, logo_url: s.logoUrl
+            };
+            const { data, error } = await client.from('shippers').insert(dbS).select().single();
+            if (error) throw error;
+            const newS = { ...data, cnpj: data.cnpj_cpf, avgPaymentDays: data.avg_payment_days, logoUrl: data.logo_url };
+            setShippers(prev => [...prev, newS]);
+            showToast('Transportadora adicionada!', 'success');
+        } catch (e: any) { showToast(`Erro: ${e.message}`, 'error'); }
+    };
+
+    const handleUpdateShipper = async (s: Shipper) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+            const { error } = await client.from('shippers').update({
+                name: s.name, cnpj_cpf: s.cnpj, avg_payment_days: s.avgPaymentDays,
+                email: s.email, phone: s.phone, logo_url: s.logoUrl
+            }).eq('id', s.id);
+            if (error) throw error;
+            setShippers(prev => prev.map(item => item.id === s.id ? s : item));
+            showToast('Transportadora atualizada!', 'success');
+        } catch (e: any) { showToast(`Erro: ${e.message}`, 'error'); }
+    };
+
+    const handleAddBuggy = async (b: Partial<Buggy>) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+            const dbB = {
+                user_id: user.id,
+                plate: b.plate?.toUpperCase(), brand: b.brand, model: b.model, axles: b.axles, tire_type: b.tireType
+            };
+            const { data, error } = await client.from('buggies').insert(dbB).select().single();
+            if (error) throw error;
+            const newB = { ...data, tireType: data.tire_type };
+            setBuggies(prev => [...prev, newB]);
+            showToast('Implemento adicionado!', 'success');
+        } catch (e: any) { showToast(`Erro: ${e.message}`, 'error'); }
+    };
+
+    const handleUpdateBuggy = async (b: Buggy) => {
+        if (!user) return;
+        try {
+            const token = await getToken({ template: 'supabase' });
+            const client = token ? createClerkSupabaseClient(token) : supabase;
+            const { error } = await client.from('buggies').update({
+                plate: b.plate.toUpperCase(), brand: b.brand, model: b.model, axles: b.axles, tire_type: b.tireType
+            }).eq('id', b.id);
+            if (error) throw error;
+            setBuggies(prev => prev.map(item => item.id === b.id ? b : item));
+            showToast('Implemento atualizado!', 'success');
+        } catch (e: any) { showToast(`Erro: ${e.message}`, 'error'); }
+    };
 
     const handleUpdateProfile = async (newProfile: UserProfile) => {
         setProfile(newProfile);
@@ -701,13 +803,21 @@ export default function Home() {
                     drivers={drivers}
                     shippers={shippers}
                     buggies={buggies}
-                    onUpdateVehicles={handleUpdateVehicles}
-                    onUpdateDrivers={handleUpdateDrivers}
-                    onUpdateShippers={handleUpdateShippers}
-                    onUpdateBuggies={handleUpdateBuggies}
+
+                    onAddVehicle={handleAddVehicle}
+                    onUpdateVehicle={handleUpdateVehicle}
                     onDeleteVehicle={handleDeleteVehicle}
+
+                    onAddDriver={handleAddDriver}
+                    onUpdateDriver={handleUpdateDriver}
                     onDeleteDriver={handleDeleteDriver}
+
+                    onAddShipper={handleAddShipper}
+                    onUpdateShipper={handleUpdateShipper}
                     onDeleteShipper={handleDeleteShipper}
+
+                    onAddBuggy={handleAddBuggy}
+                    onUpdateBuggy={handleUpdateBuggy}
                     onDeleteBuggy={handleDeleteBuggy}
                 />
             );

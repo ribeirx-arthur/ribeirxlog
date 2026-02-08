@@ -16,15 +16,18 @@ import {
     Activity,
     Clock,
     TrendingUp,
-    AlertCircle
+    TrendingUp,
+    AlertCircle,
+    X,
+    Save
 } from 'lucide-react';
 import { Driver, Trip, TripProof, VehicleLocation } from '../types';
 import { supabase } from '../services/supabase';
 
 interface DriverManagementProps {
     drivers: Driver[];
-    onAddDriver: (driver: Partial<Driver>) => void;
-    onUpdateDriver: (driver: Driver) => void;
+    onAddDriver: (driver: Partial<Driver>) => Promise<void> | void;
+    onUpdateDriver: (driver: Driver) => Promise<void> | void;
 }
 
 const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, onAddDriver, onUpdateDriver }) => {
@@ -33,6 +36,25 @@ const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, onAddDrive
     const [showAccessModal, setShowAccessModal] = useState(false);
     const [generatedLink, setGeneratedLink] = useState('');
     const [driverStats, setDriverStats] = useState<Record<string, any>>({});
+
+    // Add Driver Modal State
+    const [isSaving, setIsSaving] = useState(false);
+    const [newDriver, setNewDriver] = useState<Partial<Driver>>({
+        name: '',
+        cpf: '',
+        phone: '',
+        cnh: '',
+        cnhCategory: 'E',
+        status: 'Ativo'
+    });
+
+    const handleSaveDriver = async () => {
+        setIsSaving(true);
+        await onAddDriver(newDriver);
+        setShowAddModal(false);
+        setIsSaving(false);
+        setNewDriver({ name: '', cpf: '', phone: '', cnh: '', status: 'Ativo', cnhCategory: 'E' });
+    };
 
     // Load driver statistics
     useEffect(() => {
@@ -365,6 +387,82 @@ const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, onAddDrive
                                 className="flex-1 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all font-bold flex items-center justify-center gap-2"
                             >
                                 <Send className="w-5 h-5" /> Enviar via WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Add Driver Modal */}
+            {showAddModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-lg w-full">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-black text-white">Novo Motorista</h3>
+                            <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-800 rounded-full transition-all">
+                                <X className="w-6 h-6 text-slate-400" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Nome Completo</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ex: João da Silva"
+                                    value={newDriver.name}
+                                    onChange={e => setNewDriver({ ...newDriver, name: e.target.value })}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">CPF</label>
+                                <input
+                                    type="text"
+                                    placeholder="000.000.000-00"
+                                    value={newDriver.cpf}
+                                    onChange={e => setNewDriver({ ...newDriver, cpf: e.target.value })}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Telefone / WhatsApp</label>
+                                <input
+                                    type="text"
+                                    placeholder="(11) 99999-9999"
+                                    value={newDriver.phone}
+                                    onChange={e => setNewDriver({ ...newDriver, phone: e.target.value })}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">CNH</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Número CNH"
+                                        value={newDriver.cnh}
+                                        onChange={e => setNewDriver({ ...newDriver, cnh: e.target.value })}
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Categoria</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ex: E"
+                                        value={newDriver.cnhCategory}
+                                        onChange={e => setNewDriver({ ...newDriver, cnhCategory: e.target.value })}
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleSaveDriver}
+                                disabled={isSaving}
+                                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 mt-4"
+                            >
+                                {isSaving ? 'Salvando...' : <><Save className="w-5 h-5" /> Cadastrar Motorista</>}
                             </button>
                         </div>
                     </div>

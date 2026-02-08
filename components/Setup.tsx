@@ -26,14 +26,23 @@ interface SetupProps {
   drivers: Driver[];
   shippers: Shipper[];
   buggies: Buggy[];
-  onUpdateVehicles: (v: Vehicle[]) => void;
-  onUpdateDrivers: (d: Driver[]) => void;
-  onUpdateShippers: (s: Shipper[]) => void;
-  onUpdateBuggies: (b: Buggy[]) => void;
-  onDeleteVehicle: (id: string) => void;
-  onDeleteDriver: (id: string) => void;
-  onDeleteShipper: (id: string) => void;
-  onDeleteBuggy: (id: string) => void;
+
+  onAddVehicle: (v: Partial<Vehicle>) => Promise<void>;
+  onUpdateVehicle: (v: Vehicle) => Promise<void>;
+  onDeleteVehicle: (id: string) => Promise<void>;
+
+  onAddDriver: (d: Partial<Driver>) => Promise<void>;
+  onUpdateDriver: (d: Driver) => Promise<void>;
+  onDeleteDriver: (id: string) => Promise<void>;
+
+  onAddShipper: (s: Partial<Shipper>) => Promise<void>;
+  onUpdateShipper: (s: Shipper) => Promise<void>;
+  onDeleteShipper: (id: string) => Promise<void>;
+
+  onAddBuggy: (b: Partial<Buggy>) => Promise<void>;
+  onUpdateBuggy: (b: Buggy) => Promise<void>;
+  onDeleteBuggy: (id: string) => Promise<void>;
+
   initialSubTab?: SetupTab;
 }
 
@@ -41,8 +50,10 @@ type SetupTab = 'vehicles' | 'drivers' | 'shippers' | 'buggies';
 
 const Setup: React.FC<SetupProps> = ({
   vehicles, drivers, shippers, buggies,
-  onUpdateVehicles, onUpdateDrivers, onUpdateShippers, onUpdateBuggies,
-  onDeleteVehicle, onDeleteDriver, onDeleteShipper, onDeleteBuggy,
+  onAddVehicle, onUpdateVehicle, onDeleteVehicle,
+  onAddDriver, onUpdateDriver, onDeleteDriver,
+  onAddShipper, onUpdateShipper, onDeleteShipper,
+  onAddBuggy, onUpdateBuggy, onDeleteBuggy,
   initialSubTab
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<SetupTab>(initialSubTab || 'vehicles');
@@ -64,12 +75,13 @@ const Setup: React.FC<SetupProps> = ({
     } else {
       // Default initial states for new records
       const initialStates = {
-        vehicles: { id: '', plate: '', name: '', brand: '', model: '', year: new Date().getFullYear(), type: VehiclePropertyType.PROPRIO, societySplitFactor: 100, totalKmAccumulated: 0, lastMaintenanceKm: 0 },
-        drivers: { id: '', name: '', cpf: '', phone: '', cnh: '', cnhCategory: 'E', cnhValidity: '', status: 'Ativo' as const },
-        shippers: { id: '', name: '', cnpj: '', avgPaymentDays: 15 },
-        buggies: { id: '', plate: '', brand: '', model: '', axles: 3, tireType: 'dual' }
+        vehicles: { plate: '', name: '', brand: '', model: '', year: new Date().getFullYear(), type: VehiclePropertyType.PROPRIO, societySplitFactor: 100, totalKmAccumulated: 0, lastMaintenanceKm: 0 },
+        drivers: { name: '', cpf: '', phone: '', cnh: '', cnhCategory: 'E', cnhValidity: '', status: 'Ativo' as const },
+        shippers: { name: '', cnpj: '', avgPaymentDays: 15 },
+        buggies: { plate: '', brand: '', model: '', axles: 3, tireType: 'dual' }
       };
-      setEditingItem({ ...initialStates[activeSubTab as keyof typeof initialStates], id: Math.random().toString(36).substr(2, 9) });
+      // No ID means new item
+      setEditingItem({ ...initialStates[activeSubTab as keyof typeof initialStates] });
     }
     setIsModalOpen(true);
   };
@@ -84,18 +96,20 @@ const Setup: React.FC<SetupProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const isNew = !editingItem.id;
+
       if (activeSubTab === 'vehicles') {
-        const exists = vehicles.find(v => v.id === editingItem.id);
-        await onUpdateVehicles(exists ? vehicles.map(v => v.id === editingItem.id ? editingItem : v) : [editingItem, ...vehicles]);
+        if (isNew) await onAddVehicle(editingItem);
+        else await onUpdateVehicle(editingItem);
       } else if (activeSubTab === 'drivers') {
-        const exists = drivers.find(d => d.id === editingItem.id);
-        await onUpdateDrivers(exists ? drivers.map(d => d.id === editingItem.id ? editingItem : d) : [editingItem, ...drivers]);
+        if (isNew) await onAddDriver(editingItem);
+        else await onUpdateDriver(editingItem);
       } else if (activeSubTab === 'shippers') {
-        const exists = shippers.find(s => s.id === editingItem.id);
-        await onUpdateShippers(exists ? shippers.map(s => s.id === editingItem.id ? editingItem : s) : [editingItem, ...shippers]);
+        if (isNew) await onAddShipper(editingItem);
+        else await onUpdateShipper(editingItem);
       } else if (activeSubTab === 'buggies') {
-        const exists = buggies.find(b => b.id === editingItem.id);
-        await onUpdateBuggies(exists ? buggies.map(b => b.id === editingItem.id ? editingItem : b) : [editingItem, ...buggies]);
+        if (isNew) await onAddBuggy(editingItem);
+        else await onUpdateBuggy(editingItem);
       }
       handleCloseModal();
     } catch (err) {
@@ -127,7 +141,10 @@ const Setup: React.FC<SetupProps> = ({
   };
 
   const toggleDriverStatus = (id: string) => {
-    onUpdateDrivers(drivers.map(d => d.id === id ? { ...d, status: d.status === 'Ativo' ? 'Inativo' : 'Ativo' } : d));
+    const driver = drivers.find(d => d.id === id);
+    if (driver) {
+      onUpdateDriver({ ...driver, status: driver.status === 'Ativo' ? 'Inativo' : 'Ativo' });
+    }
   };
 
   return (
