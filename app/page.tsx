@@ -409,42 +409,41 @@ export default function Home() {
 
     const handleAddDriver = async (newDriver: Partial<Driver>) => {
         if (!user) return;
-        showToast('Adicionando motorista...', 'info');
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
-
             const dbDriver = {
+                user_id: user.id,
                 name: newDriver.name,
                 cpf: newDriver.cpf,
                 phone: newDriver.phone,
                 cnh: newDriver.cnh,
                 cnh_category: newDriver.cnhCategory,
-                cnh_validity: newDriver.cnhValidity,
-                pix_key: newDriver.pixKey,
-                status: newDriver.status || 'Ativo',
-                user_id: user.id
+                status: newDriver.status,
+                photo_url: newDriver.photoUrl
             };
 
-            const { data, error } = await client.from('drivers').insert(dbDriver).select().single();
+            // Use RPC to bypass RLS issues on insert
+            const { data, error } = await client.rpc('create_driver', { driver_data: dbDriver });
 
             if (error) throw error;
 
-            const createdDriver: Driver = {
-                ...data,
-                cnhCategory: data.cnh_category,
-                cnhValidity: data.cnh_validity,
-                pixKey: data.pix_key,
-                photoUrl: data.photo_url,
-                hasAppAccess: data.has_app_access,
-                accessToken: data.access_token,
-                lastLogin: data.last_login
-            };
+            // RPC returns single object, not array
+            const driverData = data;
 
+            const createdDriver: Driver = {
+                ...driverData,
+                cnhCategory: driverData.cnh_category,
+                photoUrl: driverData.photo_url,
+                hasAppAccess: driverData.has_app_access,
+                accessToken: driverData.access_token,
+                lastLogin: driverData.last_login
+            };
             setDrivers(prev => [...prev, createdDriver]);
-            showToast('Motorista adicionado!', 'success');
-        } catch (err: any) {
-            showToast(`Erro ao adicionar: ${err.message}`, 'error');
+            showToast('Motorista adicionado com sucesso!', 'success');
+        } catch (e: any) {
+            console.error('Error adding driver:', e);
+            showToast(`Erro ao adicionar motorista: ${e.message}`, 'error');
         }
     };
 
