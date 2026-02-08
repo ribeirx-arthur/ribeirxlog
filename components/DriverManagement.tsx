@@ -16,7 +16,6 @@ import {
     Activity,
     Clock,
     TrendingUp,
-    TrendingUp,
     AlertCircle,
     X,
     Save
