@@ -15,6 +15,7 @@ const Setup = React.lazy(() => import('../components/Setup'));
 const TireManagement = React.lazy(() => import('../components/TireManagement'));
 const Intelligence = React.lazy(() => import('../components/StrategicIntelligence'));
 const FreightCalculator = React.lazy(() => import('../components/FreightCalculator'));
+const GPSTracking = React.lazy(() => import('../components/GPSTracking'));
 const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
 const DriverManagement = React.lazy(() => import('../components/DriverManagement'));
 
@@ -81,6 +82,8 @@ export default function Home() {
     const [shippers, setShippers] = useState<Shipper[]>([]);
     const [tires, setTires] = useState<Tire[]>([]);
     const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([]);
+    const [locations, setLocations] = useState<VehicleLocation[]>([]);
+    const [gpsAlerts, setGpsAlerts] = useState<GPSAlert[]>([]);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         setToast({ message, type });
@@ -224,6 +227,16 @@ export default function Home() {
                             vehicleId: m.vehicle_id,
                             kmAtMaintenance: Number(m.km_at_maintenance),
                             totalCost: Number(m.total_cost || 0)
+                        })),
+                        loadTable('vehicle_locations', setLocations, (l: any) => ({
+                            ...l,
+                            vehicleId: trips.find(t => t.id === l.trip_id)?.vehicleId || '',
+                            timestamp: l.timestamp
+                        })),
+                        loadTable('gps_alerts', setGpsAlerts, (a: any) => ({
+                            ...a,
+                            vehicleId: a.vehicle_id,
+                            resolved: !!a.resolved
                         }))
                     ]);
                 } catch (error) {
@@ -842,6 +855,17 @@ export default function Home() {
             );
             case 'intelligence': return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
             case 'freight-calculator': return <FreightCalculator vehicles={vehicles} profile={profile} />;
+            case 'gps-tracking': return (
+                <Suspense fallback={<div>Iniciando satélites...</div>}>
+                    <GPSTracking
+                        vehicles={vehicles}
+                        trips={trips}
+                        locations={locations}
+                        alerts={gpsAlerts}
+                        onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+                    />
+                </Suspense>
+            );
             case 'tires': return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
             case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
             case 'admin':

@@ -12,7 +12,8 @@ import {
     Filter,
     Download,
     Play,
-    Pause
+    Pause,
+    ExternalLink
 } from 'lucide-react';
 import { Vehicle, Trip, VehicleLocation, GPSAlert } from '../types';
 
@@ -99,8 +100,8 @@ const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, a
                     <button
                         onClick={() => setAutoRefresh(!autoRefresh)}
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all text-sm font-bold ${autoRefresh
-                                ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/20'
-                                : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                            ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/20'
+                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
                             }`}
                     >
                         {autoRefresh ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
@@ -211,8 +212,8 @@ const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, a
                         key={status}
                         onClick={() => setFilterStatus(status)}
                         className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterStatus === status
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                                : 'text-slate-500 hover:text-slate-300'
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                            : 'text-slate-500 hover:text-slate-300'
                             }`}
                     >
                         {status === 'all' ? 'Todos' : status === 'moving' ? 'Em Movimento' : 'Parados'}
@@ -232,22 +233,40 @@ const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, a
                     </div>
                     <div
                         ref={mapRef}
-                        className="w-full h-[500px] bg-slate-950 rounded-2xl border border-slate-700 flex items-center justify-center relative overflow-hidden"
+                        className="w-full h-[500px] bg-slate-950 rounded-2xl border border-slate-700 relative overflow-hidden shadow-2xl"
                     >
-                        {/* Placeholder - Replace with real map library (Leaflet, Mapbox, Google Maps) */}
-                        <div className="absolute inset-0 opacity-10" style={{
-                            backgroundImage: 'repeating-linear-gradient(0deg, #10b981 0, #10b981 1px, transparent 0, transparent 20px), repeating-linear-gradient(90deg, #10b981 0, #10b981 1px, transparent 0, transparent 20px)',
-                        }}></div>
-                        <div className="relative z-10 text-center space-y-4">
-                            <MapPin className="w-16 h-16 text-emerald-500 mx-auto animate-pulse" />
-                            <div>
-                                <p className="text-white font-black text-xl mb-2">Mapa Interativo</p>
-                                <p className="text-slate-500 text-sm max-w-md">
-                                    Integração com Google Maps, Mapbox ou Leaflet será implementada aqui.
-                                    <br />Mostrará posição em tempo real de todos os veículos.
-                                </p>
+                        {selectedVehicle ? (() => {
+                            const location = getLatestLocation(selectedVehicle);
+                            if (!location) return (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-900/50 backdrop-blur-sm">
+                                    <MapPin className="w-12 h-12 mb-4 opacity-20" />
+                                    <p className="font-bold">Sem dados de localização para este veículo</p>
+                                </div>
+                            );
+
+                            // Calculate bounding box for the iframe
+                            const delta = 0.005;
+                            const bbox = `${location.longitude - delta},${location.latitude - delta},${location.longitude + delta},${location.latitude + delta}`;
+
+                            return (
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    className="border-0 filter grayscale invert contrast-125 opacity-80"
+                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${location.latitude},${location.longitude}`}
+                                ></iframe>
+                            );
+                        })() : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-900/50">
+                                <MapPin className="w-16 h-16 mb-4 text-emerald-500/20 animate-bounce" />
+                                <div className="text-center">
+                                    <p className="text-white font-black text-xl mb-2">Selecione um Veículo</p>
+                                    <p className="text-slate-500 text-sm max-w-xs">
+                                        Clique em um veículo na lista para visualizar sua localização exata no mapa tático.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -265,8 +284,8 @@ const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, a
                                     key={vehicle.id}
                                     onClick={() => setSelectedVehicle(vehicle.id)}
                                     className={`bg-slate-900/50 border rounded-2xl p-4 cursor-pointer transition-all hover:bg-slate-900 ${selectedVehicle === vehicle.id
-                                            ? 'border-emerald-500 shadow-lg shadow-emerald-500/20'
-                                            : 'border-slate-700/50'
+                                        ? 'border-emerald-500 shadow-lg shadow-emerald-500/20'
+                                        : 'border-slate-700/50'
                                         }`}
                                 >
                                     <div className="flex items-start justify-between mb-3">
@@ -281,25 +300,27 @@ const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, a
                                             </div>
                                         </div>
                                         <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase ${moving
-                                                ? 'bg-emerald-500/10 text-emerald-500'
-                                                : 'bg-slate-700 text-slate-400'
+                                            ? 'bg-emerald-500/10 text-emerald-500'
+                                            : 'bg-slate-700 text-slate-400'
                                             }`}>
                                             {moving ? 'Movimento' : 'Parado'}
                                         </div>
                                     </div>
 
                                     {location && (
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-2 text-xs">
-                                                <Gauge className="w-3.5 h-3.5 text-sky-400" />
-                                                <span className="text-slate-400">Velocidade:</span>
-                                                <span className="text-white font-bold">{location.speed.toFixed(0)} km/h</span>
+                                        <div className="space-y-2 mt-4 pt-4 border-t border-slate-800">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 text-xs">
+                                                    <Gauge className="w-3.5 h-3.5 text-sky-400" />
+                                                    <span className="text-slate-400">Velocidade:</span>
+                                                    <span className="text-white font-bold">{location.speed.toFixed(0)} km/h</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs">
+                                                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                                                    <span className="text-white font-bold">{getTimeSinceUpdate(location.timestamp)}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs">
-                                                <Clock className="w-3.5 h-3.5 text-amber-400" />
-                                                <span className="text-slate-400">Atualizado:</span>
-                                                <span className="text-white font-bold">{getTimeSinceUpdate(location.timestamp)}</span>
-                                            </div>
+
                                             {trip && (
                                                 <div className="flex items-center gap-2 text-xs">
                                                     <MapPin className="w-3.5 h-3.5 text-emerald-400" />
@@ -307,6 +328,17 @@ const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, a
                                                     <span className="text-white font-bold truncate">{trip.destination}</span>
                                                 </div>
                                             )}
+
+                                            <a
+                                                href={`https://www.google.com/maps?q=${location.latitude},${location.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="flex items-center justify-center gap-2 w-full py-2 bg-slate-800 border border-slate-700 rounded-xl text-[10px] font-black uppercase text-slate-300 hover:bg-slate-700 hover:text-white transition-all mt-2"
+                                            >
+                                                <ExternalLink className="w-3 h-3" />
+                                                Ver no Google Maps
+                                            </a>
                                         </div>
                                     )}
 
