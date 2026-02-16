@@ -16,7 +16,8 @@ import {
   X,
   Calculator,
   Database,
-  MapPin
+  MapPin,
+  FolderOpen
 } from 'lucide-react';
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { useAppMode } from '../contexts/AppModeContext';
@@ -45,7 +46,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'gps-tracking', label: 'Rastreio', icon: MapPin },
+    { id: 'gps-tracking', label: 'MAPA', icon: MapPin },
+    { id: 'proof-gallery', label: 'Documentos', icon: FolderOpen },
     { id: 'trips', label: 'Viagens', icon: Truck },
     { id: 'drivers', label: 'Motoristas', icon: Users },
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI },

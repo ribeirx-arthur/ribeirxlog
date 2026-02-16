@@ -103,10 +103,13 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
         setUploading(true);
         try {
-            // 1. Retrieve session token
-            const sessionStr = localStorage.getItem('driver_session');
-            if (!sessionStr) throw new Error("Sessão inválida");
-            const { token } = JSON.parse(sessionStr);
+            // 1. Retrieve sync token from props or fallback to storage
+            const token = driver.accessToken || (localStorage.getItem('driver_session') ? JSON.parse(localStorage.getItem('driver_session') || '{}').token : null);
+
+            if (!token) {
+                alert("Sessão inválida. Por favor, saia e entre novamente.");
+                throw new Error("Sessão inválida");
+            }
 
             // 2. Upload to Supabase Storage
             const fileExt = file.name.split('.').pop();
@@ -114,7 +117,10 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from('trip-proofs')
-                .upload(fileName, file);
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: true
+                });
 
             if (uploadError) {
                 console.error("Storage Error:", uploadError);

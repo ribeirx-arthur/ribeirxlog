@@ -18,6 +18,7 @@ const FreightCalculator = React.lazy(() => import('../components/FreightCalculat
 const GPSTracking = React.lazy(() => import('../components/GPSTracking'));
 const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
 const DriverManagement = React.lazy(() => import('../components/DriverManagement'));
+const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
 
 import LandingPage from '../components/LandingPage';
 import Paywall from '../components/Paywall';
@@ -34,7 +35,9 @@ import {
     TabType,
     AppNotification,
     MaintenanceRecord,
-    MaintenanceThresholds
+    MaintenanceThresholds,
+    VehicleLocation,
+    GPSAlert
 } from '../types';
 import {
     INITIAL_PROFILE
@@ -863,6 +866,15 @@ export default function Home() {
                         locations={locations}
                         alerts={gpsAlerts}
                         onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+                    />
+                </Suspense>
+            );
+            case 'proof-gallery': return (
+                <Suspense fallback={<div>Carregando galeria...</div>}>
+                    <ProofGallery
+                        trips={trips}
+                        vehicles={vehicles}
+                        drivers={drivers}
                     />
                 </Suspense>
             );

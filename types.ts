@@ -244,4 +244,4 @@ export interface Geofence {
   active: boolean;
 }
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery';
