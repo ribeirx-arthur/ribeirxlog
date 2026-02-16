@@ -302,6 +302,45 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
 
             <div className="p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
               <div className="lg:col-span-8 space-y-8">
+                {/* Campos Principais: Veículo, Motorista, Cliente */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Veículo</label>
+                    <select
+                      value={editingTrip.vehicleId}
+                      onChange={e => setEditingTrip({ ...editingTrip, vehicleId: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-bold"
+                    >
+                      {vehicles.map(v => (
+                        <option key={v.id} value={v.id}>{v.plate} - {v.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Motorista</label>
+                    <select
+                      value={editingTrip.driverId}
+                      onChange={e => setEditingTrip({ ...editingTrip, driverId: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-bold"
+                    >
+                      {drivers.map(d => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Cliente/Transportadora</label>
+                    <select
+                      value={editingTrip.shipperId}
+                      onChange={e => setEditingTrip({ ...editingTrip, shipperId: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-bold"
+                    >
+                      {shippers.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Data Saída</label>

@@ -48,38 +48,53 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             watchId = navigator.geolocation.watchPosition(
                 (position) => {
                     const { latitude, longitude, speed, heading } = position.coords;
-
-                    // Visual feedback
-                    setLastLocation({
-                        id: 'local',
-                        vehicleId: 'local',
-                        timestamp: new Date().toISOString(),
-                        latitude,
-                        longitude,
-                        speed: speed || 0,
-                        heading: heading || 0,
-                        accuracy: position.coords.accuracy || 0
-                    });
-
-                    // Send to backend via RPC
-                    supabase.rpc('update_location', {
-                        p_driver_token: driver.accessToken,
-                        p_lat: latitude,
-                        p_long: longitude,
-                        p_speed: speed || 0,
-                        p_heading: heading || 0
-                    }).then(({ error }) => {
-                        if (error) console.error("GPS Sync Error:", error);
-                    });
+                    updateDriverLocation(latitude, longitude, speed, heading, position.coords.accuracy);
                 },
                 (error) => console.error("GPS Error:", error),
                 { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+            );
+
+            // Get immediate location to avoid lag
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude, speed, heading } = position.coords;
+                    updateDriverLocation(latitude, longitude, speed, heading, position.coords.accuracy);
+                },
+                (error) => console.error("Initial GPS Error:", error),
+                { enableHighAccuracy: true }
             );
         }
         return () => {
             if (watchId) navigator.geolocation.clearWatch(watchId);
         };
     }, [isTracking, driver.accessToken]);
+
+    const updateDriverLocation = (latitude: number, longitude: number, speed: number | null, heading: number | null, accuracy: number) => {
+        if (!driver.accessToken) return;
+
+        // Visual feedback
+        setLastLocation({
+            id: 'local',
+            vehicleId: 'local',
+            timestamp: new Date().toISOString(),
+            latitude,
+            longitude,
+            speed: speed || 0,
+            heading: heading || 0,
+            accuracy: accuracy || 0
+        });
+
+        // Send to backend via RPC
+        supabase.rpc('update_location', {
+            p_driver_token: driver.accessToken,
+            p_lat: latitude,
+            p_long: longitude,
+            p_speed: speed || 0,
+            p_heading: heading || 0
+        }).then(({ error }) => {
+            if (error) console.error("GPS Sync Error:", error);
+        });
+    };
 
     // Load proofs
     useEffect(() => {

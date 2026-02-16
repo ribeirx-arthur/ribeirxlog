@@ -252,6 +252,38 @@ export default function Home() {
         }
     }, [isSignedIn, user?.id, refreshTrigger]);
 
+    // Real-time GPS Tracking updates
+    useEffect(() => {
+        if (!user || !isSignedIn) return;
+
+        const channel = supabase
+            .channel('gps-live-updates')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'vehicle_locations' },
+                (payload) => {
+                    if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+                        const newLoc = payload.new as any;
+                        setLocations(prev => {
+                            const exists = prev.find(l => l.id === newLoc.id);
+                            const updatedLoc = {
+                                ...newLoc,
+                                vehicleId: trips.find(t => t.id === newLoc.trip_id)?.vehicleId || ''
+                            };
+                            if (exists) {
+                                return prev.map(l => l.id === newLoc.id ? updatedLoc : l);
+                            }
+                            return [updatedLoc, ...prev];
+                        });
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user, isSignedIn, trips]);
+
     const handleLandingPurchase = (plan: string) => {
         const message = encodeURIComponent(`Olá Arthur! Estou na Landing Page e tenho interesse no plano ${plan}. Como faço para prosseguir com o pagamento?`);
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
