@@ -196,7 +196,9 @@ export default function Home() {
                             combustivel: Number(t.combustivel),
                             litersDiesel: Number(t.liters_diesel),
                             outrasDespesas: Number(t.outras_despesas),
-                            totalKm: Number(t.total_km)
+                            totalKm: Number(t.total_km),
+                            transitStatus: t.transit_status,
+                            checklistCompleted: t.checklist_completed
                         })),
                         loadTable('vehicles', setVehicles, (v: any) => ({
                             ...v,

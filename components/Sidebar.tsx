@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'gps-tracking', label: 'MAPA', icon: MapPin },
+    { id: 'gps-tracking', label: 'Mapa', icon: MapPin },
     { id: 'proof-gallery', label: 'Documentos', icon: FolderOpen },
     { id: 'trips', label: 'Viagens', icon: Truck },
     { id: 'drivers', label: 'Motoristas', icon: Users },
