@@ -44,6 +44,8 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     const [proofs, setProofs] = useState<TripProof[]>([]);
     const [uploading, setUploading] = useState(false);
     const [earnings, setEarnings] = useState({ pending: 0, paid: 0, total: 0 });
+    const [isDemoMode, setIsDemoMode] = useState(false);
+
     const [tripStats, setTripStats] = useState({ duration: '0h 0m', avgSpeed: 0, totalKm: 0 });
     const [checklist, setChecklist] = useState({
         pneus: false,
@@ -52,6 +54,27 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
         freios: false,
         documentos: false
     });
+
+    // Mock Trip for Demo Mode
+    const demoTrip: Trip = {
+        id: 'demo-123',
+        driverId: driver.id,
+        vehicleId: driver.vehicleId || 'demo-vehicle',
+        origin: 'São Paulo, SP',
+        destination: 'Rio de Janeiro, RJ',
+        departureDate: new Date().toISOString(),
+        status: 'Pendente',
+        shipperId: 'demo-shipper',
+        freteSeco: 5000,
+        diarias: 0,
+        adiantamento: 0,
+        combustivel: 0,
+        litersDiesel: 0,
+        outrasDespesas: 0,
+        totalKm: 0
+    };
+
+    const activeTrip = currentTrip || (isDemoMode ? demoTrip : null);
 
     // GPS Tracking Logic
     useEffect(() => {
@@ -70,8 +93,8 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
             // Update trip duration stats
             statsInterval = setInterval(() => {
-                if (currentTrip?.departureDate) {
-                    const start = new Date(currentTrip.departureDate).getTime();
+                if (activeTrip?.departureDate) {
+                    const start = new Date(activeTrip.departureDate).getTime();
                     const now = new Date().getTime();
                     const diff = Math.max(0, now - start);
                     const hours = Math.floor(diff / 3600000);
@@ -84,7 +107,7 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             if (watchId) navigator.geolocation.clearWatch(watchId);
             if (statsInterval) clearInterval(statsInterval);
         };
-    }, [isTracking, driver.accessToken, currentTrip]);
+    }, [isTracking, driver.accessToken, activeTrip]);
 
     const updateDriverLocation = (latitude: number, longitude: number, speed: number | null, heading: number | null, accuracy: number) => {
         if (!driver.accessToken) return;
@@ -115,25 +138,43 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
     // Load proofs
     useEffect(() => {
-        if (currentTrip) {
+        if (activeTrip) {
             loadProofs();
         }
-    }, [currentTrip]);
+    }, [activeTrip]);
 
     const loadProofs = async () => {
-        if (!currentTrip) return;
+        if (!activeTrip || activeTrip.id === 'demo-123') return;
         const { data } = await supabase
             .from('trip_proofs')
             .select('*')
-            .eq('trip_id', currentTrip.id)
+            .eq('trip_id', activeTrip.id)
             .order('uploaded_at', { ascending: false });
         if (data) setProofs(data);
     };
 
     const handleFileUpload = async (file: File, type: TripProof['type']) => {
-        if (!currentTrip) return;
+        if (!activeTrip) return;
 
-        setUploading(true);
+        if (activeTrip.id === 'demo-123') {
+            setUploading(true);
+            setTimeout(() => {
+                setUploading(false);
+                setProofs(prev => [{
+                    id: Math.random().toString(),
+                    tripId: 'demo-123',
+                    type,
+                    fileUrl: '#',
+                    fileName: file.name,
+                    fileSize: file.size,
+                    uploadedAt: new Date().toISOString(),
+                    uploadedBy: 'driver',
+                    approved: false
+                } as TripProof, ...prev]);
+                alert('Modo Demo: Comprovante simulado com sucesso!');
+            }, 1000);
+            return;
+        }
         try {
             // 1. Retrieve sync token from props or fallback to storage
             const token = driver.accessToken || (localStorage.getItem('driver_session') ? JSON.parse(localStorage.getItem('driver_session') || '{}').token : null);
@@ -145,7 +186,7 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
             // 2. Upload to Supabase Storage
             const fileExt = file.name.split('.').pop();
-            const fileName = `${currentTrip.id}/${type}_${Date.now()}.${fileExt}`;
+            const fileName = `${activeTrip.id}/${type}_${Date.now()}.${fileExt}`;
 
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from('trip-proofs')
@@ -167,7 +208,7 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             // 4. Save proof record via Secure RPC
             const { error: rpcError } = await supabase.rpc('submit_trip_proof', {
                 p_driver_token: token,
-                p_trip_id: currentTrip.id,
+                p_trip_id: activeTrip.id,
                 p_type: type,
                 p_file_url: publicUrl,
                 p_file_name: file.name,
@@ -189,11 +230,11 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     };
 
     const startTrip = async () => {
-        if (!currentTrip || !driver.accessToken) return;
+        if (!activeTrip || !driver.accessToken) return;
 
         const { error } = await supabase.rpc('driver_start_trip', {
             p_driver_token: driver.accessToken,
-            p_trip_id: currentTrip.id
+            p_trip_id: activeTrip.id
         });
 
         if (!error) {
@@ -206,11 +247,11 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     };
 
     const endTrip = async () => {
-        if (!currentTrip || !driver.accessToken) return;
+        if (!activeTrip || !driver.accessToken) return;
 
         const { error } = await supabase.rpc('driver_end_trip', {
             p_driver_token: driver.accessToken,
-            p_trip_id: currentTrip.id
+            p_trip_id: activeTrip.id
         });
 
         if (!error) {
@@ -250,22 +291,31 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                 )}
 
                 <div className="mt-8 relative z-10">
-                    {currentTrip ? (
+                    {activeTrip ? (
                         <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5">
                             <div className="flex items-center gap-3 mb-3">
                                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <p className="text-xs font-bold text-emerald-300 uppercase tracking-widest">Viagem Ativa</p>
+                                <p className="text-xs font-bold text-emerald-300 uppercase tracking-widest">Viagem Ativa {isDemoMode && '(DEMO)'}</p>
                             </div>
-                            <p className="text-2xl font-black text-white leading-tight mb-2">{currentTrip.destination}</p>
+                            <p className="text-2xl font-black text-white leading-tight mb-2">{activeTrip.destination}</p>
                             <div className="flex items-center gap-2 text-indigo-100 text-sm font-medium">
                                 <Clock className="w-4 h-4" />
-                                <span>Saída: {new Date(currentTrip.departureDate).toLocaleDateString('pt-BR')}</span>
+                                <span>Saída: {new Date(activeTrip.departureDate).toLocaleDateString('pt-BR')}</span>
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white/5 backdrop-blur-sm border border-white/5 rounded-2xl p-6 text-center">
-                            <p className="text-indigo-200 text-sm font-medium">Nenhuma viagem iniciada.</p>
-                            <p className="text-xs text-indigo-300/60 mt-1">Aguarde instruções do gestor.</p>
+                        <div className="bg-white/5 backdrop-blur-sm border border-white/5 rounded-2xl p-6 text-center space-y-4">
+                            <div>
+                                <p className="text-indigo-200 text-sm font-medium">Nenhuma viagem iniciada.</p>
+                                <p className="text-xs text-indigo-300/60 mt-1">Aguarde instruções do gestor.</p>
+                            </div>
+
+                            <button
+                                onClick={() => setIsDemoMode(true)}
+                                className="w-full py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            >
+                                🧪 Ativar Modo de Teste
+                            </button>
                         </div>
                     )}
                 </div>
@@ -277,17 +327,17 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                     <Maximize2 className="w-5 h-5 text-emerald-500" /> Ações Rápidas
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                    {currentTrip && !currentTrip.returnDate && (
+                    {activeTrip && !activeTrip.returnDate && (
                         <div className="col-span-2">
-                            {(!currentTrip.departureDate || new Date(currentTrip.departureDate) > new Date()) ? (
+                            {(!activeTrip.departureDate || new Date(activeTrip.departureDate) > new Date()) || isDemoMode ? (
                                 <button
-                                    onClick={startTrip}
+                                    onClick={isDemoMode ? () => setIsTracking(!isTracking) : startTrip}
                                     className="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition-all rounded-[2rem] p-6 shadow-lg shadow-emerald-500/20 group relative overflow-hidden"
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                                     <PlayCircle className="w-10 h-10 text-white mx-auto mb-3" />
-                                    <p className="text-white font-black text-lg tracking-wide">INICIAR VIAGEM</p>
-                                    <p className="text-emerald-100/80 text-xs font-medium mt-1">Ativar GPS e Status</p>
+                                    <p className="text-white font-black text-lg tracking-wide">{isTracking ? 'RODANDO GPS...' : 'INICIAR VIAGEM'}</p>
+                                    <p className="text-emerald-100/80 text-xs font-medium mt-1">{isDemoMode ? 'Simulando no navegador' : 'Ativar GPS e Status'}</p>
                                 </button>
                             ) : (
                                 <button
@@ -366,7 +416,9 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                         <span className="text-[10px] uppercase font-black tracking-widest">Tempo Total</span>
                     </div>
                     <p className="text-xl font-black text-white">{tripStats.duration}</p>
-                    <p className="text-[10px] text-slate-500 font-bold mt-1">EM OPERAÇÃO</p>
+                    <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-tighter">
+                        {isTracking ? 'EM MOVIMENTO' : 'PARADO'}
+                    </p>
                 </div>
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
                     <div className="flex items-center gap-2 mb-2 text-emerald-400">
@@ -440,7 +492,7 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                 <h3 className="text-lg font-black mb-1">Enviar Comprovante</h3>
                 <p className="text-xs text-slate-500 mb-6 font-medium">Os arquivos serão vinculados à sua viagem atual.</p>
 
-                {!currentTrip && (
+                {!activeTrip && (
                     <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-3">
                         <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
                         <p className="text-[11px] text-amber-200 font-bold leading-tight uppercase">
@@ -467,11 +519,11 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(file, type);
                                 }}
-                                disabled={uploading || !currentTrip}
+                                disabled={uploading || !activeTrip}
                             />
                             <div
                                 style={{ backgroundColor: `${color}15`, borderColor: `${color}30` }}
-                                className={`absolute inset-0 flex flex-col items-center justify-center border-2 rounded-[2rem] transition-all hover:bg-opacity-20 active:scale-95 ${uploading || !currentTrip ? 'opacity-40 grayscale' : ''}`}
+                                className={`absolute inset-0 flex flex-col items-center justify-center border-2 rounded-[2rem] transition-all hover:bg-opacity-20 active:scale-95 ${uploading || !activeTrip ? 'opacity-40 grayscale' : ''}`}
                             >
                                 <Icon style={{ color: color }} className="w-8 h-8 mb-2" />
                                 <p className="text-xs font-black text-white">{label}</p>
