@@ -65,7 +65,8 @@ export default function DriverAppPage() {
                 hasAppAccess: typedDriverData.has_app_access,
                 lastLogin: typedDriverData.last_login,
                 status: typedDriverData.status,
-                vehicleId: typedDriverData.vehicle_id
+                vehicleId: typedDriverData.vehicle_id,
+                accessToken: token
             } as Driver);
 
             // If driver has a fixed vehicle or is in a trip, we can fetch more details if needed
@@ -91,13 +92,20 @@ export default function DriverAppPage() {
                 ...typedTripData,
                 driverId: typedTripData.driver_id,
                 vehicleId: typedTripData.vehicle_id,
+                shipperId: typedTripData.shipper_id,
                 departureDate: typedTripData.departure_date,
                 returnDate: typedTripData.return_date,
-                totalDistance: typedTripData.total_distance,
-                fuelConsumed: typedTripData.fuel_consumed,
-                expenses: typedTripData.expenses,
-                netRevenue: typedTripData.net_revenue,
-                status: typedTripData.status
+                receiptDate: typedTripData.receipt_date,
+                freteSeco: Number(typedTripData.frete_seco || 0),
+                diarias: Number(typedTripData.diarias || 0),
+                adiantamento: Number(typedTripData.adiantamento || 0),
+                combustivel: Number(typedTripData.combustivel || 0),
+                litersDiesel: Number(typedTripData.liters_diesel || 0),
+                outrasDespesas: Number(typedTripData.outras_despesas || 0),
+                totalKm: Number(typedTripData.total_km || 0),
+                status: typedTripData.status || typedTripData.payment_status,
+                transitStatus: typedTripData.transit_status,
+                checklistCompleted: typedTripData.checklist_completed
             } : null;
 
             setCurrentTrip(mappedTrip as unknown as Trip);

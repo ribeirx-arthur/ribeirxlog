@@ -230,7 +230,18 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     };
 
     const startTrip = async () => {
-        if (!activeTrip || !driver.accessToken) return;
+        if (!activeTrip) return;
+
+        if (isDemoMode) {
+            alert('Modo Demo: Viagem iniciada simulada!');
+            setIsTracking(true);
+            return;
+        }
+
+        if (!driver.accessToken) {
+            alert('Erro: Sessão do motorista não encontrada.');
+            return;
+        }
 
         const { error } = await supabase.rpc('driver_start_trip', {
             p_driver_token: driver.accessToken,
@@ -247,7 +258,19 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     };
 
     const endTrip = async () => {
-        if (!activeTrip || !driver.accessToken) return;
+        if (!activeTrip) return;
+
+        if (isDemoMode) {
+            alert('Modo Demo: Viagem finalizada simulada!');
+            setIsTracking(false);
+            setIsDemoMode(false);
+            return;
+        }
+
+        if (!driver.accessToken) {
+            alert('Erro: Sessão do motorista não encontrada.');
+            return;
+        }
 
         const { error } = await supabase.rpc('driver_end_trip', {
             p_driver_token: driver.accessToken,
@@ -346,9 +369,9 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                     <Maximize2 className="w-5 h-5 text-emerald-500" /> Ações Rápidas
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                    {activeTrip && !activeTrip.returnDate && (
+                    {activeTrip && !activeTrip.returnDate && activeTrip.transitStatus !== 'Finalizado' && (
                         <div className="col-span-2">
-                            {(!activeTrip.departureDate || new Date(activeTrip.departureDate) > new Date()) || isDemoMode ? (
+                            {(activeTrip.transitStatus === 'Agendado' || !activeTrip.departureDate || isDemoMode) ? (
                                 <button
                                     onClick={isDemoMode ? () => setIsTracking(!isTracking) : startTrip}
                                     className="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition-all rounded-[2rem] p-6 shadow-lg shadow-emerald-500/20 group relative overflow-hidden"
