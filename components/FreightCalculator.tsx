@@ -29,10 +29,57 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
     const [dieselPrice, setDieselPrice] = useState(5.98);
     const [profitMargin, setProfitMargin] = useState(15);
     const [loadWeight, setLoadWeight] = useState(30);
-    const [distance, setDistance] = useState(0); // Simulado ou via API
-    const [tolls, setTolls] = useState(0); // Simulado ou via API
+    const [distance, setDistance] = useState(0);
+    const [tolls, setTolls] = useState(0);
+    const [axles, setAxles] = useState(2);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
+
+    const calculateRoute = async () => {
+        if (!origin || !destination) {
+            alert('Por favor, insira origem e destino.');
+            return;
+        }
+
+        setIsAnalyzing(true);
+        try {
+            // 1. Geocoding (Nominatim)
+            const getCoords = async (query: string) => {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=br&limit=1`);
+                const data = await res.json();
+                if (data.length > 0) return { lat: data[0].lat, lon: data[0].lon };
+                return null;
+            };
+
+            const originCoords = await getCoords(origin);
+            const destCoords = await getCoords(destination);
+
+            if (!originCoords || !destCoords) {
+                alert('Não foi possível localizar as cidades informadas.');
+                return;
+            }
+
+            // 2. Routing (OSRM)
+            const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${originCoords.lon},${originCoords.lat};${destCoords.lon},${destCoords.lat}?overview=false`);
+            const routeData = await routeRes.json();
+
+            if (routeData.routes && routeData.routes.length > 0) {
+                const distKm = Math.round(routeData.routes[0].distance / 1000);
+                setDistance(distKm);
+
+                // 3. Toll Estimation (Heuristic for Brazil)
+                // Avg price per axle every 60km approx R$ 7.50
+                const estimatedTolls = Math.round((distKm / 60) * axles * 7.50);
+                setTolls(estimatedTolls);
+            }
+        } catch (error) {
+            console.error('Erro ao calcular rota:', error);
+            alert('Erro ao conectar com o serviço de mapas.');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
 
     const results = useMemo(() => {
         if (!distance || distance <= 0) return null;
@@ -105,6 +152,8 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                     <input
                                         type="text"
                                         placeholder="Cidade de Partida..."
+                                        value={origin}
+                                        onChange={(e) => setOrigin(e.target.value)}
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all"
                                     />
                                 </div>
@@ -113,18 +162,57 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                     <input
                                         type="text"
                                         placeholder="Cidade de Entrega..."
+                                        value={destination}
+                                        onChange={(e) => setDestination(e.target.value)}
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all"
                                     />
                                 </div>
+
+                                <button
+                                    onClick={calculateRoute}
+                                    disabled={isAnalyzing}
+                                    className="w-full py-4 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-800 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-3 shadow-lg shadow-sky-500/20"
+                                >
+                                    {isAnalyzing ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            Analisando Rota...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Calculator className="w-4 h-4" />
+                                            Calcular Rota & Pedágios
+                                        </>
+                                    )}
+                                </button>
+
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Distância Estimada (Km)</label>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Distância Calculada (Km)</label>
                                     <input
                                         type="number"
                                         value={distance}
                                         onChange={(e) => setDistance(Number(e.target.value))}
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all"
                                     />
-                                    <p className="text-[9px] text-slate-500 font-bold ml-2 italic">* Em integração futura, o Google Maps preencherá automático.</p>
+                                    <p className="text-[9px] text-emerald-500 font-bold ml-2 animate-pulse">
+                                        ✨ Distância e pedágios calculados via Inteligência Ribeirx
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Número de Eixos</label>
+                                    <div className="grid grid-cols-5 gap-2">
+                                        {[2, 3, 4, 6, 9].map(n => (
+                                            <button
+                                                key={n}
+                                                onClick={() => setAxles(n)}
+                                                className={`py-2 rounded-xl text-[10px] font-black transition-all ${axles === n ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-950 border border-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                            >
+                                                {n}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-[9px] text-slate-500 font-medium ml-2 uppercase">Ajuste para precisão no pedágio</p>
                                 </div>
                             </div>
                         </div>
