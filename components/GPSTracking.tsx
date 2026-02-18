@@ -15,17 +15,18 @@ import {
     Pause,
     ExternalLink
 } from 'lucide-react';
-import { Vehicle, Trip, VehicleLocation, GPSAlert } from '../types';
+import { Vehicle, Trip, VehicleLocation, GPSAlert, Driver } from '../types';
 
 interface GPSTrackingProps {
     vehicles: Vehicle[];
     trips: Trip[];
+    drivers: Driver[];
     locations: VehicleLocation[];
     alerts: GPSAlert[];
     onRefresh: () => void;
 }
 
-const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, alerts, onRefresh }) => {
+const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, drivers, locations, alerts, onRefresh }) => {
     const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
     const [mapCenter, setMapCenter] = useState({ lat: -23.5505, lng: -46.6333 }); // São Paulo default
     const [zoom, setZoom] = useState(12);
@@ -318,6 +319,18 @@ const GPSTracking: React.FC<GPSTrackingProps> = ({ vehicles, trips, locations, a
                                                 <div className="flex items-center gap-2 text-xs">
                                                     <Clock className="w-3.5 h-3.5 text-amber-400" />
                                                     <span className="text-white font-bold">{getTimeSinceUpdate(location.timestamp)}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 text-xs py-2 border-y border-slate-800/50">
+                                                <div className="w-6 h-6 bg-slate-900 rounded-lg flex items-center justify-center">
+                                                    <Navigation className="w-3 h-3 text-emerald-500" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Motorista</p>
+                                                    <p className="text-xs text-white font-black truncate">
+                                                        {trip ? drivers.find(d => d.id === trip.driverId)?.name : drivers.find(d => d.vehicleId === vehicle.id)?.name || 'Sem motorista fixo'}
+                                                    </p>
                                                 </div>
                                             </div>
 

@@ -29,9 +29,10 @@ interface SidebarProps {
   profile: UserProfile;
   isOpen?: boolean;
   onClose?: () => void;
+  appVersion?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isOpen, onClose, appVersion }) => {
   const { features, uiStyle } = useAppMode();
   const { signOut } = useAuth();
 
@@ -160,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
           </div>
 
           <div className="pt-2 flex flex-col items-center">
-            <p className="text-[10px] font-black text-slate-700 tracking-[0.3em] uppercase">v1.7.0</p>
+            <p className="text-[10px] font-black text-slate-700 tracking-[0.3em] uppercase">v{appVersion || '1.7.0'}</p>
           </div>
         </div>
       </div>

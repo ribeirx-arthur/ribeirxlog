@@ -63,10 +63,26 @@ export default function DriverAppPage() {
                 pixKey: typedDriverData.pix_key,
                 photoUrl: typedDriverData.photo_url,
                 hasAppAccess: typedDriverData.has_app_access,
-                accessToken: typedDriverData.access_token,
                 lastLogin: typedDriverData.last_login,
-                status: typedDriverData.status
+                status: typedDriverData.status,
+                vehicleId: typedDriverData.vehicle_id
             } as Driver);
+
+            // If driver has a fixed vehicle or is in a trip, we can fetch more details if needed
+            // For now, vehicleId is enough as it will be used by the RPC anyway.
+            // But let's fetch the vehicle plate/name for the UI.
+            if (typedDriverData.vehicle_id) {
+                const { data: vData } = await supabase
+                    .from('vehicles')
+                    .select('plate, name')
+                    .eq('id', typedDriverData.vehicle_id)
+                    .single();
+
+                if (vData) {
+                    // We can store this in state or just inject into driver object for UI
+                    setDriver(prev => prev ? ({ ...prev, vehicleName: vData.name, vehiclePlate: vData.plate }) : null);
+                }
+            }
 
             const typedTripData: any = tripData;
 

@@ -221,6 +221,17 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                     </div>
                 </div>
 
+                {driver.vehiclePlate && (
+                    <div className="mt-4 flex items-center gap-2">
+                        <span className="px-2 py-1 bg-white/20 backdrop-blur-md border border-white/10 rounded-lg text-[10px] font-black text-white uppercase tracking-wider">
+                            {driver.vehiclePlate}
+                        </span>
+                        <span className="text-white/80 text-xs font-bold">
+                            {driver.vehicleName}
+                        </span>
+                    </div>
+                )}
+
                 <div className="mt-8 relative z-10">
                     {currentTrip ? (
                         <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5">

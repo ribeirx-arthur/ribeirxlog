@@ -8,11 +8,17 @@ import { Loader2 } from 'lucide-react';
 
 export default function MotoristasPage() {
     const [drivers, setDrivers] = useState<Driver[]>([]);
+    const [vehicles, setVehicles] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadDrivers();
+        Promise.all([loadDrivers(), loadVehicles()]).finally(() => setLoading(false));
     }, []);
+
+    const loadVehicles = async () => {
+        const { data } = await supabase.from('vehicles').select('*');
+        if (data) setVehicles(data);
+    };
 
     const loadDrivers = async () => {
         try {
@@ -22,11 +28,21 @@ export default function MotoristasPage() {
                 .order('name');
 
             if (error) throw error;
-            if (data) setDrivers(data);
+            if (data) {
+                setDrivers(data.map((d: any) => ({
+                    ...d,
+                    cnhCategory: d.cnh_category,
+                    cnhValidity: d.cnh_validity,
+                    pixKey: d.pix_key,
+                    photoUrl: d.photo_url,
+                    customCommission: d.custom_commission,
+                    vehicleId: d.vehicle_id
+                })));
+            }
         } catch (error) {
             console.error('Erro ao carregar motoristas:', error);
         } finally {
-            setLoading(false);
+            // Loading set in useEffect
         }
     };
 
@@ -55,6 +71,14 @@ export default function MotoristasPage() {
     };
 
 
+    const handleDeleteDriver = async (id: string) => {
+        if (!confirm('Excluir este motorista?')) return;
+        const { error } = await supabase.from('drivers').delete().eq('id', id);
+        if (!error) {
+            setDrivers(prev => prev.filter(d => d.id !== id));
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex bg-slate-950 items-center justify-center h-screen">
@@ -71,8 +95,10 @@ export default function MotoristasPage() {
 
                 <DriverManagement
                     drivers={drivers}
+                    vehicles={vehicles}
                     onAddDriver={handleAddDriver}
                     onUpdateDriver={handleUpdateDriver}
+                    onDeleteDriver={handleDeleteDriver}
                 />
             </div>
         </div>

@@ -97,6 +97,9 @@ export interface Driver {
   lastLogin?: string;
   email?: string;
   password?: string; // Hashed
+  vehicleId?: string;
+  vehicleName?: string;
+  vehiclePlate?: string;
 }
 
 export interface TripProof {

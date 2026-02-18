@@ -285,6 +285,14 @@ const Setup: React.FC<SetupProps> = ({
                 <FileText className="w-4 h-4 text-slate-500" />
                 <span className="font-medium">CNH {d.cnhCategory} • Val: {d.cnhValidity ? new Date(d.cnhValidity).toLocaleDateString() : 'N/A'}</span>
               </div>
+              {d.vehicleId && (
+                <div className="flex items-center gap-3 text-xs text-emerald-400">
+                  <Truck className="w-4 h-4" />
+                  <span className="font-black uppercase tracking-widest">
+                    Vinc: {vehicles.find(v => v.id === d.vehicleId)?.plate || 'N/A'}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-2 mt-4">
               <button
@@ -387,221 +395,238 @@ const Setup: React.FC<SetupProps> = ({
       </div>
 
       {/* Slide-over Modal for Add/Edit */}
-      {isModalOpen && editingItem && (
-        <div className="fixed inset-0 z-[100] flex justify-end">
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={handleCloseModal} />
-          <div className="relative w-full max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl h-full flex flex-col animate-in slide-in-from-right duration-500">
-            <header className="p-8 border-b border-slate-800 flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-black text-white">{vehicles.find(v => v.id === editingItem.id) || drivers.find(d => d.id === editingItem.id) || shippers.find(s => s.id === editingItem.id) ? 'Editar' : 'Novo'} {activeSubTab === 'vehicles' ? 'Veículo' : activeSubTab === 'drivers' ? 'Motorista' : 'Parceiro'}</h3>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Preencha todos os campos obrigatórios</p>
-              </div>
-              <button onClick={handleCloseModal} className="p-3 hover:bg-slate-800 rounded-2xl transition-all">
-                <X className="w-6 h-6 text-slate-400" />
-              </button>
-            </header>
-
-            <div className="flex-1 overflow-y-auto p-8 space-y-8">
-              {/* Image Upload Area */}
-              <div className="flex flex-col items-center justify-center p-8 bg-slate-950/50 border-2 border-dashed border-slate-800 rounded-3xl group hover:border-emerald-500/30 transition-all">
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="relative w-32 h-32 bg-slate-900 rounded-3xl flex items-center justify-center text-slate-600 cursor-pointer overflow-hidden border border-slate-800 hover:scale-105 transition-transform"
-                >
-                  {(editingItem.photoUrl || editingItem.logoUrl) ? (
-                    <img src={editingItem.photoUrl || editingItem.logoUrl} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <Camera className="w-10 h-10 group-hover:text-emerald-500 transition-colors" />
-                  )}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <Upload className="w-6 h-6 text-white" />
-                  </div>
+      {
+        isModalOpen && editingItem && (
+          <div className="fixed inset-0 z-[100] flex justify-end">
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={handleCloseModal} />
+            <div className="relative w-full max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl h-full flex flex-col animate-in slide-in-from-right duration-500">
+              <header className="p-8 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black text-white">{vehicles.find(v => v.id === editingItem.id) || drivers.find(d => d.id === editingItem.id) || shippers.find(s => s.id === editingItem.id) ? 'Editar' : 'Novo'} {activeSubTab === 'vehicles' ? 'Veículo' : activeSubTab === 'drivers' ? 'Motorista' : 'Parceiro'}</h3>
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Preencha todos os campos obrigatórios</p>
                 </div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4">Clique para {(editingItem.photoUrl || editingItem.logoUrl) ? 'Trocar' : 'Fazer Upload'} de Foto</p>
-              </div>
+                <button onClick={handleCloseModal} className="p-3 hover:bg-slate-800 rounded-2xl transition-all">
+                  <X className="w-6 h-6 text-slate-400" />
+                </button>
+              </header>
 
-              {/* Dynamic Forms */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {activeSubTab === 'vehicles' && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Placa</label>
-                      <input type="text" value={editingItem.plate} onChange={e => setEditingItem({ ...editingItem, plate: e.target.value.toUpperCase() })} placeholder="AAA-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Apelido/Nome</label>
-                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Ex: Scania Azul" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Marca</label>
-                      <input type="text" value={editingItem.brand} onChange={e => setEditingItem({ ...editingItem, brand: e.target.value })} placeholder="Ex: Scania" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Modelo</label>
-                      <input type="text" value={editingItem.model} onChange={e => setEditingItem({ ...editingItem, model: e.target.value })} placeholder="Ex: R450" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Tipo Propriedade</label>
-                      <select value={editingItem.type} onChange={e => setEditingItem({ ...editingItem, type: e.target.value as VehiclePropertyType })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        <option value={VehiclePropertyType.PROPRIO}>Próprio</option>
-                        <option value={VehiclePropertyType.SOCIEDADE}>Sociedade</option>
-                      </select>
-                    </div>
-                    {editingItem.type === VehiclePropertyType.SOCIEDADE && (
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Taxa Partilha (%)</label>
-                        <input type="number" value={editingItem.societySplitFactor} onChange={e => setEditingItem({ ...editingItem, societySplitFactor: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                      </div>
+              <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                {/* Image Upload Area */}
+                <div className="flex flex-col items-center justify-center p-8 bg-slate-950/50 border-2 border-dashed border-slate-800 rounded-3xl group hover:border-emerald-500/30 transition-all">
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative w-32 h-32 bg-slate-900 rounded-3xl flex items-center justify-center text-slate-600 cursor-pointer overflow-hidden border border-slate-800 hover:scale-105 transition-transform"
+                  >
+                    {(editingItem.photoUrl || editingItem.logoUrl) ? (
+                      <img src={editingItem.photoUrl || editingItem.logoUrl} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="w-10 h-10 group-hover:text-emerald-500 transition-colors" />
                     )}
-                  </>
-                )}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <Upload className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4">Clique para {(editingItem.photoUrl || editingItem.logoUrl) ? 'Trocar' : 'Fazer Upload'} de Foto</p>
+                </div>
 
-                {activeSubTab === 'drivers' && (
-                  <>
-                    <div className="md:col-span-2 space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Nome Completo</label>
-                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Nome do Motorista" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CPF</label>
-                      <input type="text" value={editingItem.cpf} onChange={e => setEditingItem({ ...editingItem, cpf: e.target.value })} placeholder="000.000.000-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Telefone/WhatsApp</label>
-                      <input type="text" value={editingItem.phone} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} placeholder="(00) 00000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Chave PIX</label>
-                      <input type="text" value={editingItem.pixKey} onChange={e => setEditingItem({ ...editingItem, pixKey: e.target.value })} placeholder="CPF, E-mail ou Celular" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CNH (Categoria)</label>
-                      <input type="text" value={editingItem.cnhCategory} onChange={e => setEditingItem({ ...editingItem, cnhCategory: e.target.value })} placeholder="E" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="md:col-span-2 space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade CNH</label>
-                      <input
-                        type="date"
-                        value={editingItem.cnhValidity}
-                        onChange={e => setEditingItem({ ...editingItem, cnhValidity: e.target.value })}
-                        className={`w-full bg-slate-950 border rounded-xl px-4 py-3.5 text-sm text-white outline-none transition-all
-                          ${editingItem.cnhValidity && new Date(editingItem.cnhValidity).getTime() < new Date().getTime() ? 'border-rose-500' :
-                            editingItem.cnhValidity && new Date(editingItem.cnhValidity).getTime() < new Date().getTime() + (30 * 24 * 60 * 60 * 1000) ? 'border-amber-500' :
-                              'border-slate-800 focus:border-emerald-500'}`}
-                      />
-                    </div>
-                    <div className="md:col-span-2 space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">URL da Foto da CNH (Opcional)</label>
-                      <div className="flex gap-4">
-                        <input
-                          type="text"
-                          placeholder="https://exemplo.com/cnh.jpg"
-                          value={editingItem.cnhPhotoUrl || ''}
-                          onChange={e => setEditingItem({ ...editingItem, cnhPhotoUrl: e.target.value })}
-                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none"
-                        />
-                        {editingItem.cnhPhotoUrl && (
-                          <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden flex-shrink-0">
-                            <img src={editingItem.cnhPhotoUrl} alt="CNH" className="w-full h-full object-cover" />
-                          </div>
-                        )}
+                {/* Dynamic Forms */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {activeSubTab === 'vehicles' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Placa</label>
+                        <input type="text" value={editingItem.plate} onChange={e => setEditingItem({ ...editingItem, plate: e.target.value.toUpperCase() })} placeholder="AAA-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                       </div>
-                    </div>
-                  </>
-                )}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Apelido/Nome</label>
+                        <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Ex: Scania Azul" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Marca</label>
+                        <input type="text" value={editingItem.brand} onChange={e => setEditingItem({ ...editingItem, brand: e.target.value })} placeholder="Ex: Scania" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Modelo</label>
+                        <input type="text" value={editingItem.model} onChange={e => setEditingItem({ ...editingItem, model: e.target.value })} placeholder="Ex: R450" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Tipo Propriedade</label>
+                        <select value={editingItem.type} onChange={e => setEditingItem({ ...editingItem, type: e.target.value as VehiclePropertyType })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
+                          <option value={VehiclePropertyType.PROPRIO}>Próprio</option>
+                          <option value={VehiclePropertyType.SOCIEDADE}>Sociedade</option>
+                        </select>
+                      </div>
+                      {editingItem.type === VehiclePropertyType.SOCIEDADE && (
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Taxa Partilha (%)</label>
+                          <input type="number" value={editingItem.societySplitFactor} onChange={e => setEditingItem({ ...editingItem, societySplitFactor: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                        </div>
+                      )}
+                    </>
+                  )}
 
-                {activeSubTab === 'shippers' && (
-                  <>
-                    <div className="md:col-span-2 space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Razão Social / Nome Fantasia</label>
-                      <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Transportadora Parceira" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CNPJ</label>
-                      <input type="text" value={editingItem.cnpj} onChange={e => setEditingItem({ ...editingItem, cnpj: e.target.value })} placeholder="00.000.000/0001-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Dias p/ Pagamento</label>
-                      <input type="number" value={editingItem.avgPaymentDays} onChange={e => setEditingItem({ ...editingItem, avgPaymentDays: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">E-mail Financeiro</label>
-                      <input type="email" value={editingItem.email} onChange={e => setEditingItem({ ...editingItem, email: e.target.value })} placeholder="financeiro@empresa.com" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Telefone</label>
-                      <input type="text" value={editingItem.phone} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} placeholder="(00) 0000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                  </>
-                )}
+                  {activeSubTab === 'drivers' && (
+                    <>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Nome Completo</label>
+                        <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Nome do Motorista" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CPF</label>
+                        <input type="text" value={editingItem.cpf} onChange={e => setEditingItem({ ...editingItem, cpf: e.target.value })} placeholder="000.000.000-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Telefone/WhatsApp</label>
+                        <input type="text" value={editingItem.phone} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} placeholder="(00) 00000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Chave PIX</label>
+                        <input type="text" value={editingItem.pixKey} onChange={e => setEditingItem({ ...editingItem, pixKey: e.target.value })} placeholder="CPF, E-mail ou Celular" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CNH (Categoria)</label>
+                        <input type="text" value={editingItem.cnhCategory} onChange={e => setEditingItem({ ...editingItem, cnhCategory: e.target.value })} placeholder="E" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade CNH</label>
+                        <input
+                          type="date"
+                          value={editingItem.cnhValidity}
+                          onChange={e => setEditingItem({ ...editingItem, cnhValidity: e.target.value })}
+                          className={`w-full bg-slate-950 border rounded-xl px-4 py-3.5 text-sm text-white outline-none transition-all
+                          ${editingItem.cnhValidity && new Date(editingItem.cnhValidity).getTime() < new Date().getTime() ? 'border-rose-500' :
+                              editingItem.cnhValidity && new Date(editingItem.cnhValidity).getTime() < new Date().getTime() + (30 * 24 * 60 * 60 * 1000) ? 'border-amber-500' :
+                                'border-slate-800 focus:border-emerald-500'}`}
+                        />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Caminhão Vinculado (Fixo)</label>
+                        <select
+                          value={editingItem.vehicleId || ''}
+                          onChange={e => setEditingItem({ ...editingItem, vehicleId: e.target.value || undefined })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none"
+                        >
+                          <option value="">Nenhum</option>
+                          {vehicles.map(v => (
+                            <option key={v.id} value={v.id}>{v.plate} - {v.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">URL da Foto da CNH (Opcional)</label>
+                        <div className="flex gap-4">
+                          <input
+                            type="text"
+                            placeholder="https://exemplo.com/cnh.jpg"
+                            value={editingItem.cnhPhotoUrl || ''}
+                            onChange={e => setEditingItem({ ...editingItem, cnhPhotoUrl: e.target.value })}
+                            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none"
+                          />
+                          {editingItem.cnhPhotoUrl && (
+                            <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden flex-shrink-0">
+                              <img src={editingItem.cnhPhotoUrl} alt="CNH" className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
 
-                {activeSubTab === 'buggies' && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Placa do Implemento</label>
-                      <input type="text" value={editingItem.plate} onChange={e => setEditingItem({ ...editingItem, plate: e.target.value.toUpperCase() })} placeholder="AAA-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Marca</label>
-                      <input type="text" value={editingItem.brand} onChange={e => setEditingItem({ ...editingItem, brand: e.target.value })} placeholder="Ex: Randon" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Modelo</label>
-                      <input type="text" value={editingItem.model} onChange={e => setEditingItem({ ...editingItem, model: e.target.value })} placeholder="Ex: Graneleira" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Quantidade de Eixos</label>
-                      <select value={editingItem.axles} onChange={e => setEditingItem({ ...editingItem, axles: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Eixos</option>)}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Tipo de Rodagem</label>
-                      <select value={editingItem.tireType} onChange={e => setEditingItem({ ...editingItem, tireType: e.target.value as 'single' | 'dual' })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        <option value="dual">Rodado Duplo</option>
-                        <option value="single">Rodado Simples</option>
-                      </select>
-                    </div>
-                  </>
-                )}
+                  {activeSubTab === 'shippers' && (
+                    <>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Razão Social / Nome Fantasia</label>
+                        <input type="text" value={editingItem.name} onChange={e => setEditingItem({ ...editingItem, name: e.target.value })} placeholder="Transportadora Parceira" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">CNPJ</label>
+                        <input type="text" value={editingItem.cnpj} onChange={e => setEditingItem({ ...editingItem, cnpj: e.target.value })} placeholder="00.000.000/0001-00" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Dias p/ Pagamento</label>
+                        <input type="number" value={editingItem.avgPaymentDays} onChange={e => setEditingItem({ ...editingItem, avgPaymentDays: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">E-mail Financeiro</label>
+                        <input type="email" value={editingItem.email} onChange={e => setEditingItem({ ...editingItem, email: e.target.value })} placeholder="financeiro@empresa.com" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Telefone</label>
+                        <input type="text" value={editingItem.phone} onChange={e => setEditingItem({ ...editingItem, phone: e.target.value })} placeholder="(00) 0000-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                    </>
+                  )}
+
+                  {activeSubTab === 'buggies' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Placa do Implemento</label>
+                        <input type="text" value={editingItem.plate} onChange={e => setEditingItem({ ...editingItem, plate: e.target.value.toUpperCase() })} placeholder="AAA-0000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Marca</label>
+                        <input type="text" value={editingItem.brand} onChange={e => setEditingItem({ ...editingItem, brand: e.target.value })} placeholder="Ex: Randon" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Modelo</label>
+                        <input type="text" value={editingItem.model} onChange={e => setEditingItem({ ...editingItem, model: e.target.value })} placeholder="Ex: Graneleira" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Quantidade de Eixos</label>
+                        <select value={editingItem.axles} onChange={e => setEditingItem({ ...editingItem, axles: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
+                          {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Eixos</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Tipo de Rodagem</label>
+                        <select value={editingItem.tireType} onChange={e => setEditingItem({ ...editingItem, tireType: e.target.value as 'single' | 'dual' })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
+                          <option value="dual">Rodado Duplo</option>
+                          <option value="single">Rodado Simples</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <footer className="p-8 border-t border-slate-800 bg-slate-900/50 backdrop-blur-md">
-              <button
-                onClick={handleSave}
-                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-3"
-              >
-                <Save className="w-5 h-5" />
-                Salvar Registro
-              </button>
-            </footer>
+              <footer className="p-8 border-t border-slate-800 bg-slate-900/50 backdrop-blur-md">
+                <button
+                  onClick={handleSave}
+                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-3"
+                >
+                  <Save className="w-5 h-5" />
+                  Salvar Registro
+                </button>
+              </footer>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700/50 rounded-[2.5rem] w-full max-w-md p-8 text-center space-y-6 animate-in zoom-in-95 duration-200 shadow-2xl">
-            <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-10 h-10 text-rose-500" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-black text-white">Excluir Registro?</h3>
-              <p className="text-slate-400 text-sm">
-                Você está prestes a apagar este item permanentemente. Isso pode afetar históricos de viagens vinculados.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <button onClick={() => setDeleteConfirm(null)} className="py-4 bg-slate-800 text-slate-300 font-black rounded-2xl hover:bg-slate-700 transition-all text-xs uppercase tracking-widest">Cancelar</button>
-              <button onClick={handleDelete} className="py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20">Sim, Excluir</button>
+      {
+        deleteConfirm && (
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700/50 rounded-[2.5rem] w-full max-w-md p-8 text-center space-y-6 animate-in zoom-in-95 duration-200 shadow-2xl">
+              <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-10 h-10 text-rose-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white">Excluir Registro?</h3>
+                <p className="text-slate-400 text-sm">
+                  Você está prestes a apagar este item permanentemente. Isso pode afetar históricos de viagens vinculados.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <button onClick={() => setDeleteConfirm(null)} className="py-4 bg-slate-800 text-slate-300 font-black rounded-2xl hover:bg-slate-700 transition-all text-xs uppercase tracking-widest">Cancelar</button>
+                <button onClick={handleDelete} className="py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20">Sim, Excluir</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
 

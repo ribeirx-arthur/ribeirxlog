@@ -17,7 +17,7 @@ const Intelligence = React.lazy(() => import('../components/StrategicIntelligenc
 const FreightCalculator = React.lazy(() => import('../components/FreightCalculator'));
 const GPSTracking = React.lazy(() => import('../components/GPSTracking'));
 const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
-const DriverManagement = React.lazy(() => import('../components/DriverManagement'));
+import DriverManagement from '../components/DriverManagement';
 const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
 
 import LandingPage from '../components/LandingPage';
@@ -44,7 +44,7 @@ import {
 } from '../constants';
 import { WHATSAPP_NUMBER } from '../pricing';
 
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.7.1-VINCULO-V2';
 
 import { AppModeProvider } from '../contexts/AppModeContext';
 import { generateMockData } from '../services/demoData';
@@ -204,7 +204,8 @@ export default function Home() {
                             cnhValidity: d.cnh_validity,
                             pixKey: d.pix_key,
                             photoUrl: d.photo_url,
-                            customCommission: d.custom_commission
+                            customCommission: d.custom_commission,
+                            vehicleId: d.vehicle_id
                         })),
                         loadTable('shippers', setShippers, (s: any) => ({
                             ...s,
@@ -233,7 +234,7 @@ export default function Home() {
                         })),
                         loadTable('vehicle_locations', setLocations, (l: any) => ({
                             ...l,
-                            vehicleId: trips.find(t => t.id === l.trip_id)?.vehicleId || '',
+                            vehicleId: l.vehicle_id || trips.find(t => t.id === l.trip_id)?.vehicleId || '',
                             timestamp: l.timestamp
                         })),
                         loadTable('gps_alerts', setGpsAlerts, (a: any) => ({
@@ -267,7 +268,7 @@ export default function Home() {
                             const exists = prev.find(l => l.id === newLoc.id);
                             const updatedLoc = {
                                 ...newLoc,
-                                vehicleId: trips.find(t => t.id === newLoc.trip_id)?.vehicleId || ''
+                                vehicleId: newLoc.vehicle_id || trips.find(t => t.id === newLoc.trip_id)?.vehicleId || ''
                             };
                             if (exists) {
                                 return prev.map(l => l.id === newLoc.id ? updatedLoc : l);
@@ -468,7 +469,8 @@ export default function Home() {
                 cnh: newDriver.cnh,
                 cnh_category: newDriver.cnhCategory,
                 status: newDriver.status,
-                photo_url: newDriver.photoUrl
+                photo_url: newDriver.photoUrl,
+                vehicle_id: newDriver.vehicleId
             };
 
             // Use RPC to bypass RLS issues on insert
@@ -485,7 +487,8 @@ export default function Home() {
                 photoUrl: driverData.photo_url,
                 hasAppAccess: driverData.has_app_access,
                 accessToken: driverData.access_token,
-                lastLogin: driverData.last_login
+                lastLogin: driverData.last_login,
+                vehicleId: driverData.vehicle_id
             };
             setDrivers(prev => [...prev, createdDriver]);
             showToast('Motorista adicionado com sucesso!', 'success');
@@ -511,7 +514,8 @@ export default function Home() {
                 pix_key: updatedDriver.pixKey,
                 status: updatedDriver.status,
                 has_app_access: updatedDriver.hasAppAccess,
-                access_token: updatedDriver.accessToken
+                access_token: updatedDriver.accessToken,
+                vehicle_id: updatedDriver.vehicleId
             }).eq('id', updatedDriver.id);
 
             if (error) throw error;
@@ -838,8 +842,10 @@ export default function Home() {
                 <Suspense fallback={<div>Carregando Motoristas...</div>}>
                     <DriverManagement
                         drivers={drivers}
+                        vehicles={vehicles}
                         onAddDriver={handleAddDriver}
                         onUpdateDriver={handleUpdateDriver}
+                        onDeleteDriver={handleDeleteDriver}
                     />
                 </Suspense>
             );
@@ -895,6 +901,7 @@ export default function Home() {
                     <GPSTracking
                         vehicles={vehicles}
                         trips={trips}
+                        drivers={drivers}
                         locations={locations}
                         alerts={gpsAlerts}
                         onRefresh={() => setRefreshTrigger(prev => prev + 1)}
@@ -971,6 +978,7 @@ export default function Home() {
                     profile={profile}
                     isOpen={isMobileMenuOpen}
                     onClose={() => setIsMobileMenuOpen(false)}
+                    appVersion={APP_VERSION}
                 />
                 <Header
                     profile={profile}
