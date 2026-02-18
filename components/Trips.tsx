@@ -237,6 +237,14 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="px-2 py-0.5 bg-slate-900 border border-slate-700 rounded text-[9px] font-black text-slate-400 uppercase">{vehicle.plate}</span>
                       <p className="text-slate-500 text-xs font-medium flex items-center gap-1.5"><CalendarIcon className="w-3 h-3 text-emerald-500" /> {formatDate(trip.departureDate)}</p>
+
+                      {/* Transit Status Pill/Dot */}
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 border border-slate-700/50 rounded-lg">
+                        <span className={`w-1.5 h-1.5 rounded-full ${trip.transitStatus === 'Em Trânsito' ? 'bg-sky-400 animate-pulse' :
+                            trip.transitStatus === 'Finalizado' ? 'bg-slate-500' : 'bg-amber-400'
+                          }`}></span>
+                        <span className="text-[9px] font-black uppercase text-slate-400">{trip.transitStatus || 'Agendado'}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -357,6 +365,23 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     <select value={editingTrip.status} onChange={e => setEditingTrip({ ...editingTrip, status: e.target.value as PaymentStatus })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-black">
                       <option value="Pendente">Pendente</option><option value="Pago">Pago</option>
                     </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Status da Operação</label>
+                    <div className="grid grid-cols-3 gap-2 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+                      {(['Agendado', 'Em Trânsito', 'Finalizado'] as const).map(s => (
+                        <button
+                          key={s}
+                          onClick={() => setEditingTrip({ ...editingTrip, transitStatus: s })}
+                          className={`py-2 rounded-lg text-xs font-black uppercase transition-all ${editingTrip.transitStatus === s
+                              ? 'bg-sky-500 text-white shadow-lg'
+                              : 'text-slate-600 hover:text-slate-400'
+                            }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Quilometragem (KM)</label>

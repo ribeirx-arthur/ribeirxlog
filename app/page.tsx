@@ -328,7 +328,9 @@ export default function Home() {
                 liters_diesel: Number(newTrip.litersDiesel || 0),
                 outras_despesas: Number(newTrip.outrasDespesas || 0),
                 status: newTrip.status || 'Pendente',
-                total_km: Number(newTrip.totalKm || 0)
+                total_km: Number(newTrip.totalKm || 0),
+                transit_status: newTrip.transitStatus || 'Agendado',
+                checklist_completed: newTrip.checklistCompleted || false
             }).select().single();
 
             if (error) throw error;
@@ -347,7 +349,9 @@ export default function Home() {
                     combustivel: Number(data.combustivel || 0),
                     litersDiesel: Number(data.liters_diesel || 0),
                     outrasDespesas: Number(data.outras_despesas || 0),
-                    totalKm: Number(data.total_km || 0)
+                    totalKm: Number(data.total_km || 0),
+                    transitStatus: data.transit_status,
+                    checklistCompleted: data.checklist_completed
                 }, ...prev]);
                 showToast('Viagem salva!', 'success');
                 setActiveTab('trips');
@@ -380,7 +384,9 @@ export default function Home() {
                 liters_diesel: Number(updatedTrip.litersDiesel),
                 outras_despesas: Number(updatedTrip.outrasDespesas),
                 status: updatedTrip.status,
-                total_km: Number(updatedTrip.totalKm)
+                total_km: Number(updatedTrip.totalKm),
+                transit_status: updatedTrip.transitStatus,
+                checklist_completed: updatedTrip.checklistCompleted
             }).eq('id', updatedTrip.id);
 
             if (error) throw error;

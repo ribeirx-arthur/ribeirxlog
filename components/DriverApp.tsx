@@ -263,6 +263,25 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
         }
     };
 
+    const finishChecklist = async () => {
+        if (!activeTrip || activeTrip.id === 'demo-123') {
+            alert('Checklist finalizado (Simulação)!');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('trips')
+            .update({ checklist_completed: true })
+            .eq('id', activeTrip.id);
+
+        if (!error) {
+            alert('Checklist de segurança enviado com sucesso!');
+            // Optional: refresh trip data
+        } else {
+            alert('Erro ao salvar checklist: ' + error.message);
+        }
+    };
+
     // HOME VIEW
     const HomeView = () => (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -502,6 +521,16 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                     </div>
                 )}
 
+                {activeTrip && activeTrip.transitStatus !== 'Em Trânsito' && !isDemoMode && (
+                    <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                        <p className="text-[11px] text-rose-200 font-bold leading-tight uppercase">
+                            VIAGEM BLOQUEADA.<br />
+                            <span className="opacity-60 lowercase font-medium">O gestor ainda não colocou esta viagem no status "Em Trânsito".</span>
+                        </p>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3">
                     {[
                         { type: 'cte' as const, label: 'CT-e', icon: FileText, color: '#10b981' },
@@ -519,11 +548,11 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(file, type);
                                 }}
-                                disabled={uploading || !activeTrip}
+                                disabled={uploading || !activeTrip || (activeTrip.transitStatus !== 'Em Trânsito' && !isDemoMode)}
                             />
                             <div
                                 style={{ backgroundColor: `${color}15`, borderColor: `${color}30` }}
-                                className={`absolute inset-0 flex flex-col items-center justify-center border-2 rounded-[2rem] transition-all hover:bg-opacity-20 active:scale-95 ${uploading || !activeTrip ? 'opacity-40 grayscale' : ''}`}
+                                className={`absolute inset-0 flex flex-col items-center justify-center border-2 rounded-[2rem] transition-all hover:bg-opacity-20 active:scale-95 ${uploading || !activeTrip || (activeTrip.transitStatus !== 'Em Trânsito' && !isDemoMode) ? 'opacity-40 grayscale pointer-events-none' : ''}`}
                             >
                                 <Icon style={{ color: color }} className="w-8 h-8 mb-2" />
                                 <p className="text-xs font-black text-white">{label}</p>
@@ -645,13 +674,14 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                 </div>
 
                 <button
+                    onClick={finishChecklist}
                     disabled={!Object.values(checklist).every(v => v)}
                     className={`w-full mt-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${Object.values(checklist).every(v => v)
                         ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
                         : 'bg-slate-800 text-slate-600'
                         }`}
                 >
-                    {Object.values(checklist).every(v => v) ? 'Checklist Finalizado' : 'Aguardando Verificação'}
+                    {checklist.documentos && Object.values(checklist).every(v => v) ? 'Checklist Finalizado ✓' : 'Finalizar Checklist'}
                 </button>
             </div>
 

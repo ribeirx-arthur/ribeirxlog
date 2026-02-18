@@ -150,6 +150,8 @@ export interface Trip {
   outrasDespesas: number;
   status: PaymentStatus;
   totalKm: number;
+  transitStatus?: 'Agendado' | 'Em Trânsito' | 'Finalizado';
+  checklistCompleted?: boolean;
 }
 
 export interface AppNotification {
