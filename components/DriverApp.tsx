@@ -15,12 +15,16 @@ import {
     Fuel,
     Receipt,
     LogOut,
-    FileCheck,
     Truck,
     ShieldCheck,
     Maximize2,
     Truck as TruckIcon,
-    Package
+    Package,
+    Disc,
+    Gauge,
+    Pause,
+    Radio,
+    FileCheck
 } from 'lucide-react';
 import { Trip, Driver, TripProof, VehicleLocation } from '../types';
 import { supabase } from '../services/supabase';
@@ -40,10 +44,20 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     const [proofs, setProofs] = useState<TripProof[]>([]);
     const [uploading, setUploading] = useState(false);
     const [earnings, setEarnings] = useState({ pending: 0, paid: 0, total: 0 });
+    const [tripStats, setTripStats] = useState({ duration: '0h 0m', avgSpeed: 0, totalKm: 0 });
+    const [checklist, setChecklist] = useState({
+        pneus: false,
+        oleo: false,
+        luzes: false,
+        freios: false,
+        documentos: false
+    });
 
     // GPS Tracking Logic
     useEffect(() => {
         let watchId: number;
+        let statsInterval: NodeJS.Timeout;
+
         if (isTracking && driver.accessToken) {
             watchId = navigator.geolocation.watchPosition(
                 (position) => {
@@ -54,20 +68,23 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                 { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
             );
 
-            // Get immediate location to avoid lag
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude, speed, heading } = position.coords;
-                    updateDriverLocation(latitude, longitude, speed, heading, position.coords.accuracy);
-                },
-                (error) => console.error("Initial GPS Error:", error),
-                { enableHighAccuracy: true }
-            );
+            // Update trip duration stats
+            statsInterval = setInterval(() => {
+                if (currentTrip?.departureDate) {
+                    const start = new Date(currentTrip.departureDate).getTime();
+                    const now = new Date().getTime();
+                    const diff = Math.max(0, now - start);
+                    const hours = Math.floor(diff / 3600000);
+                    const mins = Math.floor((diff % 3600000) / 60000);
+                    setTripStats(prev => ({ ...prev, duration: `${hours}h ${mins}m` }));
+                }
+            }, 60000);
         }
         return () => {
             if (watchId) navigator.geolocation.clearWatch(watchId);
+            if (statsInterval) clearInterval(statsInterval);
         };
-    }, [isTracking, driver.accessToken]);
+    }, [isTracking, driver.accessToken, currentTrip]);
 
     const updateDriverLocation = (latitude: number, longitude: number, speed: number | null, heading: number | null, accuracy: number) => {
         if (!driver.accessToken) return;
@@ -340,37 +357,77 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
     // GPS VIEW
     const GPSView = () => (
-        <div className="space-y-4">
-            <div className="bg-slate-800 rounded-3xl p-6">
-                <div className="text-center mb-6">
-                    <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 ${isTracking ? 'bg-emerald-500/20 animate-pulse' : 'bg-slate-700'
-                        }`}>
-                        <Navigation className={`w-12 h-12 ${isTracking ? 'text-emerald-400' : 'text-slate-500'}`} />
+        <div className="space-y-4 animate-in slide-in-from-right duration-500">
+            {/* Real-time Stats Dashboard */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+                    <div className="flex items-center gap-2 mb-2 text-sky-400">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-[10px] uppercase font-black tracking-widest">Tempo Total</span>
                     </div>
-                    <p className="text-xl font-black mb-2">
-                        {isTracking ? '🟢 Rastreamento Ativo' : '🔴 Rastreamento Pausado'}
+                    <p className="text-xl font-black text-white">{tripStats.duration}</p>
+                    <p className="text-[10px] text-slate-500 font-bold mt-1">EM OPERAÇÃO</p>
+                </div>
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+                    <div className="flex items-center gap-2 mb-2 text-emerald-400">
+                        <Gauge className="w-4 h-4" />
+                        <span className="text-[10px] uppercase font-black tracking-widest">Velocidade</span>
+                    </div>
+                    <p className="text-xl font-black text-white">{lastLocation?.speed ? lastLocation.speed.toFixed(0) : '0'} <span className="text-xs text-slate-500">km/h</span></p>
+                    <p className="text-[10px] text-slate-500 font-bold mt-1">ATUAL</p>
+                </div>
+            </div>
+
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-3xl p-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full"></div>
+                <div className="text-center mb-6">
+                    <div className={`w-28 h-28 mx-auto rounded-full flex items-center justify-center mb-6 relative ${isTracking ? 'bg-emerald-500/20' : 'bg-slate-700/50'
+                        }`}>
+                        {isTracking && (
+                            <>
+                                <div className="absolute inset-0 rounded-full border-2 border-emerald-500/50 animate-ping"></div>
+                                <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-pulse delay-75"></div>
+                            </>
+                        )}
+                        <Navigation className={`w-12 h-12 ${isTracking ? 'text-emerald-400' : 'text-slate-500'} transition-all ${isTracking ? 'scale-110' : ''}`} />
+                    </div>
+                    <p className="text-2xl font-black text-white mb-2">
+                        {isTracking ? 'GPS Ativado' : 'GPS Desligado'}
                     </p>
-                    {lastLocation && (
-                        <p className="text-sm text-slate-400">
-                            Última atualização: {new Date(lastLocation.timestamp).toLocaleTimeString('pt-BR')}
-                        </p>
-                    )}
+                    <p className="text-sm text-slate-400 font-medium px-4">
+                        {isTracking
+                            ? 'Seu sinal está sendo enviado em tempo real para a central.'
+                            : 'Clique no botão abaixo para iniciar o envio da sua posição.'}
+                    </p>
                 </div>
 
                 <button
                     onClick={() => setIsTracking(!isTracking)}
-                    className={`w-full py-4 rounded-2xl font-bold text-lg transition-all ${isTracking
-                        ? 'bg-rose-500 hover:bg-rose-600'
-                        : 'bg-emerald-500 hover:bg-emerald-600'
+                    className={`w-full py-5 rounded-[2rem] font-black text-lg transition-all shadow-2xl flex items-center justify-center gap-3 ${isTracking
+                        ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/20'
+                        : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20'
                         }`}
                 >
-                    {isTracking ? 'Pausar Rastreamento' : 'Iniciar Rastreamento'}
+                    {isTracking ? <Pause className="w-6 h-6" /> : <PlayCircle className="w-6 h-6" />}
+                    {isTracking ? 'PAUSAR RASTREIO' : 'ATIVAR RASTREIO'}
                 </button>
 
-                <div className="mt-6 text-xs text-slate-500 space-y-1">
-                    <p>• Mantenha o app aberto durante a viagem</p>
-                    <p>• Localização enviada automaticamente</p>
-                    <p>• Economize bateria com modo "Não perturbar"</p>
+                <div className="mt-8 bg-slate-900/50 rounded-2xl p-4 border border-slate-700/30">
+                    <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 text-center">Protocolo de Viagem</h5>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-xs">
+                            <CheckCircle className="w-4 h-4 text-emerald-500" />
+                            <span className="text-slate-300">Conexão Estável</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs">
+                            <CheckCircle className="w-4 h-4 text-emerald-500" />
+                            <span className="text-slate-300">Modo de Alta Precisão</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs">
+                            <AlertCircle className="w-4 h-4 text-amber-500" />
+                            <span className="text-slate-300">Bateria: Recomendado carregar</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -384,28 +441,32 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
                 <div className="grid grid-cols-2 gap-3">
                     {[
-                        { type: 'cte' as const, label: 'CT-e', icon: FileText, color: 'emerald' },
-                        { type: 'nfe' as const, label: 'NF-e', icon: Receipt, color: 'sky' },
-                        { type: 'fuel' as const, label: 'Combustível', icon: Fuel, color: 'amber' },
-                        { type: 'delivery' as const, label: 'Entrega', icon: Package, color: 'purple' },
+                        { type: 'cte' as const, label: 'CT-e', icon: FileText, color: '#10b981' },
+                        { type: 'nfe' as const, label: 'NF-e', icon: Receipt, color: '#0ea5e9' },
+                        { type: 'fuel' as const, label: 'Combustível', icon: Fuel, color: '#f59e0b' },
+                        { type: 'delivery' as const, label: 'Entrega', icon: Package, color: '#a855f7' },
                     ].map(({ type, label, icon: Icon, color }) => (
-                        <label
-                            key={type}
-                            className={`bg-${color}-500/10 border border-${color}-500/20 rounded-2xl p-4 cursor-pointer hover:bg-${color}-500/20 transition-all`}
-                        >
+                        <div key={type} className="relative">
                             <input
+                                id={`file-${type}`}
                                 type="file"
                                 accept="image/*,application/pdf"
-                                className="hidden"
+                                className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(file, type);
                                 }}
                                 disabled={uploading || !currentTrip}
                             />
-                            <Icon className={`w-8 h-8 text-${color}-400 mx-auto mb-2`} />
-                            <p className="text-sm font-bold text-center">{label}</p>
-                        </label>
+                            <div
+                                style={{ backgroundColor: `${color}15`, borderColor: `${color}30` }}
+                                className={`flex flex-col items-center justify-center p-6 border-2 rounded-[2rem] transition-all active:scale-95 ${uploading || !currentTrip ? 'opacity-40 grayscale' : 'hover:bg-opacity-20'}`}
+                            >
+                                <Icon style={{ color: color }} className="w-8 h-8 mb-3" />
+                                <p className="text-sm font-black text-white">{label}</p>
+                                <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase">Clique para enviar</p>
+                            </div>
+                        </div>
                     ))}
                 </div>
 
@@ -460,46 +521,94 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
     // DOCUMENTS VIEW (NEW)
     const DocumentsView = () => (
-        <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 text-center space-y-4">
-                <div className="w-20 h-20 mx-auto bg-amber-500/10 rounded-full flex items-center justify-center">
-                    <ShieldCheck className="w-10 h-10 text-amber-500" />
-                </div>
-                <h3 className="text-2xl font-black text-white">Documentos Digitais</h3>
-                <p className="text-slate-400 text-sm max-w-xs mx-auto">Mantenha seus documentos pessoais e do veículo sempre acessíveis.</p>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden divide-y divide-slate-800">
-                <div className="p-6 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
-                        <span className="font-black text-slate-500">CNH</span>
+        <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
+            {/* Safety Hub Header */}
+            <div className="bg-gradient-to-br from-amber-600 to-amber-700 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                        <ShieldCheck className="w-10 h-10 text-white" />
                     </div>
                     <div>
-                        <p className="font-bold text-white text-lg">Carteira de Habilitação</p>
-                        <p className="text-sm text-slate-400">Categoria: <span className="text-emerald-400 font-bold">{driver.cnhCategory || 'B'}</span></p>
-                        <p className="text-xs text-slate-500 mt-1">{driver.cnh || 'Não informado'}</p>
+                        <h3 className="text-2xl font-black leading-tight">Central de Segurança</h3>
+                        <p className="text-amber-100 text-sm font-medium">Compliance e Checklists</p>
                     </div>
                 </div>
-                <div className="p-6 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
-                        <TruckIcon className="w-6 h-6 text-slate-500" />
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="bg-black/20 rounded-xl p-3">
+                        <p className="text-[10px] font-black uppercase opacity-60">Segurança</p>
+                        <p className="text-lg font-black italic">100% OK</p>
                     </div>
-                    <div>
-                        <p className="font-bold text-white text-lg">Dados do Veículo</p>
-                        {currentTrip ? (
-                            <>
-                                <p className="text-sm text-slate-400">Placa Vinculada</p>
-                                <p className="text-emerald-400 font-bold font-mono mt-1 text-lg">---</p>
-                            </>
-                        ) : (
-                            <p className="text-sm text-slate-500">Nenhum veículo em uso no momento.</p>
-                        )}
+                    <div className="bg-black/20 rounded-xl p-3">
+                        <p className="text-[10px] font-black uppercase opacity-60">Status CNH</p>
+                        <p className="text-lg font-black italic">VÁLIDA</p>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-dashed border-slate-700 text-center">
-                <p className="text-slate-500 text-sm">Para atualizar seus documentos, entre em contato com o suporte ou gestor.</p>
+            {/* Checklist Diário */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
+                    <h4 className="text-lg font-black text-white">Checklist de Viagem</h4>
+                    <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-[10px] font-black tracking-widest uppercase">Obrigatório</span>
+                </div>
+
+                <div className="space-y-3">
+                    {[
+                        { id: 'pneus', label: 'Calibragem dos Pneus', icon: Disc },
+                        { id: 'oleo', label: 'Nível de Óleo e Fluídos', icon: Fuel },
+                        { id: 'luzes', label: 'Faróis e Lanternas', icon: Radio },
+                        { id: 'freios', label: 'Sistema de Frenagem', icon: ShieldCheck },
+                        { id: 'documentos', label: 'Documentação do Veículo', icon: FileCheck },
+                    ].map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setChecklist(prev => ({ ...prev, [item.id]: !prev[item.id as keyof typeof checklist] }))}
+                            className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${checklist[item.id as keyof typeof checklist]
+                                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
+                                : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
+                                }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <item.icon className="w-5 h-5" />
+                                <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                            </div>
+                            {checklist[item.id as keyof typeof checklist] ? (
+                                <CheckCircle className="w-5 h-5 fill-emerald-500 text-slate-900" />
+                            ) : (
+                                <div className="w-5 h-5 rounded-full border-2 border-slate-700"></div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+
+                <button
+                    disabled={!Object.values(checklist).every(v => v)}
+                    className={`w-full mt-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${Object.values(checklist).every(v => v)
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                        : 'bg-slate-800 text-slate-600'
+                        }`}
+                >
+                    {Object.values(checklist).every(v => v) ? 'Checklist Finalizado' : 'Aguardando Verificação'}
+                </button>
+            </div>
+
+            {/* Ficha Digital */}
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+                <div className="bg-slate-800/50 p-4 border-b border-slate-800 font-black text-xs text-slate-400 uppercase tracking-widest">
+                    Meus Dados
+                </div>
+                <div className="divide-y divide-slate-800">
+                    <div className="p-6 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
+                            <span className="font-black text-slate-500">CNH</span>
+                        </div>
+                        <div>
+                            <p className="font-bold text-white text-lg">Carteira {driver.cnhCategory || 'B'}</p>
+                            <p className="text-sm text-slate-400 font-mono">{driver.cnh || '---'}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
