@@ -160,7 +160,19 @@ export default function Home() {
 
                     const loadTable = async (table: string, setter: any, mapper?: any) => {
                         console.log(`[DEBUG] Loading table: ${table} for User ID: ${user.id}`);
-                        const { data, error } = await client.from(table).select('*').eq('user_id', user.id);
+                        let query = client.from(table).select('*');
+
+                        // Tables that have user_id column
+                        const tablesWithUserId = [
+                            'trips', 'vehicles', 'drivers', 'shippers',
+                            'buggies', 'tires', 'maintenance_records', 'profiles'
+                        ];
+
+                        if (tablesWithUserId.includes(table)) {
+                            query = query.eq('user_id', user.id);
+                        }
+
+                        const { data, error } = await query;
                         if (error) {
                             console.error(`[DEBUG] Error loading ${table}:`, error);
                         } else if (data) {
