@@ -436,8 +436,19 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
     // PROOFS VIEW
     const ProofsView = () => (
         <div className="space-y-4">
-            <div className="bg-slate-800 rounded-3xl p-6">
-                <h3 className="text-lg font-black mb-4">Enviar Comprovante</h3>
+            <div className="bg-slate-800 rounded-3xl p-6 text-left">
+                <h3 className="text-lg font-black mb-1">Enviar Comprovante</h3>
+                <p className="text-xs text-slate-500 mb-6 font-medium">Os arquivos serão vinculados à sua viagem atual.</p>
+
+                {!currentTrip && (
+                    <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
+                        <p className="text-[11px] text-amber-200 font-bold leading-tight uppercase">
+                            NENHUMA VIAGEM ATIVA ENCONTRADA.<br />
+                            <span className="opacity-60 lowercase font-medium">Você precisa de uma viagem ativa para enviar documentos.</span>
+                        </p>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-3">
                     {[
@@ -446,12 +457,12 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                         { type: 'fuel' as const, label: 'Combustível', icon: Fuel, color: '#f59e0b' },
                         { type: 'delivery' as const, label: 'Entrega', icon: Package, color: '#a855f7' },
                     ].map(({ type, label, icon: Icon, color }) => (
-                        <div key={type} className="relative">
+                        <div key={type} className="relative h-32">
                             <input
                                 id={`file-${type}`}
                                 type="file"
                                 accept="image/*,application/pdf"
-                                className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) handleFileUpload(file, type);
@@ -460,11 +471,11 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                             />
                             <div
                                 style={{ backgroundColor: `${color}15`, borderColor: `${color}30` }}
-                                className={`flex flex-col items-center justify-center p-6 border-2 rounded-[2rem] transition-all active:scale-95 ${uploading || !currentTrip ? 'opacity-40 grayscale' : 'hover:bg-opacity-20'}`}
+                                className={`absolute inset-0 flex flex-col items-center justify-center border-2 rounded-[2rem] transition-all hover:bg-opacity-20 active:scale-95 ${uploading || !currentTrip ? 'opacity-40 grayscale' : ''}`}
                             >
-                                <Icon style={{ color: color }} className="w-8 h-8 mb-3" />
-                                <p className="text-sm font-black text-white">{label}</p>
-                                <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase">Clique para enviar</p>
+                                <Icon style={{ color: color }} className="w-8 h-8 mb-2" />
+                                <p className="text-xs font-black text-white">{label}</p>
+                                <p className="text-[9px] text-slate-500 font-bold mt-1 uppercase">Clique</p>
                             </div>
                         </div>
                     ))}
@@ -479,37 +490,36 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
             {/* Proofs List */}
             <div className="space-y-3">
-                <h3 className="text-sm font-black text-slate-400 uppercase">Comprovantes Enviados</h3>
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2">Histórico Recente</h3>
                 {proofs.length === 0 ? (
-                    <div className="bg-slate-800 rounded-2xl p-6 text-center">
-                        <p className="text-slate-500 text-sm">Nenhum comprovante enviado ainda</p>
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 text-center">
+                        <p className="text-slate-600 text-sm italic">Nenhum comprovante enviado nesta viagem.</p>
                     </div>
                 ) : (
                     proofs.map((proof) => (
-                        <div key={proof.id} className="bg-slate-800 rounded-2xl p-4">
+                        <div key={proof.id} className="bg-slate-900 border border-slate-800 rounded-3xl p-4">
                             <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-3">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${proof.approved ? 'bg-emerald-500/10' : 'bg-amber-500/10'
-                                        }`}>
+                                <div className="flex items-start gap-4">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${proof.approved ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
                                         {proof.approved ? (
-                                            <CheckCircle className="w-5 h-5 text-emerald-400" />
+                                            <CheckCircle className="w-6 h-6 text-emerald-400" />
                                         ) : (
-                                            <Clock className="w-5 h-5 text-amber-400" />
+                                            <Clock className="w-6 h-6 text-amber-400" />
                                         )}
                                     </div>
                                     <div>
-                                        <p className="font-bold text-sm">{proof.type.toUpperCase()}</p>
-                                        <p className="text-xs text-slate-400">{proof.fileName}</p>
-                                        <p className="text-xs text-slate-500 mt-1">
+                                        <p className="font-black text-white">{proof.type.toUpperCase()}</p>
+                                        <p className="text-xs text-slate-500 font-mono truncate max-w-[150px]">{proof.fileName}</p>
+                                        <p className="text-[10px] text-slate-600 font-bold mt-1">
                                             {new Date(proof.uploadedAt).toLocaleString('pt-BR')}
                                         </p>
                                     </div>
                                 </div>
-                                <span className={`px-2 py-1 rounded-lg text-xs font-bold ${proof.approved
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${proof.approved
                                     ? 'bg-emerald-500/10 text-emerald-400'
                                     : 'bg-amber-500/10 text-amber-400'
                                     }`}>
-                                    {proof.approved ? 'Aprovado' : 'Pendente'}
+                                    {proof.approved ? 'Aprovado' : 'Pend.'}
                                 </span>
                             </div>
                         </div>
@@ -675,6 +685,7 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
                 {currentView === 'home' && <HomeView />}
                 {currentView === 'gps' && <GPSView />}
                 {currentView === 'proofs' && <ProofsView />}
+                {currentView === 'documents' && <DocumentsView />}
                 {currentView === 'earnings' && <EarningsView />}
             </div>
 
