@@ -76,9 +76,11 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
   const filteredAndSortedTrips = useMemo(() => {
     let result = trips.filter(t => {
       const vehicle = vehicles.find(v => v.id === t.vehicleId);
+      const shipper = shippers.find(s => s.id === t.shipperId);
       const matchesSearch =
         (vehicle?.plate || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (t.destination || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (shipper?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.id.includes(searchTerm);
 
       const matchesStatus =
@@ -241,7 +243,7 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                       {/* Transit Status Pill/Dot */}
                       <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 border border-slate-700/50 rounded-lg">
                         <span className={`w-1.5 h-1.5 rounded-full ${trip.transitStatus === 'Em Trânsito' ? 'bg-sky-400 animate-pulse' :
-                            trip.transitStatus === 'Finalizado' ? 'bg-slate-500' : 'bg-amber-400'
+                          trip.transitStatus === 'Finalizado' ? 'bg-slate-500' : 'bg-amber-400'
                           }`}></span>
                         <span className="text-[9px] font-black uppercase text-slate-400">{trip.transitStatus || 'Agendado'}</span>
                       </div>
@@ -374,8 +376,8 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                           key={s}
                           onClick={() => setEditingTrip({ ...editingTrip, transitStatus: s })}
                           className={`py-2 rounded-lg text-xs font-black uppercase transition-all ${editingTrip.transitStatus === s
-                              ? 'bg-sky-500 text-white shadow-lg'
-                              : 'text-slate-600 hover:text-slate-400'
+                            ? 'bg-sky-500 text-white shadow-lg'
+                            : 'text-slate-600 hover:text-slate-400'
                             }`}
                         >
                           {s}

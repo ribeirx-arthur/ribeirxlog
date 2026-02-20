@@ -473,7 +473,13 @@ const Settings: React.FC<SettingsProps> = ({
                            <Field label="Comissão Diárias (%)" type="number" value={profile.config.percMotDiaria.toString()} onChange={v => handleConfigChange('percMotDiaria', Number(v))} />
                         </div>
 
+                        <div className="grid grid-cols-2 gap-8 pt-4 border-t border-slate-800">
+                           <Field label="Custo Pneu por KM (R$)" type="number" value={profile.config.costPerKmTire?.toString() || '0'} onChange={v => handleConfigChange('costPerKmTire', Number(v))} placeholder="Deixe 0 para automático" />
+                           <Field label="Custo Manut. por KM (R$)" type="number" value={profile.config.costPerKmMaintenance?.toString() || '0'} onChange={v => handleConfigChange('costPerKmMaintenance', Number(v))} placeholder="Deixe 0 para automático" />
+                        </div>
+
                         <div className="space-y-4 pt-6">
+                           <ToggleOption label="Depreciação Global (Pneu/Manut.)" description="Abate automaticamente custos invisíveis de pneus e mecânica em todos os relatórios." checked={profile.config.calculateDepreciation} onChange={v => handleConfigChange('calculateDepreciation', v)} icon={Disc} />
                            <ToggleOption label="Telemetria Ativa (KM)" description="Monitora desgaste de frota baseado no odômetro das viagens." checked={profile.config.showMileage} onChange={v => handleConfigChange('showMileage', v)} icon={Gauge} />
                            <ToggleOption label="Divisão Automática" description="Calcula ROI de sócios automaticamente em veículos marcados." checked={profile.config.autoSplitSociety} onChange={v => handleConfigChange('autoSplitSociety', v)} icon={CloudLightning} />
                         </div>

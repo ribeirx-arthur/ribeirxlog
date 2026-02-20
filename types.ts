@@ -21,6 +21,9 @@ export interface UserProfile {
     enableMaintenance: boolean;
     enableBI: boolean;
     enableFreightCalculator: boolean;
+    calculateDepreciation: boolean;
+    costPerKmTire: number; // Valor fixado em reais por KM para pneus
+    costPerKmMaintenance: number; // Valor fixado em reais por KM para manutenção
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
     enabledFeatures?: string[];
   };
@@ -45,6 +48,7 @@ export interface MaintenanceThresholds {
 export interface Vehicle {
   id: string;
   plate: string;
+  axles: number; // 2, 3, 4, 6, 9 eixos
   name: string;
   brand: string;
   model: string;

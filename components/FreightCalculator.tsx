@@ -28,11 +28,32 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
     const [selectedVehicleId, setSelectedVehicleId] = useState('');
     const [dieselPrice, setDieselPrice] = useState(5.98);
     const [profitMargin, setProfitMargin] = useState(15);
+    const [driverCommissionPct, setDriverCommissionPct] = useState(profile.config?.percMotFrete || 12);
     const [loadWeight, setLoadWeight] = useState(30);
     const [distance, setDistance] = useState(0);
     const [tolls, setTolls] = useState(0);
     const [axles, setAxles] = useState(2);
+    const [isChemical, setIsChemical] = useState(false);
+    const [isLS, setIsLS] = useState(false);
+    const [isRoundTrip, setIsRoundTrip] = useState(false);
+    const [applyDepreciation, setApplyDepreciation] = useState(profile.config?.calculateDepreciation ?? true);
+    const [offeredFreight, setOfferedFreight] = useState(0);
+    const [calculationCount, setCalculationCount] = useState(0);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // Efeito para carregar limite de uso e preferências persistentes
+    React.useEffect(() => {
+        const usageData = localStorage.getItem(`freight_usage_${new Date().toDateString()}`);
+        if (usageData) setCalculationCount(parseInt(usageData));
+
+        const savedCommission = localStorage.getItem('freight_driver_commission');
+        if (savedCommission) setDriverCommissionPct(Number(savedCommission));
+    }, []);
+
+    // Salvar comissão sempre que mudar
+    React.useEffect(() => {
+        localStorage.setItem('freight_driver_commission', driverCommissionPct.toString());
+    }, [driverCommissionPct]);
 
     const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
 
@@ -42,40 +63,101 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
             return;
         }
 
+        if (calculationCount >= 20) {
+            alert('Limite diário de cálculos atingido (20/dia). Tente amanhã para proteger sua cota gratuita.');
+            return;
+        }
+
         setIsAnalyzing(true);
+        const apiKey = process.env.NEXT_PUBLIC_ORS_API_KEY;
+
+        if (!apiKey || apiKey === 'undefined' || !apiKey.startsWith('ey')) {
+            alert('Erro: Chave da API não configurada corretamente no sistema.');
+            setIsAnalyzing(false);
+            return;
+        }
+
         try {
-            // 1. Geocoding (Nominatim)
-            const getCoords = async (query: string) => {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=br&limit=1`);
+            // 1. Geocoding
+            const geocode = async (text: string) => {
+                const url = `https://api.openrouteservice.org/geocode/search?api_key=${apiKey}&text=${encodeURIComponent(text)}&boundary.country=BR&size=1`;
+                const res = await fetch(url);
                 const data = await res.json();
-                if (data.length > 0) return { lat: data[0].lat, lon: data[0].lon };
+                if (data.features && data.features.length > 0) {
+                    return data.features[0].geometry.coordinates; // [lon, lat]
+                }
                 return null;
             };
 
-            const originCoords = await getCoords(origin);
-            const destCoords = await getCoords(destination);
-
-            if (!originCoords || !destCoords) {
-                alert('Não foi possível localizar as cidades informadas.');
+            const originPoint = await geocode(origin);
+            if (!originPoint) {
+                alert(`Origem não encontrada: "${origin}".`);
+                setIsAnalyzing(false);
                 return;
             }
 
-            // 2. Routing (OSRM)
-            const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${originCoords.lon},${originCoords.lat};${destCoords.lon},${destCoords.lat}?overview=false`);
-            const routeData = await routeRes.json();
-
-            if (routeData.routes && routeData.routes.length > 0) {
-                const distKm = Math.round(routeData.routes[0].distance / 1000);
-                setDistance(distKm);
-
-                // 3. Toll Estimation (Heuristic for Brazil)
-                // Avg price per axle every 60km approx R$ 7.50
-                const estimatedTolls = Math.round((distKm / 60) * axles * 7.50);
-                setTolls(estimatedTolls);
+            const destPoint = await geocode(destination);
+            if (!destPoint) {
+                alert(`Destino não encontrado: "${destination}".`);
+                setIsAnalyzing(false);
+                return;
             }
+
+            // 2. Routing
+            const tryRoute = async (profile: string) => {
+                const url = `https://api.openrouteservice.org/v2/directions/${profile}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': apiKey
+                    },
+                    body: JSON.stringify({
+                        coordinates: [originPoint, destPoint]
+                    })
+                });
+                return { status: res.status, data: await res.json() };
+            };
+
+            let { status, data } = await tryRoute('driving-hgv');
+
+            if (status !== 200) {
+                console.warn('HGV falhou, tentando Carro...');
+                const fallback = await tryRoute('driving-car');
+                status = fallback.status;
+                data = fallback.data;
+            }
+
+            if (status === 200) {
+                let distKm = 0;
+
+                if (data.features && data.features.length > 0) {
+                    distKm = Math.round(data.features[0].properties.summary.distance / 1000);
+                } else if (data.routes && data.routes.length > 0) {
+                    distKm = Math.round(data.routes[0].summary.distance / 1000);
+                }
+
+                if (distKm > 0) {
+                    setDistance(distKm);
+
+                    // 3. Toll Estimation (Ajustada para realidade Fernán Dias/Dutra)
+                    const plazas = distKm / 60;
+                    const pricePerPlaza = axles * 9.20;
+                    setTolls(Math.round(plazas * pricePerPlaza));
+
+                    // Atualizar limite de uso
+                    const updatedCount = calculationCount + 1;
+                    setCalculationCount(updatedCount);
+                    localStorage.setItem(`freight_usage_${new Date().toDateString()}`, updatedCount.toString());
+                    return;
+                }
+            }
+
+            const errorDetail = data.error?.message || "Não foi possível extrair a distância da rota.";
+            alert(`A API de mapas não conseguiu traçar esta rota: ${errorDetail}`);
         } catch (error) {
-            console.error('Erro ao calcular rota:', error);
-            alert('Erro ao conectar com o serviço de mapas.');
+            console.error('Erro de conexão:', error);
+            alert('Falha crítica de conexão. Verifique se você está online.');
         } finally {
             setIsAnalyzing(false);
         }
@@ -84,33 +166,82 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
     const results = useMemo(() => {
         if (!distance || distance <= 0) return null;
 
-        // Lógica de Complexidade Operacional
-        const consumption = 2.2; // Média para um caminhão pesado carregado
-        const dieselCost = (distance / consumption) * dieselPrice;
+        // --- CALIBRAÇÃO LOGÍSTICA REAL (Matriz Ribeirx 2024) ---
+        // Definimos parâmetros técnicos baseados no número de eixos
+        const config = {
+            2: { consumption: 4.5, tireWear: 0.25, maintenance: 0.15 }, // 3/4 ou VUC
+            3: { consumption: 3.5, tireWear: 0.45, maintenance: 0.30 }, // Toco/Truck
+            4: { consumption: 2.8, tireWear: 0.65, maintenance: 0.40 }, // Bitruck
+            6: { consumption: 2.5, tireWear: 0.85, maintenance: 0.60 }, // Carreta LS (Re-calibrado para média real de 2.5 km/l)
+            9: { consumption: 1.8, tireWear: 1.30, maintenance: 0.90 }, // Rodotrem
+        }[axles as keyof typeof config] || { consumption: 2.5, tireWear: 0.85, maintenance: 0.60 };
 
-        // Custos Ocultos que profissionalizam o SaaS
-        const tireWearPerKm = 0.45; // Estimativa R$ por KM
-        const maintenanceProvision = 0.35; // R$ por KM
-        const driverCommission = 0.12; // 12% do frete seco (estimativa)
+        const calcDistance = isRoundTrip ? distance * 2 : distance;
+        const calcTolls = isRoundTrip ? tolls * 2 : tolls;
 
-        const operationalCosts = dieselCost + tolls + (distance * (tireWearPerKm + maintenanceProvision));
+        const baseDieselCost = (calcDistance / config.consumption) * dieselPrice;
+        const chemicalAditional = isChemical ? 1.20 : 1.0; // +20% para carga química
+        const lsAditional = isLS ? 1.15 : 1.0; // +15% para carga LS (Escolta/Seguro)
+        const totalAditional = chemicalAditional * lsAditional;
 
-        // Reverse Math: Quanto eu preciso cobrar para ter X% de lucro LÍQUIDO?
-        // Formula: Frete = Custos / (1 - Margem - Comissao)
-        const suggestedFreight = operationalCosts / (1 - (profitMargin / 100) - driverCommission);
-        const netProfit = suggestedFreight - operationalCosts - (suggestedFreight * driverCommission);
+        // Custos por KM (Pneus + Manutenção Preventiva)
+        const tireWearTotal = calcDistance * config.tireWear;
+        const maintenanceTotal = calcDistance * config.maintenance;
+
+        // Outros custos (Seguro Carga, Aditamentos, Impostos base ~8%)
+        const operationalFees = (baseDieselCost + calcTolls) * 0.08;
+
+        const driverCommission = driverCommissionPct / 100;
+        const fixedOperationalCosts = baseDieselCost + calcTolls +
+            (applyDepreciation ? (tireWearTotal + maintenanceTotal) : 0) +
+            operationalFees;
+
+        // Reverse Math para Margem de Lucro LÍQUIDA
+        const suggestedFreight = (fixedOperationalCosts / (1 - (profitMargin / 100) - driverCommission)) * totalAditional;
+
+        // Comparação com o Frete Ofertado
+        const realProfitWithOffer = offeredFreight > 0
+            ? (offeredFreight - fixedOperationalCosts - (offeredFreight * driverCommission))
+            : (suggestedFreight - fixedOperationalCosts - (suggestedFreight * driverCommission));
+
+        const profitPercentage = offeredFreight > 0
+            ? (realProfitWithOffer / offeredFreight) * 100
+            : profitMargin;
+
+        let status: 'excellent' | 'acceptable' | 'warning' | 'danger' = 'excellent';
+        if (profitPercentage >= profitMargin) status = 'excellent';
+        else if (profitPercentage > 5) status = 'acceptable';
+        else if (profitPercentage > 0) status = 'warning';
+        else status = 'danger';
+
+        // Ribeirx AI - Sistema de Dicas Especialistas
+        const aiAnalysis = () => {
+            const tips = [];
+            if (profitPercentage < 5) tips.push("⚠️ Risco Crítico: Este frete mal cobre o diesel e a manutenção. Só aceite se for para voltar vazio.");
+            if (profitPercentage >= profitMargin) tips.push("🚀 Excelente Negócio: O valor cobre todos os custos invisíveis e sobra lucro real.");
+            if (isChemical && profitPercentage < 20) tips.push("⚠️ Alerta Químico: O risco de carga perigosa exige uma margem maior (min. 20%).");
+            if (isLS && profitPercentage < 15) tips.push("🛡️ Alerta LS: Carga monitorada exige atenção redobrada aos custos de seguro e tempo de parada.");
+            if (config.consumption < 1.4) tips.push("⛽ Consumo Elevado: Rota com muita serra ou carga pesada detectada.");
+            if (isRoundTrip) tips.push("🔄 Ciclo Completo: Análise considerando ida e volta (percurso total).");
+            if (!applyDepreciation) tips.push("⚠️ Análise Simplificada: Pneus e manutenção não estão sendo abatidos do lucro líquido.");
+
+            return tips.length > 0 ? tips : ["✅ Operação dentro dos padrões de normalidade da frota."];
+        };
 
         return {
-            dieselCost,
-            operationalCosts,
+            dieselCost: baseDieselCost,
+            operationalCosts: fixedOperationalCosts,
             suggestedFreight,
-            netProfit,
-            tolls,
-            tireWear: distance * tireWearPerKm,
-            maintenance: distance * maintenanceProvision,
-            commission: suggestedFreight * driverCommission
+            netProfit: realProfitWithOffer,
+            tolls: calcTolls,
+            tireWear: tireWearTotal,
+            maintenance: maintenanceTotal,
+            commission: (offeredFreight > 0 ? offeredFreight : suggestedFreight) * driverCommission,
+            profitPercentage,
+            status,
+            aiTips: aiAnalysis()
         };
-    }, [distance, dieselPrice, profitMargin, tolls]);
+    }, [distance, dieselPrice, profitMargin, driverCommissionPct, tolls, axles, isChemical, isLS, isRoundTrip, applyDepreciation, offeredFreight]);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
@@ -214,6 +345,83 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                     </div>
                                     <p className="text-[9px] text-slate-500 font-medium ml-2 uppercase">Ajuste para precisão no pedágio</p>
                                 </div>
+
+                                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between group cursor-pointer" onClick={() => setIsRoundTrip(!isRoundTrip)}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isRoundTrip ? 'bg-sky-500/20 text-sky-500' : 'bg-slate-900 text-slate-600'}`}>
+                                            <Share2 className="w-5 h-5 rotate-90" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Bate e Volta (Ida e Volta)</p>
+                                            <p className="text-[9px] text-slate-500 font-bold uppercase">Dobra os custos (diesel, pedágio...)</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full relative transition-all ${isRoundTrip ? 'bg-sky-500' : 'bg-slate-800'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isRoundTrip ? 'left-7' : 'left-1'}`} />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between group cursor-pointer" onClick={() => setApplyDepreciation(!applyDepreciation)}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${applyDepreciation ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-900 text-slate-600'}`}>
+                                            <TrendingUp className="w-5 h-5 transition-transform group-hover:scale-110" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Abater Pneu/Manut.</p>
+                                            <p className="text-[9px] text-slate-500 font-bold uppercase">{applyDepreciation ? 'Custos invisíveis ativados' : 'Ignorando depreciação'}</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full relative transition-all ${applyDepreciation ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${applyDepreciation ? 'left-7' : 'left-1'}`} />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between group cursor-pointer" onClick={() => setIsChemical(!isChemical)}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isChemical ? 'bg-amber-500/20 text-amber-500' : 'bg-slate-900 text-slate-600'}`}>
+                                            <AlertCircle className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Carga Química / Perigosa</p>
+                                            <p className="text-[9px] text-slate-500 font-bold uppercase">+20% de Adicional</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full relative transition-all ${isChemical ? 'bg-amber-500' : 'bg-slate-800'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isChemical ? 'left-7' : 'left-1'}`} />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between group cursor-pointer" onClick={() => setIsLS(!isLS)}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isLS ? 'bg-sky-500/20 text-sky-500' : 'bg-slate-900 text-slate-600'}`}>
+                                            <ShieldCheck className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Carga LS / Monitorada</p>
+                                            <p className="text-[9px] text-slate-500 font-bold uppercase">+15% de Adicional</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-12 h-6 rounded-full relative transition-all ${isLS ? 'bg-sky-500' : 'bg-slate-800'}`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isLS ? 'left-7' : 'left-1'}`} />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t border-slate-800">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Valor Ofertado pela Transportadora (R$)</label>
+                                            <span className="text-[9px] font-black text-sky-400 uppercase">Input Manual</span>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            placeholder="Ex: 7250"
+                                            value={offeredFreight || ''}
+                                            onChange={(e) => setOfferedFreight(Number(e.target.value))}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-sky-500 outline-none transition-all placeholder:text-slate-700"
+                                        />
+                                        <p className="text-[9px] text-slate-600 font-medium ml-2 uppercase">Compare a oferta com seus custos reais</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -252,6 +460,15 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                             className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all"
                                         />
                                     </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Comissão Mot. (%)</label>
+                                        <input
+                                            type="number"
+                                            value={driverCommissionPct}
+                                            onChange={(e) => setDriverCommissionPct(Number(e.target.value))}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -274,29 +491,101 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                 <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2.5rem] p-8 shadow-xl shadow-emerald-500/20 group relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                                    <div className="relative z-10 space-y-2">
-                                        <p className="text-[10px] font-black text-emerald-950/60 uppercase tracking-widest">Valor do Frete Sugerido</p>
-                                        <h2 className="text-5xl font-black text-white tracking-tighter">R$ {results.suggestedFreight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
-                                        <div className="flex items-center gap-2 pt-4">
-                                            <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black text-white uppercase tracking-widest">Lucro Ideal</span>
-                                            <span className="text-white/80 font-bold text-xs flex items-center gap-1">
-                                                <TrendingUp className="w-3 h-3" /> +{profitMargin}%
-                                            </span>
+                                    <div className="relative z-10 space-y-6">
+                                        <div>
+                                            <p className="text-[10px] font-black text-emerald-950/60 uppercase tracking-widest">Valor do Frete Sugerido</p>
+                                            <h2 className="text-5xl font-black text-white tracking-tighter">R$ {results.suggestedFreight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/20">
+                                            <div>
+                                                <p className="text-[9px] font-black text-emerald-950/50 uppercase mb-1">Lucro Líquido Real</p>
+                                                <p className="text-xl font-black text-white">
+                                                    R$ {(results.suggestedFreight - results.operationalCosts - (results.suggestedFreight * (driverCommissionPct / 100))).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-black text-emerald-950/50 uppercase mb-1">Preço por KM</p>
+                                                <p className="text-xl font-black text-white">
+                                                    R$ {(results.suggestedFreight / (isRoundTrip ? distance * 2 : distance)).toFixed(2)}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            <div className="px-3 py-1 bg-white/20 rounded-full flex items-center gap-1.5">
+                                                <TrendingUp className="w-3 h-3 text-white" />
+                                                <span className="text-[9px] font-black text-white uppercase tracking-widest">+{profitMargin}% Margem</span>
+                                            </div>
+                                            {isRoundTrip && (
+                                                <div className="px-3 py-1 bg-emerald-900/30 rounded-full text-[9px] font-black text-white uppercase tracking-widest border border-white/10">
+                                                    🔄 Ida e Volta ({distance * 2}km)
+                                                </div>
+                                            )}
+                                            {(isChemical || isLS) && (
+                                                <div className="px-3 py-1 bg-amber-400/20 rounded-full text-[9px] font-black text-white uppercase tracking-widest border border-white/10">
+                                                    ⚠️ Com Adicionais
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl flex flex-col justify-center">
+                                <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl flex flex-col justify-center relative overflow-hidden">
                                     <div className="flex items-center justify-between mb-4">
                                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Resultado Líquido Estimado</p>
-                                        <span className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500 font-black text-xs">
+                                        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${results.status === 'excellent' ? 'bg-emerald-500/10 text-emerald-500' :
+                                            results.status === 'acceptable' ? 'bg-sky-500/10 text-sky-500' :
+                                                results.status === 'warning' ? 'bg-amber-500/10 text-amber-500' :
+                                                    'bg-rose-500/10 text-rose-500'
+                                            }`}>
                                             R$
                                         </span>
                                     </div>
-                                    <h2 className="text-4xl font-black text-emerald-500 tracking-tighter">
+                                    <h2 className={`text-4xl font-black tracking-tighter ${results.status === 'excellent' ? 'text-emerald-500' :
+                                        results.status === 'acceptable' ? 'text-sky-500' :
+                                            results.status === 'warning' ? 'text-amber-500' :
+                                                'text-rose-500'
+                                        }`}>
                                         R$ {results.netProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </h2>
-                                    <p className="text-[10px] text-slate-400 font-bold mt-2 italic">Sobram limpos no seu bolso.</p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <p className="text-[10px] text-slate-400 font-bold italic">Sobram limpos no seu bolso.</p>
+                                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${results.status === 'excellent' ? 'bg-emerald-500/20 text-emerald-500' :
+                                            results.status === 'acceptable' ? 'bg-sky-500/20 text-sky-500' :
+                                                results.status === 'warning' ? 'bg-amber-500/20 text-amber-500' :
+                                                    'bg-rose-500/20 text-rose-500'
+                                            }`}>
+                                            {results.status === 'excellent' ? 'Ótima Oferta' :
+                                                results.status === 'acceptable' ? 'Aceitável' :
+                                                    results.status === 'warning' ? 'Atenção' : 'Evite (Prejuízo)'}
+                                        </span>
+                                    </div>
+
+                                    {/* Barra de Viabilidade Visual */}
+                                    <div className="mt-6 flex items-center gap-1">
+                                        {[1, 2, 3, 4].map((i) => (
+                                            <div
+                                                key={i}
+                                                className={`h-1.5 flex-1 rounded-full transition-all duration-1000 ${i === 1 && (results.status === 'danger' || results.status === 'warning' || results.status === 'acceptable' || results.status === 'excellent') ? (results.status === 'danger' ? 'bg-rose-500 shadow-lg shadow-rose-500/40' : 'bg-slate-700') :
+                                                    i === 2 && (results.status === 'warning' || results.status === 'acceptable' || results.status === 'excellent') ? (results.status === 'warning' ? 'bg-amber-500 shadow-lg shadow-amber-500/40' : 'bg-slate-700') :
+                                                        i === 3 && (results.status === 'acceptable' || results.status === 'excellent') ? (results.status === 'acceptable' ? 'bg-sky-500 shadow-lg shadow-sky-500/40' : 'bg-slate-700') :
+                                                            i === 4 && (results.status === 'excellent') ? 'bg-emerald-500 shadow-lg shadow-emerald-500/40' : 'bg-slate-800'
+                                                    }`}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Ribeirx AI Insight Box */}
+                                    <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Análise de IA Ribeirx</span>
+                                        </div>
+                                        {results.aiTips.map((tip, idx) => (
+                                            <p key={idx} className="text-[10px] text-white font-medium leading-relaxed">• {tip}</p>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
@@ -327,16 +616,132 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-500">
-                                            <TrendingUp className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Comissão Mot.</span>
+                            </div>
+
+                            {/* Detalhamento Visual de Custos (Onde o dinheiro vai?) */}
+                            <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl space-y-8 animate-in slide-in-from-bottom duration-1000">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Radiografia do Frete</h4>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Para onde vai cada real do valor total?</p>
                                     </div>
-                                    <p className="text-xl font-black text-white">R$ {results.commission.toLocaleString()}</p>
-                                    <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                                        <div className="h-full bg-amber-500" style={{ width: `${(results.commission / results.suggestedFreight) * 100}%` }} />
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded bg-emerald-500" />
+                                            <span className="text-[9px] font-black text-slate-400 uppercase">Seu Lucro</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded bg-sky-500" />
+                                            <span className="text-[9px] font-black text-slate-400 uppercase">Custos Diretos</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded bg-amber-500/50" />
+                                            <span className="text-[9px] font-black text-slate-400 uppercase">Custos Invisíveis</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-10">
+                                    {/* Gráfico de Barras Empilhadas */}
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            <span>Estrutura do Frete {offeredFreight > 0 ? 'Ofertado' : 'Sugerido'}</span>
+                                            <span className="text-white">R$ {(offeredFreight > 0 ? offeredFreight : results.suggestedFreight).toLocaleString()}</span>
+                                        </div>
+                                        <div className="h-10 w-full bg-slate-950 rounded-2xl overflow-hidden flex p-1 border border-slate-800/50">
+                                            {/* Diesel */}
+                                            <div
+                                                className="h-full bg-sky-500 rounded-l-xl transition-all duration-1000 hover:brightness-110 relative group"
+                                                style={{ width: `${(results.dieselCost / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }}
+                                            >
+                                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    Diesel: {Math.round((results.dieselCost / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%
+                                                </div>
+                                            </div>
+                                            {/* Pedágio */}
+                                            <div
+                                                className="h-full bg-rose-500 border-l border-slate-950 transition-all duration-1000 hover:brightness-110 relative group"
+                                                style={{ width: `${(results.tolls / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }}
+                                            >
+                                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    Pedágio: {Math.round((results.tolls / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%
+                                                </div>
+                                            </div>
+                                            {/* Comissão */}
+                                            <div
+                                                className="h-full bg-amber-500 border-l border-slate-950 transition-all duration-1000 hover:brightness-110 relative group"
+                                                style={{ width: `${(results.commission / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }}
+                                            >
+                                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    Comissão: {Math.round((results.commission / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%
+                                                </div>
+                                            </div>
+                                            {/* Manuf/Pneus (Invisíveis) */}
+                                            <div
+                                                className="h-full bg-slate-700 border-l border-slate-950 transition-all duration-1000 hover:brightness-110 relative group"
+                                                style={{ width: `${((results.tireWear + results.maintenance) / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }}
+                                            >
+                                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    Invisíveis (Pneu/Manut): {Math.round(((results.tireWear + results.maintenance) / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%
+                                                </div>
+                                            </div>
+                                            {/* Lucro Líquido */}
+                                            <div
+                                                className={`h-full border-l border-slate-950 transition-all duration-1000 hover:brightness-110 relative group rounded-r-xl ${results.netProfit > 0 ? 'bg-emerald-500' : 'bg-rose-900'}`}
+                                                style={{ width: `${Math.max(2, (results.netProfit / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%` }}
+                                            >
+                                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-black">
+                                                    LUCRO REAL: R$ {results.netProfit.toLocaleString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Lista de Engolidores de Dinheiro */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                        <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50 hover:border-emerald-500/30 transition-all group">
+                                            <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Câmbio de Diesel</p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-black text-white">R$ {results.dieselCost.toLocaleString()}</span>
+                                                <span className="text-[10px] font-black text-sky-400">{Math.round((results.dieselCost / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%</span>
+                                            </div>
+                                            <div className="mt-2 h-0.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-sky-500" style={{ width: `${(results.dieselCost / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }} />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50 hover:border-emerald-500/30 transition-all">
+                                            <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Mão de Obra ({driverCommissionPct}%)</p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-black text-white">R$ {results.commission.toLocaleString()}</span>
+                                                <span className="text-[10px] font-black text-amber-500">{Math.round((results.commission / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%</span>
+                                            </div>
+                                            <div className="mt-2 h-0.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-amber-500" style={{ width: `${(results.commission / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }} />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50 hover:border-emerald-500/30 transition-all">
+                                            <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Custos de "Ferro" (Pneu/Mnt)</p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-black text-white">R$ {(results.tireWear + results.maintenance).toLocaleString()}</span>
+                                                <span className="text-[10px] font-black text-slate-400">{Math.round(((results.tireWear + results.maintenance) / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%</span>
+                                            </div>
+                                            <div className="mt-2 h-0.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-slate-600" style={{ width: `${((results.tireWear + results.maintenance) / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }} />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-950/50 p-4 rounded-2xl border border-emerald-500/20 shadow-lg shadow-emerald-500/5 animate-pulse">
+                                            <p className="text-[9px] font-black text-emerald-500 uppercase mb-1">Liquidez (Bolso)</p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-black text-emerald-400">R$ {results.netProfit.toLocaleString()}</span>
+                                                <span className="text-[10px] font-black text-emerald-500">{Math.round((results.netProfit / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100)}%</span>
+                                            </div>
+                                            <div className="mt-2 h-0.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div className={`h-full ${results.netProfit > 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{ width: `${(results.netProfit / (offeredFreight > 0 ? offeredFreight : results.suggestedFreight)) * 100}%` }} />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -136,12 +136,14 @@ export default function Home() {
                         if (profileData.config) {
                             parsedConfig = typeof profileData.config === 'string' ? JSON.parse(profileData.config) : profileData.config;
                         }
+                        // Merge with defaults to ensure new fields are always present
+                        const mergedConfig = { ...INITIAL_PROFILE.config, ...parsedConfig };
                         setProfile({
                             ...profileData,
                             companyName: profileData.company_name,
                             logoUrl: profileData.logo_url,
                             signatureUrl: profileData.signature_url,
-                            config: parsedConfig
+                            config: mergedConfig
                         } as any);
 
                         // If profile exists and it's the first time, maybe we don't need mock data anymore 

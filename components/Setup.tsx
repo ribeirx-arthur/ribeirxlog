@@ -451,6 +451,20 @@ const Setup: React.FC<SetupProps> = ({
                         <input type="text" value={editingItem.model} onChange={e => setEditingItem({ ...editingItem, model: e.target.value })} placeholder="Ex: R450" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                       </div>
                       <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Qtd. de Eixos</label>
+                        <select
+                          value={editingItem.axles || 6}
+                          onChange={e => setEditingItem({ ...editingItem, axles: Number(e.target.value) })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none appearance-none font-bold"
+                        >
+                          <option value={2}>2 Eixos (VUC / 3/4)</option>
+                          <option value={3}>3 Eixos (Toco / Truck)</option>
+                          <option value={4}>4 Eixos (Bitruck)</option>
+                          <option value={6}>6 Eixos (Carreta LS)</option>
+                          <option value={9}>9 Eixos (Rodotrem)</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Tipo Propriedade</label>
                         <select value={editingItem.type} onChange={e => setEditingItem({ ...editingItem, type: e.target.value as VehiclePropertyType })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none">
                           <option value={VehiclePropertyType.PROPRIO}>Próprio</option>
