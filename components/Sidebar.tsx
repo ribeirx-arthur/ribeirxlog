@@ -17,7 +17,8 @@ import {
   Calculator,
   Database,
   MapPin,
-  FolderOpen
+  FolderOpen,
+  HelpCircle
 } from 'lucide-react';
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { useAppMode } from '../contexts/AppModeContext';
@@ -58,6 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
     { id: 'freight-calculator', label: 'Cálculo de Frete', icon: Calculator, hidden: profile.config.enableFreightCalculator === false },
     { id: 'setup', label: 'Cadastros', icon: Database },
     { id: 'subscription', label: 'Assinatura', icon: CreditCard },
+    { id: 'help', label: 'Tutoriais & Ajuda', icon: HelpCircle },
     { id: 'admin', label: 'Administração', icon: ShieldCheck, hidden: !isAdmin },
   ];
 

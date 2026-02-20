@@ -19,6 +19,7 @@ const GPSTracking = React.lazy(() => import('../components/GPSTracking'));
 const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
 import DriverManagement from '../components/DriverManagement';
 const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
+const HelpCenter = React.lazy(() => import('../components/HelpCenter'));
 
 import LandingPage from '../components/LandingPage';
 import Paywall from '../components/Paywall';
@@ -941,6 +942,11 @@ export default function Home() {
             );
             case 'tires': return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
             case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
+            case 'help': return (
+                <Suspense fallback={<div>Carregando ajuda...</div>}>
+                    <HelpCenter />
+                </Suspense>
+            );
             case 'admin':
                 const isAdmin = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthurpsantos01@gmail.com', 'arthur.riberix@gmail.com', 'arthur_ribeiro09@outlook.com'].includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
