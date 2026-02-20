@@ -15,7 +15,10 @@ export const calculateTripFinance = (
 
   const totalBruto = freteSeco + diarias;
   const comissaoMotorista = (freteSeco * (percFrete / 100)) + (diarias * (percDiaria / 100));
-  const saldoAReceber = totalBruto - adiantamento - comissaoMotorista;
+
+  // Saldo a Receber da Transportadora: valor bruto menos o que já foi adiantado.
+  // A comissão do motorista é um custo administrativo pago pelo gestor, não descontado no saldo da transportadora.
+  const saldoAReceber = totalBruto - adiantamento;
 
   // Depreciation logic (Pneu e Manutenção)
   let depreciationCost = 0;

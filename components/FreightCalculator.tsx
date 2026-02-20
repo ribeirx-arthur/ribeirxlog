@@ -167,27 +167,50 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
     const results = useMemo(() => {
         if (!distance || distance <= 0) return null;
 
-        // --- CALIBRAÇÃO LOGÍSTICA REAL (Matriz Ribeirx 2024) ---
-        // Definimos parâmetros técnicos baseados no número de eixos
-        const config = {
-            2: { consumption: 4.5, tireWear: 0.25, maintenance: 0.15 }, // 3/4 ou VUC
-            3: { consumption: 3.5, tireWear: 0.45, maintenance: 0.30 }, // Toco/Truck
-            4: { consumption: 2.8, tireWear: 0.65, maintenance: 0.40 }, // Bitruck
-            6: { consumption: 2.5, tireWear: 0.85, maintenance: 0.60 }, // Carreta LS (Re-calibrado para média real de 2.5 km/l)
-            9: { consumption: 1.8, tireWear: 1.30, maintenance: 0.90 }, // Rodotrem
-        }[axles as keyof typeof config] || { consumption: 2.5, tireWear: 0.85, maintenance: 0.60 };
+        // --- CALIBRAÇÃO LOGÍSTICA REAL (Matriz Ribeirx 2024 - Média Brasil) ---
+        // Definimos parâmetros técnicos baseados no número de eixos como fallback
+        const defaultConfig = {
+            2: { consumption: 6.2, tireWear: 0.28, maintenance: 0.22 }, // 3/4 ou VUC
+            3: { consumption: 4.0, tireWear: 0.48, maintenance: 0.38 }, // Toco/Truck
+            4: { consumption: 3.1, tireWear: 0.72, maintenance: 0.58 }, // Bitruck
+            6: { consumption: 2.2, tireWear: 1.18, maintenance: 0.95 }, // Carreta LS
+            9: { consumption: 1.7, tireWear: 1.88, maintenance: 1.38 }, // Rodotrem
+        };
+
+        const config = defaultConfig[axles as keyof typeof defaultConfig] || defaultConfig[6];
+
+        // Detecção Inteligente por Modelo (Mercedes, Volvo, Scania, etc)
+        const vehicle = vehicles.find(v => v.id === selectedVehicleId);
+        let technicalParams = { ...config };
+
+        if (vehicle) {
+            const fullName = `${vehicle.brand || ''} ${vehicle.model || ''} ${vehicle.name}`.toLowerCase();
+
+            // Refinamento por modelos específicos (Média Real Brasil)
+            if (fullName.includes('actros') || fullName.includes('fh 540') || fullName.includes('scania r')) {
+                technicalParams = { consumption: 2.3, tireWear: 1.12, maintenance: 0.88 };
+            } else if (fullName.includes('axor') || fullName.includes('fh 460') || fullName.includes('vm 330')) {
+                technicalParams = { consumption: 2.5, tireWear: 1.05, maintenance: 0.78 };
+            } else if (fullName.includes('constellation') || fullName.includes('vm 270')) {
+                technicalParams = { consumption: 3.2, tireWear: 0.78, maintenance: 0.62 };
+            } else if (fullName.includes('atego') || fullName.includes('accelo')) {
+                technicalParams = { consumption: 5.5, tireWear: 0.35, maintenance: 0.28 };
+            } else if (fullName.includes('delivery')) {
+                technicalParams = { consumption: 7.2, tireWear: 0.22, maintenance: 0.18 };
+            }
+        }
 
         const calcDistance = isRoundTrip ? distance * 2 : distance;
         const calcTolls = isRoundTrip ? tolls * 2 : tolls;
 
-        const baseDieselCost = (calcDistance / config.consumption) * dieselPrice;
+        const baseDieselCost = (calcDistance / technicalParams.consumption) * dieselPrice;
         const chemicalAditional = isChemical ? 1.20 : 1.0; // +20% para carga química
         const lsAditional = isLS ? 1.15 : 1.0; // +15% para carga LS (Escolta/Seguro)
         const totalAditional = chemicalAditional * lsAditional;
 
         // Custos por KM (Pneus + Manutenção Preventiva)
-        const tireWearTotal = calcDistance * config.tireWear;
-        const maintenanceTotal = calcDistance * config.maintenance;
+        const tireWearTotal = calcDistance * technicalParams.tireWear;
+        const maintenanceTotal = calcDistance * technicalParams.maintenance;
 
         // Outros custos (Seguro Carga, Aditamentos, Impostos base ~8%)
         const operationalFees = (baseDieselCost + calcTolls) * 0.08;
@@ -222,7 +245,7 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
             if (profitPercentage >= profitMargin) tips.push("🚀 Excelente Negócio: O valor cobre todos os custos invisíveis e sobra lucro real.");
             if (isChemical && profitPercentage < 20) tips.push("⚠️ Alerta Químico: O risco de carga perigosa exige uma margem maior (min. 20%).");
             if (isLS && profitPercentage < 15) tips.push("🛡️ Alerta LS: Carga monitorada exige atenção redobrada aos custos de seguro e tempo de parada.");
-            if (config.consumption < 1.4) tips.push("⛽ Consumo Elevado: Rota com muita serra ou carga pesada detectada.");
+            if (technicalParams.consumption < 2.0) tips.push("⛽ Consumo Elevado: Verifique se a rota possui muitas serras ou se o veículo está com excesso de peso.");
             if (isRoundTrip) tips.push("🔄 Ciclo Completo: Análise considerando ida e volta (percurso total).");
             if (!applyDepreciation) tips.push("⚠️ Análise Simplificada: Pneus e manutenção não estão sendo abatidos do lucro líquido.");
 
