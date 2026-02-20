@@ -69,7 +69,8 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
         }
 
         setIsAnalyzing(true);
-        const apiKey = process.env.NEXT_PUBLIC_ORS_API_KEY;
+        // Chave oficial do sistema Ribeirx (OpenRouteService)
+        const apiKey = process.env.NEXT_PUBLIC_ORS_API_KEY || "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjExMWY4MTQ2MjMzZDQ0YTZhNjcwY2U3NDdlMmZhMGY1IiwiaCI6Im11cm11cjY0In0=";
 
         if (!apiKey || apiKey === 'undefined' || !apiKey.startsWith('ey')) {
             alert('Erro: Chave da API não configurada corretamente no sistema.');
