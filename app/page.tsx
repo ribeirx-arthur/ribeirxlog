@@ -691,7 +691,7 @@ export default function Home() {
                             id: `cnh-expired-${d.id}`,
                             title: `🚨 CNH VENCIDA: ${d.name.split(' ')[0]}`,
                             message: `CNH de ${d.name} venceu em ${validityDate.toLocaleDateString()}.`,
-                            timestamp: new Date().toISOString(),
+                            date: new Date().toISOString(),
                             read: false,
                             type: 'system'
                         });
@@ -700,7 +700,7 @@ export default function Home() {
                             id: `cnh-warning-${d.id}`,
                             title: `⚠️ Renovar CNH: ${d.name.split(' ')[0]}`,
                             message: `Vence em ${diffDays} dias (${validityDate.toLocaleDateString()}).`,
-                            timestamp: new Date().toISOString(),
+                            date: new Date().toISOString(),
                             read: false,
                             type: 'system'
                         });
