@@ -60,29 +60,29 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <PlanCard
-                    title="Mensal"
-                    price="R$ 59,90"
+                    title="Piloto"
+                    price="R$ 34,90"
                     period="/mês"
-                    desc="Organização básica para pequenos transportadores."
-                    features={["1 Veículo Ativo", "Dashboard Financeiro", "Gestão de Fretes", "Relatórios PDF"]}
-                    onSelect={() => handleWhatsApp('Mensal')}
+                    desc="Essencial para o motorista autônomo."
+                    features={["Controle de 1 Veículo", "Alertas CNH & Manutenção", "Cálculo de Lucro Real", "Sem Rastreamento GPS"]}
+                    onSelect={() => handleWhatsApp('Piloto')}
                 />
                 <PlanCard
-                    title="Anual Profissional"
-                    price="R$ 497,00"
-                    period="/ano"
+                    title="Gestor Pro"
+                    price="R$ 89,90"
+                    period="/mês"
                     isPopular
-                    desc="Completo para quem quer escalar o negócio."
-                    features={["Frota Ilimitada", "IA Ribeirx (Golden Tips)", "Ranking de Performance", "Suporte VIP", "Economia de 2 meses"]}
-                    onSelect={() => handleWhatsApp('Anual')}
+                    desc="A escolha nº 1 para transportadoras."
+                    features={["Frota Ilimitada", "Rastreamento GPS Real-Time", "Gestão Completa de Pneus", "Módulo BI & Performance", "App do Motorista"]}
+                    onSelect={() => handleWhatsApp('Gestor Pro')}
                 />
                 <PlanCard
-                    title="Placa Única"
-                    price="R$ 297,00"
-                    period=" único"
-                    desc="Ideal para frota própria com custo fixo zero."
-                    features={["Vitalício p/ 1 Veículo", "Todas as Ferramentas", "Sem faturas mensais", "Histórico Permanente"]}
-                    onSelect={() => handleWhatsApp('Vitalício')}
+                    title="Frota Elite"
+                    price="R$ 797,00"
+                    period="/ano"
+                    desc="Máxima economia e controle total."
+                    features={["Tudo do Gestor Pro", "Consultoria de Implantação", "Suporte Prioritário VIP", "Economia de ~3 Mensalidades"]}
+                    onSelect={() => handleWhatsApp('Frota Elite')}
                 />
             </div>
 
@@ -97,18 +97,18 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                         <thead>
                             <tr className="border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-900/50">
                                 <th className="p-6">Funcionalidade</th>
-                                <th className="p-6">Mensal</th>
-                                <th className="p-6 text-emerald-500">Anual Profissional</th>
-                                <th className="p-6">Placa Única</th>
+                                <th className="p-6">Piloto</th>
+                                <th className="p-6 text-emerald-500">Gestor Pro</th>
+                                <th className="p-6">Frota Elite</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
-                            <TableRow label="Limite de Veículos" v1="1 Veículo" v2="Ilimitado" v3="1 Veículo (Fixo)" />
-                            <TableRow label="Inteligência Artificial" v1="Básica" v2="Avançada (Golden Tips)" v3="Básica" />
-                            <TableRow label="Análise de Rotas" v1="Sim" v2="Sim + Previsivo" v3="Sim" />
-                            <TableRow label="Relatórios BI" v1="Não" v2="Sim" v3="Não" />
-                            <TableRow label="Suporte Técnico" v1="Padrão" v2="Prioritário VIP" v3="Padrão" />
-                            <TableRow label="Custo Manutenção" v1="Sim" v2="Incluso" v3="Zerado" />
+                            <TableRow label="Limite de Veículos" v1="1 Veículo" v2="Ilimitado" v3="Ilimitado" />
+                            <TableRow label="Rastreamento GPS" v1="Não" v2="Sim (Todos)" v3="Sim (Todos)" />
+                            <TableRow label="Gestão de Pneus" v1="Não" v2="Sim" v3="Sim" />
+                            <TableRow label="App do Motorista" v1="Básico" v2="Completo" v3="Completo" />
+                            <TableRow label="Inteligência Artificial" v1="Básica" v2="Avançada" v3="Avançada" />
+                            <TableRow label="Suporte Técnico" v1="Email" v2="WhatsApp" v3="WhatsApp VIP" />
                         </tbody>
                     </table>
                 </div>

@@ -241,10 +241,15 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                                             onChange={(e) => updatePlan(user.email, { plan_type: e.target.value as any })}
                                             className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-300 outline-none focus:border-emerald-500/50"
                                         >
-                                            <option value="none">Nenhum</option>
-                                            <option value="mensal">Mensal</option>
-                                            <option value="anual">Anual</option>
-                                            <option value="lifetime">Placa Única</option>
+                                            <option value="none">Sem Plano</option>
+                                            <option value="piloto">Piloto (Básico)</option>
+                                            <option value="gestor_pro">Gestor Pro (Completo)</option>
+                                            <option value="frota_elite">Frota Elite (Anual)</option>
+                                            <optgroup label="Legado">
+                                                <option value="mensal">Mensal (Antigo)</option>
+                                                <option value="anual">Anual (Antigo)</option>
+                                                <option value="lifetime">Lifetime</option>
+                                            </optgroup>
                                         </select>
                                     </td>
                                     <td className="p-6">

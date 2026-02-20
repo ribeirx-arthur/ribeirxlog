@@ -223,9 +223,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
             <div className="flex-1 min-w-0">
               <span className="text-xs font-black text-white leading-none block truncate">{profile.name || 'Usuário'}</span>
               <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
-                {profile.plan_type === 'lifetime' ? '✦ Vitalício' :
-                  profile.plan_type === 'anual' ? 'Anual' :
-                    profile.plan_type === 'mensal' ? 'Mensal' : 'Conta Grátis'}
+                {profile.plan_type === 'frota_elite' ? '✦ Frota Elite' :
+                  profile.plan_type === 'gestor_pro' ? 'Gestor Pro' :
+                    profile.plan_type === 'piloto' ? 'Plano Piloto' :
+                      profile.plan_type === 'lifetime' ? 'Legado Vitalício' :
+                        profile.plan_type === 'anual' ? 'Legado Anual' :
+                          profile.plan_type === 'mensal' ? 'Legado Mensal' :
+                            'Conta Grátis'}
               </span>
             </div>
             <button onClick={() => signOut()} title="Sair" className="p-1.5 text-slate-600 hover:text-rose-500 transition-colors">
