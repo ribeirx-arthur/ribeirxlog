@@ -26,8 +26,9 @@ export interface UserProfile {
     costPerKmMaintenance: number; // Valor fixado em reais por KM para manutenção
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
     enabledFeatures?: string[];
+    onboardingCompleted?: boolean;
   };
-  plan_type?: 'none' | 'mensal' | 'anual' | 'lifetime';
+  plan_type?: 'none' | 'piloto' | 'gestor_pro' | 'frota_elite' | 'mensal' | 'anual' | 'lifetime';
   payment_status?: 'unpaid' | 'paid' | 'trial' | 'preview';
   trial_ends_at?: string;
   subscription_expires_at?: string;
@@ -88,6 +89,7 @@ export interface Driver {
   cnh: string;
   cnhCategory: string;
   cnhValidity: string;
+  licenseRenewalReminder?: boolean;
   status: 'Ativo' | 'Inativo';
   photoUrl?: string;
   cnhPhotoUrl?: string;

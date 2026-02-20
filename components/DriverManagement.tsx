@@ -169,6 +169,17 @@ const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, vehicles, 
         return { status: 'offline', label: 'Offline', color: 'slate' };
     };
 
+    const getCNHStatus = (dateStr: string) => {
+        if (!dateStr) return null;
+        const today = new Date();
+        const validDate = new Date(dateStr);
+        const diffTime = validDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) return { label: 'CNH VENCIDA', bg: 'bg-rose-500/20', text: 'text-rose-500', icon: AlertCircle };
+        if (diffDays <= 30) return { label: 'Vence em breve', bg: 'bg-amber-500/20', text: 'text-amber-500', icon: AlertCircle };
+        return null;
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -239,6 +250,7 @@ const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, vehicles, 
                 {drivers.map((driver) => {
                     const status = getDriverStatus(driver);
                     const stats = driverStats[driver.id] || {};
+                    const cnhStatus = getCNHStatus(driver.cnhValidity);
 
                     return (
                         <div
@@ -271,6 +283,12 @@ const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, vehicles, 
                                                 <span className="px-2 py-0.5 rounded-lg text-xs font-black bg-emerald-500/10 text-emerald-400">
                                                     <Shield className="w-3 h-3 inline mr-1" />
                                                     Acesso App
+                                                </span>
+                                            )}
+                                            {cnhStatus && (
+                                                <span className={`px-2 py-0.5 rounded-lg text-xs font-black ${cnhStatus.bg} ${cnhStatus.text} flex items-center gap-1 animate-pulse`}>
+                                                    <cnhStatus.icon className="w-3 h-3" />
+                                                    {cnhStatus.label}
                                                 </span>
                                             )}
                                         </div>

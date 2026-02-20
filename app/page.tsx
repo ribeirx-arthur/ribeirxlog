@@ -20,6 +20,7 @@ const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
 import DriverManagement from '../components/DriverManagement';
 const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
 const HelpCenter = React.lazy(() => import('../components/HelpCenter'));
+import Onboarding from '../components/Onboarding';
 
 import LandingPage from '../components/LandingPage';
 import Paywall from '../components/Paywall';
@@ -647,6 +648,77 @@ export default function Home() {
         showToast('Manutenção atualizada!', 'success');
     };
 
+    // ─── ONBOARDING COMPLETION ───
+    const handleOnboardingComplete = async (data: { companyName: string; city: string; vehicle: Partial<Vehicle>; driver: Partial<Driver> }) => {
+        try {
+            // Update local state first for instant feedback
+            const updatedProfile: UserProfile = { ...profile, companyName: data.companyName, config: { ...profile.config, onboardingCompleted: true } };
+            setProfile(updatedProfile);
+
+            if (user) {
+                const token = await getToken({ template: 'supabase' });
+                const client = token ? createClerkSupabaseClient(token) : supabase;
+
+                await client.from('profiles').update({ company_name: data.companyName, config: updatedProfile.config }).eq('id', user.id);
+
+                if (data.vehicle.plate) await handleAddVehicle(data.vehicle as Vehicle);
+                if (data.driver.name) await handleAddDriver({ ...data.driver, vehicleId: vehicles[0]?.id } as Driver);
+            }
+            showToast("🎉 Configuração concluída! Bem-vindo.", 'success');
+
+        } catch (err) {
+            console.error(err);
+            showToast("Erro ao salvar.", 'error');
+        }
+    };
+
+    // ─── SYSTEM ALERTS (CNH) ───
+    useEffect(() => {
+        if (!drivers.length) return;
+
+        const checkAlerts = () => {
+            const today = new Date();
+            const newAlerts: AppNotification[] = [];
+
+            drivers.forEach(d => {
+                if (d.cnhValidity) {
+                    const validityDate = new Date(d.cnhValidity);
+                    const diffTime = validityDate.getTime() - today.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays < 0) {
+                        newAlerts.push({
+                            id: `cnh-expired-${d.id}`,
+                            title: `🚨 CNH VENCIDA: ${d.name.split(' ')[0]}`,
+                            message: `CNH de ${d.name} venceu em ${validityDate.toLocaleDateString()}.`,
+                            timestamp: new Date().toISOString(),
+                            read: false,
+                            type: 'system'
+                        });
+                    } else if (diffDays <= 30) {
+                        newAlerts.push({
+                            id: `cnh-warning-${d.id}`,
+                            title: `⚠️ Renovar CNH: ${d.name.split(' ')[0]}`,
+                            message: `Vence em ${diffDays} dias (${validityDate.toLocaleDateString()}).`,
+                            timestamp: new Date().toISOString(),
+                            read: false,
+                            type: 'system'
+                        });
+                    }
+                }
+            });
+
+            if (newAlerts.length > 0) {
+                setNotifications(prev => {
+                    const existingIds = new Set(prev.map(n => n.id));
+                    const unique = newAlerts.filter(a => !existingIds.has(a.id));
+                    return unique.length ? [...unique, ...prev] : prev;
+                });
+            }
+        };
+        checkAlerts();
+    }, [drivers]);
+
     const handleDeleteMaintenance = async (id: string) => {
         if (!user) return;
         if (!confirm('Tem certeza que deseja excluir este registro?')) return;
@@ -731,6 +803,15 @@ export default function Home() {
     };
     const handleAddVehicle = async (v: Partial<Vehicle>) => {
         if (!user) return;
+
+        // PLAN LIMIT CHECK
+        const plan = profile?.plan_type || 'none';
+        const isLimited = plan === 'piloto' || plan === 'none';
+        if (isLimited && vehicles.length >= 1) {
+            showToast('Limite de veículos atingido no plano Piloto. Faça upgrade para cadastrar mais!', 'error');
+            return; // Block creation
+        }
+
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -919,18 +1000,22 @@ export default function Home() {
             );
             case 'intelligence': return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
             case 'freight-calculator': return <FreightCalculator vehicles={vehicles} profile={profile} />;
-            case 'gps-tracking': return (
-                <Suspense fallback={<div>Iniciando satélites...</div>}>
-                    <GPSTracking
-                        vehicles={vehicles}
-                        trips={trips}
-                        drivers={drivers}
-                        locations={locations}
-                        alerts={gpsAlerts}
-                        onRefresh={() => setRefreshTrigger(prev => prev + 1)}
-                    />
-                </Suspense>
-            );
+            case 'gps-tracking':
+                if (profile?.plan_type === 'piloto' || profile?.plan_type === 'none') {
+                    return <Paywall title="Rastreamento em Tempo Real" plan="Gestor Pro" price="R$ 89,90" features={['Localização Exata', 'Alertas de Velocidade', 'Cerca Virtual']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                }
+                return (
+                    <Suspense fallback={<div>Iniciando satélites...</div>}>
+                        <GPSTracking
+                            vehicles={vehicles}
+                            trips={trips}
+                            drivers={drivers}
+                            locations={locations}
+                            alerts={gpsAlerts}
+                            onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+                        />
+                    </Suspense>
+                );
             case 'proof-gallery': return (
                 <Suspense fallback={<div>Carregando galeria...</div>}>
                     <ProofGallery
@@ -995,6 +1080,31 @@ export default function Home() {
             );
         }
         return <LandingPage onGetStarted={() => setShowAuth(true)} onPurchase={handleLandingPurchase} />;
+    }
+
+    // ─── RENDER ONBOARDING ───
+    if (isSignedIn && isLoaded && !loadingData && profile?.config && profile.config.onboardingCompleted !== true) {
+        return (
+            <Onboarding
+                onComplete={handleOnboardingComplete}
+                onSkip={() => handleOnboardingComplete({
+                    companyName: profile.companyName || 'Minha Transportadora',
+                    city: 'Não informado',
+                    vehicle: {},
+                    driver: {}
+                })}
+            />
+        );
+    }
+
+    // ─── RENDER ONBOARDING IF NEEDED ───
+    if (isSignedIn && isLoaded && !loadingData && profile?.config && profile.config.onboardingCompleted !== true) {
+        return (
+            <Onboarding
+                onComplete={handleOnboardingComplete}
+                onSkip={() => handleOnboardingComplete({ companyName: profile.companyName || 'Minha Transportadora', city: '', vehicle: {}, driver: {} })}
+            />
+        );
     }
 
     return (

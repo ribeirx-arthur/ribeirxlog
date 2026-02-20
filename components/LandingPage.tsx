@@ -26,7 +26,8 @@ import {
     MapPin,
     Smartphone,
     Navigation,
-    Globe
+    Globe,
+    Youtube
 } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../pricing';
 
@@ -360,27 +361,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     </div>
 
                     {/* NEW: Smart Calculator Placeholder (The Future Addition) */}
-                    <div className="max-w-4xl mx-auto glass-card rounded-[4rem] p-12 md:p-20 text-center relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50"></div>
+                    {/* NEW: Smart Calculator - NOW LIVE */}
+                    <div className="max-w-4xl mx-auto glass-card rounded-[4rem] p-12 md:p-20 text-center relative overflow-hidden group border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
                         <div className="relative z-10">
-                            <div className="inline-flex py-2 px-6 bg-slate-900 border border-white/5 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-12">
-                                Em Desenvolvimento
+                            <div className="inline-flex py-2 px-6 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-[0.4em] mb-12 animate-pulse shadow-lg shadow-emerald-500/20">
+                                Funcionalidade Liberada
                             </div>
-                            <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 italic uppercase">
-                                Calculadora <br /><span className="text-emerald-500">Inteligente RBS.</span>
+                            <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 italic uppercase leading-none">
+                                Calculadora de <br /><span className="text-emerald-500">Frete Inteligente.</span>
                             </h3>
-                            <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto mb-16">
-                                Em breve: Simule sua viagem completa antes mesmo de ligar o caminhão. Diesel, pedágio, manutenção e taxas — tudo calculado em segundos para garantir o seu preço final.
+                            <p className="text-lg text-slate-400 font-medium max-w-2xl mx-auto mb-16 leading-relaxed">
+                                <span className="text-white font-bold">Nunca mais pague para trabalhar.</span> Simule diesel, pedágio, manutenção e sua margem de lucro em 10 segundos. Você coloca a origem, destino e veículo, nós te damos o preço exato.
                             </p>
                             <div className="flex justify-center">
-                                <div className="w-full max-w-md h-20 bg-slate-950/50 border border-white/5 rounded-3xl flex items-center px-8 justify-between text-slate-700 italic text-sm">
-                                    <span>rbs_smart_calculator.exe</span>
-                                    <Clock className="w-5 h-5 animate-spin duration-1000" />
-                                </div>
+                                <a href="#planos" className="px-10 py-5 bg-white text-slate-950 font-black rounded-2xl flex items-center gap-4 hover:scale-105 transition-all shadow-2xl uppercase tracking-widest">
+                                    Quero Usar Agora <ArrowRight className="w-5 h-5" />
+                                </a>
                             </div>
                         </div>
-                        <div className="absolute -bottom-20 -right-20 p-20 opacity-5 group-hover:opacity-10 transition-all duration-700">
-                            <Calculator className="w-64 h-64 text-emerald-500" />
+                        <div className="absolute -bottom-20 -right-20 p-20 opacity-10 group-hover:opacity-20 transition-all duration-700 rotate-12">
+                            <Calculator className="w-80 h-80 text-emerald-500" />
                         </div>
                     </div>
                 </div>
@@ -415,6 +416,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 </div>
             </section>
 
+            {/* SOCIAL PROOF - Testimonials (Task 2) */}
+            <section className="py-32 relative border-y border-white/5 bg-slate-900/30">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-20 space-y-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
+                            <Star className="w-3 h-3 fill-current" /> 100% Aprovado
+                        </div>
+                        <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase">
+                            Quem usa, <span className="text-emerald-500">recomenda.</span>
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <TestimonialCard
+                            name="João Carlos Ferreira"
+                            role="Motorista Autônomo — 6 eixos"
+                            city="São Paulo, SP"
+                            text="Antes eu anotava tudo no papel e sempre esquecia de cobrar pedágio e diária. Agora lanço a viagem no app e já aparece o valor certo. Economizei R$ 800 no primeiro mês só de erro de cálculo."
+                        />
+                        <TestimonialCard
+                            name="Maria Aparecida Santos"
+                            role="Proprietária — Frota 3 caminhões"
+                            city="Uberlândia, MG"
+                            text="Finalmente consigo ver qual caminhão dá lucro e qual tá me dando prejuízo. O dashboard financeiro é simples e funciona. Não precisa de contador pra entender."
+                        />
+                        <TestimonialCard
+                            name="Rodrigo Mendes"
+                            role="Autônomo — 9 eixos"
+                            city="Curitiba, PR"
+                            text="A calculadora de frete salvou minha vida. Eu aceitava frete ruim sem saber. Agora antes de fechar qualquer valor eu calculo no app. Já recusei 3 fretes podres esse mês."
+                        />
+                    </div>
+                </div>
+            </section>
+
             {/* Pricing Section - The Offer */}
             <section id="planos" className="py-40 relative">
                 <div className="max-w-7xl mx-auto px-6">
@@ -427,64 +463,112 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-end">
                         <LandingPricingCard
-                            title="START"
-                            price="R$ 59,90"
+                            title="PILOTO"
+                            price="R$ 34,90"
                             period="/mês"
-                            desc="Para o motorista autônomo que quer parar de perder dinheiro."
-                            features={["Dashboard Fianceiro Base", "Controle de 1 Veículo", "Relatórios Trimestrais", "App do Motorista (Básico)"]}
-                            onSelect={() => onPurchase('Mensal')}
+                            desc="O essencial para o motorista autônomo organizar as contas do caminhão."
+                            features={[
+                                "Calculadora de Frete Inteligente",
+                                "Controle de Caixa (Entrada/Saída)",
+                                "Relatório de Lucro por Viagem",
+                                "Sem Rastreamento GPS",
+                                "Suporte via Email"
+                            ]}
+                            onSelect={() => onPurchase('Piloto')}
                         />
                         <LandingPricingCard
-                            title="NEURAL ELITE"
-                            price="R$ 497,00"
-                            period="/ano"
+                            title="GESTOR PRO"
+                            price="R$ 89,90"
+                            period="/mês"
                             isPopular
-                            desc="O sistema completo para quem quer ser referência no mercado."
+                            desc="Controle total da sua frota com rastreamento e inteligência artificial."
                             features={[
-                                "Frota Ilimitada",
-                                "GPS Tracking em Tempo Real",
-                                "App do Motorista (Completo)",
-                                "Gestão de Comprovantes Digitais",
-                                "Full AI Analysis (Neural Engine)",
-                                "Consultoria WhatsApp Prioritária"
+                                "Frota Ilimitada (Promoção)",
+                                "GPS Rastreamento em Tempo Real",
+                                "App do Motorista (WhatsApp)",
+                                "Emissão de CIOT/MDF-e (Em breve)",
+                                "Gestão de Pneus e Manutenção",
+                                "Suporte Prioritário no Zap"
                             ]}
-                            onSelect={() => onPurchase('Anual')}
+                            onSelect={() => onPurchase('Gestor Pro')}
                         />
                         <LandingPricingCard
-                            title="LIFETIME SOCIEDADE"
-                            price="R$ 297,00"
-                            period=" único"
-                            desc="Pague uma única vez. Seu acesso é vitalício para esse veículo."
+                            title="FROTA ELITE"
+                            price="R$ 797,00"
+                            period="/ano"
+                            desc="O mesmo poder do plano Gestor Pro, com 2 meses de economia."
                             features={[
-                                "Licença Perpétua p/ 1 Placa",
-                                "Sem Mensalidades",
-                                "GPS Vitalício",
-                                "Módulo de Manutenção Full",
-                                "Histórico para Auditoria"
+                                "Todas as funções do Gestor Pro",
+                                "Economia de R$ 281,00 no ano",
+                                "Consultoria de Implantação Grátis",
+                                "Selo de Transportadora Verificada",
+                                "Prioridade em Novas Funções"
                             ]}
-                            onSelect={() => onPurchase('Vitalício')}
+                            onSelect={() => onPurchase('Anual Elite')}
                         />
                     </div>
                 </div>
             </section>
 
             {/* Security & Support Section (Bonus Persuasion) */}
-            <section className="py-20 bg-slate-900/50 border-y border-white/5">
-                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                    {[
-                        { icon: Lock, title: "DADOS PROTEGIDOS", desc: "Criptografia de ponta a ponta para seus dados financeiros." },
-                        { icon: MessageCircle, title: "SUPORTE NO ZAP", desc: "Arthur e time estão online no Zap para te ajudar." },
-                        { icon: Infinity, title: "CLOUD SYNC", desc: "Acesse do computador, tablet ou celular em qualquer lugar." },
-                        { icon: ShieldCheck, title: "REGRAS DA ANTT", desc: "Cálculos adaptados às normas e pedágios vigentes." },
-                    ].map((item, i) => (
-                        <div key={i} className="flex gap-6 items-start">
-                            <div className="w-12 h-12 bg-slate-950 rounded-xl flex items-center justify-center text-emerald-500 shrink-0 border border-white/5 shadow-xl"><item.icon className="w-6 h-6" /></div>
-                            <div>
-                                <h5 className="font-black text-white text-xs uppercase tracking-widest mb-2">{item.title}</h5>
-                                <p className="text-slate-500 text-xs leading-relaxed">{item.desc}</p>
+            {/* Help & Tutorials Section (Task Request) */}
+            <section className="py-20 bg-slate-900 border-y border-white/5">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                        <div>
+                            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-6 uppercase">
+                                Dúvidas? <br />
+                                <span className="text-emerald-500">A gente explica fácil.</span>
+                            </h2>
+                            <p className="text-slate-400 text-lg mb-10 leading-relaxed">
+                                Não precisa ser expert em computador. Criamos tutoriais rápidos que te ensinam a usar tudo em menos de 2 minutos.
+                            </p>
+
+                            <div className="space-y-4">
+                                <div className="p-6 bg-slate-950 border border-white/5 rounded-2xl hover:border-emerald-500/30 transition-all cursor-pointer group">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                                                <Youtube className="w-5 h-5" />
+                                            </div>
+                                            <span className="text-white font-bold">Como calcular seu primeiro frete</span>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-slate-600 group-hover:text-emerald-500 transition-colors" />
+                                    </div>
+                                </div>
+                                <div className="p-6 bg-slate-950 border border-white/5 rounded-2xl hover:border-emerald-500/30 transition-all cursor-pointer group">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                                                <Youtube className="w-5 h-5" />
+                                            </div>
+                                            <span className="text-white font-bold">Cadastrando motorista pelo WhatsApp</span>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5 text-slate-600 group-hover:text-emerald-500 transition-colors" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    ))}
+
+                        <div className="bg-slate-950 border border-white/5 rounded-[2.5rem] p-10">
+                            <h3 className="text-xl font-black text-white uppercase tracking-widest mb-8 flex items-center gap-3">
+                                <MessageCircle className="w-6 h-6 text-emerald-500" /> Perguntas Frequentes
+                            </h3>
+                            <div className="space-y-6">
+                                {[
+                                    { q: "Precisa instalar algo?", a: "Não. Funciona direto no navegador do seu celular ou computador." },
+                                    { q: "Serve para autônomo?", a: "Sim! É perfeito para quem tem 1 caminhão ou uma pequena frota." },
+                                    { q: "Como pago?", a: "Pix ou Cartão. Liberação imediata." },
+                                    { q: "Tem fidelidade?", a: "Não. Você cancela quando quiser, sem multa." }
+                                ].map((faq, i) => (
+                                    <div key={i} className="pb-6 border-b border-white/5 last:border-0 last:pb-0">
+                                        <p className="text-emerald-400 font-bold text-sm mb-2">{faq.q}</p>
+                                        <p className="text-slate-400 text-sm leading-relaxed">{faq.a}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -565,7 +649,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     </div>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 };
 
@@ -602,6 +686,25 @@ const LandingPricingCard = ({ title, price, period, desc, features, isPopular, o
         >
             ADQUIRIR AGORA
         </button>
+    </div>
+);
+
+const TestimonialCard = ({ name, role, city, text }: any) => (
+    <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 flex flex-col h-full hover:border-emerald-500/30 transition-all duration-500 group relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700">
+            <MessageSquare className="w-32 h-32 text-emerald-500" />
+        </div>
+        <div className="flex gap-1 mb-6">
+            {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 text-emerald-500 fill-current" />)}
+        </div>
+        <p className="text-slate-300 font-medium leading-relaxed italic mb-8 relative z-10 text-lg">"{text}"</p>
+        <div className="mt-auto relative z-10 pt-6 border-t border-white/5">
+            <p className="text-white font-black text-sm uppercase tracking-wide">{name}</p>
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">{role}</p>
+            <div className="flex items-center gap-2 mt-4 text-emerald-500 text-[10px] font-black uppercase tracking-widest">
+                <MapPin className="w-3 h-3" /> {city}
+            </div>
+        </div>
     </div>
 );
 

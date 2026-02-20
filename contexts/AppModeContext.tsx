@@ -11,6 +11,8 @@ interface FeatureFlags {
     canAccessFinanceComplex: boolean;
     canAccessDriverMgmt: boolean;
     canAutoValidateDocs: boolean;
+    maxVehicles?: number; // New limit
+    canAccessGPS?: boolean; // New feature
 }
 
 interface AppModeContextType {
@@ -25,6 +27,7 @@ const AppModeContext = createContext<AppModeContextType | undefined>(undefined);
 
 export const AppModeProvider: React.FC<{ profile: UserProfile, children: React.ReactNode }> = ({ profile, children }) => {
     const mode = profile.config.appMode || 'advanced'; // Default to advanced if not set
+    const appPlan = profile.plan_type || 'none';
     const customFeatures = profile.config.enabledFeatures || [];
 
     const features = useMemo(() => {
@@ -35,7 +38,9 @@ export const AppModeProvider: React.FC<{ profile: UserProfile, children: React.R
             canAccessSociety: false,
             canAccessFinanceComplex: false,
             canAccessDriverMgmt: false,
-            canAutoValidateDocs: false
+            canAutoValidateDocs: false,
+            canAccessGPS: false,
+            maxVehicles: 1
         };
 
         switch (mode) {
@@ -84,8 +89,33 @@ export const AppModeProvider: React.FC<{ profile: UserProfile, children: React.R
                 };
                 break;
         }
+
+        // ─── PLAN LIMITATIONS (Hard Override) ───
+        if (appPlan === 'piloto') {
+            // Piloto: Basic only, 1 truck, no GPS, no Tires
+            flags.canAccessGPS = false;
+            flags.maxVehicles = 1;
+            flags.canAccessTires = false;
+            flags.canAccessSociety = false;
+            flags.canAccessBI = false; // Basic Dashboard only
+        } else if (appPlan === 'gestor_pro' || appPlan === 'mensal') {
+            // Gestor Pro: Full access, GPS enabled, tires enabled
+            flags.canAccessGPS = true;
+            flags.maxVehicles = 999;
+            flags.canAccessTires = true;
+        } else if (appPlan === 'frota_elite' || appPlan === 'anual' || appPlan === 'lifetime') {
+            // Elite: Everything + Priority
+            flags.canAccessGPS = true;
+            flags.maxVehicles = 999;
+            flags.canAccessTires = true;
+        } else if (appPlan === 'none') {
+            // Free/Trial: Limited
+            flags.maxVehicles = 1;
+            flags.canAccessGPS = false;
+        }
+
         return flags;
-    }, [mode, customFeatures]);
+    }, [mode, customFeatures, appPlan]);
 
     const uiStyle = useMemo((): 'minimal' | 'balanced' | 'neural' | 'deep' => {
         if (mode === 'simple') return 'minimal';

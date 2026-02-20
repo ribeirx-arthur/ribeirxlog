@@ -16,22 +16,78 @@ import {
 import { UserProfile } from '../types';
 
 interface PaywallProps {
-    profile: UserProfile;
-    onRefreshProfile: () => void;
-    onSignOut: () => void;
+    // Shared
+    profile?: UserProfile;
+
+    // Mode A: Full Account Lock (Pending Payment)
+    onRefreshProfile?: () => void;
+    onSignOut?: () => void;
+
+    // Mode B: Feature Lock (Upgrade Required)
+    title?: string;
+    description?: string;
+    plan?: string;
+    price?: string;
+    features?: string[];
+    onUpgrade?: () => void;
 }
 
 const PIX_KEY = "13988205888";
 const WHATSAPP_NUMBER = "5513988205888";
 
-const Paywall: React.FC<PaywallProps> = ({ profile, onRefreshProfile, onSignOut }) => {
+const Paywall: React.FC<PaywallProps> = ({
+    profile,
+    onRefreshProfile,
+    onSignOut,
+    title,
+    plan,
+    price,
+    features,
+    onUpgrade
+}) => {
     const [copied, setCopied] = React.useState(false);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
 
+    // MODE B: FEATURE LOCK
+    if (title && onUpgrade) {
+        return (
+            <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-8 bg-slate-900/50 rounded-3xl border border-dashed border-slate-700/50 text-center">
+                <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mb-6 shadow-xl">
+                    <Lock className="w-8 h-8 text-emerald-500" />
+                </div>
+                <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-2">{title}</h2>
+                <p className="text-slate-400 max-w-md mb-8">Esta funcionalidade é exclusiva do plano <span className="text-emerald-500 font-bold">{plan}</span>.</p>
+
+                {features && (
+                    <div className="bg-slate-950 p-6 rounded-2xl border border-white/5 mb-8 text-left w-full max-w-sm">
+                        <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Você terá acesso a:</div>
+                        <ul className="space-y-3">
+                            {features.map((f, i) => (
+                                <li key={i} className="flex items-center gap-3 text-sm text-white font-bold">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {f}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                <button
+                    onClick={onUpgrade}
+                    className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all uppercase tracking-widest flex items-center gap-2"
+                >
+                    Fazer Upgrade por {price} <ArrowRight className="w-4 h-4" />
+                </button>
+            </div>
+        );
+    }
+
+    // MODE A: ACCOUNT LOCK
     const handleRefresh = async () => {
-        setIsRefreshing(true);
-        await onRefreshProfile();
-        setTimeout(() => setIsRefreshing(false), 1000);
+        if (onRefreshProfile) {
+            setIsRefreshing(true);
+            await onRefreshProfile();
+            setTimeout(() => setIsRefreshing(false), 1000);
+        }
     };
 
     const handleCopyPix = () => {
@@ -41,7 +97,8 @@ const Paywall: React.FC<PaywallProps> = ({ profile, onRefreshProfile, onSignOut 
     };
 
     const handleWhatsApp = () => {
-        const message = encodeURIComponent(`Olá Arthur! Acabei de realizar o pagamento do Ribeirx Log para o email: ${profile.email}. Segue o comprovante em anexo.`);
+        const email = profile?.email || 'N/A';
+        const message = encodeURIComponent(`Olá Arthur! Acabei de realizar o pagamento do Ribeirx Log para o email: ${email}. Segue o comprovante em anexo.`);
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
@@ -59,7 +116,7 @@ const Paywall: React.FC<PaywallProps> = ({ profile, onRefreshProfile, onSignOut 
                         Acesso Pendente
                     </h1>
                     <p className="text-slate-400 text-sm max-w-sm">
-                        Olá, <span className="text-white font-bold">{profile.name || profile.email}</span>!
+                        Olá, <span className="text-white font-bold">{profile?.name || profile?.email}</span>!
                         Sua conta está aguardando a compensação do pagamento para liberar o painel.
                     </p>
                 </div>
