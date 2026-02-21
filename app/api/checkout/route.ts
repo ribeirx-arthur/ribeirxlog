@@ -93,7 +93,7 @@ export async function POST(req: Request) {
                 customer: customerId,
                 billingType: 'UNDEFINED',
                 value: amount,
-                dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString().split('T')[0], // 3 dias de prazo
+                dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0], // 1 dia de prazo
                 description: `Plano RibeirxLog: ${planName}`,
                 externalReference: planId,
             })

@@ -66,7 +66,7 @@ export const asaasService = {
                     customer: customerId,
                     billingType: 'UNDEFINED', // Permite que o cliente escolha entre Cartão, Boleto ou Pix
                     value: amount,
-                    dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString().split('T')[0], // 3 dias
+                    dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0], // 1 dia
                     description: `Plano RibeirxLog: ${planType}`,
                     externalReference: planType, // Usamos isso no webhook para saber qual plano dar upgrade
                 })

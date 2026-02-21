@@ -145,6 +145,7 @@ export default function Home() {
                             companyName: profileData.company_name,
                             logoUrl: profileData.logo_url,
                             signatureUrl: profileData.signature_url,
+                            cpfCnpj: profileData.cpf_cnpj,
                             config: mergedConfig
                         } as any);
 
@@ -929,6 +930,7 @@ export default function Home() {
                 logo_url: newProfile.logoUrl,
                 signature_url: newProfile.signatureUrl,
                 phone: newProfile.phone,
+                cpf_cnpj: newProfile.cpfCnpj,
                 config: newProfile.config,
                 payment_status: newProfile.payment_status,
                 plan_type: newProfile.plan_type,
