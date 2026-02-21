@@ -18,10 +18,10 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { event, payment } = body;
+        const { event, payment, subscription } = body;
 
         if (event === 'PAYMENT_RECEIVED' || event === 'PAYMENT_CONFIRMED') {
-            const planType = payment.externalReference;
+            const planType = payment.externalReference || subscription?.externalReference;
 
             // 1. BUSCA E-MAIL DO CLIENTE NO ASAAS USANDO FETCH NATIVO
             const customerRes = await fetch(`${asaasUrl}/customers/${payment.customer}`, {

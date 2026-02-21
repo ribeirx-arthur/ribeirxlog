@@ -85,31 +85,45 @@ export async function POST(req: Request) {
             customerId = newCustomer.id;
         }
 
-        // 2. Cria a cobrança
-        const paymentRes = await fetch(`${asaasUrl}/payments`, {
+        // 2. Cria a Assinatura (Recorrente Mensal)
+        const subscriptionRes = await fetch(`${asaasUrl}/subscriptions`, {
             method: 'POST',
             headers: { 'access_token': asaasKey, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 customer: customerId,
-                billingType: 'UNDEFINED',
+                billingType: 'UNDEFINED', // Permite Cartão, Boleto ou Pix
                 value: amount,
-                dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0], // 1 dia de prazo
-                description: `Plano RibeirxLog: ${planName}`,
+                nextDueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0], // 1 dia para o primeiro pagamento
+                cycle: 'MONTHLY',
+                description: `Assinatura RibeirxLog: ${planName}`,
                 externalReference: planId,
             })
         });
-        const payment = await paymentRes.json();
+        const subscription = await subscriptionRes.json();
 
-        if (!payment.invoiceUrl) {
-            console.error('Asaas payment error - Full response:', JSON.stringify(payment));
-            console.error('Asaas payment error - Status:', paymentRes.status);
+        // Se der erro na assinatura (ex: falta de dados), tenta pegar o invoice do link de pagamento
+        // No Asaas, ao criar uma assinatura, ele gera uma cobrança (payment) inicial
+        if (!subscription.id) {
+            console.error('Asaas subscription error:', JSON.stringify(subscription));
             return NextResponse.json({
-                error: 'Falha ao gerar cobrança',
-                details: payment
+                error: 'Falha ao gerar assinatura',
+                details: subscription
             }, { status: 500 });
         }
 
-        return NextResponse.json({ checkoutUrl: payment.invoiceUrl });
+        // Busca o link da FATURA dessa assinatura
+        // No Asaas, para pegar o link de pagamento da primeira parcela da assinatura:
+        const paymentsRes = await fetch(`${asaasUrl}/payments?subscription=${subscription.id}`, {
+            headers: { 'access_token': asaasKey }
+        });
+        const paymentsData = await paymentsRes.json();
+        const firstPayment = paymentsData.data?.[0];
+
+        if (!firstPayment?.invoiceUrl) {
+            return NextResponse.json({ checkoutUrl: `https://www.asaas.com/customer/subscription/view/${subscription.id}` });
+        }
+
+        return NextResponse.json({ checkoutUrl: firstPayment.invoiceUrl });
     } catch (error) {
         console.error('Checkout API error:', error);
         return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
