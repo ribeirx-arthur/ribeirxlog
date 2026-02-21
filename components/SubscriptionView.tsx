@@ -76,7 +76,8 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
         } catch (error: any) {
             console.error('Erro detalhado ao iniciar checkout:', error);
             // Fallback: Se o automático falhar, abre o WhatsApp para não perder a venda
-            const message = encodeURIComponent(`Olá Arthur! Tentei assinar o plano ${plan.name} mas o link automático falhou. Pode me ajudar? Meu e-mail é: ${profile.email}`);
+            const planToReport = plan?.name || 'Assinatura';
+            const message = encodeURIComponent(`Olá Arthur! Tentei assinar o plano ${planToReport} mas o link automático falhou (Asaas não configurado). Pode me ajudar? Meu e-mail é: ${profile.email}`);
             window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
         } finally {
             setIsLoading(null);
@@ -84,7 +85,7 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
     };
 
     const handleWhatsApp = (planName: string) => {
-        const message = encodeURIComponent(`Olá Arthur! Tenho interesse no plano ${planName}. Como faço para assinar?`);
+        const message = encodeURIComponent(`Olá Arthur! Tenho interesse no plano ${planName}. Como faço para assinar? (E-mail: ${profile.email})`);
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
