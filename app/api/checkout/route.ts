@@ -5,18 +5,25 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     const asaasUrl = process.env.ASAAS_API_URL || 'https://www.asaas.com/api/v3';
-    // Tenta pegar a chave de servidor ou a pública como fallback
-    const asaasKey = process.env.ASAAS_API_KEY || process.env.NEXT_PUBLIC_ASAAS_API_KEY;
 
-    // Log para depuração na Vercel (Veja os Logs de Runtime no painel da Vercel)
-    const envKeys = Object.keys(process.env).filter(k => k.includes('ASAAS'));
-    console.log('[DEBUG-SERVER] Chaves de Ambiente encontradas:', envKeys);
+    // Procura por qualquer variação comum do nome da chave
+    const allKeys = Object.keys(process.env);
+    const possibleNames = ['ASAAS_API_KEY', 'NEXT_PUBLIC_ASAAS_API_KEY', 'ASAS_API_KEY', 'ASAAS_KEY', 'ASAAS_TOKEN'];
+    const foundName = possibleNames.find(name => allKeys.includes(name));
+    const asaasKey = foundName ? process.env[foundName] : null;
+
+    // Log para depuração na Vercel
+    console.log('[DEBUG-SERVER] Nomes de chaves encontrados que podem ser Asaas:', allKeys.filter(k => k.includes('ASA') || k.includes('ASAS')));
+    console.log('[DEBUG-SERVER] Chave selecionada do campo:', foundName);
 
     if (!asaasKey) {
-        console.error('[ERROR-SERVER] ASAAS_API_KEY não encontrada em process.env');
+        console.error('[ERROR-SERVER] Nenhuma chave Asaas encontrada nas variáveis de ambiente.');
         return NextResponse.json({
             error: 'Asaas not configured',
-            debug_info: { keys_found: envKeys }
+            debug_info: {
+                keys_found: allKeys.filter(k => k.includes('ASA') || k.includes('ASAS')),
+                status: 'Missing environment variable in Project Settings'
+            }
         }, { status: 500 });
     }
 
