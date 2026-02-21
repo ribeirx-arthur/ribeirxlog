@@ -68,6 +68,7 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
             const data = await res.json();
 
             if (!res.ok || !data.checkoutUrl) {
+                console.error('Resposta de erro do servidor:', data);
                 throw new Error(data.error || 'Falha ao gerar link');
             }
 
