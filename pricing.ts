@@ -2,28 +2,29 @@ export const PIX_KEY = "13988205888";
 export const WHATSAPP_NUMBER = "5513988205888";
 
 export const PLANS = {
-    MENSAL: {
-        name: "Mensal",
-        price: "R$ 59,90",
+    PILOTO: {
+        id: 'piloto',
+        name: "Piloto",
+        price: "R$ 34,90",
+        amount: 34.90,
         period: "/mês",
-        vehicles: "1 Veículo",
-        ia: "Básica",
-        reports: "PDF Padrão"
+        desc: "Essencial para o motorista autônomo."
     },
-    ANUAL: {
-        name: "Anual Profissional",
-        price: "R$ 497,00",
+    GESTOR_PRO: {
+        id: 'gestor_pro',
+        name: "Gestor Pro",
+        price: "R$ 89,90",
+        amount: 89.90,
+        period: "/mês",
+        desc: "A escolha nº 1 para transportadoras."
+    },
+    FROTA_ELITE: {
+        id: 'frota_elite',
+        name: "Frota Elite",
+        price: "R$ 797,00",
+        amount: 797.00,
         period: "/ano",
-        vehicles: "Frota Ilimitada",
-        ia: "Avançada (Golden Tips)",
-        reports: "BI Analytics + PDF"
-    },
-    VITALICIO: {
-        name: "Placa Única",
-        price: "R$ 297,00",
-        period: " único",
-        vehicles: "Vitalício p/ 1 Veículo",
-        ia: "Básica",
-        reports: "PDF Padrão"
+        desc: "Máxima economia e controle total."
     }
 };
+

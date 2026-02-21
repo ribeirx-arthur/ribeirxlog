@@ -16,7 +16,8 @@ import {
     Star
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { PIX_KEY, WHATSAPP_NUMBER } from '../pricing';
+import { PIX_KEY, WHATSAPP_NUMBER, PLANS } from '../pricing';
+import { asaasService } from '../services/asaas';
 
 interface SubscriptionViewProps {
     profile: UserProfile;
@@ -26,6 +27,7 @@ interface SubscriptionViewProps {
 
 const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPlanIntent, onClearIntent }) => {
     const [copied, setCopied] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState<string | null>(null);
 
     useEffect(() => {
         if (initialPlanIntent) {
@@ -38,6 +40,23 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
         navigator.clipboard.writeText(PIX_KEY);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleCheckout = async (plan: any) => {
+        setIsLoading(plan.id);
+        try {
+            const customerId = await asaasService.getOrCreateCustomer(profile.email, profile.name);
+            const checkoutUrl = await asaasService.createSubscriptionLink(customerId, plan.id, plan.amount);
+
+            // Redireciona para o checkout do Asaas
+            window.open(checkoutUrl, '_blank');
+        } catch (error) {
+            console.error('Erro ao iniciar checkout:', error);
+            alert('Erro ao gerar link de pagamento. Tente novamente ou fale conosco no WhatsApp.');
+            handleWhatsApp(plan.name);
+        } finally {
+            setIsLoading(null);
+        }
     };
 
     const handleWhatsApp = (plan: string) => {
@@ -60,29 +79,32 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <PlanCard
-                    title="Piloto"
-                    price="R$ 34,90"
-                    period="/mês"
-                    desc="Essencial para o motorista autônomo."
+                    title={PLANS.PILOTO.name}
+                    price={PLANS.PILOTO.price}
+                    period={PLANS.PILOTO.period}
+                    desc={PLANS.PILOTO.desc}
                     features={["Controle de 1 Veículo", "Alertas CNH & Manutenção", "Cálculo de Lucro Real", "Sem Rastreamento GPS"]}
-                    onSelect={() => handleWhatsApp('Piloto')}
+                    onSelect={() => handleCheckout(PLANS.PILOTO)}
+                    loading={isLoading === PLANS.PILOTO.id}
                 />
                 <PlanCard
-                    title="Gestor Pro"
-                    price="R$ 89,90"
-                    period="/mês"
+                    title={PLANS.GESTOR_PRO.name}
+                    price={PLANS.GESTOR_PRO.price}
+                    period={PLANS.GESTOR_PRO.period}
                     isPopular
-                    desc="A escolha nº 1 para transportadoras."
+                    desc={PLANS.GESTOR_PRO.desc}
                     features={["Frota Ilimitada", "Rastreamento GPS Real-Time", "Gestão Completa de Pneus", "Módulo BI & Performance", "App do Motorista"]}
-                    onSelect={() => handleWhatsApp('Gestor Pro')}
+                    onSelect={() => handleCheckout(PLANS.GESTOR_PRO)}
+                    loading={isLoading === PLANS.GESTOR_PRO.id}
                 />
                 <PlanCard
-                    title="Frota Elite"
-                    price="R$ 797,00"
-                    period="/ano"
-                    desc="Máxima economia e controle total."
+                    title={PLANS.FROTA_ELITE.name}
+                    price={PLANS.FROTA_ELITE.price}
+                    period={PLANS.FROTA_ELITE.period}
+                    desc={PLANS.FROTA_ELITE.desc}
                     features={["Tudo do Gestor Pro", "Consultoria de Implantação", "Suporte Prioritário VIP", "Economia de ~3 Mensalidades"]}
-                    onSelect={() => handleWhatsApp('Frota Elite')}
+                    onSelect={() => handleCheckout(PLANS.FROTA_ELITE)}
+                    loading={isLoading === PLANS.FROTA_ELITE.id}
                 />
             </div>
 
@@ -185,7 +207,7 @@ const TableRow = ({ label, v1, v2, v3 }: any) => (
     </tr>
 );
 
-const PlanCard = ({ title, price, period, desc, features, isPopular, onSelect }: any) => (
+const PlanCard = ({ title, price, period, desc, features, isPopular, onSelect, loading }: any) => (
     <div className={`p-8 rounded-[3rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 scale-105 shadow-2xl' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
         {isPopular && (
             <div className="absolute top-6 right-6 px-3 py-1 bg-emerald-500 text-slate-950 rounded-full text-[8px] font-black uppercase tracking-widest">
@@ -207,9 +229,11 @@ const PlanCard = ({ title, price, period, desc, features, isPopular, onSelect }:
         </div>
         <button
             onClick={onSelect}
-            className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isPopular ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-xl shadow-emerald-500/20' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'}`}
+            disabled={loading}
+            className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${isPopular ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-xl shadow-emerald-500/20' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-            Assinar Agora
+            {loading ? <CheckCircle2 className="w-4 h-4 animate-spin" /> : null}
+            {loading ? 'Processando...' : 'Assinar Agora'}
         </button>
     </div>
 );
