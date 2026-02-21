@@ -31,7 +31,15 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
 
     useEffect(() => {
         if (initialPlanIntent) {
-            handleWhatsApp(initialPlanIntent);
+            // Se houver uma intenção de plano vinda da Landing Page, tenta disparar o checkout automático
+            const planToAutoSelect = Object.values(PLANS).find(
+                p => p.name.toLowerCase() === initialPlanIntent.toLowerCase() ||
+                    p.id.toLowerCase() === initialPlanIntent.toLowerCase()
+            );
+
+            if (planToAutoSelect) {
+                handleCheckout(planToAutoSelect);
+            }
             onClearIntent?.();
         }
     }, [initialPlanIntent]);
