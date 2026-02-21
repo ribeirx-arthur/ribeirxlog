@@ -21,6 +21,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
             error: 'Asaas not configured',
             debug_info: {
+                all_available_keys: allKeys,
                 keys_found: allKeys.filter(k => k.includes('ASA') || k.includes('ASAS')),
                 status: 'Missing environment variable in Project Settings'
             }
