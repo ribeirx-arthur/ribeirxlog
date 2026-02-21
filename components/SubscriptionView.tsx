@@ -62,7 +62,8 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                     name: profile.name,
                     planId: plan.id,
                     planName: plan.name,
-                    amount: plan.amount
+                    amount: plan.amount,
+                    cpfCnpj: profile.cpfCnpj
                 })
             });
             const data = await res.json();

@@ -162,6 +162,7 @@ const Settings: React.FC<SettingsProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                            <Field label="Seu nome / apelido" icon={User} value={tempProfile.name} onChange={v => setTempProfile({ ...tempProfile, name: v })} placeholder="Ex: João Motorista" />
                            <Field label="Nome da empresa" icon={Building2} value={tempProfile.companyName || ''} onChange={v => setTempProfile({ ...tempProfile, companyName: v })} placeholder="Ex: Transportes João LTDA" />
+                           <Field label="CPF ou CNPJ" icon={FileSearch} value={tempProfile.cpfCnpj || ''} onChange={v => setTempProfile({ ...tempProfile, cpfCnpj: v })} placeholder="000.000.000-00" />
                            <Field label="E-mail de contato" icon={Mail} value={tempProfile.email} onChange={v => setTempProfile({ ...tempProfile, email: v })} placeholder="seu@email.com" />
                            <Field label="WhatsApp / Telefone" icon={Phone} value={tempProfile.phone || ''} onChange={v => setTempProfile({ ...tempProfile, phone: v })} placeholder="(11) 99999-9999" />
                         </div>

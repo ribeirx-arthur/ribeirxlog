@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     console.log(`[DEBUG-SERVER] Chave carregada. Tamanho: ${asaasKey.length}. Começa com $: ${asaasKey.startsWith('$')}`);
 
     try {
-        const { email, name, planId, planName, amount } = await req.json();
+        const { email, name, planId, planName, amount, cpfCnpj } = await req.json();
 
         // 1. Busca ou cria cliente no Asaas
         const searchRes = await fetch(`${asaasUrl}/customers?email=${email}`, {
@@ -54,9 +54,23 @@ export async function POST(req: Request) {
             const createRes = await fetch(`${asaasUrl}/customers`, {
                 method: 'POST',
                 headers: { 'access_token': asaasKey, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, notificationDisabled: false })
+                body: JSON.stringify({
+                    name,
+                    email,
+                    cpfCnpj,
+                    notificationDisabled: false
+                })
             });
             const newCustomer = await createRes.json();
+
+            if (!newCustomer.id) {
+                console.error('Erro ao criar cliente Asaas:', newCustomer);
+                return NextResponse.json({
+                    error: 'Falha ao cadastrar cliente para pagamento',
+                    details: newCustomer
+                }, { status: 500 });
+            }
+
             customerId = newCustomer.id;
         }
 

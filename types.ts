@@ -7,6 +7,7 @@ export interface UserProfile {
   logoUrl?: string;
   signatureUrl?: string;
   phone?: string;
+  cpfCnpj?: string;
   config: {
     percMotFrete: number;
     percMotDiaria: number;
