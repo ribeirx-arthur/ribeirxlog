@@ -72,19 +72,18 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
             }
 
             window.open(data.checkoutUrl, '_blank');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro detalhado ao iniciar checkout:', error);
-            alert('Erro ao gerar link de pagamento. Por favor, verifique sua conexão ou tente novamente em instantes.');
+            // Fallback: Se o automático falhar, abre o WhatsApp para não perder a venda
+            const message = encodeURIComponent(`Olá Arthur! Tentei assinar o plano ${plan.name} mas o link automático falhou. Pode me ajudar? Meu e-mail é: ${profile.email}`);
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
         } finally {
             setIsLoading(null);
         }
     };
 
-    const handleWhatsApp = (plan: string) => {
-        const isConfirming = plan === 'de Interesse' || plan === 'Suporte';
-        const message = isConfirming
-            ? encodeURIComponent(`Olá Arthur! Estou no Ribeirx Log e gostaria de tirar uma dúvida ou confirmar meu interesse em assinar um plano.`)
-            : encodeURIComponent(`Olá Arthur! Acabei de me cadastrar no Ribeirx Log e gostaria de confirmar o pagamento do plano ${plan} (Email: ${profile.email}). Segue o comprovante.`);
+    const handleWhatsApp = (planName: string) => {
+        const message = encodeURIComponent(`Olá Arthur! Tenho interesse no plano ${planName}. Como faço para assinar?`);
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
