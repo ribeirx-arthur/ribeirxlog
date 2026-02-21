@@ -50,8 +50,12 @@ export async function POST(req: Request) {
         const payment = await paymentRes.json();
 
         if (!payment.invoiceUrl) {
-            console.error('Asaas error:', payment);
-            return NextResponse.json({ error: 'Falha ao gerar cobrança' }, { status: 500 });
+            console.error('Asaas payment error - Full response:', JSON.stringify(payment));
+            console.error('Asaas payment error - Status:', paymentRes.status);
+            return NextResponse.json({
+                error: 'Falha ao gerar cobrança',
+                details: payment
+            }, { status: 500 });
         }
 
         return NextResponse.json({ checkoutUrl: payment.invoiceUrl });
