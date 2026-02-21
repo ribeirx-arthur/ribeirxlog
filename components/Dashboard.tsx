@@ -7,7 +7,8 @@ import {
   CreditCard,
   Clock,
   Calendar,
-  PieChart as PieIcon
+  PieChart as PieIcon,
+  Users
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, Shipper, UserProfile } from '../types';
 import { calculateTripFinance } from '../services/finance';
@@ -37,11 +38,14 @@ type TimeFilter = 'semanal' | 'mensal' | 'anual' | 'total';
 
 const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shippers, profile, onPopulateDemo }) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('mensal');
+  const [activeView, setActiveView] = useState<'geral' | 'sociedade'>('geral');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const hasSocietyVehicles = useMemo(() => vehicles.some(v => v.type === 'Sociedade'), [vehicles]);
 
   const isAdmin = ['arthur@ribeirxlog.com', 'arthur_ribeiro09@outlook.com'].includes(profile.email?.trim().toLowerCase() || '');
   const isFree = profile.payment_status !== 'paid' && !isAdmin;
@@ -49,6 +53,12 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
   const filteredTrips = useMemo(() => {
     const now = new Date();
     return trips.filter(trip => {
+      // Filtro de Sociedade se ativo
+      if (activeView === 'sociedade') {
+        const v = vehicles.find(veh => veh.id === trip.vehicleId);
+        if (!v || v.type !== 'Sociedade') return false;
+      }
+
       if (timeFilter === 'total') return true;
       const receiptDate = new Date(trip.receiptDate);
       if (timeFilter === 'semanal') {
@@ -64,55 +74,77 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       if (timeFilter === 'anual') return receiptDate.getFullYear() === now.getFullYear();
       return true;
     });
-  }, [trips, timeFilter]);
+  }, [trips, timeFilter, activeView, vehicles]);
 
   const stats = useMemo(() => {
     let totalRevenue = 0;
-    let totalProfit = 0;
+    let totalProfit = 0; // Lucro que fica para o dono (sociedade aplicada)
+    let totalNetProfit = 0; // Lucro líquido real total gerado pelo caminhão
     let pendingReceivables = 0;
     let driverCommissions = 0;
 
     filteredTrips.forEach(trip => {
-      const vehicle = vehicles.find(v => v.id === trip.vehicleId) || { plate: 'GENERIC', type: 'Próprio' } as Vehicle;
+      const vehicle = vehicles.find(v => v.id === trip.vehicleId) || { plate: 'GENERIC', type: 'Próprio', societySplitFactor: 100 } as Vehicle;
       const driver = drivers.find(d => d.id === trip.driverId) || { name: 'Generic' } as Driver;
       const finance = calculateTripFinance(trip, vehicle, driver, profile);
+
       totalRevenue += finance.totalBruto;
       totalProfit += finance.lucroSociety;
+      totalNetProfit += finance.lucroLiquidoReal;
       driverCommissions += finance.comissaoMotorista;
-      if (trip.status === 'Pendente' || trip.status === 'Parcial') pendingReceivables += finance.saldoAReceber;
+
+      if (trip.status === 'Pendente' || trip.status === 'Parcial') {
+        pendingReceivables += finance.saldoAReceber;
+      }
     });
-    return { totalRevenue, totalProfit, pendingReceivables, driverCommissions };
+
+    return {
+      totalRevenue,
+      totalProfit,
+      totalNetProfit,
+      partnerProfit: totalNetProfit - totalProfit,
+      pendingReceivables,
+      driverCommissions
+    };
   }, [filteredTrips, vehicles, drivers, profile]);
 
   const chartData = useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const getYValue = (t: Trip) => {
+      const v = vehicles.find(veh => veh.id === t.vehicleId) || { plate: 'GENERIC' } as Vehicle;
+      const d = drivers.find(drv => drv.id === t.driverId) || { name: 'Generic' } as Driver;
+      const finance = calculateTripFinance(t, v, d, profile);
+      return activeView === 'sociedade' ? finance.lucroLiquidoReal : finance.lucroSociety;
+    };
+
     if (timeFilter === 'anual' || timeFilter === 'total') {
       return months.map((m, i) => ({
         name: m,
         value: filteredTrips
           .filter(t => new Date(t.receiptDate).getMonth() === i)
-          .reduce((acc, t) => {
-            const v = vehicles.find(veh => veh.id === t.vehicleId) || { plate: 'GENERIC' } as Vehicle;
-            const d = drivers.find(drv => drv.id === t.driverId) || { name: 'Generic' } as Driver;
-            return acc + calculateTripFinance(t, v, d, profile).lucroSociety;
-          }, 0)
+          .reduce((acc, t) => acc + getYValue(t), 0)
       }));
     }
     return filteredTrips.slice(-8).map(t => ({
       name: (t.receiptDate || '').split('-').reverse().slice(0, 2).join('/'),
-      value: calculateTripFinance(t, vehicles.find(v => v.id === t.vehicleId) || { plate: 'GENERIC' } as Vehicle, drivers.find(d => d.id === t.driverId) || { name: 'Generic' } as Driver, profile).lucroSociety
+      value: getYValue(t)
     }));
-  }, [filteredTrips, timeFilter, vehicles, drivers, profile]);
+  }, [filteredTrips, timeFilter, vehicles, drivers, profile, activeView]);
 
   const pieData = useMemo(() => {
+    if (activeView === 'sociedade') {
+      return [
+        { name: 'Sua Parte', value: stats.totalProfit, color: '#10b981' },
+        { name: 'Parte Sócio', value: stats.partnerProfit, color: '#3b82f6' },
+      ];
+    }
     const propio = filteredTrips.filter(t => vehicles.find(v => v.id === t.vehicleId)?.type === 'Próprio').length;
     const sociedade = filteredTrips.filter(t => vehicles.find(v => v.id === t.vehicleId)?.type === 'Sociedade').length;
-    const total = propio + sociedade || 1;
     return [
       { name: 'Próprio', value: propio, color: '#10b981' },
       { name: 'Sociedade', value: sociedade, color: '#f43f5e' },
     ];
-  }, [filteredTrips, vehicles]);
+  }, [filteredTrips, vehicles, activeView, stats]);
 
   const { uiStyle, features } = useAppMode();
   const aiInsights = useMemo(() => generateAIInsights(trips, vehicles, drivers, shippers, profile), [trips, vehicles, drivers, shippers, profile]);
@@ -196,14 +228,30 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <h1 className={`text-2xl font-black text-white tracking-tighter ${uiStyle === 'deep' ? 'animate-pulse text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400' : ''}`}>
-              {uiStyle === 'deep' ? 'System Intel OS' : 'Painel de Inteligência'}
+              {uiStyle === 'deep' ? 'System Intel OS' : activeView === 'sociedade' ? 'Sociedade & Gestão' : 'Painel de Inteligência'}
             </h1>
             {isFree && <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[10px] font-black text-amber-500 uppercase tracking-widest uppercase">Grátis</span>}
             {uiStyle === 'deep' && <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />}
           </div>
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{uiStyle === 'deep' ? 'Acesso Prioritário RBS Engine' : 'Visão Estratégica da Frota'}</p>
+          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{uiStyle === 'deep' ? 'Acesso Prioritário RBS Engine' : activeView === 'sociedade' ? 'Visão de Divisão de Lucros' : 'Visão Estratégica da Frota'}</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          {hasSocietyVehicles && (
+            <div className="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-2xl shadow-inner">
+              <button
+                onClick={() => setActiveView('geral')}
+                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'geral' ? 'bg-white text-slate-950 shadow-lg' : 'text-slate-500 hover:text-slate-200'}`}
+              >
+                Geral
+              </button>
+              <button
+                onClick={() => setActiveView('sociedade')}
+                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'sociedade' ? 'bg-sky-500 text-white shadow-lg' : 'text-slate-500 hover:text-slate-200'}`}
+              >
+                Sociedade
+              </button>
+            </div>
+          )}
           <div className="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-2xl shadow-inner">
             {(['semanal', 'mensal', 'anual', 'total'] as TimeFilter[]).map((f) => (
               <button key={f} onClick={() => setTimeFilter(f)} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeFilter === f ? 'bg-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-slate-200'}`}>{f}</button>
@@ -212,14 +260,38 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         </div>
       </header>
 
-      {profile.config.enableBI !== false && (
+      {/* Info Alert about Receivables Impact */}
+      {stats.pendingReceivables > 0 && (
+        <div className="bg-slate-900/40 border border-indigo-500/20 p-4 rounded-2xl flex items-center gap-4 animate-in slide-in-from-top-2">
+          <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 shrink-0">
+            <Zap className="w-5 h-5" />
+          </div>
+          <div className="text-xs">
+            <p className="text-white font-bold">O Saldo a Receber impacta o lucro?</p>
+            <p className="text-slate-400">Sim! O lucro mostrado abaixo é **Potencial** (inclui o que você já ganhou mas ainda não recebeu o saldo). Monitore o saldo para garantir seu fluxo de caixa real.</p>
+          </div>
+        </div>
+      )}
+
+      {profile.config.enableBI !== false && activeView === 'geral' && (
         <AIInsights insights={aiInsights} trips={trips} vehicles={vehicles} shippers={shippers} />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Faturamento Bruto" value={`R$ ${stats.totalRevenue.toLocaleString()}`} trend={timeFilter} isPositive={true} icon={DollarSign} uiStyle={uiStyle} />
-        <StatCard title="Lucro Líquido Real" value={`R$ ${stats.totalProfit.toLocaleString()}`} trend={timeFilter} isPositive={true} icon={TrendingUp} uiStyle={uiStyle} />
-        <StatCard title="Saldo a Receber" value={`R$ ${stats.pendingReceivables.toLocaleString()}`} trend="Pendente" isPositive={false} icon={Clock} uiStyle={uiStyle} />
+        <StatCard
+          title={activeView === 'sociedade' ? "Lucro Gestor (Sua Parte)" : "Lucro Líquido Real"}
+          value={`R$ ${stats.totalProfit.toLocaleString()}`}
+          trend={activeView === 'sociedade' ? "Líquido" : timeFilter}
+          isPositive={true}
+          icon={TrendingUp}
+          uiStyle={uiStyle}
+        />
+        {activeView === 'sociedade' ? (
+          <StatCard title="Lucro Sócio" value={`R$ ${stats.partnerProfit.toLocaleString()}`} trend="Divisão" isPositive={true} icon={Users} uiStyle={uiStyle} />
+        ) : (
+          <StatCard title="Saldo a Receber" value={`R$ ${stats.pendingReceivables.toLocaleString()}`} trend="Pendente" isPositive={false} icon={Clock} uiStyle={uiStyle} />
+        )}
         <StatCard title="Custos Motoristas" value={`R$ ${stats.driverCommissions.toLocaleString()}`} trend="Comissões" isPositive={true} icon={CreditCard} uiStyle={uiStyle} />
       </div>
 
