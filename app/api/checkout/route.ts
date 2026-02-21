@@ -8,7 +8,14 @@ export async function POST(req: Request) {
 
     // Procura por qualquer variação comum do nome da chave
     const allKeys = Object.keys(process.env);
-    const possibleNames = ['ASAAS_API_KEY', 'NEXT_PUBLIC_ASAAS_API_KEY', 'ASAS_API_KEY', 'ASAAS_KEY', 'ASAAS_TOKEN'];
+    const possibleNames = [
+        'ASAAS_API_KEY',
+        'VITE_ASAAS_API_KEY',
+        'NEXT_PUBLIC_ASAAS_API_KEY',
+        'ASAS_API_KEY',
+        'ASAAS_KEY',
+        'ASAAS_TOKEN'
+    ];
     const foundName = possibleNames.find(name => allKeys.includes(name));
     const asaasKey = foundName ? process.env[foundName] : null;
 
