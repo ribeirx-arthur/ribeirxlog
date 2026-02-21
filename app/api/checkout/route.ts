@@ -8,8 +8,12 @@ export async function POST(req: Request) {
     const asaasKey = process.env.ASAAS_API_KEY;
 
     if (!asaasKey) {
+        console.error('ASAAS_API_KEY is missing in environment variables');
         return NextResponse.json({ error: 'Asaas not configured' }, { status: 500 });
     }
+
+    // Log para depuração (sem expor a chave inteira)
+    console.log(`ASAAS_API_KEY loaded. Length: ${asaasKey.length}. Starts with $: ${asaasKey.startsWith('$')}`);
 
     try {
         const { email, name, planId, planName, amount } = await req.json();

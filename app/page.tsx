@@ -304,8 +304,6 @@ export default function Home() {
     }, [user, isSignedIn, trips]);
 
     const handleLandingPurchase = (plan: string) => {
-        const message = encodeURIComponent(`Olá Arthur! Estou na Landing Page e tenho interesse no plano ${plan}. Como faço para prosseguir com o pagamento?`);
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
         setPendingPlanIntent(plan);
         setShowAuth(true);
     };

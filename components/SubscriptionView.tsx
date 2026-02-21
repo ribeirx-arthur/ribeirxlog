@@ -65,9 +65,8 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
 
             window.open(data.checkoutUrl, '_blank');
         } catch (error) {
-            console.error('Erro ao iniciar checkout:', error);
-            alert('Erro ao gerar link de pagamento. Tente novamente ou fale conosco no WhatsApp.');
-            handleWhatsApp(plan.name);
+            console.error('Erro detalhado ao iniciar checkout:', error);
+            alert('Erro ao gerar link de pagamento. Por favor, verifique sua conexão ou tente novamente em instantes.');
         } finally {
             setIsLoading(null);
         }
