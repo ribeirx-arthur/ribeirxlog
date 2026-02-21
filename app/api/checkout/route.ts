@@ -5,15 +5,23 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     const asaasUrl = process.env.ASAAS_API_URL || 'https://www.asaas.com/api/v3';
-    const asaasKey = process.env.ASAAS_API_KEY;
+    // Tenta pegar a chave de servidor ou a pública como fallback
+    const asaasKey = process.env.ASAAS_API_KEY || process.env.NEXT_PUBLIC_ASAAS_API_KEY;
+
+    // Log para depuração na Vercel (Veja os Logs de Runtime no painel da Vercel)
+    const envKeys = Object.keys(process.env).filter(k => k.includes('ASAAS'));
+    console.log('[DEBUG-SERVER] Chaves de Ambiente encontradas:', envKeys);
 
     if (!asaasKey) {
-        console.error('ASAAS_API_KEY is missing in environment variables');
-        return NextResponse.json({ error: 'Asaas not configured' }, { status: 500 });
+        console.error('[ERROR-SERVER] ASAAS_API_KEY não encontrada em process.env');
+        return NextResponse.json({
+            error: 'Asaas not configured',
+            debug_info: { keys_found: envKeys }
+        }, { status: 500 });
     }
 
     // Log para depuração (sem expor a chave inteira)
-    console.log(`ASAAS_API_KEY loaded. Length: ${asaasKey.length}. Starts with $: ${asaasKey.startsWith('$')}`);
+    console.log(`[DEBUG-SERVER] Chave carregada. Tamanho: ${asaasKey.length}. Começa com $: ${asaasKey.startsWith('$')}`);
 
     try {
         const { email, name, planId, planName, amount } = await req.json();
