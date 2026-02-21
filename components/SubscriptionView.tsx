@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { PIX_KEY, WHATSAPP_NUMBER, PLANS } from '../pricing';
-import { asaasService } from '../services/asaas';
+
 
 interface SubscriptionViewProps {
     profile: UserProfile;
@@ -45,11 +45,25 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
     const handleCheckout = async (plan: any) => {
         setIsLoading(plan.id);
         try {
-            const customerId = await asaasService.getOrCreateCustomer(profile.email, profile.name);
-            const checkoutUrl = await asaasService.createSubscriptionLink(customerId, plan.id, plan.amount);
+            // Chama a API Route segura no servidor (a chave do Asaas fica protegida)
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: profile.email,
+                    name: profile.name,
+                    planId: plan.id,
+                    planName: plan.name,
+                    amount: plan.amount
+                })
+            });
+            const data = await res.json();
 
-            // Redireciona para o checkout do Asaas
-            window.open(checkoutUrl, '_blank');
+            if (!res.ok || !data.checkoutUrl) {
+                throw new Error(data.error || 'Falha ao gerar link');
+            }
+
+            window.open(data.checkoutUrl, '_blank');
         } catch (error) {
             console.error('Erro ao iniciar checkout:', error);
             alert('Erro ao gerar link de pagamento. Tente novamente ou fale conosco no WhatsApp.');
