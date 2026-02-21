@@ -51,6 +51,11 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
     };
 
     const handleCheckout = async (plan: any) => {
+        if (!profile.cpfCnpj) {
+            alert('Por favor, preencha seu CPF ou CNPJ nas Configurações -> Minha Empresa para prosseguir com a assinatura.');
+            return;
+        }
+
         setIsLoading(plan.id);
         try {
             // Chama a API Route segura no servidor (a chave do Asaas fica protegida)

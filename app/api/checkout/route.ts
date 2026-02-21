@@ -50,6 +50,15 @@ export async function POST(req: Request) {
         let customerId: string;
         if (searchData.data && searchData.data.length > 0) {
             customerId = searchData.data[0].id;
+
+            // 1.1 Atualiza o CPF se ele existir (para garantir que cadastros antigos incompletos funcionem)
+            if (cpfCnpj) {
+                await fetch(`${asaasUrl}/customers/${customerId}`, {
+                    method: 'POST',
+                    headers: { 'access_token': asaasKey, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cpfCnpj })
+                });
+            }
         } else {
             const createRes = await fetch(`${asaasUrl}/customers`, {
                 method: 'POST',
@@ -65,8 +74,10 @@ export async function POST(req: Request) {
 
             if (!newCustomer.id) {
                 console.error('Erro ao criar cliente Asaas:', newCustomer);
+                // Se o erro for CPF/CNPJ inválido, avisar o usuário
+                const errorDesc = newCustomer.errors?.[0]?.description || 'Dados inválidos';
                 return NextResponse.json({
-                    error: 'Falha ao cadastrar cliente para pagamento',
+                    error: `Falha ao cadastrar cliente: ${errorDesc}`,
                     details: newCustomer
                 }, { status: 500 });
             }
