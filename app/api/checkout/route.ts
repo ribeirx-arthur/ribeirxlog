@@ -86,7 +86,6 @@ export async function POST(req: Request) {
         }
 
         // 2. Cria a cobrança
-        const dueDate = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0];
         const paymentRes = await fetch(`${asaasUrl}/payments`, {
             method: 'POST',
             headers: { 'access_token': asaasKey, 'Content-Type': 'application/json' },
@@ -94,7 +93,7 @@ export async function POST(req: Request) {
                 customer: customerId,
                 billingType: 'UNDEFINED',
                 value: amount,
-                dueDate,
+                dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString().split('T')[0], // 3 dias de prazo
                 description: `Plano RibeirxLog: ${planName}`,
                 externalReference: planId,
             })
