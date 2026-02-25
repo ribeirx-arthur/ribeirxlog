@@ -80,6 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
     let totalRevenue = 0;
     let totalProfit = 0; // Lucro que fica para o dono (sociedade aplicada)
     let totalNetProfit = 0; // Lucro líquido real total gerado pelo caminhão
+    let driverCommissions = 0;
     let pendingReceivables = 0;
     let totalAdvanceBalance = 0;
 

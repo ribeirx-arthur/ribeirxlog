@@ -9,7 +9,7 @@ import {
     ArrowRight,
     Play
 } from 'lucide-react';
-import { UserProfile, Vehicle, Driver } from '../types';
+import { UserProfile, Vehicle, Driver, VehiclePropertyType } from '../types';
 
 interface OnboardingProps {
     onComplete: (data: {

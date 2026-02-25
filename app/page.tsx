@@ -1131,7 +1131,8 @@ export default function Home() {
                     companyName: profile.companyName || 'Minha Transportadora',
                     city: 'Não informado',
                     vehicle: {},
-                    driver: {}
+                    driver: {},
+                    appMode: 'simple'
                 })}
             />
         );
@@ -1142,7 +1143,7 @@ export default function Home() {
         return (
             <Onboarding
                 onComplete={handleOnboardingComplete}
-                onSkip={() => handleOnboardingComplete({ companyName: profile.companyName || 'Minha Transportadora', city: '', vehicle: {}, driver: {} })}
+                onSkip={() => handleOnboardingComplete({ companyName: profile.companyName || 'Minha Transportadora', city: '', vehicle: {}, driver: {}, appMode: 'simple' })}
             />
         );
     }
