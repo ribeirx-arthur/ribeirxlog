@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="120" fill="#0f172a" />
+  <!-- A subtle background grid -->
+  <path d="M 0 128 L 512 128 M 0 256 L 512 256 M 0 384 L 512 384 M 128 0 L 128 512 M 256 0 L 256 512 M 384 0 L 384 512" stroke="#10b981" stroke-width="2" stroke-opacity="0.1" fill="none" />
+  
+  <!-- Outer glowing hexagon abstract -->
+  <polygon points="256,60 450,150 450,360 256,450 62,360 62,150" fill="none" stroke="#10b981" stroke-width="12" stroke-opacity="0.2" />
+  <polygon points="256,90 410,170 410,340 256,420 102,340 102,170" fill="none" stroke="#10b981" stroke-width="8" stroke-opacity="0.4" />
+
+  <!-- Typography: RBX -->
+  <!-- Text background shadow for depth -->
+  <text x="256" y="320" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="160" font-style="italic" fill="#020617" text-anchor="middle" letter-spacing="-5" transform="translate(6, 6)">RBX</text>
+  <!-- Main bold text -->
+  <text x="256" y="320" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="160" font-style="italic" fill="#10b981" text-anchor="middle" letter-spacing="-5">RBX</text>
+</svg>
