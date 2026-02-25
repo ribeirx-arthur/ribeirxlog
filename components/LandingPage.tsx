@@ -227,9 +227,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-75 opacity-50"></div>
                             <div className="glass-card rounded-[3rem] border-white/10 relative z-10 p-4 hover:rotate-[-1deg] transition-all duration-700 shadow-[0_30px_70px_rgba(0,0,0,0.8)]">
                                 <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative">
-                                    <img src="/mapa-caminhão.png.png" alt="Rastreamento GPS Global RBS" className="w-full h-auto object-cover opacity-90 transition-all duration-1000 group-hover:opacity-100 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60 pointer-events-none"></div>
-                                    <div className="absolute inset-0 bg-emerald-500/5 mix-blend-overlay group-hover:bg-transparent transition-all duration-700"></div>
+                                    <img src="/dashboard-motorista.gif" alt="Visão do Sistema e Motorista na estrada" className="w-full h-auto object-cover opacity-90 transition-opacity group-hover:opacity-100" />
                                 </div>
                             </div>
                         </div>
@@ -277,7 +275,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
                             <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-2 transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
                                 <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 overflow-hidden relative group-hover:shadow-[0_0_50px_rgba(16,185,129,0.15)] transition-all duration-700">
-                                    <img src="/dashboard-no-caminhão.png.png" alt="Auditoria de Margem" className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-1000" />
+                                    <img src="https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=1200&h=800&auto=format&fit=crop" alt="Auditoria de Margem" className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-1000" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <DollarSign className="w-24 h-24 text-emerald-500 opacity-40 animate-float" />
@@ -301,10 +299,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <div className="order-2 lg:order-1 relative group">
                             <div className="absolute inset-0 bg-sky-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
                             <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-[-2deg] transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
-                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 flex items-center justify-center p-12 overflow-hidden relative">
-                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 10px 10px, #0ea5e9 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-                                    <Smartphone className="w-40 h-40 text-sky-500 opacity-20 animate-float" />
-                                    <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent"></div>
+                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 overflow-hidden relative group">
+                                    <img src="/site-rapido.gif" alt="App Instantâneo" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-transparent"></div>
                                 </div>
                             </div>
                         </div>
@@ -372,8 +369,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <div key={i} className="group relative">
                                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10rem] font-black text-white/5 pointer-events-none">{item.step}</div>
                                 <div className="relative glass-card p-12 rounded-[3.5rem] hover:border-emerald-500/30 transition-all duration-500 h-full">
-                                    <div className="w-20 h-20 bg-slate-950 border border-white/5 rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 relative overflow-hidden">
-                                        {i === 1 && <img src="/cerebro.png.png" className="absolute inset-0 w-full h-full object-cover opacity-40" alt="Processamento AI" />}
+                                    <div className="w-20 h-20 bg-slate-950 border border-white/5 rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 relative">
                                         <item.icon className="w-10 h-10 text-emerald-500 relative z-10" />
                                     </div>
                                     <h4 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">{item.title}</h4>
@@ -400,10 +396,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         <div className="lg:col-span-1 hidden lg:block">
                             <div className="h-full rounded-[3rem] overflow-hidden border border-white/5 group relative">
-                                <img src="/empreendedor.png.png" alt="Ribeirx Log Expert" className="w-full h-full object-cover opacity-80 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" />
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1200&h=1600&auto=format&fit=crop" alt="Ribeirx Log User" className="w-full h-full object-cover opacity-80 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
                                 <div className="absolute bottom-8 left-8">
-                                    <p className="text-white font-black text-xs uppercase tracking-widest">Especialista RBS Intel</p>
+                                    <p className="text-white font-black text-xs uppercase tracking-widest">Usuário Verificado RBS</p>
                                 </div>
                             </div>
                         </div>
@@ -561,10 +557,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             <section id="contato" className="py-40 relative">
                 <div className="max-w-5xl mx-auto px-6">
                     <div className="glass-card rounded-[4rem] p-12 md:p-24 text-center space-y-12 border-emerald-500/20 glow-emerald relative overflow-hidden">
-                        <div className="absolute inset-0 p-20 opacity-20 pointer-events-none overflow-hidden">
-                            <img src="/dashboard-caminhão-futurista2.png.png" alt="UI Background" className="w-full h-full object-cover rounded-[4rem] scale-150" />
-                        </div>
-                        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"></div>
+                        <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none"><Truck className="w-64 h-64" /></div>
 
                         <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-tight relative z-10">
                             PRONTO PARA DEIXAR O <br />
