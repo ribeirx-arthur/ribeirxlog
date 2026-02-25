@@ -75,6 +75,8 @@ export const generateTripReceipt = (
             ['Comissão Motorista', `(${finance.comissaoMotorista.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})`],
             ['Outras Despesas', `(${trip.outrasDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})`],
             ['Total Despesas', `(${totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})`],
+            ['', ''],
+            ['SALDO DO ADIANTAMENTO', finance.saldoAdiantamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })],
         ],
         theme: 'striped',
         headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255], fontStyle: 'bold' },

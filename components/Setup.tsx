@@ -1,6 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import {
+  ShieldCheck,
   Truck,
   Users,
   Building2,
@@ -17,7 +18,7 @@ import {
   Camera,
   Upload,
   AlertTriangle,
-  Save
+  Save,
 } from 'lucide-react';
 import { Vehicle, Driver, Shipper, VehiclePropertyType, Buggy } from '../types';
 
@@ -477,6 +478,37 @@ const Setup: React.FC<SetupProps> = ({
                           <input type="number" value={editingItem.societySplitFactor} onChange={e => setEditingItem({ ...editingItem, societySplitFactor: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                         </div>
                       )}
+
+                      <div className="md:col-span-2 pt-4 border-t border-slate-800 mt-4">
+                        <h4 className="text-[11px] font-black text-emerald-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4" /> Documentação & Compliance
+                        </h4>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Nº Registro ANTT</label>
+                        <input type="text" value={editingItem.anttNumber || ''} onChange={e => setEditingItem({ ...editingItem, anttNumber: e.target.value })} placeholder="Ex: 12345678" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade ANTT</label>
+                        <input type="date" value={editingItem.anttValidity || ''} onChange={e => setEditingItem({ ...editingItem, anttValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade Tacógrafo</label>
+                        <input type="date" value={editingItem.tacografoValidity || ''} onChange={e => setEditingItem({ ...editingItem, tacografoValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade Licenciamento</label>
+                        <input type="date" value={editingItem.licensingValidity || ''} onChange={e => setEditingItem({ ...editingItem, licensingValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Apólice de Seguro</label>
+                        <input type="text" value={editingItem.insurancePolicy || ''} onChange={e => setEditingItem({ ...editingItem, insurancePolicy: e.target.value })} placeholder="Nº da Apólice" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade Seguro</label>
+                        <input type="date" value={editingItem.insuranceValidity || ''} onChange={e => setEditingItem({ ...editingItem, insuranceValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
                     </>
                   )}
 
@@ -527,22 +559,20 @@ const Setup: React.FC<SetupProps> = ({
                           ))}
                         </select>
                       </div>
-                      <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">URL da Foto da CNH (Opcional)</label>
-                        <div className="flex gap-4">
-                          <input
-                            type="text"
-                            placeholder="https://exemplo.com/cnh.jpg"
-                            value={editingItem.cnhPhotoUrl || ''}
-                            onChange={e => setEditingItem({ ...editingItem, cnhPhotoUrl: e.target.value })}
-                            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none"
-                          />
-                          {editingItem.cnhPhotoUrl && (
-                            <div className="w-12 h-12 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden flex-shrink-0">
-                              <img src={editingItem.cnhPhotoUrl} alt="CNH" className="w-full h-full object-cover" />
-                            </div>
-                          )}
-                        </div>
+
+                      <div className="md:col-span-2 pt-4 border-t border-slate-800 mt-4">
+                        <h4 className="text-[11px] font-black text-sky-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4" /> Qualificações & Endereço
+                        </h4>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Validade MOPP</label>
+                        <input type="date" value={editingItem.moppValidity || ''} onChange={e => setEditingItem({ ...editingItem, moppValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Exame Toxicológico</label>
+                        <input type="date" value={editingItem.examValidity || ''} onChange={e => setEditingItem({ ...editingItem, examValidity: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white focus:border-emerald-500 outline-none" />
                       </div>
                     </>
                   )}
@@ -613,8 +643,8 @@ const Setup: React.FC<SetupProps> = ({
                   Salvar Registro
                 </button>
               </footer>
-            </div>
-          </div>
+            </div >
+          </div >
         )
       }
 

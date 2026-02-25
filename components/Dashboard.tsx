@@ -81,7 +81,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
     let totalProfit = 0; // Lucro que fica para o dono (sociedade aplicada)
     let totalNetProfit = 0; // Lucro líquido real total gerado pelo caminhão
     let pendingReceivables = 0;
-    let driverCommissions = 0;
+    let totalAdvanceBalance = 0;
 
     filteredTrips.forEach(trip => {
       const vehicle = vehicles.find(v => v.id === trip.vehicleId) || { plate: 'GENERIC', type: 'Próprio', societySplitFactor: 100 } as Vehicle;
@@ -92,6 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       totalProfit += finance.lucroSociety;
       totalNetProfit += finance.lucroLiquidoReal;
       driverCommissions += finance.comissaoMotorista;
+      totalAdvanceBalance += finance.saldoAdiantamento;
 
       if (trip.status === 'Pendente' || trip.status === 'Parcial') {
         pendingReceivables += finance.saldoAReceber;
@@ -168,13 +169,13 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
           <div className="relative z-10 space-y-4">
             <p className="text-emerald-950/60 font-black uppercase text-[10px] tracking-widest">Saldo de Lucro Líquido</p>
             <h2 className="text-6xl font-black text-emerald-950 tracking-tighter">R$ {stats.totalProfit.toLocaleString()}</h2>
-            <div className="flex gap-4 pt-4">
+            <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="bg-emerald-600/20 px-6 py-3 rounded-2xl border border-emerald-400/20 backdrop-blur-sm">
                 <p className="text-emerald-950/60 text-[9px] font-black uppercase mb-1">Total Receita</p>
                 <p className="text-emerald-950 font-black">R$ {stats.totalRevenue.toLocaleString()}</p>
               </div>
               <div className="bg-emerald-600/20 px-6 py-3 rounded-2xl border border-emerald-400/20 backdrop-blur-sm">
-                <p className="text-emerald-950/60 text-[9px] font-black uppercase mb-1">A Receber</p>
+                <p className="text-emerald-950/60 text-[9px] font-black uppercase mb-1">Saldo a Receber</p>
                 <p className="text-emerald-950 font-black">R$ {stats.pendingReceivables.toLocaleString()}</p>
               </div>
             </div>

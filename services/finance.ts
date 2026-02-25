@@ -17,8 +17,8 @@ export const calculateTripFinance = (
   const comissaoMotorista = (freteSeco * (percFrete / 100)) + (diarias * (percDiaria / 100));
 
   // Saldo a Receber da Transportadora: valor bruto menos o que já foi adiantado.
-  // A comissão do motorista é um custo administrativo pago pelo gestor, não descontado no saldo da transportadora.
-  const saldoAReceber = totalBruto - adiantamento;
+  // Se a viagem estiver marcada como Paga, o saldo é zerado.
+  const saldoAReceber = trip.status === 'Pago' ? 0 : totalBruto - adiantamento;
 
   // Depreciation logic (Pneu e Manutenção)
   let depreciationCost = 0;
@@ -47,12 +47,16 @@ export const calculateTripFinance = (
     lucroSociety = lucroLiquidoReal * (vehicle.societySplitFactor / 100);
   }
 
+  // Saldo do Adiantamento (Controla se o adiantamento cobriu as despesas da viagem)
+  const saldoAdiantamento = adiantamento - (combustivel + outrasDespesas);
+
   return {
     totalBruto,
     comissaoMotorista,
     saldoAReceber,
     lucroLiquidoReal,
-    lucroSociety
+    lucroSociety,
+    saldoAdiantamento
   };
 };
 

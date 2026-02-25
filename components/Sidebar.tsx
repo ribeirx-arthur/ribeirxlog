@@ -59,16 +59,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Visão financeira' },
     { id: 'trips', label: 'Viagens', icon: Truck, desc: 'Histórico de fretes' },
     { id: 'drivers', label: 'Motoristas', icon: Users, desc: 'Sua equipe' },
+    { id: 'compliance', label: 'Compliance Hub', icon: ShieldCheck, desc: 'Documentos do ativo' },
     { id: 'freight-calculator', label: 'Calcular Frete', icon: Calculator, desc: 'Simular viagem' },
     { id: 'gps-tracking', label: 'Mapa', icon: MapPin, desc: 'Rastear rotas' },
   ] as const;
 
   // ─── TOOLS — hidden in expandable group ───
+  const activeAppMode = profile.config.appMode || 'advanced';
+
   const toolItems = [
-    { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI },
-    { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !features.canAccessFullMaintenance },
-    { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: !features.canAccessTires },
-    { id: 'intelligence', label: 'Inteligência IA', icon: Brain, hidden: profile.config.showTips === false },
+    { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI || activeAppMode === 'simple' },
+    { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !features.canAccessFullMaintenance || activeAppMode === 'simple' },
+    { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: !features.canAccessTires || activeAppMode === 'simple' },
+    { id: 'intelligence', label: 'Inteligência IA', icon: Brain, hidden: profile.config.showTips === false || activeAppMode === 'simple' },
     { id: 'proof-gallery', label: 'Documentos', icon: FolderOpen, hidden: false },
     { id: 'setup', label: 'Cadastros', icon: Database, hidden: false },
     { id: 'admin', label: 'Admin', icon: ShieldCheck, hidden: !isAdmin },

@@ -66,6 +66,14 @@ export interface Vehicle {
   lastEngineRevKm?: number;
   photoUrl?: string;
   thresholds?: MaintenanceThresholds;
+  // Compliance Fields
+  anttNumber?: string;
+  anttValidity?: string;
+  tacografoValidity?: string;
+  licensingValidity?: string;
+  insuranceValidity?: string;
+  insurancePolicy?: string;
+  crlvPhotoUrl?: string;
 }
 
 export type MaintenanceType = 'Preventiva' | 'Corretiva' | 'Preditiva';
@@ -107,6 +115,10 @@ export interface Driver {
   vehicleId?: string;
   vehicleName?: string;
   vehiclePlate?: string;
+  // Compliance Fields
+  moppValidity?: string;
+  examValidity?: string;
+  addressProofUrl?: string;
 }
 
 export interface TripProof {
@@ -177,6 +189,7 @@ export interface FinancialResults {
   saldoAReceber: number;
   lucroLiquidoReal: number;
   lucroSociety: number;
+  saldoAdiantamento: number;
 }
 
 
@@ -256,4 +269,4 @@ export interface Geofence {
   active: boolean;
 }
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help' | 'compliance';

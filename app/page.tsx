@@ -23,6 +23,7 @@ const HelpCenter = React.lazy(() => import('../components/HelpCenter'));
 import Onboarding from '../components/Onboarding';
 
 import LandingPage from '../components/LandingPage';
+import AssetCompliance from '../components/AssetCompliance';
 import Paywall from '../components/Paywall';
 import { supabase, createClerkSupabaseClient } from '../services/supabase';
 import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain, ShieldCheck, Lock, Gauge, ArrowRightLeft } from 'lucide-react';
@@ -215,7 +216,13 @@ export default function Home() {
                             lastEngineRevKm: Number(v.last_engine_rev_km || 0),
                             thresholds: v.thresholds || INITIAL_THRESHOLDS,
                             societySplitFactor: Number(v.society_split_factor),
-                            photoUrl: v.photo_url
+                            photoUrl: v.photo_url,
+                            anttNumber: v.antt_number,
+                            anttValidity: v.antt_validity,
+                            tacografoValidity: v.tacografo_validity,
+                            licensingValidity: v.licensing_validity,
+                            insuranceValidity: v.insurance_validity,
+                            insurancePolicy: v.insurance_policy
                         })),
                         loadTable('drivers', setDrivers, (d: any) => ({
                             ...d,
@@ -224,7 +231,9 @@ export default function Home() {
                             pixKey: d.pix_key,
                             photoUrl: d.photo_url,
                             customCommission: d.custom_commission,
-                            vehicleId: d.vehicle_id
+                            vehicleId: d.vehicle_id,
+                            moppValidity: d.mopp_validity,
+                            examValidity: d.exam_validity
                         })),
                         loadTable('shippers', setShippers, (s: any) => ({
                             ...s,
@@ -491,9 +500,12 @@ export default function Home() {
                 phone: newDriver.phone,
                 cnh: newDriver.cnh,
                 cnh_category: newDriver.cnhCategory,
+                cnh_validity: newDriver.cnhValidity,
                 status: newDriver.status,
                 photo_url: newDriver.photoUrl,
-                vehicle_id: newDriver.vehicleId
+                vehicle_id: newDriver.vehicleId,
+                mopp_validity: newDriver.moppValidity,
+                exam_validity: newDriver.examValidity
             };
 
             // Use RPC to bypass RLS issues on insert
@@ -511,7 +523,9 @@ export default function Home() {
                 hasAppAccess: driverData.has_app_access,
                 accessToken: driverData.access_token,
                 lastLogin: driverData.last_login,
-                vehicleId: driverData.vehicle_id
+                vehicleId: driverData.vehicle_id,
+                moppValidity: driverData.mopp_validity,
+                examValidity: driverData.exam_validity
             };
             setDrivers(prev => [...prev, createdDriver]);
             showToast('Motorista adicionado com sucesso!', 'success');
@@ -538,7 +552,9 @@ export default function Home() {
                 status: updatedDriver.status,
                 has_app_access: updatedDriver.hasAppAccess,
                 access_token: updatedDriver.accessToken,
-                vehicle_id: updatedDriver.vehicleId
+                vehicle_id: updatedDriver.vehicleId,
+                mopp_validity: updatedDriver.moppValidity,
+                exam_validity: updatedDriver.examValidity
             }).eq('id', updatedDriver.id);
 
             if (error) throw error;
@@ -648,10 +664,10 @@ export default function Home() {
     };
 
     // ─── ONBOARDING COMPLETION ───
-    const handleOnboardingComplete = async (data: { companyName: string; city: string; vehicle: Partial<Vehicle>; driver: Partial<Driver> }) => {
+    const handleOnboardingComplete = async (data: { companyName: string; city: string; vehicle: Partial<Vehicle>; driver: Partial<Driver>; appMode: 'simple' | 'advanced' }) => {
         try {
             // Update local state first for instant feedback
-            const updatedProfile: UserProfile = { ...profile, companyName: data.companyName, config: { ...profile.config, onboardingCompleted: true } };
+            const updatedProfile: UserProfile = { ...profile, companyName: data.companyName, config: { ...profile.config, onboardingCompleted: true, appMode: data.appMode } };
             setProfile(updatedProfile);
 
             if (user) {
@@ -819,7 +835,13 @@ export default function Home() {
                 plate: v.plate?.toUpperCase(), name: v.name, brand: v.brand, model: v.model, year: v.year,
                 type: v.type, society_split_factor: v.societySplitFactor,
                 total_km_accumulated: v.totalKmAccumulated || 0,
-                photo_url: v.photoUrl
+                photo_url: v.photoUrl,
+                antt_number: v.anttNumber,
+                antt_validity: v.anttValidity,
+                tacografo_validity: v.tacografoValidity,
+                licensing_validity: v.licensingValidity,
+                insurance_validity: v.insuranceValidity,
+                insurance_policy: v.insurancePolicy
             };
             const { data, error } = await client.from('vehicles').insert(dbV).select().single();
             if (error) throw error;
@@ -829,6 +851,12 @@ export default function Home() {
                 lastMaintenanceKm: Number(data.last_maintenance_km),
                 societySplitFactor: Number(data.society_split_factor),
                 photoUrl: data.photo_url,
+                anttNumber: data.antt_number,
+                anttValidity: data.antt_validity,
+                tacografoValidity: data.tacografo_validity,
+                licensingValidity: data.licensing_validity,
+                insuranceValidity: data.insurance_validity,
+                insurancePolicy: data.insurance_policy,
                 thresholds: INITIAL_THRESHOLDS
             };
             setVehicles(prev => [...prev, newV]);
@@ -844,7 +872,13 @@ export default function Home() {
             const { error } = await client.from('vehicles').update({
                 plate: v.plate.toUpperCase(), name: v.name, brand: v.brand, model: v.model, year: v.year,
                 type: v.type, society_split_factor: v.societySplitFactor,
-                photo_url: v.photoUrl
+                photo_url: v.photoUrl,
+                antt_number: v.anttNumber,
+                antt_validity: v.anttValidity,
+                tacografo_validity: v.tacografoValidity,
+                licensing_validity: v.licensingValidity,
+                insurance_validity: v.insuranceValidity,
+                insurance_policy: v.insurancePolicy
             }).eq('id', v.id);
             if (error) throw error;
             setVehicles(prev => prev.map(item => item.id === v.id ? v : item));
@@ -1032,8 +1066,14 @@ export default function Home() {
                     <HelpCenter />
                 </Suspense>
             );
+            case 'compliance': return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
             case 'admin':
-                const isAdmin = ['arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com', 'arthurpsantos01@gmail.com', 'arthur.riberix@gmail.com', 'arthur_ribeiro09@outlook.com'].includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
+                const ADMIN_EMAILS = [
+                    'arthur@ribeirxlog.com',
+                    'arthur.ribeirx@gmail.com',
+                    'arthurpsantos01@gmail.com'
+                ];
+                const isAdmin = ADMIN_EMAILS.includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
                 return <AdminPanel supabaseClient={authenticatedClient} />;
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;

@@ -269,7 +269,7 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     <p className="text-sky-400 text-sm font-black">R$ {tripFinance.saldoAReceber.toLocaleString()}</p>
                   </div>
                   <div className="hidden md:block space-y-1">
-                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Recebimento</p>
+                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Status</p>
                     <div className={`flex items-center gap-1.5 text-xs font-black ${trip.status === 'Pago' ? 'text-emerald-500' : 'text-amber-500'}`}>
                       {trip.status === 'Pago' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />} {trip.status}
                     </div>

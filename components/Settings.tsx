@@ -263,7 +263,28 @@ const Settings: React.FC<SettingsProps> = ({
                {active === 'modulos' && (
                   <div className="space-y-5 animate-in slide-in-from-bottom-3 duration-300">
 
-                     <Card title="Módulos do app" subtitle="Ative apenas o que você usa. Desativar um módulo o oculta do menu — você não perde os dados.">
+                     <Card title="Modo de Operação" subtitle="Escolha como você prefere usar o sistema. O modo simples oculta ferramentas complexas para focar no lucro por viagem.">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                           <button
+                              onClick={() => cfg('appMode', 'simple')}
+                              className={`p-5 rounded-[2rem] border text-left transition-all relative overflow-hidden group ${profile.config.appMode === 'simple' ? 'bg-emerald-500 border-emerald-400' : 'bg-slate-950 border-slate-800'}`}
+                           >
+                              <p className={`text-xs font-black uppercase italic tracking-tighter mb-1 ${profile.config.appMode === 'simple' ? 'text-emerald-950' : 'text-emerald-500'}`}>Modo Autônomo</p>
+                              <p className={`text-[10px] font-bold leading-tight ${profile.config.appMode === 'simple' ? 'text-emerald-900' : 'text-slate-500'}`}>Ideal para quem tem 1 ou 2 caminhões. Foco no lucro e saldo a receber.</p>
+                              {profile.config.appMode === 'simple' && <Check className="absolute top-4 right-4 w-4 h-4 text-emerald-950" />}
+                           </button>
+                           <button
+                              onClick={() => cfg('appMode', 'advanced')}
+                              className={`p-5 rounded-[2rem] border text-left transition-all relative overflow-hidden group ${profile.config.appMode === 'advanced' ? 'bg-emerald-500 border-emerald-400' : 'bg-slate-950 border-slate-800'}`}
+                           >
+                              <p className={`text-xs font-black uppercase italic tracking-tighter mb-1 ${profile.config.appMode === 'advanced' ? 'text-emerald-950' : 'text-sky-500'}`}>Modo Transportadora</p>
+                              <p className={`text-[10px] font-bold leading-tight ${profile.config.appMode === 'advanced' ? 'text-emerald-900' : 'text-slate-500'}`}>Gestão completa de frota, manutenção preditiva e BI avançado.</p>
+                              {profile.config.appMode === 'advanced' && <Check className="absolute top-4 right-4 w-4 h-4 text-emerald-950" />}
+                           </button>
+                        </div>
+                     </Card>
+
+                     <Card title="Módulos Individuais" subtitle="Ative apenas o que você usa. Desativar um módulo o oculta do menu — você não perde os dados.">
                         <div className="space-y-3">
                            <ModuleCard
                               emoji="🧮"

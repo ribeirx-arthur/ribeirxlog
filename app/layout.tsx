@@ -4,7 +4,25 @@ import "./globals.css";
 
 export const metadata: Metadata = {
     title: "Ribeirx Log ERP | Inteligência Logística",
-    description: "A inteligência definitiva para gestão de frotas e logística.",
+    description: "A inteligência definitiva para gestão de frotas e logística. Calcule fretes e aumente sua margem de lucro com Inteligência Artificial.",
+    themeColor: "#10b981",
+    manifest: "/manifest.json",
+    openGraph: {
+        title: "Ribeirx Log ERP | Inteligência Logística",
+        description: "Assuma o controle total da sua frota com o app que organiza suas finanças e roteiros, tudo pelo Zap e direto na tela do celular.",
+        url: "https://ribeirxlog.vercel.app", // Replace with domain later
+        siteName: "Ribeirx Log",
+        images: [
+            {
+                url: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1200&h=630&auto=format&fit=crop", // Great generic truck tech image for OG
+                width: 1200,
+                height: 630,
+                alt: "Ribeirx Log ERP Thumbnail",
+            }
+        ],
+        locale: "pt_BR",
+        type: "website",
+    }
 };
 
 export default function RootLayout({

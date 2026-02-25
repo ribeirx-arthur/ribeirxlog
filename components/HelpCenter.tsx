@@ -27,7 +27,9 @@ import {
     Zap,
     DollarSign,
     Settings,
-    MessageCircle
+    MessageCircle,
+    ShieldCheck,
+    Share2
 } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../pricing';
 
@@ -119,6 +121,13 @@ const HelpCenter: React.FC = () => {
             label: 'Cadastros',
             icon: Database,
             color: 'cyan',
+        },
+        {
+            id: 'compliance',
+            label: 'Compliance Hub',
+            icon: ShieldCheck,
+            color: 'emerald',
+            badge: 'Novo'
         },
         {
             id: 'faq',
@@ -348,45 +357,43 @@ const HelpCenter: React.FC = () => {
             ]
         },
 
+        'compliance': {
+            title: '🛡️ Compliance Hub — Proteção da sua Operação',
+            subtitle: 'Centralize a documentação legal e receba alertas automáticos de vencimento.',
+            steps: [
+                { icon: ShieldCheck, title: 'Documentação do Veículo', desc: 'Monitore as datas de validade da ANTT, Cronotacógrafo, Seguro e Licenciamento. O sistema usa as cores Verde (OK), Amarelo (Atenção - 30 dias) e Vermelho (Vencido) para seu controle.' },
+                { icon: Users, title: 'Documentação do Motorista', desc: 'Controle os vencimentos do Curso MOPP e do Exame Toxicológico, essenciais para evitar multas graves e retenção do veículo.' },
+                { icon: Share2, title: 'Kit Compliance WhatsApp', desc: 'Gere um resumo profissional com todos os dados técnicos e enviem diretamente via WhatsApp para o seu cliente ou transportadora, acelerando o processo de liberação da carga.' },
+            ],
+            tips: [
+                'No "Modo Autônomo", o foco é o compartilhamento rápido de dados para carregar.',
+                'Cadastre os números de apólice de seguro para ter acesso rápido em caso de sinistro.',
+                'O Ribeirx Log envia notificações no app 15 dias antes de qualquer vencimento.'
+            ]
+        },
         'faq': {
             title: '❓ Dúvidas Frequentes',
             subtitle: 'As perguntas mais comuns dos usuários do Ribeirx Log.',
             faqs: [
                 {
+                    q: 'Como funciona o "Saldo a Receber"?',
+                    a: 'O Saldo a Receber representa o valor que a transportadora ainda te deve por uma viagem (Frete Total - Adiantamento já recebido). É o valor que você ainda tem para receber após a conclusão do serviço.'
+                },
+                {
+                    q: 'Qual a diferença entre o Modo Autônomo e Modo Transportadora?',
+                    a: 'O Modo Autônomo simplifica a tela, escondendo relatórios complexos de frota e focando no seu lucro por viagem e no kit de documentos rápido. O Modo Transportadora abre funções de gestão de custos societários, BI profundo e manutenção preditiva detalhada.'
+                },
+                {
                     q: 'Como o sistema calcula a comissão do motorista?',
-                    a: 'A comissão é calculada separadamente para frete seco e diárias. Ex: comissão frete seco = 10%, comissão diária = 30%. Se o frete seco é R$2.000 e diária R$100, a comissão é (2000 × 10%) + (100 × 30%) = R$230. Configure as taxas padrão em Configurações → Cálculos.'
+                    a: 'A comissão é calculada separadamente para frete seco e diárias. Ex: comissão frete seco = 10%, comissão diária = 30%. Configure as taxas padrão em Configurações → Cálculos.'
                 },
                 {
                     q: 'O que é "Depreciação Global de Pneu/Manut."?',
-                    a: 'Quando ativado nas Configurações, o sistema desconta automaticamente um custo estimado de pneu e manutenção baseado nos KMs da viagem. O valor por km é calculado com base nos eixos do caminhão ou você pode definir um valor fixo. Isso torna o lucro líquido mais realista.'
-                },
-                {
-                    q: 'Como o motorista acessa o app dele?',
-                    a: 'Acesse o link /motoristas e cada motorista tem um acesso pelo CPF. Ou vá em Motoristas → clique no motorista → "Abrir App do Motorista". De lá, compartilhe o link com ele pelo WhatsApp.'
-                },
-                {
-                    q: 'Posso usar em vários celulares ao mesmo tempo?',
-                    a: 'Sim! O app funciona em qualquer navegador. Você acessa pelo celular, o motorista acessa pelo celular dele. Todos os dados ficam sincronizados em tempo real via nuvem.'
-                },
-                {
-                    q: 'Os dados são salvos automaticamente?',
-                    a: 'Sim. Tudo é salvo automaticamente na nuvem (Supabase) assim que você confirma um lançamento. Não há risco de perder dados por fechar o app.'
+                    a: 'Quando ativado nas Configurações, o sistema desconta automaticamente um custo estimado de pneu e manutenção baseado nos KMs da viagem. Isso torna o lucro líquido mais realista.'
                 },
                 {
                     q: 'Como gero um PDF de recibo para o cliente?',
-                    a: 'No histórico de Viagens, clique no menu "⋮" de qualquer viagem e selecione "Gerar PDF". O recibo profissional é gerado com logo da empresa, dados da viagem e valores.'
-                },
-                {
-                    q: 'Posso ter mais de um caminhão cadastrado?',
-                    a: 'Sim! No plano pago você pode cadastrar frota ilimitada. Na versão gratuita há limite de registro. Vá em Assinatura para ver as opções de upgrade.'
-                },
-                {
-                    q: 'O que fazer se um frete foi parcialmente pago?',
-                    a: 'Na viagem, marque o status como "Parcial" e registre no campo de observações o valor já recebido. O Dashboard mostrará esse valor em "A Receber".'
-                },
-                {
-                    q: 'Como funciona o APP do motorista?',
-                    a: 'O motorista tem acesso a um painel simplificado onde vê: suas viagens, saldo a receber, adiantamentos e pode atualizar o status da viagem (Em Trânsito, Entregue). Ele NÃO vê os dados financeiros globais da empresa.'
+                    a: 'No histórico de Viagens, clique no menu "⋮" de qualquer viagem e selecione "Gerar PDF".'
                 },
             ]
         }

@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import LegalModal from './LegalModal';
 import {
     Check,
     ChevronRight,
@@ -37,8 +38,15 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) => {
+    const [legalType, setLegalType] = useState<'privacy' | 'terms' | null>(null);
+
     const handleWhatsAppContact = () => {
         const message = encodeURIComponent("Olá Arthur! Vi o Ribeirx Log e gostaria de tirar algumas dúvidas sobre os planos.");
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+    };
+
+    const handleWaitlistContact = () => {
+        const message = encodeURIComponent("Olá Arthur! Quero entrar na LISTA VIP para ter acesso antecipado ao App Ribeirx Driver e garantir os bônus exclusivos quando lançar nas lojas.");
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
@@ -208,8 +216,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
                         <div className="space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
-                            <div className="inline-flex p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                                <Globe className="w-10 h-10" />
+                            <div className="flex flex-col gap-4 items-start">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.2em]">
+                                    <Clock className="w-3 h-3" /> Em desenvolvimento (Breve nas lojas de app)
+                                </div>
+                                <div className="inline-flex p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                                    <Globe className="w-10 h-10" />
+                                </div>
                             </div>
                             <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
                                 VISÃO GLOBAL <br />
@@ -233,9 +246,25 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                     </li>
                                 ))}
                             </ul>
-                            <button onClick={onGetStarted} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl uppercase tracking-widest shadow-xl hover:scale-105 transition-all">
-                                Ativar Rastreamento Agora
-                            </button>
+                            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                                <button onClick={handleWaitlistContact} className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-2xl uppercase tracking-widest shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
+                                    <MessageCircle className="w-5 h-5" /> Entrar na Lista VIP
+                                </button>
+                                <div className="flex gap-2">
+                                    <div className="relative group cursor-not-allowed">
+                                        <div className="absolute inset-0 bg-black/60 z-10 rounded-xl flex items-center justify-center backdrop-blur-[1px]">
+                                            <span className="text-[9px] font-black text-white uppercase tracking-widest border border-white/20 bg-black/80 px-2 py-1 rounded">Em Breve</span>
+                                        </div>
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-[52px] opacity-50" />
+                                    </div>
+                                    <div className="relative group cursor-not-allowed">
+                                        <div className="absolute inset-0 bg-black/60 z-10 rounded-xl flex items-center justify-center backdrop-blur-[1px]">
+                                            <span className="text-[9px] font-black text-white uppercase tracking-widest border border-white/20 bg-black/80 px-2 py-1 rounded">Em Breve</span>
+                                        </div>
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" className="h-[52px] opacity-50" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Interactive Phone Mockup */}
@@ -484,8 +513,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             desc="Controle total da sua frota com rastreamento e inteligência artificial."
                             features={[
                                 "Frota Ilimitada (Promoção)",
-                                "GPS Rastreamento em Tempo Real",
-                                "App do Motorista (WhatsApp)",
+                                "GPS Rastreamento (Em breve nas lojas)",
+                                "App do Motorista (Em breve)",
                                 "Emissão de CIOT/MDF-e (Em breve)",
                                 "Gestão de Pneus e Manutenção",
                                 "Suporte Prioritário no Zap"
@@ -644,11 +673,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 <div className="max-w-7xl mx-auto px-6 mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
                     <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">© 2026 RIBEIRX LOGÍSTICA INTELIGENTE. MADE BY ART_RBS.</p>
                     <div className="flex gap-8">
-                        <span className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Políticas de Privacidade</span>
-                        <span className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Termos de Uso</span>
+                        <button onClick={() => setLegalType('privacy')} className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Políticas de Privacidade</button>
+                        <button onClick={() => setLegalType('terms')} className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Termos de Uso</button>
                     </div>
                 </div>
             </footer>
+
+            <LegalModal
+                isOpen={legalType !== null}
+                onClose={() => setLegalType(null)}
+                type={legalType || 'terms'}
+            />
         </div >
     );
 };
