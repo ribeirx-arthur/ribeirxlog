@@ -154,55 +154,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         </div>
 
                         {/* Interactive Showcase - Compact & Dense */}
+                        {/* Interactive Showcase - Fast Demo */}
                         <div className="lg:col-span-5 relative animate-in slide-in-from-right-12 duration-1000 delay-1000">
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full translate-y-20 scale-75 opacity-30"></div>
-                            <div className="relative glass-card rounded-[3rem] p-3 border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.5)] overflow-hidden hover:scale-105 transition-transform duration-700">
-                                <div className="bg-slate-950 rounded-[2.5rem] p-8 space-y-8 border border-white/5 min-h-[450px]">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex gap-2">
-                                            <div className="w-3 h-3 rounded-full bg-rose-500/50"></div>
-                                            <div className="w-3 h-3 rounded-full bg-amber-500/50"></div>
-                                            <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
-                                        </div>
-                                        <span className="text-[9px] font-black text-slate-700 tracking-widest uppercase">Director Terminal v3.1</span>
-                                    </div>
-
-                                    {/* Mockup Data Points */}
-                                    <div className="space-y-6">
-                                        {/* New GPS Alert Mockup */}
-                                        <div className="p-4 bg-slate-900 border border-emerald-500/20 rounded-2xl flex items-center justify-between relative overflow-hidden">
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                                                    <Navigation className="w-5 h-5 text-emerald-500 animate-pulse" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[9px] font-black text-emerald-500 uppercase">Frota em Movimento</p>
-                                                    <p className="text-white font-bold text-sm">Caminhão 04 - Chegando ao Destino</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-[9px] font-black bg-emerald-500 text-slate-950 px-2 py-1 rounded">LIVE</span>
-                                        </div>
-
-                                        <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                                            <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">Operational Profit</p>
-                                            <p className="text-3xl font-black text-white">R$ 142.800,00</p>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-4 bg-slate-900 border border-white/5 rounded-xl">
-                                                <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Drivers Online</p>
-                                                <p className="text-xl font-black text-white">24 / 24</p>
-                                            </div>
-                                            <div className="p-4 bg-slate-900 border border-white/5 rounded-xl">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <Smartphone className="w-3 h-3 text-sky-500" />
-                                                    <p className="text-[9px] font-bold text-slate-500 uppercase">App Ativo</p>
-                                                </div>
-                                                <p className="text-xl font-black text-sky-500">100%</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="relative glass-card rounded-[3rem] p-3 border-emerald-500/20 shadow-[0_40px_100px_rgba(16,185,129,0.2)] overflow-hidden hover:scale-105 transition-transform duration-700">
+                                <img src="/site-rapido.gif" alt="Demonstração do Ribeirx Log" className="w-full h-auto min-h-[400px] object-cover rounded-[2.5rem] bg-slate-950 border border-white/5 shadow-inner" />
                             </div>
                         </div>
                     </div>
@@ -266,31 +222,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             </div>
                         </div>
 
-                        {/* Interactive Phone Mockup */}
+                        {/* Interactive Video Presentation */}
                         <div className="relative group perspective-1000">
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-75 opacity-50"></div>
-                            <div className="glass-card rounded-[3rem] border-white/10 relative z-10 p-4 rotate-[-6deg] hover:rotate-0 transition-all duration-700 shadow-2xl">
-                                <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden aspect-[9/19] relative">
-                                    {/* Mockup Content */}
-                                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop')] bg-cover opacity-20"></div>
-                                    <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950/90"></div>
-
-                                    <div className="relative z-10 p-6 flex flex-col h-full justify-between">
-                                        <div className="flex justify-between items-center">
-                                            <div className="text-white font-black text-lg">Ribeirx<span className="text-emerald-500">Driver</span></div>
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                        </div>
-
-                                        <div className="space-y-4 mb-8">
-                                            <div className="bg-slate-900/80 backend-blur p-4 rounded-2xl border border-white/10">
-                                                <p className="text-[10px] text-slate-400 uppercase font-bold">Velocidade Atual</p>
-                                                <p className="text-4xl font-black text-white">82 <span className="text-sm text-slate-500">km/h</span></p>
-                                            </div>
-                                            <div className="bg-emerald-500 p-4 rounded-2xl text-slate-950 font-black text-center shadow-lg shadow-emerald-500/20">
-                                                RASTREAMENTO ATIVO
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div className="glass-card rounded-[3rem] border-white/10 relative z-10 p-4 hover:rotate-[-1deg] transition-all duration-700 shadow-[0_30px_70px_rgba(0,0,0,0.8)]">
+                                <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative">
+                                    <img src="/dashboard-motorista.gif" alt="Visão do Sistema e Motorista na estrada" className="w-full h-auto object-cover opacity-90 transition-opacity group-hover:opacity-100" />
                                 </div>
                             </div>
                         </div>
@@ -480,8 +417,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             </section>
 
             {/* Pricing Section - The Offer */}
-            <section id="planos" className="py-40 relative">
-                <div className="max-w-7xl mx-auto px-6">
+            <section id="planos" className="py-40 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-15 pointer-events-none">
+                    <img src="/background-minimalista.gif" alt="Background Logística Edge" className="w-full h-full object-cover" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/70 to-slate-950 pointer-events-none z-0"></div>
+
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-32 space-y-6">
                         <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.3em]">
                             <Star className="w-3 h-3" /> Parceria & Investimento
