@@ -7,11 +7,8 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-    const authData = await auth();
-    
-    // Se não estiver logado e a rota não for pública, manda para o Login
-    if (!authData.userId && !isPublicRoute(req)) {
-        return authData.redirectToSignIn();
+    if (!isPublicRoute(req)) {
+        await auth.protect();
     }
 });
 
