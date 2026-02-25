@@ -6,11 +6,9 @@ const isPublicRoute = createRouteMatcher([
     "/driver(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-    const authObject = await auth();
-
-    if (!authObject.userId && !isPublicRoute(req)) {
-        return authObject.redirectToSignIn();
+export default clerkMiddleware((auth, req) => {
+    if (!isPublicRoute(req)) {
+        auth().protect();
     }
 });
 
