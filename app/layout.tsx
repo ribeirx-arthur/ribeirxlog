@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Ribeirx Log ERP | Inteligência Logística",
         description: "Assuma o controle total da sua frota com o app que organiza suas finanças e roteiros, tudo pelo Zap e direto na tela do celular.",
-        url: "https://ribeirxlog.vercel.app", // Replace with domain later
+        url: "https://www.ribeirxlog.com.br",
         siteName: "Ribeirx Log",
         images: [
             {
