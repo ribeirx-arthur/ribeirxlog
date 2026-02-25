@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState } from 'react';
 import LegalModal from './LegalModal';
 import {
@@ -41,12 +41,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
     const [legalType, setLegalType] = useState<'privacy' | 'terms' | null>(null);
 
     const handleWhatsAppContact = () => {
-        const message = encodeURIComponent("Olá Arthur! Vi o Ribeirx Log e gostaria de tirar algumas dúvidas sobre os planos.");
+        const message = encodeURIComponent("Ol├í Arthur! Vi o Ribeirx Log e gostaria de tirar algumas d├║vidas sobre os planos.");
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
     const handleWaitlistContact = () => {
-        const message = encodeURIComponent("Olá Arthur! Quero entrar na LISTA VIP para ter acesso antecipado ao App Ribeirx Driver e garantir os bônus exclusivos quando lançar nas lojas.");
+        const message = encodeURIComponent("Ol├í Arthur! Quero entrar na LISTA VIP para ter acesso antecipado ao App Ribeirx Driver e garantir os b├┤nus exclusivos quando lan├ºar nas lojas.");
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
@@ -92,7 +92,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     </div>
                     <div className="flex items-center gap-6">
                         <button onClick={onGetStarted} className="text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition-colors hidden sm:block">
-                            Área do Cliente
+                            ├ürea do Cliente
                         </button>
                         <button
                             onClick={onGetStarted}
@@ -118,12 +118,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             </div>
 
                             <h1 className="text-6xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
-                                A INTELIGÊNCIA DO <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">SEU CAMINHÃO.</span>
+                                A INTELIG├èNCIA DO <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">SEU CAMINH├âO.</span>
                             </h1>
 
                             <p className="text-xl md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
-                                Esqueça as planilhas e o caderninho. Assuma o controle total do seu lucro, das despesas de viagem e receba os dados direto no celular com o <span className="text-emerald-400 font-bold">App pelo Zap</span>.
+                                Esque├ºa as planilhas e o caderninho. Assuma o controle total do seu lucro, das despesas de viagem e receba os dados direto no celular com o <span className="text-emerald-400 font-bold">App pelo Zap</span>.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in zoom-in-95 duration-1000 delay-700">
@@ -131,7 +131,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                     onClick={onGetStarted}
                                     className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-lg hover:scale-105 active:scale-95 group"
                                 >
-                                    CRIAR CONTA GRÁTIS <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    CRIAR CONTA GR├üTIS <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                                 <a href="#gps-tracking" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
                                     VER NOVIDADES GPS
@@ -158,7 +158,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <div className="lg:col-span-5 relative animate-in slide-in-from-right-12 duration-1000 delay-1000">
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full translate-y-20 scale-75 opacity-30"></div>
                             <div className="relative glass-card rounded-[3rem] p-3 border-emerald-500/20 shadow-[0_40px_100px_rgba(16,185,129,0.2)] overflow-hidden hover:scale-105 transition-transform duration-700">
-                                <video src="/demo-alta-qualidade.mp4" autoPlay loop muted playsInline className="w-full h-auto min-h-[400px] object-cover rounded-[2.5rem] bg-slate-950 border border-white/5 shadow-inner" />
+                                <video autoPlay loop muted playsInline className="w-full h-auto min-h-[400px] object-cover rounded-[2.5rem] bg-slate-950 border border-white/5 shadow-inner">
+                                    <source src="/demo-alta-qualidade.mp4" type="video/mp4" />
+                                    Seu navegador não suporta vídeos.
+                                </video>
                             </div>
                         </div>
                     </div>
@@ -180,18 +183,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 </div>
                             </div>
                             <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
-                                VISÃO GLOBAL <br />
+                                VIS├âO GLOBAL <br />
                                 <span className="text-emerald-500">EM TEMPO REAL.</span>
                             </h2>
                             <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Abandone os rastreadores caros. Com o <span className="text-white font-bold">Ribeirx Mobile Technology</span>, o celular do seu motorista vira um rastreador de alta precisão.
+                                Abandone os rastreadores caros. Com o <span className="text-white font-bold">Ribeirx Mobile Technology</span>, o celular do seu motorista vira um rastreador de alta precis├úo.
                             </p>
                             <ul className="space-y-6">
                                 {[
                                     "Monitoramento de velocidade ao vivo",
-                                    "Histórico de rotas completo",
-                                    "Alertas de paradas não programadas",
-                                    "Economia média de R$ 150/mês por caminhão"
+                                    "Hist├│rico de rotas completo",
+                                    "Alertas de paradas n├úo programadas",
+                                    "Economia m├®dia de R$ 150/m├¬s por caminh├úo"
                                 ].map(item => (
                                     <li key={item} className="flex items-center gap-4 text-white font-black text-sm uppercase tracking-widest">
                                         <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
@@ -258,10 +261,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 <span className="text-emerald-500">MARGEM LIMPA.</span>
                             </h2>
                             <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Pare de adivinhar quanto sobrou no fim do mês. O Ribeirx Log calcula automaticamente todos os seus custos reais. Tenha uma visão cirúrgica do seu retorno sobre investimento direto na sua tela.
+                                Pare de adivinhar quanto sobrou no fim do m├¬s. O Ribeirx Log calcula automaticamente todos os seus custos reais. Tenha uma vis├úo cir├║rgica do seu retorno sobre investimento direto na sua tela.
                             </p>
                             <ul className="space-y-6">
-                                {["Cálculo de Diesel/KM Integrado", "Visão de custos em tempo real", "Monitoramento de taxas de frete"].map(item => (
+                                {["C├ílculo de Diesel/KM Integrado", "Vis├úo de custos em tempo real", "Monitoramento de taxas de frete"].map(item => (
                                     <li key={item} className="flex items-center gap-4 text-white font-black text-sm uppercase tracking-widest">
                                         <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                                             <Check className="w-4 h-4 text-emerald-500" />
@@ -274,19 +277,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <div className="relative group perspective-1000">
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
                             <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-2 transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
-                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 overflow-hidden relative group-hover:shadow-[0_0_50px_rgba(16,185,129,0.15)] transition-all duration-700">
-                                    <img src="https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=1200&h=800&auto=format&fit=crop" alt="Auditoria de Margem" className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-1000" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <DollarSign className="w-24 h-24 text-emerald-500 opacity-40 animate-float" />
-                                    </div>
-                                    <div className="absolute bottom-10 left-10 right-10 p-6 glass-card rounded-2xl border-white/10 backdrop-blur-md">
+                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 flex items-center justify-center p-12 overflow-hidden relative">
+                                    {/* Abstract High-Tech Visual for Profitability */}
+                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #10b981 0, #10b981 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
+                                    <DollarSign className="w-40 h-40 text-emerald-500 opacity-20 animate-float" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                                    <div className="absolute bottom-12 left-12 right-12 p-6 glass-card rounded-2xl border-white/10">
                                         <div className="flex justify-between items-center text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] mb-4">
-                                            <span>Métrica de Lucratividade Ativa</span>
+                                            <span>Real-Time Profit</span>
                                             <TrendingUp className="w-4 h-4" />
                                         </div>
                                         <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-emerald-400 w-[84%] shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                                            <div className="h-full bg-emerald-500 w-[78%] shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -319,7 +321,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                     <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> App Instantâneo (PWA)
                                 </p>
                                 <p className="text-slate-300 text-sm italic leading-relaxed">
-                                    "Motorista João iniciou a viagem SP → RJ. Rastreamento ativo. Previsão de chegada: 18:30."
+                                    "Motorista João iniciou a viagem SP ➔ RJ. Rastreamento ativo. Previsão de chegada: 18:30."
                                 </p>
                             </div>
                         </div>
@@ -337,7 +339,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 Calculadora de <br /><span className="text-emerald-500">Frete Inteligente.</span>
                             </h3>
                             <p className="text-lg text-slate-400 font-medium max-w-2xl mx-auto mb-16 leading-relaxed">
-                                <span className="text-white font-bold">Nunca mais pague para trabalhar.</span> Simule diesel, pedágio, manutenção e sua margem de lucro em 10 segundos. Você coloca a origem, destino e veículo, nós te damos o preço exato.
+                                <span className="text-white font-bold">Nunca mais pague para trabalhar.</span> Simule diesel, ped├ígio, manuten├º├úo e sua margem de lucro em 10 segundos. Voc├¬ coloca a origem, destino e ve├¡culo, n├│s te damos o pre├ºo exato.
                             </p>
                             <div className="flex justify-center">
                                 <a href="#planos" className="px-10 py-5 bg-white text-slate-950 font-black rounded-2xl flex items-center gap-4 hover:scale-105 transition-all shadow-2xl uppercase tracking-widest">
@@ -357,7 +359,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-32 space-y-6">
                         <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter">FLUXO DE SUCESSO.</h2>
-                        <p className="text-slate-500 font-bold uppercase tracking-[0.3em]">Em 3 passos seu negócio sobe de nível</p>
+                        <p className="text-slate-500 font-bold uppercase tracking-[0.3em]">Em 3 passos seu neg├│cio sobe de n├¡vel</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
@@ -369,8 +371,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <div key={i} className="group relative">
                                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10rem] font-black text-white/5 pointer-events-none">{item.step}</div>
                                 <div className="relative glass-card p-12 rounded-[3.5rem] hover:border-emerald-500/30 transition-all duration-500 h-full">
-                                    <div className="w-20 h-20 bg-slate-950 border border-white/5 rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 relative">
-                                        <item.icon className="w-10 h-10 text-emerald-500 relative z-10" />
+                                    <div className="w-20 h-20 bg-slate-950 border border-white/5 rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                                        <item.icon className="w-10 h-10 text-emerald-500" />
                                     </div>
                                     <h4 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">{item.title}</h4>
                                     <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
@@ -393,36 +395,25 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                        <div className="lg:col-span-1 hidden lg:block">
-                            <div className="h-full rounded-[3rem] overflow-hidden border border-white/5 group relative">
-                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1200&h=1600&auto=format&fit=crop" alt="Ribeirx Log User" className="w-full h-full object-cover opacity-80 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
-                                <div className="absolute bottom-8 left-8">
-                                    <p className="text-white font-black text-xs uppercase tracking-widest">Usuário Verificado RBS</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <TestimonialCard
-                                name="João Carlos Ferreira"
-                                role="Motorista Autônomo — 6 eixos"
-                                city="São Paulo, SP"
-                                text="Antes eu anotava tudo no papel e sempre esquecia de cobrar pedágio e diária. Agora lanço a viagem no app e já aparece o valor certo. Economizei R$ 800 no primeiro mês só de erro de cálculo."
-                            />
-                            <TestimonialCard
-                                name="Maria Aparecida Santos"
-                                role="Proprietária — Frota 3 caminhões"
-                                city="Uberlândia, MG"
-                                text="Finalmente consigo ver qual caminhão dá lucro e qual tá me dando prejuízo. O dashboard financeiro é simples e funciona. Não precisa de contador pra entender."
-                            />
-                            <TestimonialCard
-                                name="Rodrigo Mendes"
-                                role="Autônomo — 9 eixos"
-                                city="Curitiba, PR"
-                                text="A calculadora de frete salvou minha vida. Eu aceitava frete ruim sem saber. Agora antes de fechar qualquer valor eu calculo no app. Já recusei 3 fretes podres esse mês."
-                            />
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <TestimonialCard
+                            name="Jo├úo Carlos Ferreira"
+                            role="Motorista Aut├┤nomo ÔÇö 6 eixos"
+                            city="S├úo Paulo, SP"
+                            text="Antes eu anotava tudo no papel e sempre esquecia de cobrar ped├ígio e di├íria. Agora lan├ºo a viagem no app e j├í aparece o valor certo. Economizei R$ 800 no primeiro m├¬s s├│ de erro de c├ílculo."
+                        />
+                        <TestimonialCard
+                            name="Maria Aparecida Santos"
+                            role="Propriet├íria ÔÇö Frota 3 caminh├Áes"
+                            city="Uberl├óndia, MG"
+                            text="Finalmente consigo ver qual caminh├úo d├í lucro e qual t├í me dando preju├¡zo. O dashboard financeiro ├® simples e funciona. N├úo precisa de contador pra entender."
+                        />
+                        <TestimonialCard
+                            name="Rodrigo Mendes"
+                            role="Aut├┤nomo ÔÇö 9 eixos"
+                            city="Curitiba, PR"
+                            text="A calculadora de frete salvou minha vida. Eu aceitava frete ruim sem saber. Agora antes de fechar qualquer valor eu calculo no app. J├í recusei 3 fretes podres esse m├¬s."
+                        />
                     </div>
                 </div>
             </section>
@@ -430,7 +421,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             {/* Pricing Section - The Offer */}
             <section id="planos" className="py-40 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-15 pointer-events-none">
-                    <img src="/background-minimalista.gif" alt="Background Logística Edge" className="w-full h-full object-cover" />
+                    <img src="/background-minimalista.gif" alt="Background Log├¡stica Edge" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/70 to-slate-950 pointer-events-none z-0"></div>
 
@@ -450,8 +441,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             desc="O essencial para o motorista autônomo organizar as contas do caminhão."
                             features={[
                                 "Calculadora de Frete Inteligente",
-                                "Controle de Caixa (Entrada/Saída)",
-                                "Relatório de Lucro por Viagem",
+                                "Controle de Caixa (Entrada/Sa├¡da)",
+                                "Relat├│rio de Lucro por Viagem",
                                 "Sem Rastreamento GPS",
                                 "Suporte via Email"
                             ]}
@@ -462,14 +453,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             price="R$ 89,90"
                             period="/mês"
                             isPopular
-                            desc="Controle total da sua frota com rastreamento e inteligência artificial."
+                            desc="Controle total da sua frota com rastreamento e intelig├¬ncia artificial."
                             features={[
-                                "Frota Ilimitada (Promoção)",
+                                "Frota Ilimitada (Promo├º├úo)",
                                 "GPS Rastreamento (Em breve nas lojas)",
                                 "App do Motorista (Em breve)",
-                                "Emissão de CIOT/MDF-e (Em breve)",
-                                "Gestão de Pneus e Manutenção",
-                                "Suporte Prioritário no Zap"
+                                "Emiss├úo de CIOT/MDF-e (Em breve)",
+                                "Gest├úo de Pneus e Manuten├º├úo",
+                                "Suporte Priorit├írio no Zap"
                             ]}
                             onSelect={() => onPurchase('Gestor Pro')}
                         />
@@ -479,11 +470,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             period="/ano"
                             desc="O mesmo poder do plano Gestor Pro, com 2 meses de economia."
                             features={[
-                                "Todas as funções do Gestor Pro",
+                                "Todas as fun├º├Áes do Gestor Pro",
                                 "Economia de R$ 281,00 no ano",
-                                "Consultoria de Implantação Grátis",
+                                "Consultoria de Implanta├º├úo Gr├ítis",
                                 "Selo de Transportadora Verificada",
-                                "Prioridade em Novas Funções"
+                                "Prioridade em Novas Fun├º├Áes"
                             ]}
                             onSelect={() => onPurchase('Anual Elite')}
                         />
@@ -498,11 +489,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                         <div>
                             <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-6 uppercase">
-                                Dúvidas? <br />
-                                <span className="text-emerald-500">A gente explica fácil.</span>
+                                D├║vidas? <br />
+                                <span className="text-emerald-500">A gente explica f├ícil.</span>
                             </h2>
                             <p className="text-slate-400 text-lg mb-10 leading-relaxed">
-                                Não precisa ser expert em computador. Criamos tutoriais rápidos que te ensinam a usar tudo em menos de 2 minutos.
+                                N├úo precisa ser expert em computador. Criamos tutoriais r├ípidos que te ensinam a usar tudo em menos de 2 minutos.
                             </p>
 
                             <div className="space-y-4">
@@ -537,10 +528,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             </h3>
                             <div className="space-y-6">
                                 {[
-                                    { q: "Precisa instalar algo?", a: "Não. Funciona direto no navegador do seu celular ou computador." },
-                                    { q: "Serve para autônomo?", a: "Sim! É perfeito para quem tem 1 caminhão ou uma pequena frota." },
-                                    { q: "Como pago?", a: "Pix ou Cartão. Liberação imediata." },
-                                    { q: "Tem fidelidade?", a: "Não. Você cancela quando quiser, sem multa." }
+                                    { q: "Precisa instalar algo?", a: "N├úo. Funciona direto no navegador do seu celular ou computador." },
+                                    { q: "Serve para aut├┤nomo?", a: "Sim! ├ë perfeito para quem tem 1 caminh├úo ou uma pequena frota." },
+                                    { q: "Como pago?", a: "Pix ou Cart├úo. Libera├º├úo imediata." },
+                                    { q: "Tem fidelidade?", a: "N├úo. Voc├¬ cancela quando quiser, sem multa." }
                                 ].map((faq, i) => (
                                     <div key={i} className="pb-6 border-b border-white/5 last:border-0 last:pb-0">
                                         <p className="text-emerald-400 font-bold text-sm mb-2">{faq.q}</p>
@@ -561,7 +552,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
 
                         <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-tight relative z-10">
                             PRONTO PARA DEIXAR O <br />
-                            <span className="text-emerald-500 underline decoration-emerald-500/30">AMADORISMO PARA TRÁS?</span>
+                            <span className="text-emerald-500 underline decoration-emerald-500/30">AMADORISMO PARA TR├üS?</span>
                         </h2>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 relative z-10">
@@ -569,17 +560,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 onClick={onGetStarted}
                                 className="w-full sm:w-auto px-16 py-8 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-[2.5rem] shadow-2xl transition-all text-2xl hover:scale-105 active:scale-95"
                             >
-                                COMEÇAR GRÁTIS AGORA
+                                COME├çAR GR├üTIS AGORA
                             </button>
                             <button
                                 onClick={handleWhatsAppContact}
                                 className="w-full sm:w-auto px-12 py-8 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-[2.5rem] transition-all text-xl flex items-center justify-center gap-4"
                             >
-                                <MessageCircle className="w-7 h-7" /> TIRAR DÚVIDAS NO ZAP
+                                <MessageCircle className="w-7 h-7" /> TIRAR D├ÜVIDAS NO ZAP
                             </button>
                         </div>
 
-                        <p className="text-slate-500 text-xs font-black uppercase tracking-widest relative z-10 mt-6">Teste sem cartão de crédito. Você só assina se gostar.</p>
+                        <p className="text-slate-500 text-xs font-black uppercase tracking-widest relative z-10 mt-6">Teste sem cart├úo de cr├®dito. Voc├¬ s├│ assina se gostar.</p>
                     </div>
                 </div>
             </section>
@@ -595,8 +586,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <span className="text-xl font-black tracking-tighter text-white uppercase italic">RIBEIRX<span className="text-emerald-500">LOG</span></span>
                         </div>
                         <p className="text-slate-500 max-w-sm text-sm leading-relaxed">
-                            A plataforma definitiva para transportadores modernos. Unindo inteligência artificial,
-                            gestão de frota e controle financeiro de alta precisão.
+                            A plataforma definitiva para transportadores modernos. Unindo intelig├¬ncia artificial,
+                            gest├úo de frota e controle financeiro de alta precis├úo.
                         </p>
                         <div className="flex gap-4">
                             {[1, 2, 3, 4].map(i => (
@@ -605,7 +596,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         </div>
                     </div>
                     <div>
-                        <h4 className="text-white font-black text-xs uppercase tracking-widest mb-8">Navegação</h4>
+                        <h4 className="text-white font-black text-xs uppercase tracking-widest mb-8">Navega├º├úo</h4>
                         <ul className="space-y-4 text-sm text-slate-500 font-bold">
                             <li className="hover:text-emerald-500 cursor-pointer transition-colors">Dashboard</li>
                             <li className="hover:text-emerald-500 cursor-pointer transition-colors">GPS Tracking</li>
@@ -623,9 +614,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     </div>
                 </div>
                 <div className="max-w-7xl mx-auto px-6 mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">© 2026 RIBEIRX LOGÍSTICA INTELIGENTE. MADE BY ART_RBS.</p>
+                    <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">┬® 2026 RIBEIRX LOG├ìSTICA INTELIGENTE. MADE BY ART_RBS.</p>
                     <div className="flex gap-8">
-                        <button onClick={() => setLegalType('privacy')} className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Políticas de Privacidade</button>
+                        <button onClick={() => setLegalType('privacy')} className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Pol├¡ticas de Privacidade</button>
                         <button onClick={() => setLegalType('terms')} className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Termos de Uso</button>
                     </div>
                 </div>
