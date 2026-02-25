@@ -7,6 +7,11 @@ export const metadata: Metadata = {
     description: "A inteligência definitiva para gestão de frotas e logística. Calcule fretes e aumente sua margem de lucro com Inteligência Artificial.",
     themeColor: "#10b981",
     manifest: "/manifest.json",
+    icons: {
+        icon: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Truck_icon.svg",
+        shortcut: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Truck_icon.svg",
+        apple: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Truck_icon.svg",
+    },
     openGraph: {
         title: "Ribeirx Log ERP | Inteligência Logística",
         description: "Assuma o controle total da sua frota com o app que organiza suas finanças e roteiros, tudo pelo Zap e direto na tela do celular.",
