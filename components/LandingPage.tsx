@@ -118,13 +118,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             </div>
 
                             <h1 className="text-6xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
-                                ASSUMA O <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">COMANDO TOTAL.</span>
+                                A INTELIGÊNCIA DO <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">SEU CAMINHÃO.</span>
                             </h1>
 
                             <p className="text-xl md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
-                                Mais que um sistema, o RBS é o diretor estratégico da sua transportadora.
-                                Controle motoristas com <span className="text-emerald-400 font-bold">GPS em Tempo Real</span>, finanças e frota em uma única interface neural.
+                                Esqueça as planilhas e o caderninho. Assuma o controle total do seu lucro, das despesas de viagem e receba os dados direto no celular com o <span className="text-emerald-400 font-bold">App pelo Zap</span>.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in zoom-in-95 duration-1000 delay-700">
@@ -132,7 +131,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                     onClick={onGetStarted}
                                     className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-lg hover:scale-105 active:scale-95 group"
                                 >
-                                    ADQUIRIR ACESSO <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    CRIAR CONTA GRÁTIS <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                                 <a href="#gps-tracking" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
                                     VER NOVIDADES GPS
@@ -617,17 +616,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 onClick={onGetStarted}
                                 className="w-full sm:w-auto px-16 py-8 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-[2.5rem] shadow-2xl transition-all text-2xl hover:scale-105 active:scale-95"
                             >
-                                CRIAR CONTA AGORA
+                                COMEÇAR GRÁTIS AGORA
                             </button>
                             <button
                                 onClick={handleWhatsAppContact}
                                 className="w-full sm:w-auto px-12 py-8 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-[2.5rem] transition-all text-xl flex items-center justify-center gap-4"
                             >
-                                <MessageCircle className="w-7 h-7" /> AJUDA NO WHATSAPP
+                                <MessageCircle className="w-7 h-7" /> TIRAR DÚVIDAS NO ZAP
                             </button>
                         </div>
 
-                        <p className="text-slate-500 text-xs font-black uppercase tracking-widest relative z-10">Liberação imediata via Pix após cadastro</p>
+                        <p className="text-slate-500 text-xs font-black uppercase tracking-widest relative z-10 mt-6">Teste sem cartão de crédito. Você só assina se gostar.</p>
                     </div>
                 </div>
             </section>
