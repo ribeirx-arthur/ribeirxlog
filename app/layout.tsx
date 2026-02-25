@@ -30,8 +30,11 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
+    // Busca a chave das variáveis de ambiente ou usa a sua de teste como fallback para o build não falhar
+    const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_YmVsb3ZlZC1kb3J5LTIzLmNsZXJrLmFjY291bnRzLmRldiQ";
+
     return (
-        <ClerkProvider>
+        <ClerkProvider publishableKey={publishableKey}>
             <html lang="pt-BR">
                 <head>
                     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
