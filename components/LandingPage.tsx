@@ -158,7 +158,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <div className="lg:col-span-5 relative animate-in slide-in-from-right-12 duration-1000 delay-1000">
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full translate-y-20 scale-75 opacity-30"></div>
                             <div className="relative glass-card rounded-[3rem] p-3 border-emerald-500/20 shadow-[0_40px_100px_rgba(16,185,129,0.2)] overflow-hidden hover:scale-105 transition-transform duration-700">
-                                <img src="/demo-alta-qualidade.gif" alt="Demonstração do Ribeirx Log" className="w-full h-auto min-h-[400px] object-cover rounded-[2.5rem] bg-slate-950 border border-white/5 shadow-inner" />
+                                <video src="/demo-alta-qualidade.mp4" autoPlay loop muted playsInline className="w-full h-auto min-h-[400px] object-cover rounded-[2.5rem] bg-slate-950 border border-white/5 shadow-inner" />
                             </div>
                         </div>
                     </div>
