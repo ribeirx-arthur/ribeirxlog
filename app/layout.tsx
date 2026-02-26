@@ -36,6 +36,7 @@ export default function RootLayout({
         <ClerkProvider publishableKey={clerkKey}>
             <html lang="pt-BR">
                 <head>
+                    <meta charSet="utf-8" />
                     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" async></script>
                 </head>
