@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { Trip, Driver, TripProof, VehicleLocation } from '../types';
 import { supabase } from '../services/supabase';
+import { saveOfflineEvent, syncPendingEvents } from '../services/offlineSync';
+import { triggerNativePush } from '../services/PushManager';
 
 interface DriverAppProps {
     driver: Driver;
@@ -108,6 +110,42 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             if (statsInterval) clearInterval(statsInterval);
         };
     }, [isTracking, driver.accessToken, activeTrip]);
+
+    // Sincronização offline quando a internet volta
+    useEffect(() => {
+        const handleOnline = async () => {
+            console.log("Conexão restabelecida, sincronizando eventos offline...");
+            await syncPendingEvents(async (event) => {
+                if (event.type === 'start_trip') {
+                    const { error } = await supabase.rpc('driver_start_trip', {
+                        p_driver_token: event.data.driverToken,
+                        p_trip_id: event.data.tripId
+                    });
+                    if (!error) {
+                        triggerNativePush('Viagem Iniciada', 'Seus dados offline de início de viagem foram sincronizados.');
+                        return true;
+                    }
+                } else if (event.type === 'end_trip') {
+                    const { error } = await supabase.rpc('driver_end_trip', {
+                        p_driver_token: event.data.driverToken,
+                        p_trip_id: event.data.tripId
+                    });
+                    if (!error) {
+                        triggerNativePush('Viagem Finalizada', 'Seus dados offline de fim de viagem foram sincronizados.');
+                        return true;
+                    }
+                }
+                return false;
+            });
+        };
+
+        window.addEventListener('online', handleOnline);
+        // Tenta sincronizar ao carregar o componente, caso tenha voltado
+        if (navigator.onLine) {
+            handleOnline();
+        }
+        return () => window.removeEventListener('online', handleOnline);
+    }, []);
 
     const updateDriverLocation = (latitude: number, longitude: number, speed: number | null, heading: number | null, accuracy: number) => {
         if (!driver.accessToken) return;
@@ -243,12 +281,21 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             return;
         }
 
+        if (!navigator.onLine) {
+            await saveOfflineEvent('start_trip', { tripId: activeTrip.id, driverToken: driver.accessToken });
+            triggerNativePush('GPS Ligado Através do Backup', 'A internet caiu, rastrearemos em modo Offline e subiremos depois!');
+            setIsTracking(true);
+            alert('Você está sem internet. A viagem foi iniciada em MODO OFFLINE, e as informações serão enviadas quando a conexão voltar.');
+            return;
+        }
+
         const { error } = await supabase.rpc('driver_start_trip', {
             p_driver_token: driver.accessToken,
             p_trip_id: activeTrip.id
         });
 
         if (!error) {
+            triggerNativePush('Viagem Iniciada', 'Tenha uma viagem segura! Rastreamento de GPS ativado.');
             alert('Viagem iniciada com sucesso! O rastreamento GPS foi ativado.');
             setIsTracking(true);
             window.location.reload(); // Refresh to update UI state
@@ -272,12 +319,21 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
             return;
         }
 
+        if (!navigator.onLine) {
+            await saveOfflineEvent('end_trip', { tripId: activeTrip.id, driverToken: driver.accessToken });
+            triggerNativePush('Viagem Finalizada (Offline)', 'As informações serão sincronizadas quando a conexão retornar.');
+            setIsTracking(false);
+            alert('Viagem finalizada em MODO OFFLINE.');
+            return;
+        }
+
         const { error } = await supabase.rpc('driver_end_trip', {
             p_driver_token: driver.accessToken,
             p_trip_id: activeTrip.id
         });
 
         if (!error) {
+            triggerNativePush('Viagem Finalizada', 'Excelente trabalho. O GPS foi desligado e o gestor notificado.');
             alert('Viagem finalizada com sucesso!');
             setIsTracking(false);
             window.location.reload();
