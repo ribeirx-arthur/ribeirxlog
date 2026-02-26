@@ -230,7 +230,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-75 opacity-50"></div>
                             <div className="glass-card rounded-[3rem] border-white/10 relative z-10 p-4 hover:rotate-[-1deg] transition-all duration-700 shadow-[0_30px_70px_rgba(0,0,0,0.8)]">
                                 <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative">
-                                    <img src="/dashboard-motorista.gif" alt="Visão do Sistema e Motorista na estrada" className="w-full h-auto object-cover opacity-90 transition-opacity group-hover:opacity-100" />
+                                    <img src="/mapa-caminhão.png.png" alt="Rastreamento GPS Global RBS" className="w-full h-auto object-cover opacity-90 transition-all duration-1000 group-hover:opacity-100 group-hover:scale-105" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60 pointer-events-none"></div>
+                                    <div className="absolute inset-0 bg-emerald-500/5 mix-blend-overlay group-hover:bg-transparent transition-all duration-700"></div>
                                 </div>
                             </div>
                         </div>
@@ -277,18 +279,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <div className="relative group perspective-1000">
                             <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
                             <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-2 transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
-                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 flex items-center justify-center p-12 overflow-hidden relative">
-                                    {/* Abstract High-Tech Visual for Profitability */}
-                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #10b981 0, #10b981 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
-                                    <DollarSign className="w-40 h-40 text-emerald-500 opacity-20 animate-float" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
-                                    <div className="absolute bottom-12 left-12 right-12 p-6 glass-card rounded-2xl border-white/10">
+                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 overflow-hidden relative group-hover:shadow-[0_0_50px_rgba(16,185,129,0.15)] transition-all duration-700">
+                                    <img src="/dashboard-no-caminhão.png.png" alt="Dashboard Logístico Futurista" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
+                                    <div className="absolute bottom-10 left-10 right-10 p-6 glass-card rounded-2xl border-white/10 backdrop-blur-md">
                                         <div className="flex justify-between items-center text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] mb-4">
-                                            <span>Real-Time Profit</span>
+                                            <span>Métrica de Lucratividade Ativa</span>
                                             <TrendingUp className="w-4 h-4" />
                                         </div>
                                         <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-emerald-500 w-[78%] shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                                            <div className="h-full bg-emerald-400 w-[84%] shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -302,8 +302,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <div className="absolute inset-0 bg-sky-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
                             <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-[-2deg] transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
                                 <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 overflow-hidden relative group">
-                                    <img src="/site-rapido.gif" alt="App Instantâneo" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700" />
-                                    <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-transparent"></div>
+                                    <img src="/dashboard-motorista.gif" alt="App do Motorista RBS" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-sky-500/15 via-transparent to-slate-950/60"></div>
+                                    <div className="absolute bottom-8 left-8 right-8 p-5 glass-card rounded-2xl border-white/10 backdrop-blur-md">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-sky-500/20 rounded-full flex items-center justify-center">
+                                                <Smartphone className="w-4 h-4 text-sky-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase text-sky-400 tracking-[0.2em]">Driver App Ativo</p>
+                                                <p className="text-[9px] text-slate-500 font-bold">Envio de comprovantes • GPS • Viagens</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -371,8 +382,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             <div key={i} className="group relative">
                                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10rem] font-black text-white/5 pointer-events-none">{item.step}</div>
                                 <div className="relative glass-card p-12 rounded-[3.5rem] hover:border-emerald-500/30 transition-all duration-500 h-full">
-                                    <div className="w-20 h-20 bg-slate-950 border border-white/5 rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                                        <item.icon className="w-10 h-10 text-emerald-500" />
+                                    <div className="w-20 h-20 bg-slate-950 border border-white/5 rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 relative overflow-hidden">
+                                        {i === 1 && <img src="/cerebro.png.png" className="absolute inset-0 w-full h-full object-cover opacity-40" alt="Processamento Neural AI" />}
+                                        <item.icon className="w-10 h-10 text-emerald-500 relative z-10" />
                                     </div>
                                     <h4 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">{item.title}</h4>
                                     <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
@@ -395,25 +407,36 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <TestimonialCard
-                            name="João Carlos Ferreira"
-                            role="Motorista Autônomo — 6 eixos"
-                            city="São Paulo, SP"
-                            text="Antes eu anotava tudo no papel e sempre esquecia de cobrar pedágio e diária. Agora lanço a viagem no app e já aparece o valor certo. Economizei R$ 800 no primeiro mês só de erro de cálculo."
-                        />
-                        <TestimonialCard
-                            name="Maria Aparecida Santos"
-                            role="Proprietária — Frota 3 caminhões"
-                            city="Uberlândia, MG"
-                            text="Finalmente consigo ver qual caminhão dá lucro e qual tá me dando prejuízo. O dashboard financeiro é simples e funciona. Não precisa de contador pra entender."
-                        />
-                        <TestimonialCard
-                            name="Rodrigo Mendes"
-                            role="Autônomo — 9 eixos"
-                            city="Curitiba, PR"
-                            text="A calculadora de frete salvou minha vida. Eu aceitava frete ruim sem saber. Agora antes de fechar qualquer valor eu calculo no app. Já recusei 3 fretes podres esse mês."
-                        />
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                        <div className="lg:col-span-1 hidden lg:block">
+                            <div className="h-full rounded-[3rem] overflow-hidden border border-white/5 group relative">
+                                <img src="/empreendedor.png.png" alt="Especialista Ribeirx Log" className="w-full h-full object-cover opacity-80 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
+                                <div className="absolute bottom-8 left-8">
+                                    <p className="text-white font-black text-xs uppercase tracking-widest">Especialista RBS Intel</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <TestimonialCard
+                                name="João Carlos Ferreira"
+                                role="Motorista Autônomo — 6 eixos"
+                                city="São Paulo, SP"
+                                text="Antes eu anotava tudo no papel e sempre esquecia de cobrar pedágio e diária. Agora lanço a viagem no app e já aparece o valor certo. Economizei R$ 800 no primeiro mês só de erro de cálculo."
+                            />
+                            <TestimonialCard
+                                name="Maria Aparecida Santos"
+                                role="Proprietária — Frota 3 caminhões"
+                                city="Uberlândia, MG"
+                                text="Finalmente consigo ver qual caminhão dá lucro e qual tá me dando prejuízo. O dashboard financeiro é simples e funciona. Não precisa de contador pra entender."
+                            />
+                            <TestimonialCard
+                                name="Rodrigo Mendes"
+                                role="Autônomo — 9 eixos"
+                                city="Curitiba, PR"
+                                text="A calculadora de frete salvou minha vida. Eu aceitava frete ruim sem saber. Agora antes de fechar qualquer valor eu calculo no app. Já recusei 3 fretes podres esse mês."
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -548,7 +571,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             <section id="contato" className="py-40 relative">
                 <div className="max-w-5xl mx-auto px-6">
                     <div className="glass-card rounded-[4rem] p-12 md:p-24 text-center space-y-12 border-emerald-500/20 glow-emerald relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none"><Truck className="w-64 h-64" /></div>
+                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                            <img src="/dashboard-caminhão-futurista2.png.png" alt="Caminhão Futurista RBS" className="w-full h-full object-cover opacity-15 scale-110 group-hover:scale-125 transition-transform duration-[2s]" />
+                        </div>
+                        <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px] pointer-events-none"></div>
 
                         <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-tight relative z-10">
                             PRONTO PARA DEIXAR O <br />
