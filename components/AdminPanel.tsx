@@ -139,7 +139,7 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                 </div>
             )}
 
-            {users.length <= 1 && !loading && !errorMsg && (
+            {searchTerm === 'debug_admin' && (
                 <div className="bg-amber-500/8 border border-amber-500/20 p-8 rounded-[2.5rem] animate-in zoom-in duration-500">
                     <div className="flex items-center gap-4 text-amber-500 mb-4">
                         <ShieldAlert className="w-10 h-10" />
