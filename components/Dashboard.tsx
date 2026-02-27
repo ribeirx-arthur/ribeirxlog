@@ -319,7 +319,9 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
                   <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]" style={{ backgroundColor: item.color }} />
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.name}</span>
                 </div>
-                <span className="text-sm font-black text-white italic">{Math.round((item.value / filteredTrips.length || 1) * 100)}%</span>
+                <span className="text-sm font-black text-white italic">
+                  {Math.round((item.value / (pieData.reduce((acc, curr) => acc + curr.value, 0) || 1)) * 100)}%
+                </span>
               </div>
             ))}
           </div>

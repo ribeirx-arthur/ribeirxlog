@@ -29,7 +29,9 @@ import {
   Droplets,
   Wallet,
   ExternalLink,
-  FolderOpen
+  FolderOpen,
+  Plus,
+  MessageCircle
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { Trip, Vehicle, Driver, Shipper, UserProfile, PaymentStatus, TripProof } from '../types';
@@ -127,6 +129,20 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
 
   const handleUpdate = () => {
     if (editingTrip) {
+      // Automação WhatsApp ao finalizar
+      const oldTrip = trips.find(t => t.id === editingTrip.id);
+      if (profile.config.autoSendWhatsApp &&
+        editingTrip.transitStatus === 'Finalizado' &&
+        oldTrip?.transitStatus !== 'Finalizado') {
+
+        const vehicle = vehicles.find(v => v.id === editingTrip.vehicleId);
+        const driver = drivers.find(d => d.id === editingTrip.driverId);
+        if (driver) {
+          const msg = `Resumo da Viagem RibeirxLog (Finalizada):\nDestino: ${editingTrip.destination}\nPlaca: ${vehicle?.plate || '---'}\nData: ${formatDate(editingTrip.departureDate)}\nStatus: Finalizado ✅`;
+          window.open(`https://wa.me/${driver.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+      }
+
       onUpdateTrip(editingTrip);
       setEditingTrip(null);
       setMenuOpenId(null);
@@ -286,6 +302,18 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                   {menuOpenId === trip.id && (
                     <div className="absolute right-0 mt-3 w-56 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-20 py-2">
                       <button onClick={() => { setEditingTrip({ ...trip }); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-emerald-500 hover:bg-emerald-500/10 font-bold"> <Edit3 className="w-4 h-4" /> Editar </button>
+                      {trip.transitStatus === 'Finalizado' && (
+                        <button
+                          onClick={() => {
+                            const msg = `Resumo da Viagem RibeirxLog:\nDestino: ${trip.destination}\nPlaca: ${vehicle.plate}\nData: ${formatDate(trip.departureDate)}\nStatus: ${trip.transitStatus || 'Agendado'}`;
+                            window.open(`https://wa.me/${driver.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                            setMenuOpenId(null);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-emerald-400 hover:bg-emerald-500/10 font-bold"
+                        >
+                          <MessageCircle className="w-4 h-4" /> Enviar p/ WhatsApp
+                        </button>
+                      )}
                       <button onClick={() => { setViewingFilesTripId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-sky-500 hover:bg-sky-500/10 font-bold"> <FileText className="w-4 h-4" /> Ver Rastreio & Docs </button>
                       <button onClick={() => { setTripToDeleteId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-rose-500 hover:bg-rose-500/10 font-bold"> <Trash2 className="w-4 h-4" /> Excluir </button>
                     </div>
@@ -460,11 +488,25 @@ const TripDetailsModal = ({ tripId, onClose }: { tripId: string, onClose: () => 
   const [proofs, setProofs] = useState<TripProof[]>([]);
   const [lastLocation, setLastLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   React.useEffect(() => {
     const loadData = async () => {
       const { data: proofsData } = await supabase.from('trip_proofs').select('*').eq('trip_id', tripId).order('uploaded_at', { ascending: false });
-      if (proofsData) setProofs(proofsData);
+      if (proofsData) {
+        setProofs(proofsData.map((p: any) => ({
+          id: p.id,
+          tripId: p.trip_id,
+          type: p.type,
+          fileUrl: p.file_url,
+          fileName: p.file_name,
+          fileSize: p.file_size,
+          uploadedBy: p.uploaded_by,
+          uploadedAt: p.uploaded_at,
+          approved: p.approved
+        })));
+      }
 
       const { data: locData } = await supabase.from('vehicle_locations').select('*').eq('trip_id', tripId).order('timestamp', { ascending: false }).limit(1).single();
       if (locData) setLastLocation(locData);
@@ -472,14 +514,54 @@ const TripDetailsModal = ({ tripId, onClose }: { tripId: string, onClose: () => 
       setLoading(false);
     };
     loadData();
-  }, [tripId]);
+  }, [tripId, refreshTrigger]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const fileName = `${tripId}_${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('trip-proofs')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('trip-proofs')
+        .getPublicUrl(fileName);
+
+      const { error: insertError } = await supabase
+        .from('trip_proofs')
+        .insert([{
+          trip_id: tripId,
+          type: 'expense',
+          file_url: publicUrl,
+          file_name: file.name,
+          file_size: file.size,
+          uploaded_by: 'manager',
+          uploaded_at: new Date().toISOString(),
+          approved: true
+        }]);
+
+      if (insertError) throw insertError;
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Error uploading:', error);
+      alert('Erro ao enviar arquivo.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[300] flex items-center justify-center p-4">
       <div className="bg-slate-900 border border-slate-700/50 rounded-[2.5rem] w-full max-w-2xl p-8 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-2xl font-black text-white flex items-center gap-3">
-            <FolderOpen className="w-8 h-8 text-sky-500" /> Detalhes da Viagem
+            <FolderOpen className="w-8 h-8 text-sky-500" /> Detalhes & Documentos
           </h3>
           <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-all">
             <X className="w-6 h-6" />
@@ -490,7 +572,7 @@ const TripDetailsModal = ({ tripId, onClose }: { tripId: string, onClose: () => 
           {/* Rastreamento */}
           <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
             <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-500" /> Última Localização
+              <MapPin className="w-4 h-4 text-emerald-500" /> Monitoramento em Tempo Real
             </h4>
             {lastLocation ? (
               <div className="space-y-4">
@@ -514,40 +596,52 @@ const TripDetailsModal = ({ tripId, onClose }: { tripId: string, onClose: () => 
                 </div>
               </div>
             ) : (
-              <p className="text-slate-400 text-sm italic">Nenhuma localização registrada para esta viagem.</p>
+              <p className="text-slate-400 text-sm italic">O motorista ainda não iniciou o rastreamento via App Motorista.</p>
             )}
           </div>
 
           {/* Comprovantes */}
           <div>
-            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-sky-500" /> Comprovantes ({proofs.length})
-            </h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-4 h-4 text-sky-500" /> Arquivos Anexados ({proofs.length})
+              </h4>
+              <label className={`cursor-pointer px-4 py-1.5 bg-sky-500/10 border border-sky-500/20 rounded-xl text-sky-500 text-[10px] font-black uppercase tracking-widest hover:bg-sky-500 transition-all hover:text-white flex items-center gap-2 ${isUploading ? 'opacity-50 cursor-wait' : ''}`}>
+                {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                Anexar Documento
+                <input type="file" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
+              </label>
+            </div>
+
             {proofs.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {proofs.map((proof) => (
-                  <div key={proof.id} className="bg-slate-800 rounded-xl p-4 border border-slate-700 flex flex-col gap-3">
+                  <div key={proof.id} className="bg-slate-800 rounded-xl p-4 border border-slate-700 flex flex-col gap-3 group/item">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-[10px] font-black uppercase text-slate-500 bg-slate-900 px-2 py-0.5 rounded">{proof.type}</span>
-                        <p className="text-white font-bold text-sm mt-1 truncate max-w-[150px]">{proof.fileName}</p>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-900 border border-white/5 px-2 py-0.5 rounded italic">
+                          {proof.uploadedBy === 'manager' ? 'Escritório' : 'Motorista'}
+                        </span>
+                        <p className="text-white font-bold text-sm mt-1 truncate" title={proof.fileName}>
+                          {proof.fileName}
+                        </p>
                       </div>
-                      {proof.approved && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                      {(proof.approved || proof.uploadedBy === 'manager') && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
                     </div>
                     <a
                       href={proof.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-auto w-full py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold rounded-lg text-center flex items-center justify-center gap-2 transition-all"
+                      className="mt-auto w-full py-2 bg-slate-700 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg text-center flex items-center justify-center gap-2 transition-all"
                     >
-                      <Download className="w-3 h-3" /> Baixar / Visualizar
+                      <Download className="w-3 h-3" /> Visualizar
                     </a>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="bg-slate-800/30 rounded-xl p-8 text-center border border-dashed border-slate-700">
-                <p className="text-slate-500 text-sm">Nenhum comprovante enviado pelo motorista.</p>
+                <p className="text-slate-500 text-sm">Nenhum arquivo ou comprovante nesta viagem.</p>
               </div>
             )}
           </div>

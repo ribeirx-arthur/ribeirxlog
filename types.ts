@@ -18,6 +18,7 @@ export interface UserProfile {
     notifyIncompleteData: boolean;
     notifyMaintenance: boolean;
     showTips: boolean;
+    autoSendWhatsApp?: boolean;
     theme?: 'light' | 'dark';
     enableMaintenance: boolean;
     enableBI: boolean;

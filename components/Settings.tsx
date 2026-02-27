@@ -356,6 +356,18 @@ const Settings: React.FC<SettingsProps> = ({
                         <Tip>Ex: se colocar 7 dias, o sistema avisa se a viagem completou 7 dias desde o retorno e ainda está com pagamento pendente.</Tip>
                      </Card>
 
+                     <Card title="Canal de Comunicação (WhatsApp)" subtitle="Automações para agilizar o contato com motoristas.">
+                        <div className="space-y-3">
+                           <Toggle
+                              label="WhatsApp Automático ao Finalizar"
+                              desc="Abre o WhatsApp com o resumo da viagem automaticamente quando você marca uma viagem como Finalizada."
+                              checked={profile.config.autoSendWhatsApp || false}
+                              onChange={v => cfg('autoSendWhatsApp', v)}
+                           />
+                        </div>
+                        <Tip>Essa opção ajuda a enviar o recibo e resumo para o motorista sem precisar clicar manualmente em cada menu.</Tip>
+                     </Card>
+
                      <Card title="Outros alertas" subtitle="Cada um pode ser ativado ou desativado independentemente.">
                         <div className="space-y-3">
                            <Toggle
