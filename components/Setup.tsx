@@ -44,6 +44,7 @@ interface SetupProps {
   onUpdateBuggy: (b: Buggy) => Promise<void>;
   onDeleteBuggy: (id: string) => Promise<void>;
 
+  profile: any;
   initialSubTab?: SetupTab;
 }
 
@@ -55,9 +56,20 @@ const Setup: React.FC<SetupProps> = ({
   onAddDriver, onUpdateDriver, onDeleteDriver,
   onAddShipper, onUpdateShipper, onDeleteShipper,
   onAddBuggy, onUpdateBuggy, onDeleteBuggy,
+  profile,
   initialSubTab
 }) => {
+  const isAdmin = [
+    'arthur@ribeirxlog.com',
+    'arthur.ribeirx@gmail.com',
+    'arthur.riberix@gmail.com',
+    'arthurpsantos01@gmail.com',
+    'arthur_ribeiro09@outlook.com'
+  ].includes(profile.email?.trim().toLowerCase() || '');
+  const isFree = profile.payment_status !== 'paid' && !isAdmin;
+
   const [activeSubTab, setActiveSubTab] = useState<SetupTab>(initialSubTab || 'vehicles');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -95,6 +107,10 @@ const Setup: React.FC<SetupProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
+    if (isFree) {
+      alert("⚠️ CADASTROS BLOQUEADOS - PLANO GRÁTIS\n\nNa versão demonstrativa você não pode adicionar, editar ou remover registros.\n\nAssine o plano GESTOR PRO para gerenciar sua frota!");
+      return;
+    }
     setIsSaving(true);
     try {
       const isNew = !editingItem.id;
@@ -121,6 +137,10 @@ const Setup: React.FC<SetupProps> = ({
   };
 
   const handleDelete = () => {
+    if (isFree) {
+      alert("⚠️ EXCLUSÃO BLOQUEADA\n\nUsuários grátis não podem remover dados.");
+      return;
+    }
     if (!deleteConfirm) return;
     if (deleteConfirm.type === 'vehicles') onDeleteVehicle(deleteConfirm.id);
     if (deleteConfirm.type === 'drivers') onDeleteDriver(deleteConfirm.id);
@@ -128,6 +148,7 @@ const Setup: React.FC<SetupProps> = ({
     if (deleteConfirm.type === 'buggies') onDeleteBuggy(deleteConfirm.id);
     setDeleteConfirm(null);
   };
+
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

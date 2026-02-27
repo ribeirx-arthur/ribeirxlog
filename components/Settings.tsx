@@ -28,7 +28,17 @@ const Settings: React.FC<SettingsProps> = ({
    trips, vehicles, drivers, shippers, maintenances,
    onImportData, onResetData
 }) => {
+   const isAdmin = [
+      'arthur@ribeirxlog.com',
+      'arthur.ribeirx@gmail.com',
+      'arthur.riberix@gmail.com',
+      'arthurpsantos01@gmail.com',
+      'arthur_ribeiro09@outlook.com'
+   ].includes(profile.email?.trim().toLowerCase() || '');
+   const isFree = profile.payment_status !== 'paid' && !isAdmin;
+
    const [active, setActive] = useState<Section>('empresa');
+
    const [tempProfile, setTempProfile] = useState<UserProfile>({ ...profile });
    const [saved, setSaved] = useState(false);
    const [isResetting, setIsResetting] = useState(false);
@@ -47,6 +57,10 @@ const Settings: React.FC<SettingsProps> = ({
    };
 
    const saveProfile = () => {
+      if (isFree && active !== 'empresa') {
+         alert("⚠️ CONFIGURAÇÃO BLOQUEADA\n\nNo plano grátis você só pode alterar seus dados cadastrais (Nome, Logo, Contato).\n\nAs outras configurações são exclusivas para assinantes PRO.");
+         return;
+      }
       setProfile(tempProfile);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -75,6 +89,10 @@ const Settings: React.FC<SettingsProps> = ({
    };
 
    const importBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isFree) {
+         alert("⚠️ IMPORTAÇÃO BLOQUEADA\n\nRestaurar backups é uma função avançada do plano GESTOR PRO.");
+         return;
+      }
       const file = e.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
@@ -434,7 +452,15 @@ const Settings: React.FC<SettingsProps> = ({
                            {isResetting ? (
                               <div className="flex gap-3 shrink-0">
                                  <button onClick={() => setIsResetting(false)} className="px-5 py-3 bg-slate-800 text-slate-400 rounded-xl text-xs font-black uppercase">Cancelar</button>
-                                 <button onClick={() => { onResetData(); setIsResetting(false); }} className="px-5 py-3 bg-rose-600 text-white rounded-xl text-xs font-black uppercase shadow-lg shadow-rose-600/20">Confirmar</button>
+                                 <button onClick={() => {
+                                    if (isFree) {
+                                       alert("⚠️ RESET BLOQUEADO\n\nUsuários grátis não podem limpar a base de dados.");
+                                       setIsResetting(false);
+                                       return;
+                                    }
+                                    onResetData();
+                                    setIsResetting(false);
+                                 }} className="px-5 py-3 bg-rose-600 text-white rounded-xl text-xs font-black uppercase shadow-lg shadow-rose-600/20">Confirmar</button>
                               </div>
                            ) : (
                               <button onClick={() => setIsResetting(true)} className="shrink-0 px-6 py-3 bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all">

@@ -974,6 +974,19 @@ export default function Home() {
     };
 
     const renderContent = () => {
+        const userEmail = user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '';
+        const adminEmails = [
+            'arthur@ribeirxlog.com',
+            'arthur.ribeirx@gmail.com',
+            'arthur.riberix@gmail.com',
+            'arthurpsantos01@gmail.com',
+            'arthur_ribeiro09@outlook.com'
+        ];
+        const isAdmin = adminEmails.includes(userEmail) ||
+            userEmail.endsWith('@ribeirxlog.com') ||
+            user?.username?.toLowerCase().includes('ribeirxlog') ||
+            (profile.name?.toLowerCase().includes('ribeirxlog'));
+
         switch (activeTab) {
             case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
             case 'drivers': return (
@@ -1010,7 +1023,9 @@ export default function Home() {
                     onAddBuggy={handleAddBuggy}
                     onUpdateBuggy={handleUpdateBuggy}
                     onDeleteBuggy={handleDeleteBuggy}
+                    profile={profile}
                 />
+
             );
             case 'maintenance': return (
                 <Suspense fallback={<div>Carregando...</div>}>
@@ -1022,20 +1037,30 @@ export default function Home() {
                         onDeleteMaintenance={handleDeleteMaintenance}
                         onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
                         onResetComponent={handleResetVehicleComponent}
+                        profile={profile}
                     />
                 </Suspense>
             );
+
             case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
             case 'settings': return <Settings profile={profile} setProfile={handleUpdateProfile} trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} maintenances={maintenances} onImportData={() => { }} onResetData={() => { }} />;
-            case 'performance': return (
-                <Suspense fallback={<div>Carregando BI...</div>}>
-                    <Performance trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} />
-                </Suspense>
-            );
-            case 'intelligence': return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
+            case 'performance':
+                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                    return <Paywall title="Business Intelligence (BI)" plan="Gestor Pro" price="R$ 89,90" features={['Gráficos de Lucro Bruto', 'Análise de Margem por KM', 'Performance por Motorista']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                }
+                return (
+                    <Suspense fallback={<div>Carregando BI...</div>}>
+                        <Performance trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} />
+                    </Suspense>
+                );
+            case 'intelligence':
+                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                    return <Paywall title="Inteligência de Dados" plan="Gestor Pro" price="R$ 89,90" features={['Previsão de Gastos', 'Alertas de Ineficiência', 'Otimização de Rotas']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                }
+                return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
             case 'freight-calculator': return <FreightCalculator vehicles={vehicles} profile={profile} />;
             case 'gps-tracking':
-                if (profile?.plan_type === 'piloto' || profile?.plan_type === 'none') {
+                if (profile?.payment_status !== 'paid' && !isAdmin) {
                     return <Paywall title="Rastreamento em Tempo Real" plan="Gestor Pro" price="R$ 89,90" features={['Localização Exata', 'Alertas de Velocidade', 'Cerca Virtual']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
                 }
                 return (
@@ -1059,28 +1084,23 @@ export default function Home() {
                     />
                 </Suspense>
             );
-            case 'tires': return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
+            case 'tires':
+                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                    return <Paywall title="Controle de Pneus" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de Vidas', 'Custo por KM de Pneu', 'Alertas de Rodízio']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                }
+                return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
             case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
             case 'help': return (
                 <Suspense fallback={<div>Carregando ajuda...</div>}>
                     <HelpCenter />
                 </Suspense>
             );
-            case 'compliance': return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
+            case 'compliance':
+                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                    return <Paywall title="Compliance & Documentos" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de CNH/ANTT', 'Validade de Seguros', 'Alertas de Vencimento']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                }
+                return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
             case 'admin':
-                const userEmail = user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '';
-                const adminEmails = [
-                    'arthur@ribeirxlog.com',
-                    'arthur.ribeirx@gmail.com',
-                    'arthur.riberix@gmail.com',
-                    'arthurpsantos01@gmail.com',
-                    'arthur_ribeiro09@outlook.com'
-                ];
-                const isAdmin = adminEmails.includes(userEmail) ||
-                    userEmail.endsWith('@ribeirxlog.com') ||
-                    user?.username?.toLowerCase().includes('ribeirxlog') ||
-                    profile.name?.toLowerCase().includes('ribeirxlog');
-
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
                 return <AdminPanel supabaseClient={authenticatedClient} />;
 

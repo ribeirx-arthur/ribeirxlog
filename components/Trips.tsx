@@ -61,7 +61,17 @@ const formatDate = (dateStr: string) => {
 };
 
 const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTrip, vehicles, drivers, shippers, profile }) => {
+  const isAdmin = [
+    'arthur@ribeirxlog.com',
+    'arthur.ribeirx@gmail.com',
+    'arthur.riberix@gmail.com',
+    'arthurpsantos01@gmail.com',
+    'arthur_ribeiro09@outlook.com'
+  ].includes(profile.email?.trim().toLowerCase() || '');
+  const isFree = profile.payment_status !== 'paid' && !isAdmin;
+
   const [searchTerm, setSearchTerm] = useState('');
+
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
@@ -128,6 +138,10 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
   }, [filteredAndSortedTrips, vehicles, drivers, profile]);
 
   const handleUpdate = () => {
+    if (isFree) {
+      alert("⚠️ EDIÇÃO BLOQUEADA\n\nUsuários grátis não podem alterar dados de viagens.");
+      return;
+    }
     if (editingTrip) {
       // Automação WhatsApp ao finalizar
       const oldTrip = trips.find(t => t.id === editingTrip.id);
@@ -150,6 +164,10 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
   };
 
   const handleGenerateReceipt = (tripId: string) => {
+    if (isFree) {
+      alert("⚠️ PDF BLOQUEADO\n\nA geração de recibos é exclusiva para assinantes PRO.");
+      return;
+    }
     const trip = trips.find(t => t.id === tripId);
     const vehicle = trip ? vehicles.find(v => v.id === trip.vehicleId) : null;
     const driver = trip ? drivers.find(d => d.id === trip.driverId) : null;
@@ -160,6 +178,10 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
   };
 
   const handleGenerateMonthlyReport = () => {
+    if (isFree) {
+      alert("⚠️ RELATÓRIO BLOQUEADO\n\nGerar relatórios mensais em PDF requer assinatura PRO.");
+      return;
+    }
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const year = String(now.getFullYear());
@@ -468,7 +490,15 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                 Cancelar
               </button>
               <button
-                onClick={() => { onDeleteTrip(tripToDeleteId); setTripToDeleteId(null); }}
+                onClick={() => {
+                  if (isFree) {
+                    alert("⚠️ EXCLUSÃO BLOQUEADA\n\nUsuários grátis não podem excluir viagens.");
+                    setTripToDeleteId(null);
+                    return;
+                  }
+                  onDeleteTrip(tripToDeleteId);
+                  setTripToDeleteId(null);
+                }}
                 className="py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20"
               >
                 Sim, Excluir
@@ -478,13 +508,13 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
         </div>
       )}
       {viewingFilesTripId && (
-        <TripDetailsModal tripId={viewingFilesTripId} onClose={() => setViewingFilesTripId(null)} />
+        <TripDetailsModal tripId={viewingFilesTripId} onClose={() => setViewingFilesTripId(null)} isFree={isFree} />
       )}
     </div>
   );
 };
 
-const TripDetailsModal = ({ tripId, onClose }: { tripId: string, onClose: () => void }) => {
+const TripDetailsModal = ({ tripId, onClose, isFree }: { tripId: string, onClose: () => void, isFree: boolean }) => {
   const [proofs, setProofs] = useState<TripProof[]>([]);
   const [lastLocation, setLastLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -517,6 +547,10 @@ const TripDetailsModal = ({ tripId, onClose }: { tripId: string, onClose: () => 
   }, [tripId, refreshTrigger]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isFree) {
+      alert("⚠️ UPLOAD BLOQUEADO\n\nAnexar documentos é exclusivo para assinantes PRO.");
+      return;
+    }
     const file = e.target.files?.[0];
     if (!file) return;
 

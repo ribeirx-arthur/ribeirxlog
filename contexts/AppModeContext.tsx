@@ -27,8 +27,19 @@ const AppModeContext = createContext<AppModeContextType | undefined>(undefined);
 
 export const AppModeProvider: React.FC<{ profile: UserProfile, children: React.ReactNode }> = ({ profile, children }) => {
     const mode = profile.config.appMode || 'advanced'; // Default to advanced if not set
-    const appPlan = profile.plan_type || 'none';
+    const isAdmin = [
+        'arthur@ribeirxlog.com',
+        'arthur.ribeirx@gmail.com',
+        'arthur.riberix@gmail.com',
+        'arthurpsantos01@gmail.com',
+        'arthur_ribeiro09@outlook.com'
+    ].includes(profile.email?.trim().toLowerCase() || '');
+
+    const isFree = profile.payment_status !== 'paid' && !isAdmin;
+    const appPlan = isFree ? 'none' : (profile.plan_type || 'none');
+
     const customFeatures = profile.config.enabledFeatures || [];
+
 
     const features = useMemo(() => {
         let flags: FeatureFlags = {
@@ -91,28 +102,35 @@ export const AppModeProvider: React.FC<{ profile: UserProfile, children: React.R
         }
 
         // ─── PLAN LIMITATIONS (Hard Override) ───
-        if (appPlan === 'piloto') {
-            // Piloto: Basic only, 1 truck, no GPS, no Tires
+        if (appPlan === 'piloto' || appPlan === 'none') {
+            // Piloto/None: Basic only, 1 truck, no GPS, no Tires
             flags.canAccessGPS = false;
             flags.maxVehicles = 1;
             flags.canAccessTires = false;
             flags.canAccessSociety = false;
-            flags.canAccessBI = false; // Basic Dashboard only
-        } else if (appPlan === 'gestor_pro' || appPlan === 'mensal') {
-            // Gestor Pro: Full access, GPS enabled, tires enabled
+            flags.canAccessBI = false;
+            flags.canAccessFullMaintenance = false;
+            flags.canAccessFinanceComplex = false;
+        } else if (appPlan === 'gestor_pro' || appPlan === 'mensal' || appPlan === 'lifetime') {
+            // Gestor Pro: Full access
             flags.canAccessGPS = true;
             flags.maxVehicles = 999;
             flags.canAccessTires = true;
-        } else if (appPlan === 'frota_elite' || appPlan === 'anual' || appPlan === 'lifetime') {
-            // Elite: Everything + Priority
+            flags.canAccessBI = true;
+            flags.canAccessFullMaintenance = true;
+            flags.canAccessSociety = true;
+            flags.canAccessFinanceComplex = true;
+        } else if (appPlan === 'frota_elite' || appPlan === 'anual') {
+            // Elite: Everything
             flags.canAccessGPS = true;
             flags.maxVehicles = 999;
             flags.canAccessTires = true;
-        } else if (appPlan === 'none') {
-            // Free/Trial: Limited
-            flags.maxVehicles = 1;
-            flags.canAccessGPS = false;
+            flags.canAccessBI = true;
+            flags.canAccessFullMaintenance = true;
+            flags.canAccessSociety = true;
+            flags.canAccessFinanceComplex = true;
         }
+
 
         return flags;
     }, [mode, customFeatures, appPlan]);

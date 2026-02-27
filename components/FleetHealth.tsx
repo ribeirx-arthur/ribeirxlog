@@ -32,6 +32,7 @@ interface FleetHealthProps {
   onDeleteMaintenance: (id: string) => void;
   onUpdateVehicleThresholds: (vehicleId: string, thresholds: MaintenanceThresholds) => void;
   onResetComponent?: (vehicleId: string, component: 'oil' | 'tire' | 'brake' | 'engine') => void;
+  profile: any;
 }
 
 const FleetHealth: React.FC<FleetHealthProps> = ({
@@ -41,8 +42,18 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
   onUpdateMaintenance,
   onDeleteMaintenance,
   onUpdateVehicleThresholds,
-  onResetComponent
+  onResetComponent,
+  profile
 }) => {
+  const isAdmin = [
+    'arthur@ribeirxlog.com',
+    'arthur.ribeirx@gmail.com',
+    'arthur.riberix@gmail.com',
+    'arthurpsantos01@gmail.com',
+    'arthur_ribeiro09@outlook.com'
+  ].includes(profile.email?.trim().toLowerCase() || '');
+  const isFree = profile.payment_status !== 'paid' && !isAdmin;
+
   const [view, setView] = useState<'list' | 'add' | 'edit' | 'report' | 'config'>('list');
   const [selectedAsset, setSelectedAsset] = useState<Vehicle | null>(null);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
@@ -84,12 +95,17 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
   };
 
   const handleSaveConfig = () => {
+    if (isFree) {
+      alert("⚠️ CONFIGURAÇÃO BLOQUEADA\n\nAlterar parâmetros de manutenção é exclusivo para assinantes PRO.");
+      return;
+    }
     if (selectedAsset) {
       onUpdateVehicleThresholds(selectedAsset.id, tempThresholds);
       setView('list');
       alert("Configurações de manutenção atualizadas!");
     }
   };
+
 
   const filteredHistory = useMemo(() => {
     return maintenances.filter(m => {
@@ -99,7 +115,12 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
   }, [maintenances, vehicles, filterPlate]);
 
   const handleSave = () => {
+    if (isFree) {
+      alert("⚠️ REGISTRO BLOQUEADO\n\nNo plano grátis você não pode lançar manutenções. Assine o GESTOR PRO!");
+      return;
+    }
     if (!newRecord.vehicleId || !newRecord.description || !newRecord.totalCost) {
+
       alert("Por favor, preencha os campos obrigatórios.");
       return;
     }

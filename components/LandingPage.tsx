@@ -446,7 +446,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             period="/mês"
                             desc="O essencial para o motorista autônomo organizar as contas do caminhão."
                             features={[
-                                "Calculadora de Frete Inteligente",
+                                "Calculadora Inteligente (10/dia)",
                                 "Controle de Caixa (Entrada/Saída)",
                                 "Relatório de Lucro por Viagem",
                                 "Sem Rastreamento GPS",
@@ -461,10 +461,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             isPopular
                             desc="Controle total da sua frota com rastreamento e inteligência artificial."
                             features={[
+                                "Calculadora Inteligente (20/dia)",
                                 "Frota Ilimitada (Promoção)",
-                                "GPS Rastreamento (Em breve nas lojas)",
+                                "GPS Rastreamento (Em breve lojas)",
                                 "App do Motorista (Em breve)",
-                                "Emissão de CIOT/MDF-e (Em breve)",
                                 "Gestão de Pneus e Manutenção",
                                 "Suporte Prioritário no Zap"
                             ]}
@@ -476,7 +476,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             period="/ano"
                             desc="O mesmo poder do plano Gestor Pro, com 2 meses de economia."
                             features={[
-                                "Todas as funções do Gestor Pro",
+                                "Tudo do Pro + Ilimitado",
                                 "Economia de R$ 281,00 no ano",
                                 "Consultoria de Implantação Grátis",
                                 "Selo de Transportadora Verificada",

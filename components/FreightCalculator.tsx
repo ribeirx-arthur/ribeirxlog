@@ -55,20 +55,45 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
         localStorage.setItem('freight_driver_commission', driverCommissionPct.toString());
     }, [driverCommissionPct]);
 
+    const isAdmin = [
+        'arthur@ribeirxlog.com',
+        'arthur.ribeirx@gmail.com',
+        'arthur.riberix@gmail.com',
+        'arthurpsantos01@gmail.com',
+        'arthur_ribeiro09@outlook.com'
+    ].includes(profile.email?.trim().toLowerCase() || '');
+
     const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
 
     const calculateRoute = async () => {
+        const isFree = profile.payment_status !== 'paid' && !isAdmin;
+
+        if (isFree) {
+            alert("⚠️ CALCULADORA BLOQUEADA\n\nA simulação de frete com inteligência de rotas e pedágios é exclusiva para usuários GESTOR PRO.\n\nAssine um plano para liberar!");
+            return;
+        }
+
+        const isPro = profile.plan_type === 'gestor_pro' || profile.plan_type === 'mensal';
+        const isPiloto = profile.plan_type === 'piloto';
+
+        if (isPro && calculationCount >= 20 && !isAdmin) {
+            alert("⚠️ LIMITE DE USO ATINGIDO\n\nNo plano GESTOR PRO você tem um limite de 20 simulações inteligentes por dia.\n\nSeu limite será renovado amanhã!");
+            return;
+        }
+
+        if (isPiloto && calculationCount >= 10 && !isAdmin) {
+            alert("⚠️ LIMITE DE USO ATINGIDO\n\nNo plano PILOTO você tem um limite de 10 simulações inteligentes por dia.\n\nSeu limite será renovado amanhã!");
+            return;
+        }
+
         if (!origin || !destination) {
+
             alert('Por favor, insira origem e destino.');
             return;
         }
 
-        if (calculationCount >= 20) {
-            alert('Limite diário de cálculos atingido (20/dia). Tente amanhã para proteger sua cota gratuita.');
-            return;
-        }
-
         setIsAnalyzing(true);
+
         // Chave oficial do sistema Ribeirx (OpenRouteService)
         const apiKey = process.env.NEXT_PUBLIC_ORS_API_KEY || "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjExMWY4MTQ2MjMzZDQ0YTZhNjcwY2U3NDdlMmZhMGY1IiwiaCI6Im11cm11cjY0In0=";
 
@@ -340,6 +365,23 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                         </>
                                     )}
                                 </button>
+
+                                {(!isAdmin && (profile.plan_type === 'gestor_pro' || profile.plan_type === 'mensal' || profile.plan_type === 'piloto')) && (
+                                    <div className="flex items-center justify-between px-2 mt-[-8px]">
+                                        <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Uso Diário</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-20 h-1 bg-slate-800 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full transition-all duration-1000 ${calculationCount >= (profile.plan_type?.includes('pro') || profile.plan_type === 'mensal' ? 18 : 8) ? 'bg-rose-500' : 'bg-sky-500'}`}
+                                                    style={{ width: `${Math.min(100, (calculationCount / (profile.plan_type?.includes('pro') || profile.plan_type === 'mensal' ? 20 : 10)) * 100)}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                                {calculationCount}/{profile.plan_type?.includes('pro') || profile.plan_type === 'mensal' ? 20 : 10}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Distância Calculada (Km)</label>

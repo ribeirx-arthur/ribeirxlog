@@ -142,9 +142,10 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     const isFree = profile.payment_status !== 'paid' && !isAdmin;
 
     if (isFree) {
-      alert("⚠️ Função Indisponível no Plano Grátis\n\nNo modo de teste, você pode preencher os dados para ver a prévia do lucro, mas o salvamento oficial requer o plano Gestor Pro.\n\nFale com a RibeirxLog para liberar seu acesso!");
+      alert("⚠️ ACESSO BLOQUEADO - PLANO GRÁTIS\n\nVocê está na versão de demonstração. Para salvar viagens e gerenciar sua frota, você precisa do plano GESTOR PRO.\n\nFale com a RibeirxLog para liberar seu acesso agora!");
       return;
     }
+
 
     const isSimple = profile.config.appMode === 'simple';
     const isMissingCrucial = !formData.origin || !formData.destination ||
