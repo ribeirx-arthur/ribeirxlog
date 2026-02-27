@@ -67,20 +67,27 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       }
 
       if (timeFilter === 'total') return true;
-      const receiptDate = new Date(trip.receiptDate);
+
+      // Usa a data de recebimento, mas se estiver vazia (viagem pendente), usa a data de saída
+      const dateStr = trip.receiptDate || trip.departureDate;
+      const targetDate = new Date(dateStr);
+
+      if (isNaN(targetDate.getTime())) return false; // Evita erro com datas inválidas
+
       if (timeFilter === 'semanal') {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(now.getDate() - 7);
-        return receiptDate >= sevenDaysAgo;
+        return targetDate >= sevenDaysAgo;
       }
       if (timeFilter === 'mensal') {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(now.getDate() - 30);
-        return receiptDate >= thirtyDaysAgo;
+        return targetDate >= thirtyDaysAgo;
       }
-      if (timeFilter === 'anual') return receiptDate.getFullYear() === now.getFullYear();
+      if (timeFilter === 'anual') return targetDate.getFullYear() === now.getFullYear();
       return true;
     });
+
   }, [trips, timeFilter, activeView, vehicles]);
 
   const stats = useMemo(() => {
