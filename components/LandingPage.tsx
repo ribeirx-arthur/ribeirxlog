@@ -28,7 +28,9 @@ import {
     Smartphone,
     Navigation,
     Globe,
-    Youtube
+    Youtube,
+    Facebook,
+    Instagram
 } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../pricing';
 
@@ -117,24 +119,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 RBS Intel v3.1 Enterprise
                             </div>
 
-                            <h1 className="text-6xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
-                                A INTELIGÊNCIA DO <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-100 to-sky-400">SEU CAMINHÃO.</span>
+                            <h1 className="text-5xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
+                                GESTÃO <span className="text-emerald-500">SIMPLES</span> PARA QUEM ENTENDE DE ESTRADA.
                             </h1>
 
-                            <p className="text-xl md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
-                                Esqueça as planilhas e o caderninho. Assuma o controle total do seu lucro, das despesas de viagem e receba os dados direto no celular com o <span className="text-emerald-400 font-bold">App pelo Zap</span>.
+                            <p className="text-lg md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
+                                O único app que transforma seu celular em um verdadeiro gestor. Controle lucros, fretes e motoristas sem complicação, <span className="text-white font-bold">por menos que um almoço por mês.</span>
                             </p>
 
-                            <div className="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in zoom-in-95 duration-1000 delay-700">
+                            <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in zoom-in-95 duration-1000 delay-700">
                                 <button
                                     onClick={onGetStarted}
                                     className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-lg hover:scale-105 active:scale-95 group"
                                 >
-                                    CRIAR CONTA GRÁTIS <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    TESTAR GRÁTIS AGORA <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                <a href="#gps-tracking" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
-                                    VER NOVIDADES GPS
+                                <a href="#planos" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
+                                    VER TODOS OS PLANOS
                                 </a>
                             </div>
 
@@ -168,74 +169,83 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 </div>
             </section>
 
-            {/* NEW: GPS TRACKING SECTION - FEATURE HIGHLIGHT */}
-            <section id="gps-tracking" className="py-40 relative overflow-hidden">
-                <div className="absolute inset-0 bg-slate-900/50 skew-y-3 transform origin-bottom-right z-0"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
-                        <div className="space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
-                            <div className="flex flex-col gap-4 items-start">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                                    <Clock className="w-3 h-3" /> Em desenvolvimento (Breve nas lojas de app)
-                                </div>
-                                <div className="inline-flex p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                                    <Globe className="w-10 h-10" />
-                                </div>
-                            </div>
-                            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
-                                VISÃO GLOBAL <br />
-                                <span className="text-emerald-500">EM TEMPO REAL.</span>
-                            </h2>
-                            <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Abandone os rastreadores caros. Com o <span className="text-white font-bold">Ribeirx Mobile Technology</span>, o celular do seu motorista vira um rastreador de alta precisão.
-                            </p>
-                            <ul className="space-y-6">
-                                {[
-                                    "Monitoramento de velocidade ao vivo",
-                                    "Histórico de rotas completo",
-                                    "Alertas de paradas não programadas",
-                                    "Economia média de R$ 150/mês por caminhão"
-                                ].map(item => (
-                                    <li key={item} className="flex items-center gap-4 text-white font-black text-sm uppercase tracking-widest">
-                                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                            <Check className="w-4 h-4 text-emerald-500" />
-                                        </div>
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                                <button onClick={handleWaitlistContact} className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-2xl uppercase tracking-widest shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
-                                    <MessageCircle className="w-5 h-5" /> Entrar na Lista VIP
-                                </button>
-                                <div className="flex gap-2">
-                                    <div className="relative group cursor-not-allowed">
-                                        <div className="absolute inset-0 bg-black/60 z-10 rounded-xl flex items-center justify-center backdrop-blur-[1px]">
-                                            <span className="text-[9px] font-black text-white uppercase tracking-widest border border-white/20 bg-black/80 px-2 py-1 rounded">Em Breve</span>
-                                        </div>
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-[52px] opacity-50" />
-                                    </div>
-                                    <div className="relative group cursor-not-allowed">
-                                        <div className="absolute inset-0 bg-black/60 z-10 rounded-xl flex items-center justify-center backdrop-blur-[1px]">
-                                            <span className="text-[9px] font-black text-white uppercase tracking-widest border border-white/20 bg-black/80 px-2 py-1 rounded">Em Breve</span>
-                                        </div>
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" className="h-[52px] opacity-50" />
-                                    </div>
-                                </div>
-                            </div>
+            {/* Comparison Section - Focus on Low Cost */}
+            <section className="py-20 md:py-32 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-16 space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-500 text-[10px] font-black uppercase tracking-widest mx-auto mb-4">
+                            <TrendingUp className="w-3 h-3" /> Transparência Total
                         </div>
+                        <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-[1.1]">
+                            O MELHOR CUSTO-BENEFÍCIO <br />
+                            <span className="text-emerald-500 underline decoration-emerald-500/20">DO MERCADO BRASILEIRO.</span>
+                        </h2>
+                        <p className="text-slate-400 font-medium max-w-2xl mx-auto">Pare de gastar fortunas com sistemas complexos ou perder dinheiro no caderninho. Tenha tudo na palma da mão.</p>
+                    </div>
+                    <div className="glass-card rounded-[2.5rem] border-white/10 overflow-hidden shadow-2xl">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse min-w-[600px]">
+                                <thead>
+                                    <tr className="border-b border-white/5 bg-white/[0.02]">
+                                        <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Funcionalidade</th>
+                                        <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Caderninho / Planilha</th>
+                                        <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 bg-emerald-500/5">Ribeirx Log (App)</th>
+                                        <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Sistemas Caros (ERP/TMS)</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5 text-sm">
+                                    <LandingTableRow label="Custo Mensal" v1="Perda de Capital" v2="R$ 34,90" v3="R$ 499,00+" />
+                                    <LandingTableRow label="Cálculo de Frete" v1="No Chute / Lento" v2="Instantâneo" v3="Complexo" />
+                                    <LandingTableRow label="App do Motorista" v1="Não Existe" v2="Direto no WhatsApp" v3="App Pesado / Difícil" />
+                                    <LandingTableRow label="Saúde da Frota" v1="Esquecimento" v2="Alertas Automáticos" v3="Manual / Burocrático" />
+                                    <LandingTableRow label="Inteligência de Dados" v1="Nenhuma" v2="RBS Neural v3.1" v3="Relatórios Estáticos" />
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                        {/* Interactive Video Presentation */}
-                        <div className="relative group perspective-1000">
-                            <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-75 opacity-50"></div>
-                            <div className="glass-card rounded-[3rem] border-white/10 relative z-10 p-4 hover:rotate-[-1deg] transition-all duration-700 shadow-[0_30px_70px_rgba(0,0,0,0.8)]">
-                                <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden relative">
-                                    <img src="/mapa-caminhão.png.png" alt="Rastreamento GPS Global RBS" className="w-full h-auto object-cover opacity-90 transition-all duration-1000 group-hover:opacity-100 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60 pointer-events-none"></div>
-                                    <div className="absolute inset-0 bg-emerald-500/5 mix-blend-overlay group-hover:bg-transparent transition-all duration-700"></div>
+            {/* NEW: All Features Showcase - Tighter & Dense for Sales */}
+            <section id="recursos" className="py-20 md:py-32 bg-slate-900/40 relative border-y border-white/5">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase mb-4">
+                            MUITO MAIS QUE UM APP. <br />
+                            <span className="text-emerald-500">UMA GESTÃO COMPLETA.</span>
+                        </h3>
+                        <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-xs">Tudo o que você precisa em um só lugar</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                        {[
+                            { icon: Calculator, title: "Calculadora de Frete", desc: "Simule custos reais e margem em segundos." },
+                            { icon: LayoutDashboard, title: "Dashboard Financeiro", desc: "Sua saúde financeira em tempo real." },
+                            { icon: Users, title: "Gestão de Motoristas", desc: "Controle de CNH, comissões e rotas." },
+                            { icon: Smartphone, title: "App do Motorista", desc: "No WhatsApp. Sem downloads difíceis." },
+                            { icon: ShieldCheck, title: "Compliance Hub", desc: "Alertas de ANTT, CNH e Seguros." },
+                            { icon: BarChart3, title: "BI & Performance", desc: "Ranking de motoristas e rotas lucrativas." },
+                            { icon: Truck, title: "Saúde da Frota", desc: "Alertas de manutenção e mecânica." },
+                            { icon: Zap, title: "Gestão de Pneus", desc: "Controle de custo por KM e trocas." },
+                            { icon: BrainCircuit, title: "IA Ribeirx", desc: "Insights proativos para o seu negócio." },
+                            { icon: MapPin, title: "Mapa de Histórico", desc: "Visualize suas rotas geograficamente." },
+                            { icon: Building2, title: "Modo Transportadora", desc: "Gestão para frotas e sociedades." },
+                            { icon: DollarSign, title: "Alertas de Cobrança", desc: "Nunca mais perca o prazo de cobrança." },
+                        ].map((feature, i) => (
+                            <div key={i} className="glass-card p-6 md:p-10 rounded-[2.5rem] hover:border-emerald-500/40 transition-all group">
+                                <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all">
+                                    <feature.icon className="w-6 h-6" />
                                 </div>
+                                <h4 className="text-sm md:text-lg font-black text-white uppercase tracking-tighter mb-2 leading-none">{feature.title}</h4>
+                                <p className="text-slate-500 text-[10px] md:text-xs font-medium leading-relaxed">{feature.desc}</p>
                             </div>
-                        </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-16 text-center">
+                        <button onClick={onGetStarted} className="px-12 py-6 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black rounded-2xl uppercase tracking-[0.2em] text-xs transition-all flex items-center gap-4 mx-auto">
+                            VER DETALHES DE CADA FUNÇÃO <ArrowRight className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             </section>
@@ -254,85 +264,61 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             {/* Features Section - Deep Details */}
             <section id="recursos" className="py-40 relative">
                 <div className="max-w-7xl mx-auto px-6">
-                    {/* Feature 1 */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center mb-60">
-                        <div className="space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
+                    {/* Feature 1 — Clean UI Highlight */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-32 items-center mb-32 md:mb-60">
+                        <div className="space-y-10 animate-in fade-in slide-in-from-left-8 duration-1000">
                             <div className="inline-flex p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]"><BarChart3 className="w-10 h-10" /></div>
-                            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
+                            <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-tight uppercase">
                                 AUDITORIA DE <br />
-                                <span className="text-emerald-500">MARGEM LIMPA.</span>
+                                <span className="text-emerald-500">LUCRO REAL.</span>
                             </h2>
-                            <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Pare de adivinhar quanto sobrou no fim do mês. O Ribeirx Log calcula automaticamente todos os seus custos reais. Tenha uma visão cirúrgica do seu retorno sobre investimento direto na sua tela.
+                            <p className="text-lg text-slate-400 font-medium leading-relaxed">
+                                Pare de adivinhar quanto sobrou no fim do mês. O Ribeirx Log calcula automaticamente custos de diesel, manutenção e pneus. Tenha uma visão cirúrgica do seu lucro direto no celular.
                             </p>
-                            <ul className="space-y-6">
-                                {["Cálculo de Diesel/KM Integrado", "Visão de custos em tempo real", "Monitoramento de taxas de frete"].map(item => (
-                                    <li key={item} className="flex items-center gap-4 text-white font-black text-sm uppercase tracking-widest">
-                                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                            <Check className="w-4 h-4 text-emerald-500" />
+                            <ul className="space-y-4">
+                                {["Cálculo de Diesel Automático", "Aviso de lucros negativos", "Histórico de fretes profissional"].map(item => (
+                                    <li key={item} className="flex items-center gap-4 text-white font-black text-[10px] md:text-sm uppercase tracking-widest">
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                            <Check className="w-3 h-3 text-emerald-500" />
                                         </div>
                                         {item}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                        <div className="relative group perspective-1000">
-                            <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
-                            <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-2 transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
-                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 overflow-hidden relative group-hover:shadow-[0_0_50px_rgba(16,185,129,0.15)] transition-all duration-700">
-                                    <img src="/dashboard-no-caminhão.png.png" alt="Dashboard Logístico Futurista" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
-                                    <div className="absolute bottom-10 left-10 right-10 p-6 glass-card rounded-2xl border-white/10 backdrop-blur-md">
-                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] mb-4">
-                                            <span>Métrica de Lucratividade Ativa</span>
-                                            <TrendingUp className="w-4 h-4" />
-                                        </div>
-                                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-emerald-400 w-[84%] shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
-                                        </div>
-                                    </div>
+                        <div className="relative group">
+                            <div className="glass-card rounded-[3rem] p-3 border-white/10 relative z-10 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
+                                <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden">
+                                    <img src="/dashboard-no-caminhão.png.png" alt="Dashboard Ribeirx Log" className="w-full h-auto object-cover opacity-90 group-hover:scale-105 transition-all duration-1000" />
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Feature 2 - Intelligence & Driver App */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center mb-60">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-32 items-center mb-32 md:mb-60">
                         <div className="order-2 lg:order-1 relative group">
-                            <div className="absolute inset-0 bg-sky-500/20 blur-[120px] rounded-full scale-75 opacity-50 group-hover:opacity-80 transition-all duration-1000"></div>
-                            <div className="glass-card rounded-[4rem] p-4 border-white/10 relative z-10 hover:rotate-[-2deg] transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
-                                <div className="aspect-video bg-slate-950 rounded-[3.5rem] border border-white/5 overflow-hidden relative group">
-                                    <img src="/dashboard-motorista.gif" alt="App do Motorista RBS" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
-                                    <div className="absolute inset-0 bg-gradient-to-br from-sky-500/15 via-transparent to-slate-950/60"></div>
-                                    <div className="absolute bottom-8 left-8 right-8 p-5 glass-card rounded-2xl border-white/10 backdrop-blur-md">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-sky-500/20 rounded-full flex items-center justify-center">
-                                                <Smartphone className="w-4 h-4 text-sky-400" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase text-sky-400 tracking-[0.2em]">Driver App Ativo</p>
-                                                <p className="text-[9px] text-slate-500 font-bold">Envio de comprovantes • GPS • Viagens</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div className="glass-card rounded-[3rem] p-3 border-white/10 relative z-10 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
+                                <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden">
+                                    <img src="/dashboard-motorista.gif" alt="App do Motorista Ribeirx" className="w-full h-auto object-cover opacity-90 group-hover:scale-105 transition-all duration-1000" />
                                 </div>
                             </div>
                         </div>
-                        <div className="order-1 lg:order-2 space-y-12 animate-in fade-in slide-in-from-right-8 duration-1000">
+                        <div className="order-1 lg:order-2 space-y-10 animate-in fade-in slide-in-from-right-8 duration-1000 text-left">
                             <div className="inline-flex p-4 bg-sky-500/10 rounded-2xl text-sky-500 shadow-[0_0_20px_rgba(14,165,233,0.2)]"><Zap className="w-10 h-10" /></div>
-                            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight">
+                            <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-tight uppercase">
                                 APP DO MOTORISTA <br />
-                                <span className="text-sky-500">VIA WHATSAPP.</span>
+                                <span className="text-sky-500">ZERO COMPLICAÇÃO.</span>
                             </h2>
-                            <p className="text-xl text-slate-400 font-medium leading-relaxed">
-                                Esqueça downloads complexos. Gere um link, envie no Zap e pronto: seu motorista tem um app completo para enviar comprovantes, iniciar viagens e ativar o GPS.
+                            <p className="text-lg text-slate-400 font-medium leading-relaxed">
+                                Esqueça downloads difíceis. Seu motorista recebe um link no Zap e já começa a usar. Rápido, leve e simples — feito para quem não quer perder tempo.
                             </p>
-                            <div className="p-8 bg-sky-500/5 border border-sky-500/10 rounded-[3rem] backdrop-blur-sm">
-                                <p className="text-sky-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> App Instantâneo (PWA)
+                            <div className="p-6 bg-sky-500/5 border border-sky-500/10 rounded-3xl backdrop-blur-sm">
+                                <p className="text-sky-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Tecnologia PWA Instantânea
                                 </p>
-                                <p className="text-slate-300 text-sm italic leading-relaxed">
-                                    &quot;Motorista João iniciou a viagem SP ➔ RJ. Rastreamento ativo. Previsão de chegada: 18:30.&quot;
+                                <p className="text-slate-300 text-xs italic leading-relaxed">
+                                    Basta clicar no link, adicionar à tela de início e o motorista já tem o gestor na palma da mão.
                                 </p>
                             </div>
                         </div>
@@ -340,33 +326,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
 
                     {/* NEW: Smart Calculator Placeholder (The Future Addition) */}
                     {/* NEW: Smart Calculator - NOW LIVE */}
-                    <div className="max-w-4xl mx-auto glass-card rounded-[4rem] p-12 md:p-20 text-center relative overflow-hidden group border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+                    <div className="max-w-4xl mx-auto glass-card rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden group border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
                         <div className="relative z-10">
-                            <div className="inline-flex py-2 px-6 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-[0.4em] mb-12 animate-pulse shadow-lg shadow-emerald-500/20">
+                            <div className="inline-flex py-2 px-6 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-[0.4em] mb-8 animate-pulse shadow-lg shadow-emerald-500/20">
                                 Funcionalidade Liberada
                             </div>
-                            <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 italic uppercase leading-none">
-                                Calculadora de <br /><span className="text-emerald-500">Frete Inteligente.</span>
+                            <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6 italic uppercase leading-none">
+                                Calculadora de <br /><span className="text-emerald-500">Frete Rápida.</span>
                             </h3>
-                            <p className="text-lg text-slate-400 font-medium max-w-2xl mx-auto mb-16 leading-relaxed">
-                                <span className="text-white font-bold">Nunca mais pague para trabalhar.</span> Simule diesel, pedágio, manutenção e sua margem de lucro em 10 segundos. Você coloca a origem, destino e veículo, nós te damos o preço exato.
+                            <p className="text-lg text-slate-400 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
+                                <span className="text-white font-bold">Nunca mais pague para trabalhar.</span> Simule diesel, pedágio, manutenção e sua margem de lucro em segundos. Transparente e direto ao ponto.
                             </p>
                             <div className="flex justify-center">
-                                <a href="#planos" className="px-10 py-5 bg-white text-slate-950 font-black rounded-2xl flex items-center gap-4 hover:scale-105 transition-all shadow-2xl uppercase tracking-widest">
-                                    Quero Usar Agora <ArrowRight className="w-5 h-5" />
+                                <a href="#planos" className="px-10 py-5 bg-white text-slate-950 font-black rounded-2xl flex items-center gap-4 hover:scale-105 transition-all shadow-2xl uppercase tracking-widest text-sm">
+                                    SIMULAR AGORA <ArrowRight className="w-4 h-4" />
                                 </a>
                             </div>
-                        </div>
-                        <div className="absolute -bottom-20 -right-20 p-20 opacity-10 group-hover:opacity-20 transition-all duration-700 rotate-12">
-                            <Calculator className="w-80 h-80 text-emerald-500" />
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* How It Works - The Flow */}
-            <section id="como-funciona" className="py-40 bg-slate-900/40 relative">
+            <section id="como-funciona" className="py-20 md:py-40 bg-slate-900/40 relative">
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-32 space-y-6">
                         <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter">FLUXO DE SUCESSO.</h2>
@@ -396,7 +379,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             </section>
 
             {/* SOCIAL PROOF - Testimonials (Task 2) */}
-            <section className="py-32 relative border-y border-white/5 bg-slate-900/30">
+            <section className="py-20 md:py-32 relative border-y border-white/5 bg-slate-900/30">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20 space-y-6">
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">
@@ -442,7 +425,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             </section>
 
             {/* Pricing Section - The Offer */}
-            <section id="planos" className="py-40 relative overflow-hidden">
+            <section id="planos" className="py-20 md:py-40 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-15 pointer-events-none">
                     <img src="/background-minimalista.gif" alt="Background Logística Edge" className="w-full h-full object-cover" />
                 </div>
@@ -568,11 +551,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             </section>
 
             {/* Final CTA - The Last Push */}
-            <section id="contato" className="py-40 relative">
+            <section id="contato" className="py-20 md:py-40 relative">
                 <div className="max-w-5xl mx-auto px-6">
                     <div className="glass-card rounded-[4rem] p-12 md:p-24 text-center space-y-12 border-emerald-500/20 glow-emerald relative overflow-hidden">
                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                            <img src="/dashboard-caminhão-futurista2.png.png" alt="Caminhão Futurista RBS" className="w-full h-full object-cover opacity-15 scale-110 group-hover:scale-125 transition-transform duration-[2s]" />
+                            <img src="/dashboard-caminhão-futurista2.png.png" alt="Caminhão Futurista RBS" loading="lazy" className="w-full h-full object-cover opacity-15 scale-110 group-hover:scale-125 transition-transform duration-[2s]" />
                         </div>
                         <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px] pointer-events-none"></div>
 
@@ -616,9 +599,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             gestão de frota e controle financeiro de alta precisão.
                         </p>
                         <div className="flex gap-4">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="w-10 h-10 bg-slate-900 border border-white/5 rounded-full hover:bg-emerald-500/10 cursor-pointer transition-colors" />
-                            ))}
+                            <a
+                                href="https://www.instagram.com/ribeirxlog/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 bg-slate-900 border border-white/5 rounded-full flex items-center justify-center hover:bg-emerald-500/10 hover:border-emerald-500/30 text-slate-500 hover:text-emerald-500 transition-all"
+                            >
+                                <Instagram className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="https://www.facebook.com/profile.php?id=61588570600609"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 bg-slate-900 border border-white/5 rounded-full flex items-center justify-center hover:bg-emerald-500/10 hover:border-emerald-500/30 text-slate-500 hover:text-emerald-500 transition-all"
+                            >
+                                <Facebook className="w-5 h-5" />
+                            </a>
                         </div>
                     </div>
                     <div>
@@ -714,15 +710,15 @@ const TestimonialCard = ({ name, role, city, text }: any) => (
 
 const LandingTableRow = ({ label, v1, v2, v3 }: any) => (
     <tr className="hover:bg-white/[0.04] transition-all group/row">
-        <td className="p-10 text-slate-400 font-black text-[10px] uppercase tracking-widest">{label}</td>
-        <td className="p-10 text-white font-bold">{v1}</td>
-        <td className="p-10">
-            <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-emerald-500" />
-                <span className="text-emerald-400 font-black text-lg italic tracking-tighter">{v2}</span>
+        <td className="p-6 md:p-8 text-slate-400 font-black text-[9px] md:text-[10px] uppercase tracking-widest leading-none shrink-0">{label}</td>
+        <td className="p-6 md:p-8 text-slate-500 font-bold text-xs md:text-sm line-through decoration-red-500/30">{v1}</td>
+        <td className="p-6 md:p-8 bg-emerald-500/5">
+            <div className="flex flex-col md:flex-row md:items-center gap-2">
+                <span className="text-emerald-400 font-black text-sm md:text-xl italic tracking-tighter leading-none">{v2}</span>
+                <span className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest hidden md:block">Mais em conta</span>
             </div>
         </td>
-        <td className="p-10 text-white font-bold">{v3}</td>
+        <td className="p-6 md:p-8 text-slate-500 font-bold text-xs md:text-sm">{v3}</td>
     </tr>
 );
 
