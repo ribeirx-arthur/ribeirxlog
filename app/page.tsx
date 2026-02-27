@@ -1068,14 +1068,23 @@ export default function Home() {
             );
             case 'compliance': return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
             case 'admin':
-                const ADMIN_EMAILS = [
+                const userEmail = user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '';
+                const adminEmails = [
                     'arthur@ribeirxlog.com',
                     'arthur.ribeirx@gmail.com',
-                    'arthurpsantos01@gmail.com'
+                    'arthur.riberix@gmail.com',
+                    'arthurpsantos01@gmail.com',
+                    'arthur_ribeiro09@outlook.com'
                 ];
-                const isAdmin = ADMIN_EMAILS.includes(user?.primaryEmailAddress?.emailAddress?.trim().toLowerCase() || '');
-                if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+                const isAdmin = adminEmails.includes(userEmail) ||
+                    userEmail.endsWith('@ribeirxlog.com') ||
+                    user?.username?.toLowerCase().includes('ribeirxlog') ||
+                    profile.name?.toLowerCase().includes('ribeirxlog');
+
+                if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
                 return <AdminPanel supabaseClient={authenticatedClient} />;
+
+
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
         }
     };

@@ -69,14 +69,17 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
         fetchUsers();
     };
 
-    const updatePlan = async (email: string, updates: Partial<UserProfile>) => {
+    const updatePlan = async (userId: string, updates: Partial<UserProfile>) => {
         const { error } = await client
             .from('profiles')
             .update(updates)
-            .eq('email', email);
+            .eq('id', userId);
 
         if (!error) {
             fetchUsers();
+        } else {
+            console.error("Error updating user:", error);
+            setErrorMsg(`Erro ao atualizar: ${error.message}`);
         }
     };
 
@@ -129,16 +132,31 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
             )}
 
             {users.length === 0 && !loading && !errorMsg && (
-                <div className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-3xl animate-in zoom-in duration-300">
-                    <div className="flex items-center gap-4 text-amber-500 mb-2">
-                        <ShieldAlert className="w-6 h-6" />
-                        <p className="font-black uppercase tracking-widest italic">Nenhum Usuário Encontrado</p>
+                <div className="bg-amber-500/10 border border-amber-500/20 p-8 rounded-[2.5rem] animate-in zoom-in duration-300">
+                    <div className="flex items-center gap-4 text-amber-500 mb-4">
+                        <ShieldAlert className="w-8 h-8" />
+                        <h3 className="text-xl font-black uppercase tracking-tight italic">Nenhum Usuário Visível</h3>
                     </div>
-                    <p className="text-slate-400 text-sm leading-relaxed">
-                        Não existem perfis registrados no banco de dados ou você não tem permissão para visualizá-los. Se você sabe que existem usuários mas não os vê aqui, é provável que a **Row Level Security (RLS)** do Supabase esteja restringindo o acesso. Certifique-se de que existe uma política na tabela `profiles` permitindo a leitura para o seu e-mail de admin.
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                        Você está autenticado como admin, mas a **Row Level Security (RLS)** do Supabase está impedindo que você veja outros perfis. Para corrigir isso, execute o comando SQL abaixo no seu painel do Supabase:
+                    </p>
+                    <div className="bg-slate-950 rounded-2xl p-6 border border-white/5 font-mono text-[11px] text-emerald-500 overflow-x-auto">
+                        <pre>
+                            {`CREATE POLICY "Admins can view and update all profiles" 
+ON public.profiles 
+FOR ALL 
+USING (
+  auth.email() IN ('arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com') 
+  OR auth.email() LIKE '%@ribeirxlog.com'
+);`}
+                        </pre>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-4 uppercase font-bold tracking-widest italic">
+                        * Substitua pelos e-mails reais dos administradores se necessário.
                     </p>
                 </div>
             )}
+
 
             {/* Filters */}
             <div className="flex flex-col md:flex-row gap-4">
@@ -220,17 +238,17 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                         </thead>
                         <tbody className="divide-y divide-slate-800/50">
                             {filteredUsers.map(user => (
-                                <tr key={user.email} className="group hover:bg-white/[0.02] transition-colors">
+                                <tr key={user.id} className="group hover:bg-white/[0.02] transition-colors">
                                     <td className="p-6">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-2xl bg-slate-800 flex items-center justify-center text-emerald-500 font-black italic">
-                                                {user.name?.[0] || '?'}
+                                                {user.name?.[0] || user.email?.[0] || '?'}
                                             </div>
                                             <div>
                                                 <p className="text-sm font-black text-white uppercase tracking-tight">{user.name || 'Sem Nome'}</p>
                                                 <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium">
                                                     <Mail className="w-3 h-3" />
-                                                    {user.email}
+                                                    {user.email || 'Nenhum e-mail'}
                                                 </div>
                                             </div>
                                         </div>
@@ -238,8 +256,8 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                                     <td className="p-6">
                                         <select
                                             value={user.plan_type || 'none'}
-                                            onChange={(e) => updatePlan(user.email, { plan_type: e.target.value as any })}
-                                            className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-300 outline-none focus:border-emerald-500/50"
+                                            onChange={(e) => updatePlan(user.id!, { plan_type: e.target.value as any })}
+                                            className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-300 outline-none focus:border-emerald-500/50 cursor-pointer"
                                         >
                                             <option value="none">Sem Plano</option>
                                             <option value="piloto">Piloto (Básico)</option>
@@ -248,15 +266,15 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                                             <optgroup label="Legado">
                                                 <option value="mensal">Mensal (Antigo)</option>
                                                 <option value="anual">Anual (Antigo)</option>
-                                                <option value="lifetime">Lifetime</option>
+                                                <option value="lifetime">Lifetime (Vitalício)</option>
                                             </optgroup>
                                         </select>
                                     </td>
                                     <td className="p-6">
                                         <select
                                             value={user.payment_status || 'unpaid'}
-                                            onChange={(e) => updatePlan(user.email, { payment_status: e.target.value as any })}
-                                            className={`rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none border transition-all ${user.payment_status === 'paid' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                            onChange={(e) => updatePlan(user.id!, { payment_status: e.target.value as any })}
+                                            className={`rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none border transition-all cursor-pointer ${user.payment_status === 'paid' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
                                                 user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
                                                     'bg-rose-500/10 border-rose-500/20 text-rose-500'
                                                 }`}
@@ -269,14 +287,16 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                                     </td>
                                     <td className="p-6 text-right">
                                         <button
-                                            onClick={() => updatePlan(user.email, { payment_status: user.payment_status === 'paid' ? 'unpaid' : 'paid' })}
-                                            className="p-3 rounded-2xl bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                                            onClick={() => updatePlan(user.id!, { payment_status: user.payment_status === 'paid' ? 'unpaid' : 'paid' })}
+                                            className="p-3 rounded-2xl bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all group-hover:bg-emerald-500/10 group-hover:text-emerald-500"
+                                            title={user.payment_status === 'paid' ? "Bloquear" : "Liberar"}
                                         >
                                             {user.payment_status === 'paid' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                                         </button>
                                     </td>
                                 </tr>
                             ))}
+
                             {loading && (
                                 <tr>
                                     <td colSpan={4} className="p-12 text-center">

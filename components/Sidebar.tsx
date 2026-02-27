@@ -40,6 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
   const { signOut } = useAuth();
   const [toolsExpanded, setToolsExpanded] = useState(false);
 
+  const userEmail = profile.email?.trim().toLowerCase() || '';
   const adminEmails = [
     'arthur@ribeirxlog.com',
     'arthur.ribeirx@gmail.com',
@@ -47,7 +48,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
     'arthurpsantos01@gmail.com',
     'arthur_ribeiro09@outlook.com'
   ];
-  const isAdmin = adminEmails.includes(profile.email?.trim().toLowerCase() || '') || profile.name?.toLowerCase().includes('ribeirxlog');
+  const isAdmin = adminEmails.includes(userEmail) ||
+    userEmail.endsWith('@ribeirxlog.com') ||
+    profile.name?.toLowerCase().includes('ribeirxlog');
+
 
   const navigate = (tab: TabType) => {
     setActiveTab(tab);
