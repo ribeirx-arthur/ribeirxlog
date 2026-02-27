@@ -132,6 +132,20 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
   const isAdvanced = !isSimple && !isIntermediate;
 
   const handleSave = () => {
+    const isAdmin = [
+      'arthur@ribeirxlog.com',
+      'arthur.ribeirx@gmail.com',
+      'arthur.riberix@gmail.com',
+      'arthurpsantos01@gmail.com',
+      'arthur_ribeiro09@outlook.com'
+    ].includes(profile.email?.trim().toLowerCase() || '');
+    const isFree = profile.payment_status !== 'paid' && !isAdmin;
+
+    if (isFree) {
+      alert("⚠️ Função Indisponível no Plano Grátis\n\nNo modo de teste, você pode preencher os dados para ver a prévia do lucro, mas o salvamento oficial requer o plano Gestor Pro.\n\nFale com a RibeirxLog para liberar seu acesso!");
+      return;
+    }
+
     const isSimple = profile.config.appMode === 'simple';
     const isMissingCrucial = !formData.origin || !formData.destination ||
       (!isSimple && (!formData.vehicleId || !formData.driverId || !formData.shipperId));
@@ -153,6 +167,7 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     onSave(newTrip);
     localStorage.removeItem('ribeirx_trip_draft');
   };
+
 
   const estimatedProfit = (formData.freteSeco + formData.diarias) - (formData.combustivel + formData.outrasDespesas);
 

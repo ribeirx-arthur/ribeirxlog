@@ -18,8 +18,10 @@ import {
     ShieldAlert,
     Database,
     HardDrive,
-    Zap
+    Zap,
+    ChevronRight
 } from 'lucide-react';
+
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -86,9 +88,15 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
     const filteredUsers = users.filter(u => {
         const emailMatch = (u.email || '').toLowerCase().includes(searchTerm.toLowerCase());
         const nameMatch = (u.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-        const statusMatch = statusFilter === 'all' || u.payment_status === statusFilter;
+
+        // Se o filtro for 'all', mostra todo mundo. 
+        // Se for um filtro específico, garante que bate, tratando null como 'unpaid'.
+        const userStatus = u.payment_status || 'unpaid';
+        const statusMatch = statusFilter === 'all' || userStatus === statusFilter;
+
         return (emailMatch || nameMatch) && statusMatch;
     });
+
 
     useEffect(() => {
         if (users.length > 0) {
@@ -131,29 +139,45 @@ export const AdminPanel = ({ supabaseClient }: AdminPanelProps) => {
                 </div>
             )}
 
-            {users.length === 0 && !loading && !errorMsg && (
-                <div className="bg-amber-500/10 border border-amber-500/20 p-8 rounded-[2.5rem] animate-in zoom-in duration-300">
+            {users.length <= 1 && !loading && !errorMsg && (
+                <div className="bg-amber-500/8 border border-amber-500/20 p-8 rounded-[2.5rem] animate-in zoom-in duration-500">
                     <div className="flex items-center gap-4 text-amber-500 mb-4">
-                        <ShieldAlert className="w-8 h-8" />
-                        <h3 className="text-xl font-black uppercase tracking-tight italic">Nenhum Usuário Visível</h3>
+                        <ShieldAlert className="w-10 h-10" />
+                        <div>
+                            <h3 className="text-xl font-black uppercase tracking-tight italic">Apenas {users.length} usuário visível</h3>
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Provável restrição de permissão (RLS)</p>
+                        </div>
                     </div>
                     <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                        Você está autenticado como admin, mas a **Row Level Security (RLS)** do Supabase está impedindo que você veja outros perfis. Para corrigir isso, execute o comando SQL abaixo no seu painel do Supabase:
+                        Se você sabe que existem outros usuários mas eles não aparecem abaixo, é porque o **Supabase RLS** está protegendo os dados. Para que você (Admin) consiga gerenciar todos, siga estes passos:
                     </p>
-                    <div className="bg-slate-950 rounded-2xl p-6 border border-white/5 font-mono text-[11px] text-emerald-500 overflow-x-auto">
-                        <pre>
-                            {`CREATE POLICY "Admins can view and update all profiles" 
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="bg-slate-900/50 p-6 rounded-3xl border border-white/5">
+                            <p className="text-emerald-500 font-black text-[10px] uppercase mb-3">1. SQL para Executar</p>
+                            <div className="bg-black/40 p-4 rounded-2xl font-mono text-[10px] text-slate-300 border border-white/5 select-all">
+                                <pre className="whitespace-pre-wrap">
+                                    {`-- Permite que admins vejam e editem qualquer perfil
+CREATE POLICY "Admins can manage all profiles" 
 ON public.profiles 
 FOR ALL 
 USING (
   auth.email() IN ('arthur@ribeirxlog.com', 'arthur.ribeirx@gmail.com') 
   OR auth.email() LIKE '%@ribeirxlog.com'
 );`}
-                        </pre>
+                                </pre>
+                            </div>
+                        </div>
+                        <div className="bg-slate-900/50 p-6 rounded-3xl border border-white/5">
+                            <p className="text-sky-500 font-black text-[10px] uppercase mb-3">2. Onde colar?</p>
+                            <ul className="text-xs text-slate-400 space-y-2 font-bold">
+                                <li className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-sky-500" /> Vá no Dashboard do Supabase</li>
+                                <li className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-sky-500" /> Clique em "SQL Editor" na barra lateral</li>
+                                <li className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-sky-500" /> Clique em "+ New Query"</li>
+                                <li className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-sky-500" /> Cole o código e clique em "Run"</li>
+                            </ul>
+                        </div>
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-4 uppercase font-bold tracking-widest italic">
-                        * Substitua pelos e-mails reais dos administradores se necessário.
-                    </p>
                 </div>
             )}
 

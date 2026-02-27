@@ -47,8 +47,15 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
 
   const hasSocietyVehicles = useMemo(() => vehicles.some(v => v.type === 'Sociedade'), [vehicles]);
 
-  const isAdmin = ['arthur@ribeirxlog.com', 'arthur_ribeiro09@outlook.com'].includes(profile.email?.trim().toLowerCase() || '');
-  const isFree = profile.payment_status !== 'paid' && !isAdmin;
+  const isAdmin = [
+    'arthur@ribeirxlog.com',
+    'arthur.ribeirx@gmail.com',
+    'arthur.riberix@gmail.com',
+    'arthurpsantos01@gmail.com',
+    'arthur_ribeiro09@outlook.com'
+  ].includes(profile.email?.trim().toLowerCase() || '') || profile.name?.toLowerCase().includes('ribeirxlog');
+  const isFree = (profile.payment_status === 'unpaid' || !profile.payment_status) && !isAdmin;
+
 
   const filteredTrips = useMemo(() => {
     const now = new Date();
