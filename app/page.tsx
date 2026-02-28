@@ -141,7 +141,23 @@ export default function Home() {
                         }
                         // Merge with defaults to ensure new fields are always present
                         const mergedConfig = { ...INITIAL_PROFILE.config, ...parsedConfig };
-                        window.location.reload();
+                        setProfile({
+                            ...profileData,
+                            companyName: profileData.company_name,
+                            logoUrl: profileData.logo_url,
+                            signatureUrl: profileData.signature_url,
+                            cpfCnpj: profileData.cpf_cnpj,
+                            plan_type: profileData.plan_type,
+                            payment_status: profileData.payment_status,
+                            trial_ends_at: profileData.trial_ends_at,
+                            subscription_expires_at: profileData.subscription_expires_at,
+                            config: mergedConfig
+                        } as any);
+
+                        // Se o onboarding já foi completado, abrimos no dashboard
+                        if (mergedConfig.onboardingCompleted) {
+                            setActiveTab('dashboard');
+                        }
                     } else if (profileError?.code === 'PGRST116') {
                         // New User - Create Profile
                         setActiveTab('setup');
