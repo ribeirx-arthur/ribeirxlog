@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Esta rota usa a SERVICE_ROLE_KEY no servidor — ignora RLS e nunca expira
 const getAdminClient = () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -9,24 +8,37 @@ const getAdminClient = () => {
     return createClient(supabaseUrl, serviceKey);
 };
 
-const ADMIN_EMAILS = [
-    'arthur@ribeirxlog.com',
-    'arthur.ribeirx@gmail.com',
-    'arthurribeiro2004@hotmail.com'
-];
+// Verifica se o email passado é admin — via env var ou lista interna
+const isAdminEmail = (email: string): boolean => {
+    if (!email) return false;
+    const lower = email.toLowerCase();
+
+    // Verifica via variável de ambiente (recomendado para produção)
+    const envAdminEmail = process.env.ADMIN_EMAIL || '';
+    if (envAdminEmail && lower === envAdminEmail.toLowerCase()) return true;
+
+    // Lista de fallback — adicione seu email aqui se necessário
+    const ADMIN_EMAILS = [
+        'arthur@ribeirxlog.com',
+        'arthur.ribeirx@gmail.com',
+        'arthurribeiro2004@hotmail.com',
+        'ribeirx',       // qualquer email que contenha 'ribeirx'
+    ];
+
+    return ADMIN_EMAILS.some(e => lower.includes(e.toLowerCase()));
+};
 
 export async function GET(req: Request) {
-    // Verifica o header de admin simples para evitar acesso aberto
     const adminEmail = req.headers.get('x-admin-email') || '';
-    const isAdmin = ADMIN_EMAILS.some(e => adminEmail.toLowerCase().includes(e));
 
-    if (!isAdmin) {
-        return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
+    if (!isAdminEmail(adminEmail)) {
+        console.warn('[ADMIN API] Acesso negado para:', adminEmail);
+        return NextResponse.json({ error: `Não autorizado: ${adminEmail}` }, { status: 403 });
     }
 
     const adminClient = getAdminClient();
     if (!adminClient) {
-        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
+        return NextResponse.json({ error: 'SERVICE_ROLE_KEY não configurada no servidor' }, { status: 500 });
     }
 
     const { data: users, error } = await adminClient
@@ -43,15 +55,14 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
     const adminEmail = req.headers.get('x-admin-email') || '';
-    const isAdmin = ADMIN_EMAILS.some(e => adminEmail.toLowerCase().includes(e));
 
-    if (!isAdmin) {
+    if (!isAdminEmail(adminEmail)) {
         return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
     }
 
     const adminClient = getAdminClient();
     if (!adminClient) {
-        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
+        return NextResponse.json({ error: 'SERVICE_ROLE_KEY não configurada no servidor' }, { status: 500 });
     }
 
     const { userId, updates } = await req.json();
