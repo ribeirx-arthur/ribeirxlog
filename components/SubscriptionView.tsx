@@ -105,6 +105,34 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                 <p className="text-slate-400 text-sm max-w-2xl mx-auto">Sua logística merece ser profissional. Escolha um plano agora e desbloqueie o verdadeiro potencial da sua frota com automação e IA.</p>
             </header>
 
+            {/* Status da Assinatura Atual */}
+            {(profile.plan_type && profile.plan_type !== 'none') && (
+                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 animate-in slide-in-from-top duration-700">
+                    <div className="flex items-center gap-6 text-center md:text-left">
+                        <div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/40 shrink-0">
+                            <Zap className="w-10 h-10 text-slate-950 fill-current" />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Assinatura Ativa: {profile.plan_type.toUpperCase()}</h3>
+                            <p className="text-emerald-500/70 text-xs font-bold uppercase tracking-widest mt-1">Status: {profile.payment_status === 'paid' ? '🔥 Premium Liberado' : '⏳ Em Processamento'}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col items-center md:items-end">
+                        <div className="text-4xl font-black text-white tracking-tighter">
+                            {(() => {
+                                const expiry = profile.subscription_expires_at || profile.trial_ends_at;
+                                if (!expiry) return '∞';
+                                const diff = Math.ceil((new Date(expiry).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                return diff > 0 ? diff : 0;
+                            })()}
+                            <span className="text-sm text-slate-500 ml-2 uppercase">Dias Restantes</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Aproveite todos os recursos</p>
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <PlanCard
                     title={PLANS.PILOTO.name}
@@ -212,6 +240,45 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                             <MessageCircle className="w-8 h-8 group-hover:scale-110 transition-transform" />
                             Falar com Arthur no WhatsApp
                         </button>
+
+                        {/* Cupom de Desconto */}
+                        <div className="mt-8 p-6 bg-slate-950/50 border border-slate-800 rounded-3xl">
+                            <h4 className="text-[10px] text-slate-500 uppercase font-black mb-3 tracking-widest">Tem um Cupom de Desconto?</h4>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    id="couponInput"
+                                    placeholder="INSIRA SEU CÓDIGO"
+                                    className="flex-1 bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-white focus:border-emerald-500/50 outline-none"
+                                />
+                                <button
+                                    onClick={async () => {
+                                        const code = (document.getElementById('couponInput') as HTMLInputElement).value;
+                                        if (!code) return;
+
+                                        try {
+                                            const res = await fetch('/api/coupon', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ email: profile.email, couponCode: code })
+                                            });
+                                            const data = await res.json();
+                                            if (res.ok) {
+                                                alert('🎉 Cupom ativado com sucesso! Seu plano foi atualizado. Recarregando...');
+                                                window.location.reload();
+                                            } else {
+                                                alert(data.error || 'Erro ao validar cupom');
+                                            }
+                                        } catch (e) {
+                                            alert('Erro ao processar cupom.');
+                                        }
+                                    }}
+                                    className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-black rounded-xl uppercase tracking-widest transition-all"
+                                >
+                                    Validar
+                                </button>
+                            </div>
+                        </div>
 
                         <div className="flex items-start gap-3 p-6 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">
                             <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />

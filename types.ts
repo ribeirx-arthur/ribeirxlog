@@ -29,6 +29,7 @@ export interface UserProfile {
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
     enabledFeatures?: string[];
     onboardingCompleted?: boolean;
+    hasUsedCoupon?: boolean;
   };
   plan_type?: 'none' | 'piloto' | 'gestor_pro' | 'frota_elite' | 'mensal' | 'anual' | 'lifetime';
   payment_status?: 'unpaid' | 'paid' | 'trial' | 'preview';

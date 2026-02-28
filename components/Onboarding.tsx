@@ -37,13 +37,17 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
     const [driverCnhValidity, setDriverCnhValidity] = useState('');
     const [appMode, setAppMode] = useState<'simple' | 'advanced'>('simple');
 
-    const totalSteps = 4;
+    const [isDriverManager, setIsDriverManager] = useState<boolean | null>(null);
+
+    const totalSteps = 3;
     const progress = (step / totalSteps) * 100;
 
     const handleNext = () => {
-        if (step < totalSteps) {
-            setStep(step + 1);
-        } else {
+        if (isDriverManager !== null && step === 1) {
+            setStep(2); // Vai para Veículo (antigo 3)
+        } else if (step === 2) {
+            setStep(3); // Vai para Motorista (antigo 4)
+        } else if (step === 3) {
             handleFinish();
         }
     };
@@ -79,9 +83,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
 
     const isStepValid = () => {
         if (step === 1) return companyName.length > 2 && city.length > 2;
-        if (step === 2) return appMode !== null;
-        if (step === 3) return vehiclePlate.length >= 7;
-        if (step === 4) return driverName.length > 3 && driverCpf.length > 10;
+        if (step === 2) return vehiclePlate.length >= 7; // Veículo agora é step 2
+        if (step === 3) return driverName.length > 3 && driverCpf.length > 10; // Motorista agora é step 3
         return false;
     };
 
@@ -116,8 +119,41 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
 
                 {/* Card */}
                 <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+                    {/* Step 0: Initial Question */}
+                    {step === 1 && isDriverManager === null && (
+                        <div className="space-y-8 animate-in fade-in duration-500 py-4">
+                            <div className="text-center space-y-4">
+                                <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-6">
+                                    <User className="w-8 h-8" />
+                                </div>
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Você é motorista gestor?</h3>
+                                <p className="text-slate-400 text-sm">Queremos deixar a ferramenta com a sua cara.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button
+                                    onClick={() => {
+                                        setIsDriverManager(true);
+                                        setAppMode('simple');
+                                    }}
+                                    className="p-6 rounded-2xl border border-slate-800 bg-slate-950 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-left group"
+                                >
+                                    <div className="font-black text-emerald-500 uppercase italic tracking-tighter mb-1">Sim, sou motorista e gestor</div>
+                                    <div className="text-xs text-slate-500 uppercase font-bold">Recomendamos o Modo Simples</div>
+                                </button>
+                                <button
+                                    onClick={() => setIsDriverManager(false)}
+                                    className="p-6 rounded-2xl border border-slate-800 bg-slate-950 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-left group"
+                                >
+                                    <div className="font-black text-sky-500 uppercase italic tracking-tighter mb-1">Não, sou apenas gestor / transportador</div>
+                                    <div className="text-xs text-slate-500 uppercase font-bold">Configuração padrão avançada</div>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Step 1: Company */}
-                    {step === 1 && (
+                    {step === 1 && isDriverManager !== null && (
                         <div className="space-y-6 animate-in slide-in-from-right duration-500">
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
@@ -155,43 +191,9 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
                         </div>
                     )}
 
-                    {/* Step 2: User Profile / App Mode */}
+
+                    {/* Step 2: Vehicle */}
                     {step === 2 && (
-                        <div className="space-y-6 animate-in slide-in-from-right duration-500">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
-                                    <Check className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-white">Escolha sua Experiência</h3>
-                                    <p className="text-xs text-slate-500">Como você prefere usar o Ribeirx Log?</p>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button
-                                    onClick={() => setAppMode('simple')}
-                                    className={`p-6 rounded-2xl border text-left transition-all relative overflow-hidden group ${appMode === 'simple' ? 'bg-emerald-500 border-emerald-400' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}
-                                >
-                                    <div className={`font-black text-sm uppercase italic tracking-tighter mb-1 ${appMode === 'simple' ? 'text-emerald-950' : 'text-emerald-500'}`}>Modo Autônomo (Simples)</div>
-                                    <div className={`text-xs font-medium ${appMode === 'simple' ? 'text-emerald-900' : 'text-slate-500'}`}>Foco em lucro, despesas de viagem e compliance rápido. Direto ao ponto.</div>
-                                    {appMode === 'simple' && <div className="absolute top-2 right-2 bg-emerald-950 text-white p-1 rounded-full"><Check className="w-3 h-3" /></div>}
-                                </button>
-
-                                <button
-                                    onClick={() => setAppMode('advanced')}
-                                    className={`p-6 rounded-2xl border text-left transition-all relative overflow-hidden group ${appMode === 'advanced' ? 'bg-emerald-500 border-emerald-400' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}
-                                >
-                                    <div className={`font-black text-sm uppercase italic tracking-tighter mb-1 ${appMode === 'advanced' ? 'text-emerald-950' : 'text-sky-500'}`}>Modo Transportadora (Completo)</div>
-                                    <div className={`text-xs font-medium ${appMode === 'advanced' ? 'text-emerald-900' : 'text-slate-500'}`}>Gestão de balsa, frota, BI avançado e controle total de manutenção preditiva.</div>
-                                    {appMode === 'advanced' && <div className="absolute top-2 right-2 bg-emerald-950 text-white p-1 rounded-full"><Check className="w-3 h-3" /></div>}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 3: Vehicle */}
-                    {step === 3 && (
                         <div className="space-y-6 animate-in slide-in-from-right duration-500">
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
@@ -246,8 +248,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
                         </div>
                     )}
 
-                    {/* Step 4: Driver */}
-                    {step === 4 && (
+                    {/* Step 3: Driver */}
+                    {step === 3 && (
                         <div className="space-y-6 animate-in slide-in-from-right duration-500">
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
@@ -295,23 +297,24 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
                             Pular setup
                         </button>
 
-                        <button
-                            onClick={handleNext}
-                            disabled={!isStepValid()}
-                            className={`flex items-center gap-3 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-lg ${isStepValid()
-                                ? 'bg-emerald-500 hover:bg-emerald-600 text-emerald-950 shadow-emerald-500/20 translate-y-0'
-                                : 'bg-slate-800 text-slate-600 cursor-not-allowed translate-y-0'
-                                }`}
-                        >
-                            {step === 4 ? 'Começar a usar' : 'Próximo'}
-                            {step === 4 ? <Play className="w-4 h-4 fill-current" /> : <ArrowRight className="w-4 h-4" />}
-                        </button>
+                        {isDriverManager !== null && (
+                            <button
+                                onClick={handleNext}
+                                disabled={!isStepValid()}
+                                className={`flex items-center gap-3 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-lg ${isStepValid()
+                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-emerald-950 shadow-emerald-500/20 translate-y-0'
+                                    : 'bg-slate-800 text-slate-600 cursor-not-allowed translate-y-0'
+                                    }`}
+                            >
+                                {step === 3 ? 'Começar a usar' : 'Próximo'}
+                                {step === 3 ? <Play className="w-4 h-4 fill-current" /> : <ArrowRight className="w-4 h-4" />}
+                            </button>
+                        )}
                     </div>
                 </div>
 
-                {/* Steps Dots */}
                 <div className="flex justify-center gap-2 mt-8">
-                    {[1, 2, 3, 4].map(i => (
+                    {[1, 2, 3].map(i => (
                         <div
                             key={i}
                             className={`w-2 h-2 rounded-full transition-all duration-300 ${i === step ? 'bg-emerald-500 w-6' : i < step ? 'bg-emerald-500/40' : 'bg-slate-800'

@@ -65,7 +65,7 @@ export default function Home() {
 
     const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
     const [loadingData, setLoadingData] = useState(false);
-    const [activeTab, setActiveTab] = useState<TabType>('setup');
+    const [activeTab, setActiveTab] = useState<TabType>('dashboard');
     const [showAuth, setShowAuth] = useState(false);
     const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
     const [pendingPlanIntent, setPendingPlanIntent] = useState<string | null>(null);
@@ -141,19 +141,10 @@ export default function Home() {
                         }
                         // Merge with defaults to ensure new fields are always present
                         const mergedConfig = { ...INITIAL_PROFILE.config, ...parsedConfig };
-                        setProfile({
-                            ...profileData,
-                            companyName: profileData.company_name,
-                            logoUrl: profileData.logo_url,
-                            signatureUrl: profileData.signature_url,
-                            cpfCnpj: profileData.cpf_cnpj,
-                            config: mergedConfig
-                        } as any);
-
-                        // If profile exists and it's the first time, maybe we don't need mock data anymore 
-                        // but the original logic had it for "preview" users.
+                        window.location.reload();
                     } else if (profileError?.code === 'PGRST116') {
                         // New User - Create Profile
+                        setActiveTab('setup');
                         console.log("Creating new profile for:", user.id);
                         const { error: insertError } = await client.from('profiles').insert({
                             id: user.id,
