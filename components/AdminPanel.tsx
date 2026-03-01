@@ -17,12 +17,14 @@ import {
     Calendar,
     Clock
 } from 'lucide-react';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface AdminPanelProps {
     profile: UserProfile;
+    supabaseClient: SupabaseClient;
 }
 
-export const AdminPanel = ({ profile }: AdminPanelProps) => {
+export const AdminPanel = ({ profile, supabaseClient }: AdminPanelProps) => {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -32,50 +34,59 @@ export const AdminPanel = ({ profile }: AdminPanelProps) => {
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [supabaseClient]);
 
     const fetchUsers = async () => {
         setLoading(true);
         setErrorMsg(null);
-        try {
-            const res = await fetch('/api/admin/users', {
-                headers: { 'x-admin-email': profile.email }
-            });
-            const data = await res.json();
 
-            if (!res.ok) {
-                if (data.debug) {
-                    setErrorMsg(`${data.error || 'Erro'}. Debug Info: URL=${data.debug.SUPABASE_URL ? 'OK' : 'MISSING'}, KEY1=${data.debug.SERVICE_ROLE_KEY ? 'OK' : 'MISSING'}, KEY2=${data.debug.SERVICE_ROLE_KEY_ALT1 ? 'OK' : 'MISSING'}. Vercel vars (Supa/Service): ${JSON.stringify(data.debug.allSupabaseVars)}`);
+        try {
+            // Usa o client autenticado (que tem o RLS permissivo para admins)
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Admin fetch error:", error);
+                if (error.message?.toLowerCase().includes('jwt expired')) {
+                    setErrorMsg('Sua sessão de segurança expirou. Por favor, atualize a página para renovar seu acesso de Admin.');
                 } else {
-                    setErrorMsg(data.error || 'Erro ao buscar usuários');
+                    setErrorMsg(error.message);
                 }
-            } else {
-                setUsers(data.users || []);
+            } else if (data) {
+                setUsers(data);
             }
+
+            // Puxa o total de viagens para o heatmap
+            const { count, error: tripError } = await supabaseClient
+                .from('trips')
+                .select('*', { count: 'exact', head: true });
+
+            if (!tripError && count !== null) setTotalTrips(count);
+
         } catch (err: any) {
-            setErrorMsg('Erro de conexão com o servidor');
+            console.error("Admin general error:", err);
+            setErrorMsg('Erro de conexão ao buscar dados do Admin.');
         }
         setLoading(false);
     };
 
     const updateUser = async (userId: string, updates: any) => {
-        try {
-            const res = await fetch('/api/admin/users', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-admin-email': profile.email
-                },
-                body: JSON.stringify({ userId, updates })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setErrorMsg(data.error || 'Erro ao atualizar usuário');
+        const { error } = await supabaseClient
+            .from('profiles')
+            .update(updates)
+            .eq('id', userId);
+
+        if (!error) {
+            fetchUsers();
+        } else {
+            console.error("Error updating user:", error);
+            if (error.message?.toLowerCase().includes('jwt expired')) {
+                setErrorMsg('Sessão expirada. Atualize a página antes de continuar.');
             } else {
-                fetchUsers();
+                setErrorMsg(`Erro ao atualizar: ${error.message}`);
             }
-        } catch (err: any) {
-            setErrorMsg('Erro de conexão com o servidor');
         }
     };
 
@@ -133,11 +144,61 @@ export const AdminPanel = ({ profile }: AdminPanelProps) => {
             </div>
 
             {errorMsg && (
-                <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-3xl flex items-center gap-4 text-rose-500">
-                    <AlertCircle className="w-6 h-6 shrink-0" />
-                    <p className="font-bold text-sm">{errorMsg}</p>
+                <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-3xl flex items-center justify-between gap-4 text-rose-500">
+                    <div className="flex items-center gap-4">
+                        <AlertCircle className="w-6 h-6 shrink-0" />
+                        <p className="font-bold text-sm">{errorMsg}</p>
+                    </div>
+                    {errorMsg.includes('expirou') && (
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-6 py-2 bg-rose-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-rose-600 transition-colors"
+                        >
+                            Recarregar Página
+                        </button>
+                    )}
                 </div>
             )}
+
+            {/* Resto dos painéis (Heatmap de Capacidade) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 bg-slate-900/50 border border-slate-800 rounded-[2.5rem] p-8 flex items-center justify-between relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
+                        <Database className="w-32 h-32" />
+                    </div>
+                    <div className="relative z-10 w-full">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-emerald-500/10 rounded-2xl flex items-center justify-center">
+                                <HardDrive className="w-5 h-5 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-white font-black italic uppercase tracking-tighter">Capacidade do Banco (500MB Free)</h3>
+                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest italic">Monitoramento de Escalabilidade</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{Math.min(((totalTrips * 2) / 512000) * 100, 100).toFixed(2)}% de Uso Estimado</span>
+                                <span className="text-xs font-black text-white italic">{(totalTrips * 2 / 1024).toFixed(1)}MB / 500MB</span>
+                            </div>
+                            <div className="h-3 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-white/5">
+                                <div
+                                    className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 rounded-full transition-all duration-1000"
+                                    style={{ width: `${Math.max(1, Math.min(((totalTrips * 2) / 512000) * 100, 100))}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[2.5rem] p-8 flex flex-col justify-center text-center">
+                    <Zap className="w-8 h-8 text-emerald-500 mx-auto mb-4" />
+                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Total de Viagens</p>
+                    <p className="text-4xl font-black text-white italic tracking-tighter uppercase">{totalTrips.toLocaleString()}</p>
+                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-2">+ de {Math.floor(500000 - totalTrips).toLocaleString()} disponíveis no plano free</p>
+                </div>
+            </div>
 
             {/* Filtros */}
             <div className="flex flex-col md:flex-row gap-4">
@@ -216,9 +277,9 @@ export const AdminPanel = ({ profile }: AdminPanelProps) => {
                                                 value={user.payment_status || 'unpaid'}
                                                 onChange={(e) => updateUser(user.id, { payment_status: e.target.value })}
                                                 className={`rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none border transition-all cursor-pointer ${user.payment_status === 'paid' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                    user.payment_status === 'trial' ? 'bg-sky-500/10 border-sky-500/20 text-sky-500' :
-                                                        user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
-                                                            'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                                                        user.payment_status === 'trial' ? 'bg-sky-500/10 border-sky-500/20 text-sky-500' :
+                                                            user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
+                                                                'bg-rose-500/10 border-rose-500/20 text-rose-500'
                                                     }`}
                                             >
                                                 <option value="unpaid">Pendente</option>
@@ -257,7 +318,7 @@ export const AdminPanel = ({ profile }: AdminPanelProps) => {
                                     <td colSpan={5} className="p-12 text-center">
                                         <div className="flex flex-col items-center gap-4">
                                             <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Carregando usuários via servidor seguro...</p>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Consultando Banco de Dados localmente...</p>
                                         </div>
                                     </td>
                                 </tr>

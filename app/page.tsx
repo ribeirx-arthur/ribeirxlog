@@ -1110,7 +1110,7 @@ export default function Home() {
                 return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
             case 'admin':
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
-                return <AdminPanel profile={profile} />;
+                return <AdminPanel profile={profile} supabaseClient={authenticatedClient} />;
 
 
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
