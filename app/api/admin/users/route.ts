@@ -22,7 +22,8 @@ const isAdminEmail = (email: string): boolean => {
         'arthur@ribeirxlog.com',
         'arthur.ribeirx@gmail.com',
         'arthurribeiro2004@hotmail.com',
-        'ribeirx',       // qualquer email que contenha 'ribeirx'
+        'arthur_ribeiro09@outlook.com',
+        'ribeirx',
     ];
 
     return ADMIN_EMAILS.some(e => lower.includes(e.toLowerCase()));
