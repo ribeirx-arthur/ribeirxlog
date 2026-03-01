@@ -2,20 +2,18 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const getAdminClient = () => {
+    // É importante pegar as variáveis de ambiente dentro da função em Serverless Functions
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    // Tenta múltiplos nomes de variável para compatibilidade
-    const serviceKey =
-        process.env.SUPABASE_SERVICE_ROLE_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ||
-        process.env.SUPABASE_SERVICE_KEY ||
-        '';
 
-    console.log('[ADMIN API] supabaseUrl presente:', !!supabaseUrl);
-    console.log('[ADMIN API] serviceKey presente:', !!serviceKey);
-    console.log('[ADMIN API] serviceKey início:', serviceKey ? serviceKey.substring(0, 20) + '...' : 'VAZIO');
+    // Tenta múltiplos nomes, priorizando os mais comuns
+    let serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) serviceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    if (!serviceKey) serviceKey = '';
+
+    console.log('[ADMIN API] supabaseUrl:', !!supabaseUrl, ' serviceKey:', !!serviceKey);
 
     if (!supabaseUrl || !serviceKey) {
-        console.error('[ADMIN API] Variáveis ausentes. Disponíveis:', Object.keys(process.env).filter(k => k.includes('SUPA')));
         return null;
     }
     return createClient(supabaseUrl, serviceKey);
