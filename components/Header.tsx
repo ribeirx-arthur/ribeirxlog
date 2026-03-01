@@ -192,18 +192,18 @@ const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => setActiveTab('settings')}
-            className="flex items-center gap-3 py-1.5 pl-1.5 pr-4 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800/80 transition-all group"
+            className="flex items-center gap-3 py-1.5 pl-1.5 pr-4 bg-emerald-500/10 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] rounded-2xl hover:bg-emerald-500/20 transition-all group text-left"
           >
             <div className="text-right hidden sm:block">
               <div className="flex items-center justify-end gap-2">
                 <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase ${profile.payment_status === 'paid' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-500'}`}>
                   {profile.plan_type || 'Sem Plano'}
                 </span>
-                <p className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors">{profile.name}</p>
+                <p className="text-xs font-black text-emerald-400 group-hover:text-emerald-300 transition-colors">{profile.name}</p>
               </div>
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{profile.companyName}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{profile.companyName}</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-slate-900 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-emerald-500 overflow-hidden">
               {profile.logoUrl ? (
                 <img src={profile.logoUrl} className="w-full h-full object-cover" />
               ) : (

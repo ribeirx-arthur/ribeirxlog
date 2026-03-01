@@ -996,7 +996,7 @@ export default function Home() {
             (profile.name?.toLowerCase().includes('ribeirxlog'));
 
         switch (activeTab) {
-            case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
+            case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} setActiveTab={setActiveTab} />;
             case 'drivers': return (
                 <Suspense fallback={<div>Carregando Motoristas...</div>}>
                     <DriverManagement
@@ -1109,11 +1109,11 @@ export default function Home() {
                 }
                 return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
             case 'admin':
-                if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} />;
+                if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} setActiveTab={setActiveTab} />;
                 return <AdminPanel profile={profile} supabaseClient={authenticatedClient} />;
 
 
-            default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+            default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} setActiveTab={setActiveTab} />;
         }
     };
 

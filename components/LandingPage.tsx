@@ -77,13 +77,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
             <nav className="fixed top-0 left-0 right-0 z-[100] bg-slate-950/70 backdrop-blur-2xl border-b border-white/5 transition-all duration-500">
                 <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
                     <div className="flex items-center gap-4 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                            <Truck className="text-slate-950 w-7 h-7" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RIBEIRX<span className="text-emerald-500">LOG</span></span>
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence Dynamics</span>
-                        </div>
+                        <img
+                            src="/logo.png"
+                            alt="Ribeirx Log"
+                            className="h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.outerHTML = `<div class="flex items-center gap-4 group cursor-pointer"><div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-950"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-9h-4V5H14v12h3"></path><path d="M14 17H10"></path><circle cx="17" cy="17" r="2"></circle><circle cx="7" cy="17" r="2"></circle></svg></div><div class="flex flex-col"><span class="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RIBEIRX<span class="text-emerald-500">LOG</span></span><span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence Dynamics</span></div></div>`;
+                            }}
+                        />
                     </div>
                     <div className="hidden lg:flex items-center gap-10">
                         {['Recursos', 'GPS Tracking', 'Planos', 'Contato'].map((item) => (
@@ -589,10 +591,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-20">
                     <div className="col-span-1 md:col-span-2 space-y-8">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
-                                <Truck className="text-slate-950 w-6 h-6" />
-                            </div>
-                            <span className="text-xl font-black tracking-tighter text-white uppercase italic">RIBEIRX<span className="text-emerald-500">LOG</span></span>
+                            <img
+                                src="/logo.png"
+                                alt="Ribeirx Log"
+                                className="h-10 w-auto object-contain"
+                                onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.outerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-950"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-9h-4V5H14v12h3"></path><path d="M14 17H10"></path><circle cx="17" cy="17" r="2"></circle><circle cx="7" cy="17" r="2"></circle></svg></div><span class="text-xl font-black tracking-tighter text-white uppercase italic">RIBEIRX<span class="text-emerald-500">LOG</span></span></div>`;
+                                }}
+                            />
                         </div>
                         <p className="text-slate-500 max-w-sm text-sm leading-relaxed">
                             A plataforma definitiva para transportadores modernos. Unindo inteligência artificial,

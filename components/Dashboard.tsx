@@ -32,11 +32,12 @@ interface DashboardProps {
   shippers: Shipper[];
   profile: UserProfile;
   onPopulateDemo?: () => void;
+  setActiveTab?: (tab: any) => void;
 }
 
 type TimeFilter = 'semanal' | 'mensal' | 'anual' | 'total';
 
-const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shippers, profile, onPopulateDemo }) => {
+const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shippers, profile, onPopulateDemo, setActiveTab }) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('mensal');
   const [activeView, setActiveView] = useState<'geral' | 'sociedade'>('geral');
   const [mounted, setMounted] = useState(false);
@@ -217,19 +218,35 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
             </div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-8 space-y-6 shadow-xl relative overflow-hidden">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-500"><BarChart3 className="w-5 h-5" /></div>
-              <h3 className="text-sm font-black text-white uppercase tracking-widest">Ações Rápidas</h3>
+          <div className="flex flex-col gap-6">
+            <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-8 space-y-6 shadow-xl relative overflow-hidden">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-500"><BarChart3 className="w-5 h-5" /></div>
+                <h3 className="text-sm font-black text-white uppercase tracking-widest">Ações Rápidas</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <QuickAction color="sky" icon={Plus} label="Novo Frete" onClick={() => setActiveTab?.('new-trip')} />
+                <QuickAction color="emerald" icon={Wallet} label="Lançar Gasto" onClick={() => setActiveTab?.('trips')} />
+                <QuickAction color="amber" icon={MapIcon} label="Ver Rotas" onClick={() => setActiveTab?.('gps-tracking')} />
+                <QuickAction color="purple" icon={BarChart3} label="Relatórios" onClick={() => setActiveTab?.('performance')} />
+              </div>
+              <div className="pt-4 border-t border-slate-800 text-center">
+                <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest italic group-hover:text-emerald-500 transition-colors">Modo Simples RBS v1.7</p>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <QuickAction color="sky" icon={Plus} label="Novo Frete" />
-              <QuickAction color="emerald" icon={Wallet} label="Lançar Gasto" />
-              <QuickAction color="amber" icon={MapIcon} label="Ver Rotas" />
-              <QuickAction color="purple" icon={BarChart3} label="Relatórios" />
-            </div>
-            <div className="pt-4 border-t border-slate-800 text-center">
-              <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest italic group-hover:text-emerald-500 transition-colors">Modo Simples RBS v1.7</p>
+
+            {/* Banner de Imagem Temática Caminhão/Tecnologia */}
+            <div className="relative rounded-[2rem] overflow-hidden shadow-xl aspect-[2/1] border border-slate-800 group">
+              <img
+                src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&q=80"
+                alt="Truck and Technology"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-luminosity"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <h4 className="text-lg font-black text-white uppercase tracking-tight mb-1">Tecnologia em Movimento</h4>
+                <p className="text-xs font-bold text-emerald-500">Lucro de ponta a ponta na sua rota</p>
+              </div>
             </div>
           </div>
         </div>
@@ -351,8 +368,8 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
   );
 };
 
-const QuickAction = ({ icon: Icon, label, color }: any) => (
-  <button className={`flex flex-col items-center justify-center gap-3 p-6 bg-slate-950 border border-slate-800 rounded-3xl hover:border-${color}-500/50 hover:bg-slate-900 transition-all group`}>
+const QuickAction = ({ icon: Icon, label, color, onClick }: any) => (
+  <button onClick={onClick} className={`flex flex-col items-center justify-center gap-3 p-6 bg-slate-950 border border-slate-800 rounded-3xl hover:border-${color}-500/50 hover:bg-slate-900 transition-all group`}>
     <div className={`w-12 h-12 bg-${color}-500/10 rounded-2xl flex items-center justify-center text-${color}-500 group-hover:scale-110 transition-transform`}>
       <Icon className="w-6 h-6" />
     </div>
