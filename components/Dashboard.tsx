@@ -177,8 +177,13 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
           <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Resumo Financeiro & Operacional</p>
         </header>
 
-        {/* Big Balance Card */}
+        {/* Big Balance Card with Background Image */}
         <div className="bg-emerald-500 rounded-[2.5rem] p-10 shadow-2xl shadow-emerald-500/20 relative overflow-hidden group">
+          <img
+            src="/dashboard-caminhão-futurista2.png.png"
+            className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"
+            alt="Dashboard"
+          />
           <div className="absolute right-[-20px] top-[-20px] opacity-10 group-hover:scale-110 transition-transform duration-1000">
             <Zap className="w-64 h-64 text-white" />
           </div>
@@ -186,12 +191,12 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
             <p className="text-emerald-950/60 font-black uppercase text-[10px] tracking-widest">Saldo de Lucro Líquido</p>
             <h2 className="text-6xl font-black text-emerald-950 tracking-tighter">R$ {stats.totalProfit.toLocaleString()}</h2>
             <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="bg-emerald-600/20 px-6 py-3 rounded-2xl border border-emerald-400/20 backdrop-blur-sm">
-                <p className="text-emerald-950/60 text-[9px] font-black uppercase mb-1">Total Receita</p>
+              <div className="bg-emerald-600/30 px-6 py-3 rounded-2xl border border-emerald-400/30 backdrop-blur-md">
+                <p className="text-emerald-950/70 text-[9px] font-black uppercase mb-1">Total Receita</p>
                 <p className="text-emerald-950 font-black">R$ {stats.totalRevenue.toLocaleString()}</p>
               </div>
-              <div className="bg-emerald-600/20 px-6 py-3 rounded-2xl border border-emerald-400/20 backdrop-blur-sm">
-                <p className="text-emerald-950/60 text-[9px] font-black uppercase mb-1">Saldo a Receber</p>
+              <div className="bg-emerald-600/30 px-6 py-3 rounded-2xl border border-emerald-400/30 backdrop-blur-md">
+                <p className="text-emerald-950/70 text-[9px] font-black uppercase mb-1">Saldo a Receber</p>
                 <p className="text-emerald-950 font-black">R$ {stats.pendingReceivables.toLocaleString()}</p>
               </div>
             </div>

@@ -227,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
           </div>
 
           {/* User row */}
-          <div className="bg-emerald-500/10 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] rounded-2xl px-3 py-2.5 flex items-center gap-3">
+          <div className="bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.25)] rounded-2xl px-3 py-2.5 flex items-center gap-3">
             <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-8 h-8 rounded-lg" } }} />
             <div className="flex-1 min-w-0">
               <span className="text-xs font-black text-emerald-400 leading-none block truncate">{profile.name || 'Usuário'}</span>

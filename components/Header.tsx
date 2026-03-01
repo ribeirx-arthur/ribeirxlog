@@ -192,7 +192,7 @@ const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => setActiveTab('settings')}
-            className="flex items-center gap-3 py-1.5 pl-1.5 pr-4 bg-emerald-500/10 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] rounded-2xl hover:bg-emerald-500/20 transition-all group text-left"
+            className="flex items-center gap-3 py-1.5 pl-1.5 pr-4 bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.25)] rounded-2xl hover:bg-emerald-500/20 transition-all group text-left"
           >
             <div className="text-right hidden sm:block">
               <div className="flex items-center justify-end gap-2">
