@@ -52,7 +52,17 @@ export async function GET(req: Request) {
 
     const adminClient = getAdminClient();
     if (!adminClient) {
-        return NextResponse.json({ error: 'SERVICE_ROLE_KEY não configurada no servidor' }, { status: 500 });
+        const diag = {
+            error: 'SERVICE_ROLE_KEY não configurada no servidor',
+            debug: {
+                SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+                SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+                SERVICE_ROLE_KEY_ALT1: !!process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY,
+                SERVICE_ROLE_KEY_ALT2: !!process.env.SUPABASE_SERVICE_KEY,
+                allSupabaseVars: Object.keys(process.env).filter(k => k.toLowerCase().includes('supa') || k.toLowerCase().includes('service'))
+            }
+        };
+        return NextResponse.json(diag, { status: 500 });
     }
 
     const { data: users, error } = await adminClient
