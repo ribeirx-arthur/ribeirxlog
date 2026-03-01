@@ -44,7 +44,11 @@ export const AdminPanel = ({ profile }: AdminPanelProps) => {
             const data = await res.json();
 
             if (!res.ok) {
-                setErrorMsg(data.error || 'Erro ao buscar usuários');
+                if (data.debug) {
+                    setErrorMsg(`${data.error || 'Erro'}. Debug Info: URL=${data.debug.SUPABASE_URL ? 'OK' : 'MISSING'}, KEY1=${data.debug.SERVICE_ROLE_KEY ? 'OK' : 'MISSING'}, KEY2=${data.debug.SERVICE_ROLE_KEY_ALT1 ? 'OK' : 'MISSING'}. Vercel vars (Supa/Service): ${JSON.stringify(data.debug.allSupabaseVars)}`);
+                } else {
+                    setErrorMsg(data.error || 'Erro ao buscar usuários');
+                }
             } else {
                 setUsers(data.users || []);
             }
@@ -212,9 +216,9 @@ export const AdminPanel = ({ profile }: AdminPanelProps) => {
                                                 value={user.payment_status || 'unpaid'}
                                                 onChange={(e) => updateUser(user.id, { payment_status: e.target.value })}
                                                 className={`rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none border transition-all cursor-pointer ${user.payment_status === 'paid' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                        user.payment_status === 'trial' ? 'bg-sky-500/10 border-sky-500/20 text-sky-500' :
-                                                            user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
-                                                                'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                                                    user.payment_status === 'trial' ? 'bg-sky-500/10 border-sky-500/20 text-sky-500' :
+                                                        user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
+                                                            'bg-rose-500/10 border-rose-500/20 text-rose-500'
                                                     }`}
                                             >
                                                 <option value="unpaid">Pendente</option>
