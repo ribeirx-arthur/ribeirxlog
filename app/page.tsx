@@ -51,6 +51,14 @@ const APP_VERSION = '1.7.1-VINCULO-V2';
 
 import { AppModeProvider } from '../contexts/AppModeContext';
 import { generateMockData } from '../services/demoData';
+import {
+    STATIC_DEMO_PROFILE,
+    STATIC_DEMO_VEHICLES,
+    STATIC_DEMO_DRIVERS,
+    STATIC_DEMO_SHIPPERS,
+    STATIC_DEMO_TRIPS,
+    STATIC_DEMO_NOTIFICATIONS
+} from '../services/staticDemoData';
 
 const INITIAL_THRESHOLDS: MaintenanceThresholds = {
     oilChangeKm: 10000,
@@ -133,6 +141,18 @@ export default function Home() {
                     }
                     const client = token ? createClerkSupabaseClient(token) : supabase;
                     setAuthenticatedClient(client);
+
+                    if (isDemo) {
+                        setProfile(STATIC_DEMO_PROFILE as any);
+                        setVehicles(STATIC_DEMO_VEHICLES as any);
+                        setDrivers(STATIC_DEMO_DRIVERS as any);
+                        setShippers(STATIC_DEMO_SHIPPERS as any);
+                        setTrips(STATIC_DEMO_TRIPS as any);
+                        setNotifications(STATIC_DEMO_NOTIFICATIONS as any);
+                        setLoadingData(false);
+                        setActiveTab('dashboard');
+                        return;
+                    }
 
                     console.log("[DEBUG] Fetching profile for User ID:", targetUserId);
                     const { data: profileData, error: profileError } = await client.from('profiles').select('*').eq('id', targetUserId).single();
