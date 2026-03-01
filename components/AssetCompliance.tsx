@@ -54,7 +54,7 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
 
     const handleShareDocs = (vehicle: Vehicle) => {
         const driver = drivers.find(d => d.vehicleId === vehicle.id);
-        const text = `*HUB DE DOCUMENTOS - RIBEIRX LOG*\n\n` +
+        const text = `*HUB DE DOCUMENTOS - RBX LOG*\\n\\n` +
             `🚛 *Veículo:* ${vehicle.plate} (${vehicle.name})\n` +
             `👤 *Motorista:* ${driver?.name || 'Não vinculado'}\n\n` +
             `📄 *Status de Compliance:*\n` +
@@ -62,7 +62,7 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
             `• Venc. ANTT: ${vehicle.anttValidity || 'N/A'}\n` +
             `• Venc. Tacógrafo: ${vehicle.tacografoValidity || 'N/A'}\n` +
             `• Venc. Licenciamento: ${vehicle.licensingValidity || 'N/A'}\n\n` +
-            `🔗 *Acesso aos arquivos:* [Portal Ribeirx Log]`;
+            `🔗 *Acesso aos arquivos:* [Portal RBX Log]`;
 
         const encodedText = encodeURIComponent(text);
         window.open(`https://wa.me/?text=${encodedText}`, '_blank');
@@ -194,7 +194,7 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
                                     <div>
                                         <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-1">Dica Estratégica</p>
                                         <p className="text-indigo-200/60 text-sm leading-relaxed">
-                                            Manter o cronotacógrafo em dia evita multas de natureza grave sob o Art. 230 do CTB. O Ribeirx Log avisará você 15 dias antes do vencimento para agendar a aferição.
+                                            Manter o cronotacógrafo em dia evita multas de natureza grave sob o Art. 230 do CTB. O RBX Log avisará você 15 dias antes do vencimento para agendar a aferição.
                                         </p>
                                     </div>
                                 </div>

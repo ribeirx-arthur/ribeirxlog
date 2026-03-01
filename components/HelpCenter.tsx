@@ -139,7 +139,7 @@ const HelpCenter: React.FC = () => {
 
     const content: Record<string, { title: string; subtitle: string; steps?: { icon: any; title: string; desc: string; tip?: string }[]; tips?: string[]; faqs?: { q: string; a: string }[] }> = {
         'inicio-rapido': {
-            title: '🚀 Configure o Ribeirx Log em 5 minutos',
+            title: '🚀 Configure o RBX Log em 5 minutos',
             subtitle: 'Siga esses passos na ordem certa para começar a usar com seus dados reais.',
             steps: [
                 {
@@ -299,7 +299,7 @@ const HelpCenter: React.FC = () => {
 
         'inteligencia': {
             title: '🧠 Inteligência IA — Seu assistente estratégico',
-            subtitle: 'A IA do Ribeirx Log analisa seus dados e entrega insights que você nunca veria sozinho.',
+            subtitle: 'A IA do RBX Log analisa seus dados e entrega insights que você nunca veria sozinho.',
             steps: [
                 { icon: Brain, title: 'Golden Tips', desc: 'Dicas personalizadas baseadas nos seus dados reais. A IA identifica padrões e alerta sobre riscos ou oportunidades na sua operação.' },
                 { icon: TrendingUp, title: 'Análise de Tendências', desc: 'Previsão de faturamento baseada no histórico. A IA identifica se seu negócio está em crescimento ou precisa de atenção.' },
@@ -368,12 +368,12 @@ const HelpCenter: React.FC = () => {
             tips: [
                 'No "Modo Autônomo", o foco é o compartilhamento rápido de dados para carregar.',
                 'Cadastre os números de apólice de seguro para ter acesso rápido em caso de sinistro.',
-                'O Ribeirx Log envia notificações no app 15 dias antes de qualquer vencimento.'
+                'O RBX Log envia notificações no app 15 dias antes de qualquer vencimento.'
             ]
         },
         'faq': {
             title: '❓ Dúvidas Frequentes',
-            subtitle: 'As perguntas mais comuns dos usuários do Ribeirx Log.',
+            subtitle: 'As perguntas mais comuns dos usuários do RBX Log.',
             faqs: [
                 {
                     q: 'Como funciona o "Saldo a Receber"?',
@@ -481,7 +481,7 @@ const HelpCenter: React.FC = () => {
 
                 {/* Support CTA */}
                 <button
-                    onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Preciso de ajuda com o Ribeirx Log.')}`, '_blank')}
+                    onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Preciso de ajuda com o RBX Log.')}`, '_blank')}
                     className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20 transition-all uppercase tracking-widest text-xs"
                 >
                     <MessageCircle className="w-5 h-5" />
@@ -586,7 +586,7 @@ const HelpCenter: React.FC = () => {
                                 <p className="text-xs text-slate-500">Mande uma mensagem direta. Respondo rápido.</p>
                             </div>
                             <button
-                                onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Tenho uma dúvida sobre o Ribeirx Log: ')}`, '_blank')}
+                                onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Tenho uma dúvida sobre o RBX Log: ')}`, '_blank')}
                                 className="shrink-0 flex items-center gap-3 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl transition-all uppercase tracking-wider text-xs shadow-xl shadow-emerald-500/20"
                             >
                                 <MessageCircle className="w-5 h-5" />

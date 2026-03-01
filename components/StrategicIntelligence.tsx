@@ -195,7 +195,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                         <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Inteligência</h2>
                         <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase mt-2 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            Ribeirx Log Digital Brain v1.3
+                            RBX Log Digital Brain v1.3
                         </p>
                     </div>
                 </div>

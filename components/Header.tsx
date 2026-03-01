@@ -204,11 +204,7 @@ const Header: React.FC<HeaderProps> = ({
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{profile.companyName}</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-emerald-500 overflow-hidden">
-              {profile.logoUrl ? (
-                <img src={profile.logoUrl} className="w-full h-full object-cover" />
-              ) : (
-                profile.name.split(' ').map(n => n[0]).join('')
-              )}
+              {profile.name.split(' ').map(n => n[0]).join('')}
             </div>
           </button>
         </div>

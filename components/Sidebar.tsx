@@ -99,14 +99,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
         <div className="px-5 pt-6 pb-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <img
-              src={profile.logoUrl || "/logo.png"}
-              alt="Ribeirx Log"
-              className="h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+              src="/icon.svg"
+              alt="RBX"
+              className="h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.outerHTML = `<div class="flex items-center gap-3"><div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-9h-4V5H14v12h3"></path><path d="M14 17H10"></path><circle cx="17" cy="17" r="2"></circle><circle cx="7" cy="17" r="2"></circle></svg></div><div><span class="font-black text-lg tracking-tighter text-white">RIBEIRX<span class="text-emerald-500">LOG</span></span><p class="text-[9px] font-bold text-slate-600 uppercase tracking-[0.2em] leading-none">Inteligência Logística</p></div></div>`;
+                e.currentTarget.outerHTML = `<div class="flex items-center gap-2"><div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20"><span class="text-white font-black text-xs">RBX</span></div></div>`;
               }}
             />
+            <div className="flex flex-col">
+              <span className="font-black text-xl tracking-tighter text-white leading-none">RBX<span className="text-emerald-500">LOG</span></span>
+              <p className="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em] leading-none mt-1">Intelligence</p>
+            </div>
           </div>
           <button onClick={onClose} className="p-1.5 text-slate-600 hover:text-white md:hidden transition-colors">
             <X className="w-5 h-5" />
@@ -226,12 +230,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
             ))}
           </div>
 
-          {/* User row */}
-          <div className="bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.25)] rounded-2xl px-3 py-2.5 flex items-center gap-3">
-            <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-8 h-8 rounded-lg" } }} />
+          {/* User row (Photo removed) */}
+          <div className="bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.25)] rounded-2xl px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
-              <span className="text-xs font-black text-emerald-400 leading-none block truncate">{profile.name || 'Usuário'}</span>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-black text-emerald-400 leading-none block truncate uppercase tracking-wider">{profile.name || 'Usuário'}</span>
+              </div>
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter mt-1 block">
                 {profile.plan_type === 'frota_elite' ? '✦ Frota Elite' :
                   profile.plan_type === 'gestor_pro' ? 'Gestor Pro' :
                     profile.plan_type === 'piloto' ? 'Plano Piloto' :

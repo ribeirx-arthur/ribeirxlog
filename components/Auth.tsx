@@ -51,7 +51,7 @@ export default function Auth() {
                     <div className="w-20 h-20 bg-emerald-950/50 border border-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 shadow-inner ring-1 ring-emerald-500/10">
                         <Truck className="w-10 h-10 text-emerald-500" />
                     </div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight mb-2">RIBEIRX <span className="text-emerald-500">LOG</span></h1>
+                    <h1 className="text-3xl font-bold text-white tracking-tight mb-2">RBX <span className="text-emerald-500">LOG</span></h1>
                     <p className="text-slate-400 text-xs font-bold tracking-widest uppercase">
                         <span className="text-emerald-500/80">{isSignup ? 'Crie sua conta' : 'Gestão Inteligente'}</span>
                     </p>

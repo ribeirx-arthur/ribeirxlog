@@ -105,7 +105,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
                         <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <Truck className="w-6 h-6 text-white" />
                         </div>
-                        <span className="font-black text-2xl tracking-tighter text-white">RIBEIRX<span className="text-emerald-500">LOG</span></span>
+                        <span className="font-black text-2xl tracking-tighter text-white">RBX<span className="text-emerald-500">LOG</span></span>
                     </div>
                     <h1 className="text-3xl font-black text-white tracking-tight">Vamos configurar sua operação</h1>
                     <p className="text-slate-400 text-sm">Leva menos de 2 minutos. Sem burocracia.</p>

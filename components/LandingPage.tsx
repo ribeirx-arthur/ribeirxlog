@@ -43,7 +43,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
     const [legalType, setLegalType] = useState<'privacy' | 'terms' | null>(null);
 
     const handleWhatsAppContact = () => {
-        const message = encodeURIComponent("Olá Arthur! Vi o Ribeirx Log e gostaria de tirar algumas dúvidas sobre os planos.");
+        const message = encodeURIComponent("Olá Arthur! Vi o RBX Log e gostaria de tirar algumas dúvidas sobre os planos.");
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     };
 
@@ -78,14 +78,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                 <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
                     <div className="flex items-center gap-4 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                         <img
-                            src="/logo.png"
-                            alt="Ribeirx Log"
+                            src="/icon.svg"
+                            alt="RBX"
                             className="h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:scale-105 transition-transform duration-500"
                             onError={(e) => {
                                 e.currentTarget.onerror = null;
-                                e.currentTarget.outerHTML = `<div class="flex items-center gap-4 group cursor-pointer"><div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-950"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-9h-4V5H14v12h3"></path><path d="M14 17H10"></path><circle cx="17" cy="17" r="2"></circle><circle cx="7" cy="17" r="2"></circle></svg></div><div class="flex flex-col"><span class="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RIBEIRX<span class="text-emerald-500">LOG</span></span><span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence Dynamics</span></div></div>`;
+                                e.currentTarget.outerHTML = `<div class="flex items-center gap-4 group cursor-pointer"><div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><span class="text-white font-black text-xl italic">RBX</span></div><div class="flex flex-col"><span class="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span class="text-emerald-500">LOG</span></span><span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence Dynamics</span></div></div>`;
                             }}
                         />
+                        <div className="flex flex-col">
+                            <span className="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span className="text-emerald-500">LOG</span></span>
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence Dynamics</span>
+                        </div>
                     </div>
                     <div className="hidden lg:flex items-center gap-10">
                         {['Recursos', 'GPS Tracking', 'Planos', 'Contato'].map((item) => (
@@ -191,7 +195,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                     <tr className="border-b border-white/5 bg-white/[0.02]">
                                         <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Funcionalidade</th>
                                         <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Caderninho / Planilha</th>
-                                        <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 bg-emerald-500/5">Ribeirx Log (App)</th>
+                                        <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 bg-emerald-500/5">RBX Log (App)</th>
                                         <th className="p-6 md:p-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Sistemas Caros (ERP/TMS)</th>
                                     </tr>
                                 </thead>
@@ -229,7 +233,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                             { icon: BarChart3, title: "BI & Performance", desc: "Ranking de motoristas e rotas lucrativas." },
                             { icon: Truck, title: "Saúde da Frota", desc: "Alertas de manutenção e mecânica." },
                             { icon: Zap, title: "Gestão de Pneus", desc: "Controle de custo por KM e trocas." },
-                            { icon: BrainCircuit, title: "IA Ribeirx", desc: "Insights proativos para o seu negócio." },
+                            { icon: BrainCircuit, title: "IA RBX", desc: "Insights proativos para o seu negócio." },
                             { icon: MapPin, title: "Mapa de Histórico", desc: "Visualize suas rotas geograficamente." },
                             { icon: Building2, title: "Modo Transportadora", desc: "Gestão para frotas e sociedades." },
                             { icon: DollarSign, title: "Alertas de Cobrança", desc: "Nunca mais perca o prazo de cobrança." },
@@ -275,7 +279,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                                 <span className="text-emerald-500">LUCRO REAL.</span>
                             </h2>
                             <p className="text-lg text-slate-400 font-medium leading-relaxed">
-                                Pare de adivinhar quanto sobrou no fim do mês. O Ribeirx Log calcula automaticamente custos de diesel, manutenção e pneus. Tenha uma visão cirúrgica do seu lucro direto no celular.
+                                Pare de adivinhar quanto sobrou no fim do mês. O RBX Log calcula automaticamente custos de diesel, manutenção e pneus. Tenha uma visão cirúrgica do seu lucro direto no celular.
                             </p>
                             <ul className="space-y-4">
                                 {["Cálculo de Diesel Automático", "Aviso de lucros negativos", "Histórico de fretes profissional"].map(item => (
@@ -291,7 +295,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <div className="relative group">
                             <div className="glass-card rounded-[3rem] p-3 border-white/10 relative z-10 shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
                                 <div className="bg-slate-950 rounded-[2.5rem] border border-white/5 overflow-hidden">
-                                    <img src="/dashboard-no-caminhão.png.png" alt="Dashboard Ribeirx Log" className="w-full h-auto object-cover opacity-90 group-hover:scale-105 transition-all duration-1000" />
+                                    <img src="/dashboard-no-caminhão.png.png" alt="Dashboard RBX Log" className="w-full h-auto object-cover opacity-90 group-hover:scale-105 transition-all duration-1000" />
                                 </div>
                             </div>
                         </div>
@@ -395,7 +399,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         <div className="lg:col-span-1 hidden lg:block">
                             <div className="h-full rounded-[3rem] overflow-hidden border border-white/5 group relative">
-                                <img src="/empreendedor.png.png" alt="Especialista Ribeirx Log" className="w-full h-full object-cover opacity-80 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" />
+                                <img src="/empreendedor.png.png" alt="Especialista RBX Log" className="w-full h-full object-cover opacity-80 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
                                 <div className="absolute bottom-8 left-8">
                                     <p className="text-white font-black text-xs uppercase tracking-widest">Especialista RBS Intel</p>
@@ -592,14 +596,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     <div className="col-span-1 md:col-span-2 space-y-8">
                         <div className="flex items-center gap-4">
                             <img
-                                src="/logo.png"
-                                alt="Ribeirx Log"
+                                src="/icon.svg"
+                                alt="RBX"
                                 className="h-10 w-auto object-contain"
                                 onError={(e) => {
                                     e.currentTarget.onerror = null;
-                                    e.currentTarget.outerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-950"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-9h-4V5H14v12h3"></path><path d="M14 17H10"></path><circle cx="17" cy="17" r="2"></circle><circle cx="7" cy="17" r="2"></circle></svg></div><span class="text-xl font-black tracking-tighter text-white uppercase italic">RIBEIRX<span class="text-emerald-500">LOG</span></span></div>`;
+                                    e.currentTarget.outerHTML = `<div class="flex items-center gap-4"><div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">RBX</span></div><span class="text-xl font-black tracking-tighter text-white uppercase italic">RBX<span class="text-emerald-500">LOG</span></span></div>`;
                                 }}
                             />
+                            <span className="text-xl font-black tracking-tighter text-white uppercase italic">RBX<span className="text-emerald-500">LOG</span></span>
                         </div>
                         <p className="text-slate-500 max-w-sm text-sm leading-relaxed">
                             A plataforma definitiva para transportadores modernos. Unindo inteligência artificial,
@@ -643,7 +648,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                     </div>
                 </div>
                 <div className="max-w-7xl mx-auto px-6 mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">© 2026 RIBEIRX LOGÍSTICA INTELIGENTE. MADE BY ART_RBS.</p>
+                    <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">© 2026 RBX LOGÍSTICA INTELIGENTE. MADE BY ART_RBS.</p>
                     <div className="flex gap-8">
                         <button onClick={() => setLegalType('privacy')} className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Políticas de Privacidade</button>
                         <button onClick={() => setLegalType('terms')} className="text-slate-600 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:text-white transition-colors">Termos de Uso</button>
