@@ -143,6 +143,7 @@ export default function Home() {
                         const mergedConfig = { ...INITIAL_PROFILE.config, ...parsedConfig };
                         setProfile({
                             ...profileData,
+                            email: profileData.email || user.primaryEmailAddress?.emailAddress || '',
                             companyName: profileData.company_name,
                             logoUrl: profileData.logo_url,
                             signatureUrl: profileData.signature_url,
