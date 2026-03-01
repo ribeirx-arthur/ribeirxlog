@@ -43,6 +43,20 @@ const isAdminEmail = (email: string): boolean => {
 };
 
 export async function GET(req: Request) {
+    // Permite diagnóstico via navegador adicionando ?debug=1 na URL
+    if (req.url.includes('debug=1')) {
+        return NextResponse.json({
+            error: 'Modo Diagnóstico',
+            debug: {
+                SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+                SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+                SERVICE_ROLE_KEY_ALT1: !!process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY,
+                SERVICE_ROLE_KEY_ALT2: !!process.env.SUPABASE_SERVICE_KEY,
+                allSupabaseVars: Object.keys(process.env).filter(k => k.toLowerCase().includes('supa') || k.toLowerCase().includes('service'))
+            }
+        }, { status: 200 });
+    }
+
     const adminEmail = req.headers.get('x-admin-email') || '';
 
     if (!isAdminEmail(adminEmail)) {
