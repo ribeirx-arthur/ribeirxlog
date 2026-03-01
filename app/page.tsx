@@ -62,6 +62,8 @@ const INITIAL_THRESHOLDS: MaintenanceThresholds = {
 export default function Home() {
     const { isLoaded, isSignedIn, user } = useUser();
     const { signOut, getToken } = useAuth();
+    const [isDemo, setIsDemo] = useState(false);
+    const DEMO_USER_ID = '00000000-0000-0000-0000-000000000000';
 
     const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
     const [loadingData, setLoadingData] = useState(false);
@@ -116,23 +118,25 @@ export default function Home() {
 
     // Data Loading
     useEffect(() => {
-        if (isSignedIn && user?.id) {
+        if ((isSignedIn && user?.id) || isDemo) {
             setLoadingData(true);
             const fetchData = async () => {
+                const targetUserId = isDemo ? DEMO_USER_ID : user?.id;
                 try {
                     let token = null;
-                    try {
-                        token = await getToken({ template: 'supabase' });
-                    } catch (e) {
-                        console.warn("Clerk Supabase Token Error: Verifique se o template 'supabase' foi criado no painel do Clerk.");
+                    if (!isDemo) {
+                        try {
+                            token = await getToken({ template: 'supabase' });
+                        } catch (e) {
+                            console.warn("Clerk Supabase Token Error: Verifique se o template 'supabase' foi criado no painel do Clerk.");
+                        }
                     }
                     const client = token ? createClerkSupabaseClient(token) : supabase;
                     setAuthenticatedClient(client);
 
-                    console.log("[DEBUG] Fetching profile for User ID:", user.id);
-                    const { data: profileData, error: profileError } = await client.from('profiles').select('*').eq('id', user.id).single();
+                    console.log("[DEBUG] Fetching profile for User ID:", targetUserId);
+                    const { data: profileData, error: profileError } = await client.from('profiles').select('*').eq('id', targetUserId).single();
                     console.log("[DEBUG] Profile Data:", profileData);
-                    console.log("[DEBUG] Profile Error:", profileError);
 
                     if (profileData) {
                         let parsedConfig = INITIAL_PROFILE.config;
@@ -143,7 +147,7 @@ export default function Home() {
                         const mergedConfig = { ...INITIAL_PROFILE.config, ...parsedConfig };
                         setProfile({
                             ...profileData,
-                            email: profileData.email || user.primaryEmailAddress?.emailAddress || '',
+                            email: profileData.email || (isDemo ? 'demo@rbxlog.com' : user?.primaryEmailAddress?.emailAddress) || '',
                             companyName: profileData.company_name,
                             logoUrl: profileData.logo_url,
                             signatureUrl: profileData.signature_url,
@@ -173,17 +177,18 @@ export default function Home() {
                     }
 
                     const loadTable = async (table: string, setter: any, mapper?: any) => {
-                        console.log(`[DEBUG] Loading table: ${table} for User ID: ${user.id}`);
+                        console.log(`[DEBUG] Loading table: ${table} for User ID: ${targetUserId}`);
                         let query = client.from(table).select('*');
 
                         // Tables that have user_id column
                         const tablesWithUserId = [
                             'trips', 'vehicles', 'drivers', 'shippers',
-                            'buggies', 'tires', 'maintenance_records', 'profiles'
+                            'buggies', 'tires', 'maintenance_records', 'profiles',
+                            'vehicle_locations', 'gps_alerts' // Added for demo mode consistency
                         ];
 
                         if (tablesWithUserId.includes(table)) {
-                            query = query.eq('user_id', user.id);
+                            query = query.eq('user_id', targetUserId);
                         }
 
                         const { data, error } = await query;
@@ -287,11 +292,11 @@ export default function Home() {
             };
             fetchData();
         }
-    }, [isSignedIn, user?.id, refreshTrigger]);
+    }, [isSignedIn, user?.id, refreshTrigger, isDemo]); // Added isDemo to dependency array
 
     // Real-time GPS Tracking updates
     useEffect(() => {
-        if (!user || !isSignedIn) return;
+        if (!user || !isSignedIn || isDemo) return; // Do not subscribe to real-time updates in demo mode
 
         const channel = supabase
             .channel('gps-live-updates')
@@ -319,7 +324,7 @@ export default function Home() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [user, isSignedIn, trips]);
+    }, [user, isSignedIn, trips, isDemo]); // Added isDemo to dependency array
 
     const handleLandingPurchase = (plan: string) => {
         setPendingPlanIntent(plan);
@@ -327,14 +332,15 @@ export default function Home() {
     };
 
     const handleSaveTrip = async (newTrip: Trip) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         showToast('Salvando viagem...', 'info');
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
+            const userId = isDemo ? DEMO_USER_ID : user?.id;
 
             const { data, error } = await client.from('trips').insert({
-                user_id: user.id,
+                user_id: userId,
                 origin: newTrip.origin,
                 destination: newTrip.destination,
                 vehicle_id: newTrip.vehicleId === 'generic-vehicle' ? null : newTrip.vehicleId,
@@ -348,7 +354,7 @@ export default function Home() {
                 adiantamento: Number(newTrip.adiantamento || 0),
                 combustivel: Number(newTrip.combustivel || 0),
                 liters_diesel: Number(newTrip.litersDiesel || 0),
-                outras_despesas: Number(newTrip.outrasDespesas || 0),
+                outrasDespesas: Number(newTrip.outrasDespesas || 0),
                 status: newTrip.status || 'Pendente',
                 total_km: Number(newTrip.totalKm || 0),
                 transit_status: newTrip.transitStatus || 'Agendado',
@@ -384,7 +390,7 @@ export default function Home() {
     };
 
     const handleUpdateTrip = async (updatedTrip: Trip) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         showToast('Atualizando viagem...', 'info');
         try {
             const token = await getToken({ template: 'supabase' });
@@ -431,10 +437,11 @@ export default function Home() {
     };
 
     const handlePopulateDemoData = async () => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         showToast('Populando dados de teste...', 'info');
         try {
-            const success = await generateMockData(user.id);
+            const userId = isDemo ? DEMO_USER_ID : user?.id;
+            const success = await generateMockData(userId);
             if (success) {
                 showToast('Interface alimentada com sucesso!', 'success');
                 setRefreshTrigger(prev => prev + 1);
@@ -448,7 +455,7 @@ export default function Home() {
 
 
     const handleDeleteTrip = async (tripId: string) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         showToast('Excluindo viagem...', 'info');
         try {
             const token = await getToken({ template: 'supabase' });
@@ -465,7 +472,7 @@ export default function Home() {
     };
 
     const handleDeleteVehicle = async (vehicleId: string) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -481,7 +488,7 @@ export default function Home() {
     };
 
     const handleDeleteDriver = async (driverId: string) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -497,12 +504,14 @@ export default function Home() {
     };
 
     const handleAddDriver = async (newDriver: Partial<Driver>) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
+            const userId = isDemo ? DEMO_USER_ID : user?.id;
+
             const dbDriver = {
-                user_id: user.id,
+                user_id: userId,
                 name: newDriver.name,
                 cpf: newDriver.cpf,
                 phone: newDriver.phone,
@@ -544,7 +553,7 @@ export default function Home() {
     };
 
     const handleUpdateDriver = async (updatedDriver: Driver) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -575,7 +584,7 @@ export default function Home() {
     };
 
     const handleDeleteShipper = async (shipperId: string) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -591,7 +600,7 @@ export default function Home() {
     };
 
     const handleDeleteBuggy = async (buggyId: string) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -608,9 +617,10 @@ export default function Home() {
 
 
     const handleSaveMaintenance = async (record: MaintenanceRecord) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         const token = await getToken({ template: 'supabase' });
         const client = token ? createClerkSupabaseClient(token) : supabase;
+        const userId = isDemo ? DEMO_USER_ID : user?.id;
 
         const { data: saved, error } = await client.from('maintenance_records').insert({
             vehicle_id: record.vehicleId,
@@ -620,7 +630,7 @@ export default function Home() {
             description: record.description,
             total_cost: record.totalCost,
             provider: record.provider,
-            user_id: user.id
+            user_id: userId
         }).select().single();
 
         if (error) {
@@ -648,7 +658,7 @@ export default function Home() {
     };
 
     const handleUpdateMaintenance = async (record: MaintenanceRecord) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         const token = await getToken({ template: 'supabase' });
         const client = token ? createClerkSupabaseClient(token) : supabase;
 
@@ -678,11 +688,12 @@ export default function Home() {
             const updatedProfile: UserProfile = { ...profile, companyName: data.companyName, config: { ...profile.config, onboardingCompleted: true, appMode: data.appMode, userRole: data.userRole } };
             setProfile(updatedProfile);
 
-            if (user) {
+            if (user || isDemo) {
                 const token = await getToken({ template: 'supabase' });
                 const client = token ? createClerkSupabaseClient(token) : supabase;
+                const userId = isDemo ? DEMO_USER_ID : user?.id;
 
-                await client.from('profiles').update({ company_name: data.companyName, config: updatedProfile.config }).eq('id', user.id);
+                await client.from('profiles').update({ company_name: data.companyName, config: updatedProfile.config }).eq('id', userId);
 
                 if (data.vehicle.plate) await handleAddVehicle(data.vehicle as Vehicle);
                 if (data.driver.name) await handleAddDriver({ ...data.driver, vehicleId: vehicles[0]?.id } as Driver);
@@ -743,7 +754,7 @@ export default function Home() {
     }, [drivers]);
 
     const handleDeleteMaintenance = async (id: string) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         if (!confirm('Tem certeza que deseja excluir este registro?')) return;
 
         const token = await getToken({ template: 'supabase' });
@@ -761,7 +772,7 @@ export default function Home() {
     };
 
     const handleUpdateVehicleThresholds = async (vehicleId: string, thresholds: MaintenanceThresholds) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         console.log("[MAINT] Force-updating thresholds for vehicle:", vehicleId, thresholds);
         try {
             const token = await getToken({ template: 'supabase' });
@@ -790,7 +801,7 @@ export default function Home() {
     };
 
     const handleResetVehicleComponent = async (vehicleId: string, component: 'oil' | 'tire' | 'brake' | 'engine') => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         console.log("[MAINT] Force-resetting health for component:", component, "on vehicle:", vehicleId);
         try {
             const token = await getToken({ template: 'supabase' });
@@ -825,12 +836,12 @@ export default function Home() {
         }
     };
     const handleAddVehicle = async (v: Partial<Vehicle>) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
 
         // PLAN LIMIT CHECK
         const plan = profile?.plan_type || 'none';
         const isLimited = plan === 'piloto' || plan === 'none';
-        if (isLimited && vehicles.length >= 1) {
+        if (isLimited && vehicles.length >= 1 && !isDemo) { // Allow unlimited in demo
             showToast('Limite de veículos atingido no plano Piloto. Faça upgrade para cadastrar mais!', 'error');
             return; // Block creation
         }
@@ -838,8 +849,10 @@ export default function Home() {
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
+            const userId = isDemo ? DEMO_USER_ID : user?.id;
+
             const dbV = {
-                user_id: user.id,
+                user_id: userId,
                 plate: v.plate?.toUpperCase(), name: v.name, brand: v.brand, model: v.model, year: v.year,
                 type: v.type, society_split_factor: v.societySplitFactor,
                 total_km_accumulated: v.totalKmAccumulated || 0,
@@ -873,7 +886,7 @@ export default function Home() {
     };
 
     const handleUpdateVehicle = async (v: Vehicle) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -895,12 +908,14 @@ export default function Home() {
     };
 
     const handleAddShipper = async (s: Partial<Shipper>) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
+            const userId = isDemo ? DEMO_USER_ID : user?.id;
+
             const dbS = {
-                user_id: user.id,
+                user_id: userId,
                 name: s.name, cnpj_cpf: s.cnpj, avg_payment_days: s.avgPaymentDays,
                 email: s.email, phone: s.phone, logo_url: s.logoUrl
             };
@@ -913,7 +928,7 @@ export default function Home() {
     };
 
     const handleUpdateShipper = async (s: Shipper) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -928,12 +943,14 @@ export default function Home() {
     };
 
     const handleAddBuggy = async (b: Partial<Buggy>) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
+            const userId = isDemo ? DEMO_USER_ID : user?.id;
+
             const dbB = {
-                user_id: user.id,
+                user_id: userId,
                 plate: b.plate?.toUpperCase(), brand: b.brand, model: b.model, axles: b.axles, tire_type: b.tireType
             };
             const { data, error } = await client.from('buggies').insert(dbB).select().single();
@@ -945,7 +962,7 @@ export default function Home() {
     };
 
     const handleUpdateBuggy = async (b: Buggy) => {
-        if (!user) return;
+        if (!user && !isDemo) return;
         try {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
@@ -960,14 +977,15 @@ export default function Home() {
 
     const handleUpdateProfile = async (newProfile: UserProfile) => {
         setProfile(newProfile);
-        if (user) {
+        if (user || isDemo) {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
+            const userId = isDemo ? DEMO_USER_ID : user?.id;
 
             await client.from('profiles').upsert({
-                id: user.id,
+                id: userId,
                 name: newProfile.name,
-                email: user.primaryEmailAddress?.emailAddress,
+                email: isDemo ? 'demo@rbxlog.com' : user?.primaryEmailAddress?.emailAddress,
                 company_name: newProfile.companyName,
                 logo_url: newProfile.logoUrl,
                 signature_url: newProfile.signatureUrl,
@@ -1053,7 +1071,7 @@ export default function Home() {
             case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
             case 'settings': return <Settings profile={profile} setProfile={handleUpdateProfile} trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} maintenances={maintenances} onImportData={() => { }} onResetData={() => { }} />;
             case 'performance':
-                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
                     return <Paywall title="Business Intelligence (BI)" plan="Gestor Pro" price="R$ 89,90" features={['Gráficos de Lucro Bruto', 'Análise de Margem por KM', 'Performance por Motorista']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
                 }
                 return (
@@ -1062,13 +1080,13 @@ export default function Home() {
                     </Suspense>
                 );
             case 'intelligence':
-                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
                     return <Paywall title="Inteligência de Dados" plan="Gestor Pro" price="R$ 89,90" features={['Previsão de Gastos', 'Alertas de Ineficiência', 'Otimização de Rotas']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
                 }
                 return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
             case 'freight-calculator': return <FreightCalculator vehicles={vehicles} profile={profile} />;
             case 'gps-tracking':
-                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
                     return <Paywall title="Rastreamento em Tempo Real" plan="Gestor Pro" price="R$ 89,90" features={['Localização Exata', 'Alertas de Velocidade', 'Cerca Virtual']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
                 }
                 return (
@@ -1093,7 +1111,7 @@ export default function Home() {
                 </Suspense>
             );
             case 'tires':
-                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
                     return <Paywall title="Controle de Pneus" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de Vidas', 'Custo por KM de Pneu', 'Alertas de Rodízio']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
                 }
                 return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
@@ -1104,7 +1122,7 @@ export default function Home() {
                 </Suspense>
             );
             case 'compliance':
-                if (profile?.payment_status !== 'paid' && !isAdmin) {
+                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
                     return <Paywall title="Compliance & Documentos" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de CNH/ANTT', 'Validade de Seguros', 'Alertas de Vencimento']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
                 }
                 return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
@@ -1205,6 +1223,7 @@ export default function Home() {
                     activeTab={activeTab}
                     onRefresh={() => setRefreshTrigger(prev => prev + 1)}
                     isMobileMenuOpen={isMobileMenuOpen}
+                    isDemo={isDemo}
                     setIsMobileMenuOpen={setIsMobileMenuOpen}
                 />
                 <main className="md:ml-64 p-4 md:p-8">

@@ -37,9 +37,10 @@ import { WHATSAPP_NUMBER } from '../pricing';
 interface LandingPageProps {
     onGetStarted: () => void;
     onPurchase: (plan: string) => void;
+    onDemo?: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onDemo }) => {
     const [legalType, setLegalType] = useState<'privacy' | 'terms' | null>(null);
 
     const handleWhatsAppContact = () => {
@@ -102,6 +103,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase }) =
                         <button onClick={onGetStarted} className="text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition-colors hidden sm:block">
                             Área do Cliente
                         </button>
+                        {onDemo && (
+                            <button onClick={onDemo} className="text-emerald-500/60 hover:text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-emerald-500/20 px-4 py-2 rounded-xl hover:bg-emerald-500/5">
+                                Modo Demo
+                            </button>
+                        )}
                         <button
                             onClick={onGetStarted}
                             className="bg-emerald-500 text-slate-950 px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)]"

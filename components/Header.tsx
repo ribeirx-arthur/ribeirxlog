@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import {
   Bell, Search, HelpCircle, User, X, AlertTriangle, ChevronRight, RefreshCcw,
-  Share2, Menu
+  Share2, Menu, ShieldAlert
 } from 'lucide-react';
 import { UserProfile, AppNotification, TabType } from '../types';
 
@@ -15,11 +15,12 @@ interface HeaderProps {
   onRefresh?: () => void;
   isMobileMenuOpen?: boolean;
   setIsMobileMenuOpen?: (open: boolean) => void;
+  isDemo?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
   profile, notifications, onReadNotification, setActiveTab, activeTab, onRefresh,
-  isMobileMenuOpen, setIsMobileMenuOpen
+  isMobileMenuOpen, setIsMobileMenuOpen, isDemo
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFaq, setShowFaq] = useState(false);
@@ -43,6 +44,13 @@ const Header: React.FC<HeaderProps> = ({
               placeholder="Pesquisar placa, motorista ou identificador..."
               className="bg-transparent text-xs text-slate-200 outline-none w-full font-medium"
             />
+          </div>
+        )}
+
+        {isDemo && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+            <ShieldAlert className="w-3 h-3 text-amber-500" />
+            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Visualização de Teste</span>
           </div>
         )}
       </div>
