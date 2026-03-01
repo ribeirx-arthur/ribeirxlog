@@ -233,6 +233,8 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
             </div>
           </div>
         </div>
+
+        {profile.config.userRole === 'autonomo' && <AutonomousDriverTips />}
       </div>
     );
   }
@@ -308,8 +310,12 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         ) : (
           <StatCard title="Saldo a Receber" value={`R$ ${stats.pendingReceivables.toLocaleString()}`} trend="Pendente" isPositive={false} icon={Clock} uiStyle={uiStyle} />
         )}
-        <StatCard title="Custos Motoristas" value={`R$ ${stats.driverCommissions.toLocaleString()}`} trend="Comissões" isPositive={true} icon={CreditCard} uiStyle={uiStyle} />
+        {profile.config.userRole !== 'autonomo' && (
+          <StatCard title="Custos Motoristas" value={`R$ ${stats.driverCommissions.toLocaleString()}`} trend="Comissões" isPositive={true} icon={CreditCard} uiStyle={uiStyle} />
+        )}
       </div>
+
+      {profile.config.userRole === 'autonomo' && <AutonomousDriverTips />}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`lg:col-span-2 bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden ${uiStyle === 'deep' ? 'ring-1 ring-emerald-500/20' : ''}`}>
@@ -429,5 +435,42 @@ const StatCard: React.FC<{ title: string; value: string; trend: string; isPositi
     {uiStyle === 'deep' && <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />}
   </div>
 );
+
+const AutonomousDriverTips = () => {
+  return (
+    <div className="bg-sky-500/10 border border-sky-500/20 p-8 rounded-[2.5rem] shadow-xl">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+          <Zap className="w-6 h-6" />
+        </div>
+        <div>
+          <h3 className="text-xl font-black text-white uppercase tracking-tighter italic">Minuto do Autônomo</h3>
+          <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Dicas valiosas para aumentar o seu lucro na estrada</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-slate-900/50 p-6 rounded-3xl border border-sky-500/10 hover:border-sky-500/30 transition-all group">
+          <h4 className="text-sky-500 font-black text-sm uppercase tracking-tighter mb-2 group-hover:text-emerald-400 transition-colors">1. Otimização do Diesel</h4>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed">
+            Mantenha a rotação do motor na faixa verde (torque máximo). Isso pode gerar uma economia de até **15% no consumo**. Lembre-se: aceleração suave é dinheiro no bolso!
+          </p>
+        </div>
+        <div className="bg-slate-900/50 p-6 rounded-3xl border border-sky-500/10 hover:border-sky-500/30 transition-all group">
+          <h4 className="text-sky-500 font-black text-sm uppercase tracking-tighter mb-2 group-hover:text-emerald-400 transition-colors">2. Gestão de Pneus</h4>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed">
+            Calibre os pneus a frio (com o caminhão parado). Rodar com a pressão correta não só poupa combustível mas aumenta a lona e a vida útil para recapagem.
+          </p>
+        </div>
+        <div className="bg-slate-900/50 p-6 rounded-3xl border border-sky-500/10 hover:border-sky-500/30 transition-all group">
+          <h4 className="text-sky-500 font-black text-sm uppercase tracking-tighter mb-2 group-hover:text-amber-400 transition-colors">3. Gestão Financeira</h4>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed">
+            Separe sempre um percentual do valor líquido do frete (ex: 10%) para um "Caixa de Reserva". Manutenções inesperadas ou quebras não podem parar o seu faturamento.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default Dashboard;

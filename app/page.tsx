@@ -672,10 +672,10 @@ export default function Home() {
     };
 
     // ─── ONBOARDING COMPLETION ───
-    const handleOnboardingComplete = async (data: { companyName: string; city: string; vehicle: Partial<Vehicle>; driver: Partial<Driver>; appMode: 'simple' | 'advanced' }) => {
+    const handleOnboardingComplete = async (data: { companyName: string; city: string; vehicle: Partial<Vehicle>; driver: Partial<Driver>; appMode: 'simple' | 'advanced'; userRole: 'autonomo' | 'transportadora' }) => {
         try {
             // Update local state first for instant feedback
-            const updatedProfile: UserProfile = { ...profile, companyName: data.companyName, config: { ...profile.config, onboardingCompleted: true, appMode: data.appMode } };
+            const updatedProfile: UserProfile = { ...profile, companyName: data.companyName, config: { ...profile.config, onboardingCompleted: true, appMode: data.appMode, userRole: data.userRole } };
             setProfile(updatedProfile);
 
             if (user) {
@@ -1169,7 +1169,8 @@ export default function Home() {
                     city: 'Não informado',
                     vehicle: {},
                     driver: {},
-                    appMode: 'simple'
+                    appMode: 'simple',
+                    userRole: 'transportadora'
                 })}
             />
         );
@@ -1180,7 +1181,7 @@ export default function Home() {
         return (
             <Onboarding
                 onComplete={handleOnboardingComplete}
-                onSkip={() => handleOnboardingComplete({ companyName: profile.companyName || 'Minha Transportadora', city: '', vehicle: {}, driver: {}, appMode: 'simple' })}
+                onSkip={() => handleOnboardingComplete({ companyName: profile.companyName || 'Minha Transportadora', city: '', vehicle: {}, driver: {}, appMode: 'simple', userRole: 'transportadora' })}
             />
         );
     }

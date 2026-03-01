@@ -18,6 +18,7 @@ interface OnboardingProps {
         vehicle: Partial<Vehicle>;
         driver: Partial<Driver>;
         appMode: 'simple' | 'advanced';
+        userRole: 'autonomo' | 'transportadora';
     }) => void;
     onSkip: () => void;
 }
@@ -57,6 +58,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
             companyName,
             city,
             appMode,
+            userRole: isDriverManager ? 'autonomo' : 'transportadora',
             vehicle: {
                 plate: vehiclePlate,
                 axles: parseInt(vehicleAxles),

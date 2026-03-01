@@ -10,11 +10,12 @@ export const calculateTripFinance = (
   const { freteSeco, diarias, adiantamento, combustivel, outrasDespesas } = trip;
 
   // Commission logic
+  const isAutonomo = profile.config.userRole === 'autonomo';
   const percFrete = driver.customCommission?.frete ?? profile.config.percMotFrete;
   const percDiaria = driver.customCommission?.diaria ?? profile.config.percMotDiaria;
 
   const totalBruto = freteSeco + diarias;
-  const comissaoMotorista = (freteSeco * (percFrete / 100)) + (diarias * (percDiaria / 100));
+  const comissaoMotorista = isAutonomo ? 0 : (freteSeco * (percFrete / 100)) + (diarias * (percDiaria / 100));
 
   // Saldo a Receber da Transportadora: valor bruto menos o que já foi adiantado.
   // Se a viagem estiver marcada como Paga, o saldo é zerado.

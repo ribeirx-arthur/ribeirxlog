@@ -27,6 +27,7 @@ export interface UserProfile {
     costPerKmTire: number; // Valor fixado em reais por KM para pneus
     costPerKmMaintenance: number; // Valor fixado em reais por KM para manutenção
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
+    userRole?: 'autonomo' | 'transportadora';
     enabledFeatures?: string[];
     onboardingCompleted?: boolean;
     hasUsedCoupon?: boolean;

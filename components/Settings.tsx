@@ -201,27 +201,29 @@ const Settings: React.FC<SettingsProps> = ({
                {active === 'calculos' && (
                   <div className="space-y-5 animate-in slide-in-from-bottom-3 duration-300">
 
-                     <Card title="Comissão dos motoristas" subtitle="O sistema usa esses percentuais para calcular o lucro líquido de cada viagem automaticamente.">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                           <NumberField
-                              label="Comissão do Frete Seco"
-                              value={profile.config.percMotFrete}
-                              onChange={v => cfg('percMotFrete', v)}
-                              unit="%"
-                              hint="Porcentagem que o motorista recebe sobre o valor do frete principal."
-                              example="Se o frete é R$2.000 e a comissão é 10%, o motorista recebe R$200."
-                           />
-                           <NumberField
-                              label="Comissão das Diárias"
-                              value={profile.config.percMotDiaria}
-                              onChange={v => cfg('percMotDiaria', v)}
-                              unit="%"
-                              hint="Porcentagem que o motorista recebe sobre as diárias cobradas."
-                              example="Se a diária é R$100 e a comissão é 30%, o motorista recebe R$30."
-                           />
-                        </div>
-                        <Tip>Cada motorista pode ter uma comissão individual diferente dessa. Configure em Cadastros → Motorista → Editar.</Tip>
-                     </Card>
+                     {profile.config.userRole !== 'autonomo' && (
+                        <Card title="Comissão dos motoristas" subtitle="O sistema usa esses percentuais para calcular o lucro líquido de cada viagem automaticamente.">
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <NumberField
+                                 label="Comissão do Frete Seco"
+                                 value={profile.config.percMotFrete}
+                                 onChange={v => cfg('percMotFrete', v)}
+                                 unit="%"
+                                 hint="Porcentagem que o motorista recebe sobre o valor do frete principal."
+                                 example="Se o frete é R$2.000 e a comissão é 10%, o motorista recebe R$200."
+                              />
+                              <NumberField
+                                 label="Comissão das Diárias"
+                                 value={profile.config.percMotDiaria}
+                                 onChange={v => cfg('percMotDiaria', v)}
+                                 unit="%"
+                                 hint="Porcentagem que o motorista recebe sobre as diárias cobradas."
+                                 example="Se a diária é R$100 e a comissão é 30%, o motorista recebe R$30."
+                              />
+                           </div>
+                           <Tip>Cada motorista pode ter uma comissão individual diferente dessa. Configure em Cadastros → Motorista → Editar.</Tip>
+                        </Card>
+                     )}
 
                      <Card title="Custo de desgaste (pneus e mecânica)" subtitle="Ativar isso torna o lucro líquido mais realista, pois desconta os gastos invisíveis do dia a dia.">
                         <Toggle
@@ -284,7 +286,7 @@ const Settings: React.FC<SettingsProps> = ({
                      <Card title="Modo de Operação" subtitle="Escolha como você prefere usar o sistema. O modo simples oculta ferramentas complexas para focar no lucro por viagem.">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                            <button
-                              onClick={() => cfg('appMode', 'simple')}
+                              onClick={() => setProfile({ ...profile, config: { ...profile.config, appMode: 'simple', userRole: 'autonomo' } })}
                               className={`p-5 rounded-[2rem] border text-left transition-all relative overflow-hidden group ${profile.config.appMode === 'simple' ? 'bg-emerald-500 border-emerald-400' : 'bg-slate-950 border-slate-800'}`}
                            >
                               <p className={`text-xs font-black uppercase italic tracking-tighter mb-1 ${profile.config.appMode === 'simple' ? 'text-emerald-950' : 'text-emerald-500'}`}>Modo Autônomo</p>
@@ -292,7 +294,7 @@ const Settings: React.FC<SettingsProps> = ({
                               {profile.config.appMode === 'simple' && <Check className="absolute top-4 right-4 w-4 h-4 text-emerald-950" />}
                            </button>
                            <button
-                              onClick={() => cfg('appMode', 'advanced')}
+                              onClick={() => setProfile({ ...profile, config: { ...profile.config, appMode: 'advanced', userRole: 'transportadora' } })}
                               className={`p-5 rounded-[2rem] border text-left transition-all relative overflow-hidden group ${profile.config.appMode === 'advanced' ? 'bg-emerald-500 border-emerald-400' : 'bg-slate-950 border-slate-800'}`}
                            >
                               <p className={`text-xs font-black uppercase italic tracking-tighter mb-1 ${profile.config.appMode === 'advanced' ? 'text-emerald-950' : 'text-sky-500'}`}>Modo Transportadora</p>

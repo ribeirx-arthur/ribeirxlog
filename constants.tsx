@@ -20,6 +20,7 @@ export const INITIAL_PROFILE: UserProfile = {
     calculateDepreciation: false,   // Desativado por padrão — gestor escolhe ativar
     costPerKmTire: 0,               // 0 = usa estimula automática por eixos
     costPerKmMaintenance: 0,        // 0 = usa estimula automática por eixos
-    appMode: 'simple'
+    appMode: 'simple',
+    userRole: 'transportadora'
   }
 };
