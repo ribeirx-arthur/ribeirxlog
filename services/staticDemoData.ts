@@ -29,6 +29,8 @@ export const STATIC_DEMO_VEHICLES = [
         model: 'R500',
         year: 2024,
         type: 'Próprio',
+        axles: 6,
+        societySplitFactor: 100,
         totalKmAccumulated: 145000,
         lastMaintenanceKm: 140000,
         anttNumber: '123456789',
@@ -54,7 +56,11 @@ export const STATIC_DEMO_DRIVERS = [
         cnhCategory: 'E',
         cnhValidity: '2027-01-01',
         status: 'Ativo',
-        hasAppAccess: true
+        hasAppAccess: true,
+        customCommission: {
+            frete: 10,
+            diaria: 10
+        }
     }
 ];
 
@@ -80,6 +86,7 @@ export const STATIC_DEMO_TRIPS = [
         destination: 'Santos/SP',
         freteSeco: 14500,
         departureDate: '2025-02-10',
+        receiptDate: '2025-02-10',
         status: 'Pago',
         totalKm: 1550,
         combustivel: 4200,
@@ -98,6 +105,7 @@ export const STATIC_DEMO_TRIPS = [
         destination: 'Uberlândia/MG',
         freteSeco: 8800,
         departureDate: '2025-02-15',
+        receiptDate: '2025-02-15',
         status: 'Pago',
         totalKm: 600,
         combustivel: 1800,
@@ -116,6 +124,7 @@ export const STATIC_DEMO_TRIPS = [
         destination: 'Paranaguá/PR',
         freteSeco: 3200,
         departureDate: '2025-02-20',
+        receiptDate: '2025-02-20',
         status: 'Pago',
         totalKm: 200,
         combustivel: 700,
@@ -134,7 +143,9 @@ export const STATIC_DEMO_TRIPS = [
         destination: 'Miritituba/PA',
         freteSeco: 19500,
         departureDate: '2025-03-01',
+        receiptDate: '2025-03-01',
         status: 'Pendente',
+        distancia: 1400,
         totalKm: 1400,
         combustivel: 5500,
         diarias: 800,
