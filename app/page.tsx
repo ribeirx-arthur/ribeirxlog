@@ -1144,7 +1144,7 @@ export default function Home() {
         );
     }
 
-    if (!isSignedIn) {
+    if (!isSignedIn && !isDemo) {
         if (showAuth) {
             return (
                 <div className="min-h-screen bg-slate-950 flex items-center justify-center relative p-6">
@@ -1174,7 +1174,13 @@ export default function Home() {
                 </div>
             );
         }
-        return <LandingPage onGetStarted={() => setShowAuth(true)} onPurchase={handleLandingPurchase} />;
+        return (
+            <LandingPage
+                onGetStarted={() => setShowAuth(true)}
+                onPurchase={handleLandingPurchase}
+                onDemo={() => setIsDemo(true)}
+            />
+        );
     }
 
     // ─── RENDER ONBOARDING ───
