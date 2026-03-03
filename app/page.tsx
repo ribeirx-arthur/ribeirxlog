@@ -374,7 +374,7 @@ export default function Home() {
                 adiantamento: Number(newTrip.adiantamento || 0),
                 combustivel: Number(newTrip.combustivel || 0),
                 liters_diesel: Number(newTrip.litersDiesel || 0),
-                outrasDespesas: Number(newTrip.outrasDespesas || 0),
+                outras_despesas: Number(newTrip.outrasDespesas || 0),
                 status: newTrip.status || 'Pendente',
                 total_km: Number(newTrip.totalKm || 0),
                 transit_status: newTrip.transitStatus || 'Agendado',
@@ -1240,6 +1240,7 @@ export default function Home() {
                     isOpen={isMobileMenuOpen}
                     onClose={() => setIsMobileMenuOpen(false)}
                     appVersion={APP_VERSION}
+                    isDemo={isDemo}
                 />
                 <Header
                     profile={profile}

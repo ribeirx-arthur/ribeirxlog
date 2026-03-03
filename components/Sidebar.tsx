@@ -33,204 +33,141 @@ interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
   appVersion?: string;
+  isDemo?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isOpen, onClose, appVersion }) => {
-  const { features } = useAppMode();
+const Sidebar: React.FC<SidebarProps> = ({
+  activeTab, setActiveTab, profile, isOpen, onClose, appVersion, isDemo
+}) => {
   const { signOut } = useAuth();
-  const [toolsExpanded, setToolsExpanded] = useState(false);
-
-  const userEmail = profile.email?.trim().toLowerCase() || '';
-  const adminEmails = [
-    'arthur@ribeirxlog.com',
-    'arthur.ribeirx@gmail.com',
-    'arthur.riberix@gmail.com',
-    'arthurpsantos01@gmail.com',
-    'arthur_ribeiro09@outlook.com'
-  ];
-  const isAdmin = adminEmails.includes(userEmail) ||
-    userEmail.endsWith('@ribeirxlog.com') ||
-    profile.name?.toLowerCase().includes('ribeirxlog');
-
 
   const navigate = (tab: TabType) => {
     setActiveTab(tab);
     onClose?.();
   };
 
-  // ─── PRIMARY items — always visible ───
-  const primaryItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Visão financeira' },
-    { id: 'trips', label: 'Viagens', icon: Truck, desc: 'Histórico de fretes' },
-    { id: 'drivers', label: 'Motoristas', icon: Users, desc: 'Sua equipe' },
-    { id: 'compliance', label: 'Compliance Hub', icon: ShieldCheck, desc: 'Documentos do ativo' },
-    { id: 'freight-calculator', label: 'Calcular Frete', icon: Calculator, desc: 'Simular viagem' },
-    { id: 'gps-tracking', label: 'Mapa', icon: MapPin, desc: 'Rastear rotas' },
-  ] as const;
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'trips', label: 'Viagens', icon: Truck },
+    { id: 'performance', label: 'BI & Performance', icon: TrendingUp },
+    { id: 'intelligence', label: 'IA Estratégica', icon: Brain },
+    { id: 'tires', label: 'Gestão de Pneus', icon: Disc, badge: 'PRO' },
+    { id: 'compliance', label: 'Documentos & CNH', icon: ShieldCheck, badge: 'PRO' },
+    { id: 'help', label: 'Central de Ajuda', icon: HelpCircle },
+  ];
 
-  // ─── TOOLS — hidden in expandable group ───
-  const activeAppMode = profile.config.appMode || 'advanced';
-
-  const toolItems = [
-    { id: 'performance', label: 'BI & Performance', icon: TrendingUp, hidden: !features.canAccessBI || activeAppMode === 'simple' },
-    { id: 'maintenance', label: 'Saúde da Frota', icon: ShieldAlert, hidden: !features.canAccessFullMaintenance || activeAppMode === 'simple' },
-    { id: 'tires', label: 'Gestão de Pneus', icon: Disc, hidden: !features.canAccessTires || activeAppMode === 'simple' },
-    { id: 'intelligence', label: 'Inteligência IA', icon: Brain, hidden: profile.config.showTips === false || activeAppMode === 'simple' },
-    { id: 'proof-gallery', label: 'Documentos', icon: FolderOpen, hidden: false },
-    { id: 'setup', label: 'Cadastros', icon: Database, hidden: false },
-    { id: 'admin', label: 'Admin', icon: ShieldCheck, hidden: !isAdmin },
-  ].filter(i => !i.hidden) as any[];
-
-  const isToolActive = toolItems.some(t => t.id === activeTab);
+  // Itens que só aparecem se NÃO for modo Demo
+  const managementItems = !isDemo ? [
+    { id: 'drivers', label: 'Motoristas', icon: Users },
+    { id: 'setup', label: 'Frota & Unidades', icon: PlusCircle },
+    { id: 'freight-calculator', label: 'Calculadora', icon: Calculator },
+    { id: 'settings', label: 'Configurações', icon: Settings },
+  ] : [];
 
   return (
     <>
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[140] md:hidden"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[150] md:hidden"
           onClick={onClose}
         />
       )}
 
-      <div className={`w-64 bg-slate-900 border-r border-slate-800/60 flex flex-col h-screen fixed left-0 top-0 z-[150] transition-transform duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-
-        {/* ── Logo ── */}
-        <div className="px-5 pt-6 pb-4 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <img
-              src="/icon.svg"
-              alt="RBX"
-              className="h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.outerHTML = `<div class="flex items-center gap-2"><div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20"><span class="text-white font-black text-xs">RBX</span></div></div>`;
-              }}
-            />
-            <div className="flex flex-col">
-              <span className="font-black text-xl tracking-tighter text-white leading-none">RBX<span className="text-emerald-500">LOG</span></span>
-              <p className="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em] leading-none mt-1">Intelligence</p>
+      <aside className={`
+                fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-[200]
+                transition-transform duration-300 ease-in-out flex flex-col
+                ${isOpen ? 'translate-x-0' : '-translate-x-64 md:translate-x-0'}
+            `}>
+        {/* Logo Section */}
+        <div className="p-8 border-b border-white/5">
+          <div className="flex flex-col items-center gap-2 group cursor-pointer" onClick={() => navigate('dashboard')}>
+            <div className="relative">
+              <img
+                src="/icon.svg"
+                alt="RBX"
+                className="h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+              />
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span className="text-emerald-500">LOG</span></span>
+              <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence</span>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-slate-600 hover:text-white md:hidden transition-colors">
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
-        {/* ── Trial warning ── */}
-        {profile.payment_status !== 'paid' && !isAdmin && (
-          <div className="mx-4 mb-3 px-4 py-3 bg-amber-500/8 border border-amber-500/20 rounded-2xl">
-            <p className="text-[10px] text-amber-400 font-bold leading-relaxed">
-              ⚡ Versão gratuita — <button onClick={() => navigate('subscription')} className="underline">fazer upgrade</button>
-            </p>
-          </div>
-        )}
+        {/* Main Navigation */}
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-hide">
+          {/* Primary Actions (Hidden in Demo) */}
+          {!isDemo && (
+            <div className="space-y-2">
+              <button
+                onClick={() => navigate('new-trip')}
+                className={`
+                   w-full flex items-center gap-3 px-4 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all
+                   ${activeTab === 'new-trip'
+                    ? 'bg-emerald-500 text-slate-950 shadow-[0_10px_20px_rgba(16,185,129,0.2)]'
+                    : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border border-emerald-500/20'}
+               `}
+              >
+                <PlusCircle className="w-4 h-4" />
+                Lançar Viagem
+              </button>
+            </div>
+          )}
 
-        {/* ── New Trip CTA ── */}
-        <div className="px-4 mb-4 shrink-0">
-          <button
-            onClick={() => navigate('new-trip')}
-            className={`w-full flex items-center justify-center gap-2 font-black py-3.5 rounded-2xl transition-all shadow-lg text-sm ${activeTab === 'new-trip'
-              ? 'bg-sky-500 text-white shadow-sky-500/20'
-              : 'bg-emerald-500 hover:bg-emerald-600 text-emerald-950 shadow-emerald-500/20 hover:scale-[1.02] active:scale-95'
-              }`}
-          >
-            <PlusCircle className="w-4 h-4" />
-            Novo Lançamento
-          </button>
-        </div>
-
-        {/* ── Primary Nav ── */}
-        <nav className="flex-1 overflow-y-auto px-3 space-y-1 pb-2">
-          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] px-3 mb-2">Principal</p>
-
-          {primaryItems.map(item => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
+          {/* Main Menu */}
+          <nav className="space-y-1">
+            <p className="px-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 italic">Operação & BI</p>
+            {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => navigate(item.id as TabType)}
-                className={`w-full group flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${isActive
-                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-slate-400 hover:bg-slate-800/40 hover:text-white'
-                  }`}
+                className={`
+                    w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all group
+                    ${activeTab === item.id
+                    ? 'bg-white/5 text-white ring-1 ring-white/10'
+                    : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]'}
+                `}
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-800/50 text-slate-500 group-hover:bg-slate-700 group-hover:text-white'}`}>
-                  <Icon className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <item.icon className={`w-4 h-4 transition-colors ${activeTab === item.id ? 'text-emerald-500' : 'group-hover:text-slate-300'}`} />
+                  <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
                 </div>
-                <div className="text-left min-w-0">
-                  <p className={`text-xs font-bold leading-none ${isActive ? 'text-emerald-400' : ''}`}>{item.label}</p>
-                  <p className="text-[9px] text-slate-600 mt-0.5 font-medium">{item.desc}</p>
-                </div>
-                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
-              </button>
-            );
-          })}
-
-          {/* ── Ferramentas (collapsible) ── */}
-          <div className="pt-3">
-            <button
-              onClick={() => setToolsExpanded(p => !p)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all group ${isToolActive ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}`}
-            >
-              <div className="flex items-center gap-2">
-                <Wrench className="w-3.5 h-3.5" />
-                <p className="text-[9px] font-black uppercase tracking-[0.2em]">Ferramentas</p>
-              </div>
-              <div className={`flex items-center gap-2 transition-all`}>
-                {isToolActive && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${toolsExpanded ? 'rotate-180' : ''}`} />
-              </div>
-            </button>
-
-            <div className={`overflow-hidden transition-all duration-300 ${toolsExpanded || isToolActive ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-              <div className="space-y-0.5 pt-1 pl-2">
-                {toolItems.map((item: any) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => navigate(item.id as TabType)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${isActive
-                        ? 'bg-emerald-500/10 text-emerald-400'
-                        : 'text-slate-500 hover:bg-slate-800/30 hover:text-slate-300'
-                        }`}
-                    >
-                      <Icon className="w-3.5 h-3.5 shrink-0" />
-                      <span className="text-[11px] font-bold">{item.label}</span>
-                      {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        {/* ── Bottom utility strip ── */}
-        <div className="shrink-0 border-t border-slate-800/60 px-4 pt-3 pb-4 space-y-3">
-          {/* Icon row */}
-          <div className="flex items-center justify-around">
-            {[
-              { id: 'settings', icon: Settings, label: 'Config.' },
-              { id: 'help', icon: HelpCircle, label: 'Ajuda' },
-              { id: 'subscription', icon: CreditCard, label: 'Plano' },
-            ].map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => navigate(id as TabType)}
-                title={label}
-                className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${activeTab === id ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-600 hover:text-slate-300 hover:bg-slate-800/40'}`}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="text-[8px] font-bold uppercase tracking-wide">{label}</span>
+                {item.badge && (
+                  <span className="text-[7px] font-black px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{item.badge}</span>
+                )}
               </button>
             ))}
-          </div>
+          </nav>
 
-          {/* User row (Photo removed) */}
+          {/* Management Section (Filtered in Demo) */}
+          {managementItems.length > 0 && (
+            <nav className="space-y-1">
+              <p className="px-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 italic">Gestão & Frota</p>
+              {managementItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => navigate(item.id as TabType)}
+                  className={`
+                      w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all group
+                      ${activeTab === item.id
+                      ? 'bg-white/5 text-white ring-1 ring-white/10'
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]'}
+                  `}
+                >
+                  <div className="flex items-center gap-3">
+                    <item.icon className={`w-4 h-4 transition-colors ${activeTab === item.id ? 'text-emerald-500' : 'group-hover:text-slate-300'}`} />
+                    <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
+                  </div>
+                </button>
+              ))}
+            </nav>
+          )}
+        </div>
+
+        {/* User profile box (Static/Clean) */}
+        <div className="p-4 border-t border-white/5">
           <div className="bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.25)] rounded-2xl px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -247,14 +184,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, profile, isO
                             'Conta Grátis'}
               </span>
             </div>
-            <button onClick={() => signOut()} title="Sair" className="p-1.5 text-slate-500 hover:text-rose-500 transition-colors">
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
+            {!isDemo && (
+              <button onClick={() => signOut()} title="Sair" className="p-1.5 text-slate-500 hover:text-rose-500 transition-colors">
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
-
-          <p className="text-center text-[9px] font-black text-slate-700 tracking-[0.3em] uppercase">v{appVersion || '1.7.1'}</p>
+          <p className="text-center text-[9px] font-black text-slate-700 tracking-[0.3em] uppercase mt-4">v{appVersion || '1.7.1'}</p>
         </div>
-      </div>
+      </aside>
     </>
   );
 };
