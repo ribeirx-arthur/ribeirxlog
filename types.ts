@@ -174,6 +174,7 @@ export interface Trip {
   totalKm: number;
   transitStatus?: 'Agendado' | 'Em Trânsito' | 'Finalizado';
   checklistCompleted?: boolean;
+  observations?: string;
 }
 
 export interface AppNotification {

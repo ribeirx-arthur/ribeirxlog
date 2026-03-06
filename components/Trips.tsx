@@ -456,6 +456,16 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     <input type="number" value={editingTrip.adiantamento || ''} onChange={e => setEditingTrip({ ...editingTrip, adiantamento: Number(e.target.value) })} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-white" placeholder="Adiant." />
                     <input type="number" value={editingTrip.outrasDespesas || ''} onChange={e => setEditingTrip({ ...editingTrip, outrasDespesas: Number(e.target.value) })} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-white" placeholder="Despesas" />
                   </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Observações da Viagem</label>
+                    <textarea
+                      value={editingTrip.observations || ''}
+                      onChange={e => setEditingTrip({ ...editingTrip, observations: e.target.value })}
+                      placeholder="Adicione observações importantes..."
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-300 font-medium min-h-[100px] resize-none outline-none focus:border-emerald-500 transition-all shadow-inner"
+                    />
+                  </div>
                 </div>
               </div>
               <div className="lg:col-span-4 space-y-6">
@@ -470,51 +480,62 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
         </div>
       )}
       {/* Modal de Exclusão */}
-      {tripToDeleteId && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700/50 rounded-[2.5rem] w-full max-w-md p-8 text-center space-y-6 animate-in zoom-in-95 duration-200 shadow-2xl">
-            <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-10 h-10 text-rose-500" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-black text-white">Excluir Viagem?</h3>
-              <p className="text-slate-400 text-sm">
-                Esta ação é irreversível. O registro da viagem será removido permanentemente do sistema.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <button
-                onClick={() => setTripToDeleteId(null)}
-                className="py-4 bg-slate-800 text-slate-300 font-black rounded-2xl hover:bg-slate-700 transition-all text-xs uppercase tracking-widest"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  if (isFree) {
-                    alert("⚠️ EXCLUSÃO BLOQUEADA\n\nUsuários grátis não podem excluir viagens.");
+      {
+        tripToDeleteId && (
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700/50 rounded-[2.5rem] w-full max-w-md p-8 text-center space-y-6 animate-in zoom-in-95 duration-200 shadow-2xl">
+              <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-10 h-10 text-rose-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white">Excluir Viagem?</h3>
+                <p className="text-slate-400 text-sm">
+                  Esta ação é irreversível. O registro da viagem será removido permanentemente do sistema.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <button
+                  onClick={() => setTripToDeleteId(null)}
+                  className="py-4 bg-slate-800 text-slate-300 font-black rounded-2xl hover:bg-slate-700 transition-all text-xs uppercase tracking-widest"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    if (isFree) {
+                      alert("⚠️ EXCLUSÃO BLOQUEADA\n\nUsuários grátis não podem excluir viagens.");
+                      setTripToDeleteId(null);
+                      return;
+                    }
+                    onDeleteTrip(tripToDeleteId);
                     setTripToDeleteId(null);
-                    return;
-                  }
-                  onDeleteTrip(tripToDeleteId);
-                  setTripToDeleteId(null);
-                }}
-                className="py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20"
-              >
-                Sim, Excluir
-              </button>
+                  }}
+                  className="py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20"
+                >
+                  Sim, Excluir
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
       {viewingFilesTripId && (
-        <TripDetailsModal tripId={viewingFilesTripId} onClose={() => setViewingFilesTripId(null)} isFree={isFree} />
+        <TripDetailsModal
+          trip={trips.find(t => t.id === viewingFilesTripId)!}
+          onUpdateTrip={onUpdateTrip}
+          onClose={() => setViewingFilesTripId(null)}
+          isFree={isFree}
+        />
       )}
     </div>
   );
 };
 
-const TripDetailsModal = ({ tripId, onClose, isFree }: { tripId: string, onClose: () => void, isFree: boolean }) => {
+const TripDetailsModal = ({ trip, onUpdateTrip, onClose, isFree }: { trip: Trip, onUpdateTrip: (t: Trip) => void, onClose: () => void, isFree: boolean }) => {
+  const tripId = trip.id;
+  const [observations, setObservations] = useState(trip.observations || '');
+  const [isSavingObs, setIsSavingObs] = useState(false);
+
   const [proofs, setProofs] = useState<TripProof[]>([]);
   const [lastLocation, setLastLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -603,6 +624,37 @@ const TripDetailsModal = ({ tripId, onClose, isFree }: { tripId: string, onClose
         </div>
 
         <div className="overflow-y-auto custom-scrollbar space-y-8 pr-2">
+          {/* Observações da Viagem */}
+          <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 space-y-4">
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 text-emerald-500" /> Observações da Viagem
+            </h4>
+            <div className="space-y-3">
+              <textarea
+                value={observations}
+                onChange={e => setObservations(e.target.value)}
+                placeholder="Adicione notas, observações ou status complementares..."
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl p-4 text-slate-300 font-medium min-h-[100px] resize-none outline-none focus:border-emerald-500 transition-all text-sm"
+              />
+              <button
+                onClick={async () => {
+                  if (isFree) {
+                    alert("⚠️ ACESSO BLOQUEADO\n\nEdição de observações é para assinantes PRO.");
+                    return;
+                  }
+                  setIsSavingObs(true);
+                  await onUpdateTrip({ ...trip, observations });
+                  setIsSavingObs(false);
+                }}
+                disabled={isSavingObs || observations === (trip.observations || '')}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-slate-700 text-white text-xs font-black uppercase rounded-lg transition-all"
+              >
+                {isSavingObs ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                {isSavingObs ? 'Salvando...' : 'Salvar Observação'}
+              </button>
+            </div>
+          </div>
+
           {/* Rastreamento */}
           <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50">
             <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">

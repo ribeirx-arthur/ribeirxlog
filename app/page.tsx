@@ -237,7 +237,8 @@ export default function Home() {
                             outrasDespesas: Number(t.outras_despesas),
                             totalKm: Number(t.total_km),
                             transitStatus: t.transit_status,
-                            checklistCompleted: t.checklist_completed
+                            checklistCompleted: t.checklist_completed,
+                            observations: t.observations
                         })),
                         loadTable('vehicles', setVehicles, (v: any) => ({
                             ...v,
@@ -378,7 +379,8 @@ export default function Home() {
                 status: newTrip.status || 'Pendente',
                 total_km: Number(newTrip.totalKm || 0),
                 transit_status: newTrip.transitStatus || 'Agendado',
-                checklist_completed: newTrip.checklistCompleted || false
+                checklist_completed: newTrip.checklistCompleted || false,
+                observations: newTrip.observations || ''
             }).select().single();
 
             if (error) throw error;
@@ -399,7 +401,8 @@ export default function Home() {
                     outrasDespesas: Number(data.outras_despesas || 0),
                     totalKm: Number(data.total_km || 0),
                     transitStatus: data.transit_status,
-                    checklistCompleted: data.checklist_completed
+                    checklistCompleted: data.checklist_completed,
+                    observations: data.observations
                 }, ...prev]);
                 showToast('Viagem salva!', 'success');
                 setActiveTab('trips');
@@ -434,7 +437,8 @@ export default function Home() {
                 status: updatedTrip.status,
                 total_km: Number(updatedTrip.totalKm),
                 transit_status: updatedTrip.transitStatus,
-                checklist_completed: updatedTrip.checklistCompleted
+                checklist_completed: updatedTrip.checklistCompleted,
+                observations: updatedTrip.observations || ''
             }).eq('id', updatedTrip.id);
 
             if (error) throw error;

@@ -58,7 +58,8 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     returnDate: '',
     receiptDate: '',
     status: 'Pendente' as PaymentStatus,
-    totalKm: 0
+    totalKm: 0,
+    observations: ''
   });
 
   // Carregar rascunho salvo ao montar o componente
@@ -163,6 +164,7 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
       vehicleId: formData.vehicleId || 'generic-vehicle',
       driverId: formData.driverId || 'generic-driver',
       shipperId: formData.shipperId || 'generic-shipper',
+      observations: formData.observations,
     } as Trip;
 
     onSave(newTrip);
@@ -380,6 +382,16 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                   <input type="number" placeholder="KM Total Rodado" className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-white font-black text-xl outline-none focus:border-emerald-500" value={formData.totalKm || ''} onChange={e => setFormData({ ...formData, totalKm: Number(e.target.value) })} />
                 </div>
               </div>
+            </div>
+
+            <div className="pt-6 border-t border-slate-800 space-y-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Observações da Viagem</label>
+              <textarea
+                placeholder="Adicione observações importantes sobre esta viagem, docs pendentes, etc..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-6 text-slate-300 focus:border-emerald-500 outline-none transition-all font-medium min-h-[120px] resize-none"
+                value={formData.observations}
+                onChange={e => setFormData({ ...formData, observations: e.target.value })}
+              />
             </div>
           </section>
 
