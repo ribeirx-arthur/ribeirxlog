@@ -33,7 +33,8 @@ import {
   Plus,
   MessageCircle
 } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { supabase, createClerkSupabaseClient } from '../services/supabase';
+import { useAuth } from '@clerk/nextjs';
 import { Trip, Vehicle, Driver, Shipper, UserProfile, PaymentStatus, TripProof } from '../types';
 import { calculateTripFinance } from '../services/finance';
 import { generateTripReceipt, generateMonthlyReport } from '../services/pdfGenerator';
@@ -532,6 +533,7 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
 };
 
 const TripDetailsModal = ({ trip, onUpdateTrip, onClose, isFree }: { trip: Trip, onUpdateTrip: (t: Trip) => void, onClose: () => void, isFree: boolean }) => {
+  const { getToken } = useAuth();
   const tripId = trip.id;
   const [observations, setObservations] = useState(trip.observations || '');
   const [isSavingObs, setIsSavingObs] = useState(false);
@@ -541,10 +543,13 @@ const TripDetailsModal = ({ trip, onUpdateTrip, onClose, isFree }: { trip: Trip,
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [newDocObservation, setNewDocObservation] = useState('');
 
   React.useEffect(() => {
     const loadData = async () => {
-      const { data: proofsData } = await supabase.from('trip_proofs').select('*').eq('trip_id', tripId).order('uploaded_at', { ascending: false });
+      const token = await getToken({ template: 'supabase' });
+      const client = token ? createClerkSupabaseClient(token) : supabase;
+      const { data: proofsData } = await client.from('trip_proofs').select('*').eq('trip_id', tripId).order('uploaded_at', { ascending: false });
       if (proofsData) {
         setProofs(proofsData.map((p: any) => ({
           id: p.id,
@@ -559,7 +564,7 @@ const TripDetailsModal = ({ trip, onUpdateTrip, onClose, isFree }: { trip: Trip,
         })));
       }
 
-      const { data: locData } = await supabase.from('vehicle_locations').select('*').eq('trip_id', tripId).order('timestamp', { ascending: false }).limit(1).single();
+      const { data: locData } = await client.from('vehicle_locations').select('*').eq('trip_id', tripId).order('timestamp', { ascending: false }).limit(1).single();
       if (locData) setLastLocation(locData);
 
       setLoading(false);
@@ -577,18 +582,24 @@ const TripDetailsModal = ({ trip, onUpdateTrip, onClose, isFree }: { trip: Trip,
 
     setIsUploading(true);
     try {
-      const fileName = `${tripId}_${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabase.storage
+      const token = await getToken({ template: 'supabase' });
+      const client = token ? createClerkSupabaseClient(token) : supabase;
+
+      // Sanitiza o nome do arquivo para evitar erros de encoding no upload do Supabase
+      const safeFileName = file.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9.-]/g, '_');
+      const fileName = `${tripId}_${Date.now()}_${safeFileName}`;
+
+      const { error: uploadError } = await client.storage
         .from('trip-proofs')
-        .upload(fileName, file);
+        .upload(fileName, file, { cacheControl: '3600', upsert: true });
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = client.storage
         .from('trip-proofs')
         .getPublicUrl(fileName);
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await client
         .from('trip_proofs')
         .insert([{
           trip_id: tripId,
@@ -598,16 +609,43 @@ const TripDetailsModal = ({ trip, onUpdateTrip, onClose, isFree }: { trip: Trip,
           file_size: file.size,
           uploaded_by: 'manager',
           uploaded_at: new Date().toISOString(),
-          approved: true
+          approved: true,
+          observations: newDocObservation // Use the new observation field
         }]);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        // Fallback case the 'observations' column doesn't exist right now
+        if (insertError.code === '42703' || insertError.message?.includes('observations')) {
+          console.warn('observations column missing, retrying without it');
+          const { error: retryError } = await client
+            .from('trip_proofs')
+            .insert([{
+              trip_id: tripId,
+              type: 'expense',
+              file_url: publicUrl,
+              file_name: file.name,
+              file_size: file.size,
+              uploaded_by: 'manager',
+              uploaded_at: new Date().toISOString(),
+              approved: true
+            }]);
+          if (retryError) throw retryError;
+        } else {
+          throw insertError;
+        }
+      }
+      setNewDocObservation(''); // Clear observations after success
       setRefreshTrigger(prev => prev + 1);
-    } catch (error) {
-      console.error('Error uploading:', error);
-      alert('Erro ao enviar arquivo.');
+      alert('Arquivo anexo enviado com sucesso!'); // Feedback positivo para o usuário
+    } catch (error: any) {
+      console.error('DEBUG - Upload Error Full Object:', error);
+      const msg = error.message || error.error_description || 'Erro ao enviar arquivo';
+      const code = error.code || (error.status ? `Status ${error.status}` : 'No Code');
+      alert(`[ERRO DE UPLOAD]\n\nMensagem: ${msg}\nCódigo: ${code}\n\nVerifique se:\n1. O bucket "trip-proofs" existe no Supabase.\n2. As permissões de RLS permitem o upload.\n3. O arquivo não é muito grande.`);
     } finally {
       setIsUploading(false);
+      // Limpa o input file para permitir o envio do mesmo arquivo novamente se necessário
+      e.target.value = '';
     }
   };
 
@@ -688,13 +726,25 @@ const TripDetailsModal = ({ trip, onUpdateTrip, onClose, isFree }: { trip: Trip,
 
           {/* Comprovantes */}
           <div>
+            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50 space-y-4 mb-4">
+              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <MessageCircle className="w-3.5 h-3.5 text-sky-500" /> Observação do Documento (Opcional)
+              </h4>
+              <textarea
+                value={newDocObservation}
+                onChange={e => setNewDocObservation(e.target.value)}
+                placeholder="Ex: Nota fiscal referente ao conserto do pneu..."
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-300 font-medium min-h-[60px] resize-none outline-none focus:border-sky-500 transition-all text-xs"
+              />
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-4 h-4 text-sky-500" /> Arquivos Anexados ({proofs.length})
               </h4>
               <label className={`cursor-pointer px-4 py-1.5 bg-sky-500/10 border border-sky-500/20 rounded-xl text-sky-500 text-[10px] font-black uppercase tracking-widest hover:bg-sky-500 transition-all hover:text-white flex items-center gap-2 ${isUploading ? 'opacity-50 cursor-wait' : ''}`}>
                 {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-                Anexar Documento
+                {isUploading ? 'Enviando...' : 'Anexar Documento'}
                 <input type="file" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
               </label>
             </div>

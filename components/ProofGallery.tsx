@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
+import { supabase, createClerkSupabaseClient } from '../services/supabase';
+import { useAuth } from '@clerk/nextjs';
 import { TripProof, Trip, Vehicle, Driver } from '../types';
 import {
     FileText,
@@ -23,6 +24,7 @@ interface ProofGalleryProps {
 }
 
 const ProofGallery: React.FC<ProofGalleryProps> = ({ trips, vehicles, drivers }) => {
+    const { getToken } = useAuth();
     const [proofs, setProofs] = useState<TripProof[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,7 +36,9 @@ const ProofGallery: React.FC<ProofGalleryProps> = ({ trips, vehicles, drivers })
 
     const fetchProofs = async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        const token = await getToken({ template: 'supabase' });
+        const client = token ? createClerkSupabaseClient(token) : supabase;
+        const { data, error } = await client
             .from('trip_proofs')
             .select('*')
             .order('uploaded_at', { ascending: false });
@@ -44,7 +48,9 @@ const ProofGallery: React.FC<ProofGalleryProps> = ({ trips, vehicles, drivers })
     };
 
     const handleApprove = async (id: string) => {
-        const { error } = await supabase
+        const token = await getToken({ template: 'supabase' });
+        const client = token ? createClerkSupabaseClient(token) : supabase;
+        const { error } = await client
             .from('trip_proofs')
             .update({ approved: true, approved_at: new Date().toISOString() })
             .eq('id', id);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Radio, Battery, Signal, Clock, Navigation, AlertCircle } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import { supabase, createClerkSupabaseClient } from '../services/supabase';
+import { useAuth } from '@clerk/nextjs';
 
 interface DriverTrackerProps {
     vehicleId: string;
@@ -9,6 +10,7 @@ interface DriverTrackerProps {
 }
 
 const DriverTracker: React.FC<DriverTrackerProps> = ({ vehicleId, driverId, tripId }) => {
+    const { getToken } = useAuth();
     const [isTracking, setIsTracking] = useState(false);
     const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -55,7 +57,10 @@ const DriverTracker: React.FC<DriverTrackerProps> = ({ vehicleId, driverId, trip
                     timestamp: new Date().toISOString(),
                 };
 
-                const { error: insertError } = await supabase
+                const token = await getToken({ template: 'supabase' });
+                const client = token ? createClerkSupabaseClient(token) : supabase;
+
+                const { error: insertError } = await client
                     .from('vehicle_locations')
                     .insert(locationData);
 

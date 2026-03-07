@@ -134,6 +134,7 @@ export interface TripProof {
   uploadedBy: 'driver' | 'manager';
   uploadedAt: string;
   description?: string;
+  observations?: string;
   amount?: number;
   approved: boolean;
   approvedBy?: string;

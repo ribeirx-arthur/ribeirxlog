@@ -259,9 +259,9 @@ const DriverApp: React.FC<DriverAppProps> = ({ driver, currentTrip, onLogout }) 
 
             await loadProofs();
             alert('Comprovante enviado com sucesso!');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro ao enviar comprovante:', error);
-            alert('Erro ao enviar comprovante. Tente novamente.');
+            alert(`Erro ao enviar comprovante: ${error.message || 'Tente novamente.'}`);
         } finally {
             setUploading(false);
         }
