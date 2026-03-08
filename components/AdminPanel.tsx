@@ -42,7 +42,9 @@ export const AdminPanel = ({ profile, supabaseClient }: AdminPanelProps) => {
 
         try {
             // Usa o endpoint de Admin que roda no servidor com Service Role Key (bypassa o RLS)
-            const res = await fetch('/api/admin/users', {
+            // Adiciona timestamp e cache no-store para evitar respostas antigas presas na cache do Vercel/Navegador
+            const res = await fetch(`/api/admin/users?t=${Date.now()}`, {
+                cache: 'no-store',
                 headers: {
                     'x-admin-email': profile.email || 'arthur@ribeirxlog.com'
                 }
