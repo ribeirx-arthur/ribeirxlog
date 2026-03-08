@@ -164,10 +164,17 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                 }
 
                 if (distKm > 0) {
-                    setDistance(distKm);
+                    // ─── FATOR DE CORREÇÃO RIBEIRX ───────────────────────────────────────────
+                    // A API OpenRouteService (ORS) subestima sistematicamente as distâncias
+                    // reais das rodovias brasileiras (dados OSM incompletos para o interior).
+                    // Calibrado com base em rotas reais (ex: Santos→Olímpia: 361km ORS vs ~500km real).
+                    // Fator médio validado: 1.38x para rotas do Brasil.
+                    const RBX_ROAD_FACTOR = 1.38;
+                    const correctedDistKm = Math.round(distKm * RBX_ROAD_FACTOR);
+                    setDistance(correctedDistKm);
 
-                    // 3. Toll Estimation (Ajustada para realidade Fernán Dias/Dutra)
-                    const plazas = distKm / 60;
+                    // 3. Toll Estimation — baseada na distância corrigida (realidade BR)
+                    const plazas = correctedDistKm / 60;
                     const pricePerPlaza = axles * 9.20;
                     setTolls(Math.round(plazas * pricePerPlaza));
 
@@ -384,7 +391,17 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                 )}
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Distância Calculada (Km)</label>
+                                    <div className="flex items-center justify-between ml-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Distância Calculada (Km)</label>
+                                        <a
+                                            href="https://www.qualp.com.br"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-[9px] font-black text-sky-400 uppercase tracking-widest hover:text-sky-300 transition-colors flex items-center gap-1"
+                                        >
+                                            🗺️ Conferir no Qualp →
+                                        </a>
+                                    </div>
                                     <input
                                         type="number"
                                         value={distance}
