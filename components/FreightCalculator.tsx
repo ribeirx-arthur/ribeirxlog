@@ -167,16 +167,17 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                     // ─── FATOR DE CORREÇÃO RIBEIRX ───────────────────────────────────────────
                     // A API OpenRouteService (ORS) subestima sistematicamente as distâncias
                     // reais das rodovias brasileiras (dados OSM incompletos para o interior).
-                    // Calibrado com base em rotas reais (ex: Santos→Olímpia: 361km ORS vs ~500km real).
-                    // Fator médio validado: 1.38x para rotas do Brasil.
-                    const RBX_ROAD_FACTOR = 1.38;
+                    // Calibrado com base em rotas reais (ex: Santos→Olímpia: 361km ORS vs 546km real).
+                    // Fator médio validado: 1.51x para rotas do Brasil.
+                    const RBX_ROAD_FACTOR = 1.51;
                     const correctedDistKm = Math.round(distKm * RBX_ROAD_FACTOR);
                     setDistance(correctedDistKm);
 
-                    // 3. Toll Estimation — baseada na distância corrigida (realidade BR)
-                    const plazas = correctedDistKm / 60;
-                    const pricePerPlaza = axles * 9.20;
-                    setTolls(Math.round(plazas * pricePerPlaza));
+                    // 3. Toll Estimation — baseada na distância corrigida (realidade BR / SP)
+                    // Utiliza o custo médio ponderado por KM por eixo, comum em rodovias do estado de SP: 
+                    // R$ 0.247 por KM por eixo (para bater c/ ex de R$809 ida p/ 546km com 6 eixos)
+                    const pricePerKmPerAxle = 0.247;
+                    setTolls(Math.round(correctedDistKm * pricePerKmPerAxle * axles));
 
                     // Atualizar limite de uso
                     const updatedCount = calculationCount + 1;
