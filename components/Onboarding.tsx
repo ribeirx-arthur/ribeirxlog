@@ -91,239 +91,238 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-slate-950 flex flex-col items-center justify-center p-6 animate-in fade-in duration-700">
-            {/* Background Effects */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[120px]" />
+        <div className="fixed inset-0 z-[200] bg-slate-950 flex flex-col items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
+            {/* Background Simplificado para evitar travamento de GPU no mobile */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none hidden md:block">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-950 to-slate-950" />
             </div>
 
-            <div className="w-full max-w-lg relative z-10">
+            <div className="w-full max-w-lg relative z-10 flex flex-col pt-10 md:pt-0 max-h-screen">
                 {/* Header */}
-                <div className="text-center mb-10 space-y-4">
-                    <div className="inline-flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                            <Truck className="w-6 h-6 text-white" />
+                <div className="text-center mb-6 md:mb-10 space-y-2 md:space-y-4 shrink-0">
+                    <div className="inline-flex items-center gap-3 mb-1">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <Truck className="w-5 h-5 md:w-6 md:h-6 text-white" />
                         </div>
-                        <span className="font-black text-2xl tracking-tighter text-white">RBX<span className="text-emerald-500">LOG</span></span>
+                        <span className="font-black text-xl md:text-2xl tracking-tighter text-white">RBX<span className="text-emerald-500">LOG</span></span>
                     </div>
-                    <h1 className="text-3xl font-black text-white tracking-tight">Vamos configurar sua operação</h1>
-                    <p className="text-slate-400 text-sm">Leva menos de 2 minutos. Sem burocracia.</p>
+                    <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">Vamos configurar sua operação</h1>
+                    <p className="text-slate-400 text-xs md:text-sm">Leva menos de 2 minutos. Sem burocracia.</p>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full h-1 bg-slate-800 rounded-full mb-10 overflow-hidden">
+                <div className="w-full h-1 bg-slate-800 rounded-full mb-6 md:mb-10 overflow-hidden shrink-0">
                     <div
                         className="h-full bg-emerald-500 transition-all duration-500 ease-out"
                         style={{ width: `${progress}%` }}
                     />
                 </div>
 
-                {/* Card */}
-                <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
-                    {/* Step 0: Initial Question */}
-                    {step === 1 && isDriverManager === null && (
-                        <div className="space-y-8 animate-in fade-in duration-500 py-4">
-                            <div className="text-center space-y-4">
-                                <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-6">
-                                    <User className="w-8 h-8" />
-                                </div>
-                                <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Você é motorista gestor?</h3>
-                                <p className="text-slate-400 text-sm">Queremos deixar a ferramenta com a sua cara.</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button
-                                    onClick={() => {
-                                        setIsDriverManager(true);
-                                        setAppMode('simple');
-                                    }}
-                                    className="p-6 rounded-2xl border border-slate-800 bg-slate-950 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-left group"
-                                >
-                                    <div className="font-black text-emerald-500 uppercase italic tracking-tighter mb-1">Sim, sou motorista e gestor</div>
-                                    <div className="text-xs text-slate-500 uppercase font-bold">Recomendamos o Modo Simples</div>
-                                </button>
-                                <button
-                                    onClick={() => setIsDriverManager(false)}
-                                    className="p-6 rounded-2xl border border-slate-800 bg-slate-950 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-left group"
-                                >
-                                    <div className="font-black text-sky-500 uppercase italic tracking-tighter mb-1">Não, sou apenas gestor / transportador</div>
-                                    <div className="text-xs text-slate-500 uppercase font-bold">Configuração padrão avançada</div>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 1: Company */}
-                    {step === 1 && isDriverManager !== null && (
-                        <div className="space-y-6 animate-in slide-in-from-right duration-500">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
-                                    <Building2 className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-white">Sobre sua Empresa</h3>
-                                    <p className="text-xs text-slate-500">Como você quer ser chamado nos relatórios?</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase ml-1">Nome da Transportadora / Fantasia</label>
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        value={companyName}
-                                        onChange={e => setCompanyName(e.target.value)}
-                                        placeholder="Ex: Transportes Silva"
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase ml-1">Cidade Base</label>
-                                    <input
-                                        type="text"
-                                        value={city}
-                                        onChange={e => setCity(e.target.value)}
-                                        placeholder="Ex: São Paulo, SP"
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-
-                    {/* Step 2: Vehicle */}
-                    {step === 2 && (
-                        <div className="space-y-6 animate-in slide-in-from-right duration-500">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
-                                    <Truck className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-white">Seu Primeiro Veículo</h3>
-                                    <p className="text-xs text-slate-500">Vamos cadastrar o caminhão principal.</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase ml-1">Placa do Veículo</label>
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        value={vehiclePlate}
-                                        onChange={e => setVehiclePlate(e.target.value.toUpperCase())}
-                                        placeholder="ABC-1234"
-                                        maxLength={8}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-black tracking-widest uppercase text-lg"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400 uppercase ml-1">Eixos</label>
-                                        <select
-                                            value={vehicleAxles}
-                                            onChange={e => setVehicleAxles(e.target.value)}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all font-medium appearance-none"
-                                        >
-                                            <option value="2">2 Eixos (VUC)</option>
-                                            <option value="3">3 Eixos (Toco / Truck)</option>
-                                            <option value="4">4 Eixos (Bitruck)</option>
-                                            <option value="6">6 Eixos (Carreta LS)</option>
-                                            <option value="9">9 Eixos (Rodotrem)</option>
-                                        </select>
+                {/* Card Wrapper com Scroll */}
+                <div className="flex-1 overflow-y-auto scrollbar-hide w-full pb-10">
+                    <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                        {/* Step 0: Initial Question */}
+                        {step === 1 && isDriverManager === null && (
+                            <div className="space-y-8 animate-in fade-in duration-500 py-4">
+                                <div className="text-center space-y-4">
+                                    <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-6">
+                                        <User className="w-8 h-8" />
                                     </div>
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Você é motorista gestor?</h3>
+                                    <p className="text-slate-400 text-sm">Queremos deixar a ferramenta com a sua cara.</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    <button
+                                        onClick={() => {
+                                            setIsDriverManager(true);
+                                            setAppMode('simple');
+                                        }}
+                                        className="p-6 rounded-2xl border border-slate-800 bg-slate-950 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-left group"
+                                    >
+                                        <div className="font-black text-emerald-500 uppercase italic tracking-tighter mb-1">Sim, sou motorista e gestor</div>
+                                        <div className="text-xs text-slate-500 uppercase font-bold">Recomendamos o Modo Simples</div>
+                                    </button>
+                                    <button
+                                        onClick={() => setIsDriverManager(false)}
+                                        className="p-6 rounded-2xl border border-slate-800 bg-slate-950 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-left group"
+                                    >
+                                        <div className="font-black text-sky-500 uppercase italic tracking-tighter mb-1">Não, sou apenas gestor / transportador</div>
+                                        <div className="text-xs text-slate-500 uppercase font-bold">Configuração padrão avançada</div>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 1: Company */}
+                        {step === 1 && isDriverManager !== null && (
+                            <div className="space-y-6 animate-in slide-in-from-right duration-500">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
+                                        <Building2 className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white">Sobre sua Empresa</h3>
+                                        <p className="text-xs text-slate-500">Como você quer ser chamado nos relatórios?</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-400 uppercase ml-1">Apelido (Opcional)</label>
+                                        <label className="text-xs font-bold text-slate-400 uppercase ml-1">Nome da Transportadora / Fantasia</label>
                                         <input
                                             type="text"
-                                            value={vehicleName}
-                                            onChange={e => setVehicleName(e.target.value)}
-                                            placeholder="Ex: Scania Azul"
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium"
+                                            value={companyName}
+                                            onChange={e => setCompanyName(e.target.value)}
+                                            placeholder="Ex: Transportes Silva"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium text-base"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-400 uppercase ml-1">Cidade Base</label>
+                                        <input
+                                            type="text"
+                                            value={city}
+                                            onChange={e => setCity(e.target.value)}
+                                            placeholder="Ex: São Paulo, SP"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium text-base"
                                         />
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
-
-                    {/* Step 3: Driver */}
-                    {step === 3 && (
-                        <div className="space-y-6 animate-in slide-in-from-right duration-500">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
-                                    <User className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-white">Motorista Principal</h3>
-                                    <p className="text-xs text-slate-500">Quem dirige esse caminhão? (Pode ser você)</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase ml-1">Nome Completo</label>
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        value={driverName}
-                                        onChange={e => setDriverName(e.target.value)}
-                                        placeholder="Nome do Motorista"
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase ml-1">CPF (Apenas números)</label>
-                                    <input
-                                        type="text"
-                                        value={driverCpf}
-                                        onChange={e => setDriverCpf(e.target.value.replace(/\D/g, ''))}
-                                        placeholder="000.000.000-00"
-                                        maxLength={11}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium tracking-wide"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="mt-10 pt-6 border-t border-slate-800 flex items-center justify-between">
-                        <button
-                            onClick={onSkip}
-                            className="text-xs font-bold text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-wider"
-                        >
-                            Pular setup
-                        </button>
-
-                        {isDriverManager !== null && (
-                            <button
-                                onClick={handleNext}
-                                disabled={!isStepValid()}
-                                className={`flex items-center gap-3 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-lg ${isStepValid()
-                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-emerald-950 shadow-emerald-500/20 translate-y-0'
-                                    : 'bg-slate-800 text-slate-600 cursor-not-allowed translate-y-0'
-                                    }`}
-                            >
-                                {step === 3 ? 'Começar a usar' : 'Próximo'}
-                                {step === 3 ? <Play className="w-4 h-4 fill-current" /> : <ArrowRight className="w-4 h-4" />}
-                            </button>
                         )}
-                    </div>
-                </div>
 
-                <div className="flex justify-center gap-2 mt-8">
-                    {[1, 2, 3].map(i => (
-                        <div
-                            key={i}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${i === step ? 'bg-emerald-500 w-6' : i < step ? 'bg-emerald-500/40' : 'bg-slate-800'
-                                }`}
-                        />
-                    ))}
+
+                        {/* Step 2: Vehicle */}
+                        {step === 2 && (
+                            <div className="space-y-6 animate-in slide-in-from-right duration-500">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
+                                        <Truck className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white">Seu Primeiro Veículo</h3>
+                                        <p className="text-xs text-slate-500">Vamos cadastrar o caminhão principal.</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-400 uppercase ml-1">Placa do Veículo</label>
+                                        <input
+                                            type="text"
+                                            value={vehiclePlate}
+                                            onChange={e => setVehiclePlate(e.target.value.toUpperCase())}
+                                            placeholder="ABC-1234"
+                                            maxLength={8}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-black tracking-widest uppercase text-base"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-slate-400 uppercase ml-1">Eixos</label>
+                                            <select
+                                                value={vehicleAxles}
+                                                onChange={e => setVehicleAxles(e.target.value)}
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all font-medium appearance-none"
+                                            >
+                                                <option value="2">2 Eixos (VUC)</option>
+                                                <option value="3">3 Eixos (Toco / Truck)</option>
+                                                <option value="4">4 Eixos (Bitruck)</option>
+                                                <option value="6">6 Eixos (Carreta LS)</option>
+                                                <option value="9">9 Eixos (Rodotrem)</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-slate-400 uppercase ml-1">Apelido (Opcional)</label>
+                                            <input
+                                                type="text"
+                                                value={vehicleName}
+                                                onChange={e => setVehicleName(e.target.value)}
+                                                placeholder="Ex: Scania Azul"
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: Driver */}
+                        {step === 3 && (
+                            <div className="space-y-6 animate-in slide-in-from-right duration-500">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
+                                        <User className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white">Motorista Principal</h3>
+                                        <p className="text-xs text-slate-500">Quem dirige esse caminhão? (Pode ser você)</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-400 uppercase ml-1">Nome Completo</label>
+                                        <input
+                                            type="text"
+                                            value={driverName}
+                                            onChange={e => setDriverName(e.target.value)}
+                                            placeholder="Nome do Motorista"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium text-base"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-400 uppercase ml-1">CPF (Apenas números)</label>
+                                        <input
+                                            type="text"
+                                            value={driverCpf}
+                                            onChange={e => setDriverCpf(e.target.value.replace(/\D/g, ''))}
+                                            placeholder="000.000.000-00"
+                                            maxLength={11}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700 font-medium tracking-wide"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="mt-8 pt-6 border-t border-slate-800 flex items-center justify-between">
+                            <button
+                                onClick={onSkip}
+                                className="text-[10px] md:text-xs font-bold text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-wider px-2 py-3"
+                            >
+                                Pular setup
+                            </button>
+
+                            {isDriverManager !== null && (
+                                <button
+                                    onClick={handleNext}
+                                    disabled={!isStepValid()}
+                                    className={`flex items-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg ${isStepValid()
+                                        ? 'bg-emerald-500 hover:bg-emerald-600 text-emerald-950 shadow-emerald-500/20 translate-y-0'
+                                        : 'bg-slate-800 text-slate-600 cursor-not-allowed translate-y-0'
+                                        }`}
+                                >
+                                    {step === 3 ? 'Começar' : 'Próximo'}
+                                    {step === 3 ? <Play className="w-4 h-4 fill-current" /> : <ArrowRight className="w-4 h-4" />}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {/* Fim do Card */}
                 </div>
+            </div>
+
+            {/* Dots fora do Card Wrapper */}
+            <div className="flex justify-center gap-2 my-6 shrink-0 z-10">
+                {[1, 2, 3].map(i => (
+                    <div
+                        key={i}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${i === step ? 'bg-emerald-500 w-6' : i < step ? 'bg-emerald-500/40' : 'bg-slate-800'}`}
+                    />
+                ))}
             </div>
         </div>
     );

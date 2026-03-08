@@ -94,24 +94,24 @@ const Sidebar: React.FC<SidebarProps> = ({
                 ${isOpen ? 'translate-x-0' : '-translate-x-64 md:translate-x-0'}
             `}>
         {/* Logo Section */}
-        <div className="p-8 border-b border-white/5">
+        <div className="p-6 md:p-8 border-b border-white/5 shrink-0">
           <div className="flex flex-col items-center gap-2 group cursor-pointer" onClick={() => navigate('dashboard')}>
             <div className="relative">
               <img
                 src="/icon.svg"
                 alt="RBX"
-                className="h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                className="h-8 md:h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
               />
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span className="text-emerald-500">LOG</span></span>
-              <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence</span>
+              <span className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span className="text-emerald-500">LOG</span></span>
+              <span className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence</span>
             </div>
           </div>
         </div>
 
         {/* Main Navigation */}
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-6 md:space-y-8 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
           {/* Primary Actions (Hidden in Demo) */}
           {!isDemo && (
             <div className="space-y-2">
