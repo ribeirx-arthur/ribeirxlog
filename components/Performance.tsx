@@ -468,7 +468,7 @@ const NeuralPieChart = ({ data }: { data: any[] }) => {
 
 const PremiumStat = ({ title, value, color, icon: Icon, trend }: any) => (
    <div className="bg-slate-900 border border-slate-800 p-10 rounded-[2.5rem] shadow-2xl relative group overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[80px] translate-x-16 -translate-y-16 group-hover:bg-white/10 transition-all pointer-events-none" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl hidden md:block opacity-20 translate-x-16 -translate-y-16 group-hover:bg-white/10 transition-all pointer-events-none" />
       <div className="flex justify-between items-start mb-8">
          <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 shadow-xl group-hover:scale-110 transition-all duration-700"><Icon className={`w-8 h-8 ${color}`} /></div>
          <span className={`text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-950 border border-slate-800 ${trend.includes('+') ? 'text-emerald-500 shadow-emerald-500/10' : 'text-slate-500'} shadow-lg`}>{trend}</span>

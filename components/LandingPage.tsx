@@ -70,8 +70,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute inset-0 opacity-20"
                     style={{ backgroundImage: 'radial-gradient(#10b981 0.5px, transparent 0.5px)', backgroundSize: '32px 32px' }}></div>
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[120px] rounded-full"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-sky-500/10 blur-[120px] rounded-full"></div>
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-3xl hidden md:block rounded-full"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-sky-500/10 blur-3xl hidden md:block rounded-full"></div>
             </div>
 
             {/* Navbar Premium */}
@@ -99,20 +99,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                             </a>
                         ))}
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 md:gap-6 shrink-0">
                         <button onClick={onGetStarted} className="text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition-colors hidden sm:block">
                             Área do Cliente
                         </button>
                         {onDemo && (
-                            <button onClick={onDemo} className="text-emerald-500/60 hover:text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-emerald-500/20 px-4 py-2 rounded-xl hover:bg-emerald-500/5">
+                            <button onClick={onDemo} className="whitespace-nowrap text-emerald-500/80 hover:text-emerald-500 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-emerald-500/20 px-3 md:px-4 py-2 md:py-2.5 rounded-xl hover:bg-emerald-500/5">
                                 Modo Demo
                             </button>
                         )}
                         <button
                             onClick={onGetStarted}
-                            className="bg-emerald-500 text-slate-950 px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                            className="whitespace-nowrap bg-emerald-500 text-slate-950 px-4 md:px-8 py-2 md:py-3.5 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)]"
                         >
-                            ACESSAR RBS INTEL
+                            <span className="md:hidden">ACESSAR</span>
+                            <span className="hidden md:inline">ACESSAR RBS INTEL</span>
                         </button>
                     </div>
                 </div>
@@ -169,7 +170,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                         {/* Interactive Showcase - Compact & Dense */}
                         {/* Interactive Showcase - Fast Demo */}
                         <div className="lg:col-span-5 relative animate-in slide-in-from-right-12 duration-1000 delay-1000">
-                            <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full translate-y-20 scale-75 opacity-30"></div>
+                            <div className="absolute inset-0 bg-emerald-500/20 blur-3xl hidden md:block rounded-full translate-y-20 scale-75 opacity-30"></div>
                             <div className="relative glass-card rounded-[3rem] p-3 border-emerald-500/20 shadow-[0_40px_100px_rgba(16,185,129,0.2)] overflow-hidden hover:scale-105 transition-transform duration-700">
                                 <video autoPlay loop muted playsInline className="w-full h-auto min-h-[400px] object-cover rounded-[2.5rem] bg-slate-950 border border-white/5 shadow-inner">
                                     <source src="/demo-alta-qualidade.mp4" type="video/mp4" />
@@ -672,7 +673,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
 };
 
 const LandingPricingCard = ({ title, price, period, desc, features, isPopular, onSelect }: any) => (
-    <div className={`p-8 md:p-16 rounded-[3rem] md:rounded-[4.5rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 scale-105 shadow-[0_40px_100px_rgba(16,185,129,0.15)] z-10' : 'bg-slate-900/50 border-white/5 hover:border-white/10'}`}>
+    <div className={`p-8 md:p-16 rounded-[3rem] md:rounded-[4.5rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 md:scale-105 shadow-[0_40px_100px_rgba(16,185,129,0.15)] z-10' : 'bg-slate-900/50 border-white/5 hover:border-white/10'}`}>
         {isPopular && (
             <div className="absolute top-8 right-8 px-6 py-2 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl">
                 MAIS VENDIDO

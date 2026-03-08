@@ -303,7 +303,7 @@ const TableRow = ({ label, v1, v2, v3 }: any) => (
 );
 
 const PlanCard = ({ title, price, period, desc, features, isPopular, onSelect, loading }: any) => (
-    <div className={`p-8 rounded-[3rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 scale-105 shadow-2xl' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
+    <div className={`p-8 rounded-[3rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 md:scale-105 shadow-2xl' : 'bg-slate-900 border-white/5 hover:border-white/10'}`}>
         {isPopular && (
             <div className="absolute top-6 right-6 px-3 py-1 bg-emerald-500 text-slate-950 rounded-full text-[8px] font-black uppercase tracking-widest">
                 Pop

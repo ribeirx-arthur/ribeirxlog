@@ -363,7 +363,7 @@ const FleetHealth: React.FC<FleetHealthProps> = ({
 
             return (
               <div key={v.id} className={glassCard}>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -translate-x-10 -translate-y-10 group-hover:bg-emerald-500/10 transition-all duration-1000 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-3xl hidden md:block opacity-20 -translate-x-10 -translate-y-10 group-hover:bg-emerald-500/10 transition-all duration-1000 pointer-events-none" />
 
                 {/* Decorative Tech Background */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none">

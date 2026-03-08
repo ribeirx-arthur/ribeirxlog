@@ -311,7 +311,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
             </div>
 
             <div className="bg-gradient-to-r from-slate-900 to-indigo-950/20 border border-slate-800 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-3xl hidden md:block opacity-20 rounded-full -mr-32 -mt-32" />
                 <div className="flex-1 relative z-10">
                     <div className="flex items-center gap-3 mb-4">
                         <span className="bg-indigo-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">AI Roadmap</span>
