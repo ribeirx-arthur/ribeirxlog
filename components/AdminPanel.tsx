@@ -41,21 +41,19 @@ export const AdminPanel = ({ profile, supabaseClient }: AdminPanelProps) => {
         setErrorMsg(null);
 
         try {
-            // Usa o client autenticado (que tem o RLS permissivo para admins)
-            const { data, error } = await supabaseClient
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error("Admin fetch error:", error);
-                if (error.message?.toLowerCase().includes('jwt expired')) {
-                    setErrorMsg('Sua sessão de segurança expirou. Por favor, atualize a página para renovar seu acesso de Admin.');
-                } else {
-                    setErrorMsg(error.message);
+            // Usa o endpoint de Admin que roda no servidor com Service Role Key (bypassa o RLS)
+            const res = await fetch('/api/admin/users', {
+                headers: {
+                    'x-admin-email': profile.email || 'arthur@ribeirxlog.com'
                 }
-            } else if (data) {
-                setUsers(data);
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                console.error("Admin fetch error:", data);
+                setErrorMsg(data.error || 'Acesso negado ou erro ao buscar usuários Admin.');
+            } else if (data.users) {
+                setUsers(data.users);
             }
 
             // Puxa o total de viagens para o heatmap
@@ -73,20 +71,26 @@ export const AdminPanel = ({ profile, supabaseClient }: AdminPanelProps) => {
     };
 
     const updateUser = async (userId: string, updates: any) => {
-        const { error } = await supabaseClient
-            .from('profiles')
-            .update(updates)
-            .eq('id', userId);
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-email': profile.email || 'arthur@ribeirxlog.com'
+                },
+                body: JSON.stringify({ userId, updates })
+            });
 
-        if (!error) {
-            fetchUsers();
-        } else {
-            console.error("Error updating user:", error);
-            if (error.message?.toLowerCase().includes('jwt expired')) {
-                setErrorMsg('Sessão expirada. Atualize a página antes de continuar.');
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                fetchUsers();
             } else {
-                setErrorMsg(`Erro ao atualizar: ${error.message}`);
+                console.error("Error updating user:", data);
+                setErrorMsg(`Erro ao atualizar: ${data.error}`);
             }
+        } catch (err: any) {
+            setErrorMsg('Erro de rede ao atualizar usuário.');
         }
     };
 
@@ -277,9 +281,9 @@ export const AdminPanel = ({ profile, supabaseClient }: AdminPanelProps) => {
                                                 value={user.payment_status || 'unpaid'}
                                                 onChange={(e) => updateUser(user.id, { payment_status: e.target.value })}
                                                 className={`rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none border transition-all cursor-pointer ${user.payment_status === 'paid' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                        user.payment_status === 'trial' ? 'bg-sky-500/10 border-sky-500/20 text-sky-500' :
-                                                            user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
-                                                                'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                                                    user.payment_status === 'trial' ? 'bg-sky-500/10 border-sky-500/20 text-sky-500' :
+                                                        user.payment_status === 'preview' ? 'bg-purple-500/10 border-purple-500/20 text-purple-500' :
+                                                            'bg-rose-500/10 border-rose-500/20 text-rose-500'
                                                     }`}
                                             >
                                                 <option value="unpaid">Pendente</option>
