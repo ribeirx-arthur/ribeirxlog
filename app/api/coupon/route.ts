@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
         // Validar cupom
         const validCoupons: Record<string, { plan: string, days: number }> = {
-            'TVCAMINHONEIRO': { plan: 'piloto', days: 30 }
+            'SAAS': { plan: 'piloto', days: 30 }
         };
 
         const coupon = validCoupons[couponCode.toUpperCase()];
