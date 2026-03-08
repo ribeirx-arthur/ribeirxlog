@@ -37,6 +37,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
     const [driverPhone, setDriverPhone] = useState('');
     const [driverCnhValidity, setDriverCnhValidity] = useState('');
     const [appMode, setAppMode] = useState<'simple' | 'advanced'>('simple');
+    const [wantsToSetupNow, setWantsToSetupNow] = useState<boolean | null>(null);
 
     const [isDriverManager, setIsDriverManager] = useState<boolean | null>(null);
 
@@ -106,23 +107,61 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) => {
                         </div>
                         <span className="font-black text-xl md:text-2xl tracking-tighter text-white">RBX<span className="text-emerald-500">LOG</span></span>
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">Vamos configurar sua operação</h1>
-                    <p className="text-slate-400 text-xs md:text-sm">Leva menos de 2 minutos. Sem burocracia.</p>
+                    <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
+                        {wantsToSetupNow === null ? 'Bem-vindo ao RBX LOG' : 'Vamos configurar sua operação'}
+                    </h1>
+                    <p className="text-slate-400 text-xs md:text-sm">
+                        {wantsToSetupNow === null ? 'Como deseja começar no sistema?' : 'Leva menos de 2 minutos. Sem burocracia.'}
+                    </p>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="w-full h-1 bg-slate-800 rounded-full mb-6 md:mb-10 overflow-hidden shrink-0">
-                    <div
-                        className="h-full bg-emerald-500 transition-all duration-500 ease-out"
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
+                {/* Progress Bar (Só aparece se já iniciou configuração) */}
+                {wantsToSetupNow && (
+                    <div className="w-full h-1 bg-slate-800 rounded-full mb-6 md:mb-10 overflow-hidden shrink-0">
+                        <div
+                            className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                )}
 
                 {/* Card Wrapper com Scroll */}
                 <div className="flex-1 overflow-y-auto scrollbar-hide w-full pb-10">
                     <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                        {/* Step -1: Configurar Agora ou Depois */}
+                        {wantsToSetupNow === null && (
+                            <div className="space-y-8 animate-in fade-in duration-500 py-4">
+                                <div className="text-center space-y-4">
+                                    <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-6">
+                                        <Truck className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Primeiros Passos</h3>
+                                    <p className="text-slate-400 text-sm">Configure agora para já usar os recursos avançados, ou navegue apenas pelo painel de controle simples (gratuito).</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    <button
+                                        onClick={() => setWantsToSetupNow(true)}
+                                        className="p-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 hover:border-emerald-500 hover:bg-emerald-500/20 transition-all text-left flex gap-4 items-center group relative overflow-hidden"
+                                    >
+                                        <div className="flex-1 z-10">
+                                            <div className="font-black text-emerald-500 uppercase tracking-tighter mb-1 text-lg">Configurar Agora (Recomendado)</div>
+                                            <div className="text-xs text-slate-300">Liberar frotas, motoristas e preenchimentos.</div>
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={onSkip}
+                                        className="p-6 rounded-2xl border border-slate-800 bg-slate-950 hover:border-slate-700 transition-all text-left group"
+                                    >
+                                        <div className="font-black text-slate-400 uppercase tracking-tighter mb-1">Deixar para Depois</div>
+                                        <div className="text-xs text-slate-500">Acessar modo básico e explorar o site gratuito.</div>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Step 0: Initial Question */}
-                        {step === 1 && isDriverManager === null && (
+                        {step === 1 && wantsToSetupNow === true && isDriverManager === null && (
                             <div className="space-y-8 animate-in fade-in duration-500 py-4">
                                 <div className="text-center space-y-4">
                                     <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-6">

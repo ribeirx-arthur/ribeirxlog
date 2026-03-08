@@ -40,6 +40,8 @@ const isAdminEmail = (email: string): boolean => {
     return ADMIN_EMAILS.some(e => lower.includes(e.toLowerCase()));
 };
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
     // Permite diagnóstico via navegador adicionando ?debug=1 na URL
     if (req.url.includes('debug=1')) {
