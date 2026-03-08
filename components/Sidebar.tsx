@@ -46,6 +46,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     onClose?.();
   };
 
+  const userEmail = profile.email?.trim().toLowerCase() || '';
+  const adminEmails = [
+    'arthur@ribeirxlog.com',
+    'arthur.ribeirx@gmail.com',
+    'arthur.riberix@gmail.com',
+    'arthurpsantos01@gmail.com',
+    'arthur_ribeiro09@outlook.com'
+  ];
+  const isAdmin = adminEmails.includes(userEmail) ||
+    userEmail.endsWith('@ribeirxlog.com') ||
+    (profile.name?.toLowerCase().includes('ribeirxlog'));
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
@@ -62,6 +74,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'setup', label: 'Frota & Unidades', icon: PlusCircle },
     { id: 'freight-calculator', label: 'Calculadora', icon: Calculator },
     { id: 'settings', label: 'Configurações', icon: Settings },
+    { id: 'subscription', label: 'Planos & Assinaturas', icon: CreditCard },
+    ...(isAdmin ? [{ id: 'admin', label: 'Painel Admin', icon: ShieldAlert }] : [])
   ] : [];
 
   return (
