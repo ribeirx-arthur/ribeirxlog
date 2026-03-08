@@ -1037,66 +1037,89 @@ export default function Home() {
             user?.username?.toLowerCase().includes('ribeirxlog') ||
             (profile.name?.toLowerCase().includes('ribeirxlog'));
 
+        // Verifica se é free (não pagou e não é admin e não é demo)
+        const isFreeUser = profile?.payment_status !== 'paid' && !isAdmin && !isDemo;
+
         switch (activeTab) {
             case 'dashboard': return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} setActiveTab={setActiveTab} />;
-            case 'drivers': return (
-                <Suspense fallback={<div>Carregando Motoristas...</div>}>
-                    <DriverManagement
-                        drivers={drivers}
+            case 'drivers':
+                if (isFreeUser) {
+                    return <Paywall title="Gestão de Motoristas" plan="Piloto" price="R$ 49,90" features={['Cadastro Completo', 'Controle de CNH', 'Comissões Automáticas']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return (
+                    <Suspense fallback={<div>Carregando Motoristas...</div>}>
+                        <DriverManagement
+                            drivers={drivers}
+                            vehicles={vehicles}
+                            onAddDriver={handleAddDriver}
+                            onUpdateDriver={handleUpdateDriver}
+                            onDeleteDriver={handleDeleteDriver}
+                        />
+                    </Suspense>
+                );
+            case 'trips':
+                if (isFreeUser) {
+                    return <Paywall title="Gestão de Viagens" plan="Piloto" price="R$ 49,90" features={['Registro de Viagens', 'Cálculo de Lucro Real', 'Histórico Completo']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} onDeleteTrip={handleDeleteTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+            case 'setup':
+                if (isFreeUser) {
+                    return <Paywall title="Cadastro de Frota" plan="Piloto" price="R$ 49,90" features={['Cadastro de Veículos', 'Embarcadores', 'Unidades de Carga']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return (
+                    <Setup
                         vehicles={vehicles}
+                        drivers={drivers}
+                        shippers={shippers}
+                        buggies={buggies}
+
+                        onAddVehicle={handleAddVehicle}
+                        onUpdateVehicle={handleUpdateVehicle}
+                        onDeleteVehicle={handleDeleteVehicle}
+
                         onAddDriver={handleAddDriver}
                         onUpdateDriver={handleUpdateDriver}
                         onDeleteDriver={handleDeleteDriver}
-                    />
-                </Suspense>
-            );
-            case 'trips': return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} onDeleteTrip={handleDeleteTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
-            case 'setup': return (
-                <Setup
-                    vehicles={vehicles}
-                    drivers={drivers}
-                    shippers={shippers}
-                    buggies={buggies}
 
-                    onAddVehicle={handleAddVehicle}
-                    onUpdateVehicle={handleUpdateVehicle}
-                    onDeleteVehicle={handleDeleteVehicle}
+                        onAddShipper={handleAddShipper}
+                        onUpdateShipper={handleUpdateShipper}
+                        onDeleteShipper={handleDeleteShipper}
 
-                    onAddDriver={handleAddDriver}
-                    onUpdateDriver={handleUpdateDriver}
-                    onDeleteDriver={handleDeleteDriver}
-
-                    onAddShipper={handleAddShipper}
-                    onUpdateShipper={handleUpdateShipper}
-                    onDeleteShipper={handleDeleteShipper}
-
-                    onAddBuggy={handleAddBuggy}
-                    onUpdateBuggy={handleUpdateBuggy}
-                    onDeleteBuggy={handleDeleteBuggy}
-                    profile={profile}
-                />
-
-            );
-            case 'maintenance': return (
-                <Suspense fallback={<div>Carregando...</div>}>
-                    <FleetHealth
-                        vehicles={vehicles}
-                        maintenances={maintenances}
-                        onAddMaintenance={handleSaveMaintenance}
-                        onUpdateMaintenance={handleUpdateMaintenance}
-                        onDeleteMaintenance={handleDeleteMaintenance}
-                        onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
-                        onResetComponent={handleResetVehicleComponent}
+                        onAddBuggy={handleAddBuggy}
+                        onUpdateBuggy={handleUpdateBuggy}
+                        onDeleteBuggy={handleDeleteBuggy}
                         profile={profile}
                     />
-                </Suspense>
-            );
 
-            case 'new-trip': return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
+                );
+            case 'maintenance':
+                if (isFreeUser) {
+                    return <Paywall title="Manutenção da Frota" plan="Gestor Pro" price="R$ 89,90" features={['Controle de Revisões', 'Alertas de Troca', 'Histórico de Manutenções']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return (
+                    <Suspense fallback={<div>Carregando...</div>}>
+                        <FleetHealth
+                            vehicles={vehicles}
+                            maintenances={maintenances}
+                            onAddMaintenance={handleSaveMaintenance}
+                            onUpdateMaintenance={handleUpdateMaintenance}
+                            onDeleteMaintenance={handleDeleteMaintenance}
+                            onUpdateVehicleThresholds={handleUpdateVehicleThresholds}
+                            onResetComponent={handleResetVehicleComponent}
+                            profile={profile}
+                        />
+                    </Suspense>
+                );
+
+            case 'new-trip':
+                if (isFreeUser) {
+                    return <Paywall title="Nova Viagem" plan="Piloto" price="R$ 49,90" features={['Registro de Viagens', 'Cálculo Automático de Lucro', 'Controle de Despesas']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return <NewTrip vehicles={vehicles} drivers={drivers} shippers={shippers} onSave={handleSaveTrip} profile={profile} trips={trips} />;
             case 'settings': return <Settings profile={profile} setProfile={handleUpdateProfile} trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} maintenances={maintenances} onImportData={() => { }} onResetData={() => { }} />;
             case 'performance':
-                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
-                    return <Paywall title="Business Intelligence (BI)" plan="Gestor Pro" price="R$ 89,90" features={['Gráficos de Lucro Bruto', 'Análise de Margem por KM', 'Performance por Motorista']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                if (isFreeUser) {
+                    return <Paywall title="Business Intelligence (BI)" plan="Gestor Pro" price="R$ 89,90" features={['Gráficos de Lucro Bruto', 'Análise de Margem por KM', 'Performance por Motorista']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
                 return (
                     <Suspense fallback={<div>Carregando BI...</div>}>
@@ -1104,14 +1127,18 @@ export default function Home() {
                     </Suspense>
                 );
             case 'intelligence':
-                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
-                    return <Paywall title="Inteligência de Dados" plan="Gestor Pro" price="R$ 89,90" features={['Previsão de Gastos', 'Alertas de Ineficiência', 'Otimização de Rotas']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                if (isFreeUser) {
+                    return <Paywall title="Inteligência de Dados" plan="Gestor Pro" price="R$ 89,90" features={['Previsão de Gastos', 'Alertas de Ineficiência', 'Otimização de Rotas']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
                 return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
-            case 'freight-calculator': return <FreightCalculator vehicles={vehicles} profile={profile} />;
+            case 'freight-calculator':
+                if (isFreeUser) {
+                    return <Paywall title="Calculadora de Frete" plan="Piloto" price="R$ 49,90" features={['Cálculo de Custos', 'Margem de Lucro', 'Estimativa de Diesel']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return <FreightCalculator vehicles={vehicles} profile={profile} />;
             case 'gps-tracking':
-                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
-                    return <Paywall title="Rastreamento em Tempo Real" plan="Gestor Pro" price="R$ 89,90" features={['Localização Exata', 'Alertas de Velocidade', 'Cerca Virtual']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                if (isFreeUser) {
+                    return <Paywall title="Rastreamento em Tempo Real" plan="Gestor Pro" price="R$ 89,90" features={['Localização Exata', 'Alertas de Velocidade', 'Cerca Virtual']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
                 return (
                     <Suspense fallback={<div>Iniciando satélites...</div>}>
@@ -1135,8 +1162,8 @@ export default function Home() {
                 </Suspense>
             );
             case 'tires':
-                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
-                    return <Paywall title="Controle de Pneus" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de Vidas', 'Custo por KM de Pneu', 'Alertas de Rodízio']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                if (isFreeUser) {
+                    return <Paywall title="Controle de Pneus" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de Vidas', 'Custo por KM de Pneu', 'Alertas de Rodízio']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
                 return <TireManagement vehicles={vehicles} buggies={buggies} tires={tires} onUpdateTires={(newTires) => setTires(newTires)} />;
             case 'subscription': return <Subscription profile={profile} initialPlanIntent={pendingPlanIntent} onClearIntent={() => setPendingPlanIntent(null)} />;
@@ -1146,8 +1173,8 @@ export default function Home() {
                 </Suspense>
             );
             case 'compliance':
-                if (profile?.payment_status !== 'paid' && !isAdmin && !isDemo) {
-                    return <Paywall title="Compliance & Documentos" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de CNH/ANTT', 'Validade de Seguros', 'Alertas de Vencimento']} onUpgrade={() => handleLandingPurchase('Gestor Pro')} />;
+                if (isFreeUser) {
+                    return <Paywall title="Compliance & Documentos" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de CNH/ANTT', 'Validade de Seguros', 'Alertas de Vencimento']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
                 return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
             case 'admin':
