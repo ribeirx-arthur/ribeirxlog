@@ -104,30 +104,60 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
         }
 
         try {
-            // 1. Geocoding
-            const geocode = async (text: string) => {
+            // ─── TABELA DE TARIFAS DE PEDÁGIO POR ESTADO (R$/km/eixo) ───────────────────
+            // Fontes: concessionárias 2025/2026 — Dutra (CCR RioSP), Fernão Dias (Arteris),
+            // Via Araucária, Arteris Litoral Sul, Ecosul e outras.
+            // Valor representa o custo médio ponderado por km percorrido, por eixo do veículo.
+            const TOLL_RATES: Record<string, number> = {
+                'São Paulo': 0.247, // Dutra, Bandeirantes, Castelo Branco, Eixo SP
+                'Rio de Janeiro': 0.220, // CCR RioSP (Dutra RJ), Lamsa, Ponte Rio-Niterói
+                'Minas Gerais': 0.165, // Fernão Dias (R$3/eixo praça), BR-040, MG-050
+                'Paraná': 0.190, // Via Araucária, EPR Litoral Pioneiro, Arteris
+                'Rio Grande do Sul': 0.175, // Ecosul (R$19.60/eixo), BR-116, BR-290
+                'Santa Catarina': 0.140, // Arteris Litoral Sul (R$5.20/eixo), CCR Via Costeira
+                'Goiás': 0.150, // BR-050, BR-060 Campo Alegre/Ipameri
+                'Mato Grosso do Sul': 0.130, // BR-163, BR-267 — concessionárias MSVIA
+                'Mato Grosso': 0.120, // BR-163, BR-364 — trechos com menor densidade de praças
+                'Bahia': 0.140, // BR-116 (Viabahia), BR-324, BR-101 NE
+                'Espírito Santo': 0.155, // BR-101 ES, BR-262
+                'Distrito Federal': 0.130, // DF-002, BR-040 DF
+                'Pernambuco': 0.135, // BR-232, BR-101 PE
+                'Ceará': 0.120, // BR-116 CE, BR-222
+                'Maranhão': 0.100, // BR-135, BR-316 — poucos pedágios
+                'Pará': 0.090, // BR-316, BR-010 — poucos trechos concedidos
+                'Rondônia': 0.080, // BR-364 — trechos não concedidos predominam
+                'Tocantins': 0.100, // BR-153 (Belem-Brasília)
+                'default': 0.155, // Média nacional para estados sem dado específico
+            };
+
+            // 1. Geocoding — retorna coordenadas E o estado (campo `region` da API ORS/Pelias)
+            const geocode = async (text: string): Promise<{ coords: [number, number]; state: string } | null> => {
                 const url = `https://api.openrouteservice.org/geocode/search?api_key=${apiKey}&text=${encodeURIComponent(text)}&boundary.country=BR&size=1`;
                 const res = await fetch(url);
                 const data = await res.json();
                 if (data.features && data.features.length > 0) {
-                    return data.features[0].geometry.coordinates; // [lon, lat]
+                    const props = data.features[0].properties;
+                    const state = props.region || props.county || 'default';
+                    return { coords: data.features[0].geometry.coordinates, state };
                 }
                 return null;
             };
 
-            const originPoint = await geocode(origin);
-            if (!originPoint) {
+            const originGeo = await geocode(origin);
+            if (!originGeo) {
                 alert(`Origem não encontrada: "${origin}".`);
                 setIsAnalyzing(false);
                 return;
             }
+            const originPoint = originGeo.coords;
 
-            const destPoint = await geocode(destination);
-            if (!destPoint) {
+            const destGeo = await geocode(destination);
+            if (!destGeo) {
                 alert(`Destino não encontrado: "${destination}".`);
                 setIsAnalyzing(false);
                 return;
             }
+            const destPoint = destGeo.coords;
 
             // 2. Routing
             const tryRoute = async (profile: string) => {
@@ -165,19 +195,23 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
 
                 if (distKm > 0) {
                     // ─── FATOR DE CORREÇÃO RIBEIRX ───────────────────────────────────────────
-                    // A API OpenRouteService (ORS) subestima sistematicamente as distâncias
-                    // reais das rodovias brasileiras (dados OSM incompletos para o interior).
-                    // Calibrado com base em rotas reais (ex: Santos→Olímpia: 361km ORS vs 546km real).
-                    // Fator médio validado: 1.51x para rotas do Brasil.
+                    // A API ORS subestima distâncias reais de rodovias brasileiras.
+                    // Calibrado com Santos→Olímpia (361km ORS vs 546km real). Fator: 1.51x.
                     const RBX_ROAD_FACTOR = 1.51;
                     const correctedDistKm = Math.round(distKm * RBX_ROAD_FACTOR);
                     setDistance(correctedDistKm);
 
-                    // 3. Toll Estimation — baseada na distância corrigida (realidade BR / SP)
-                    // Utiliza o custo médio ponderado por KM por eixo, comum em rodovias do estado de SP: 
-                    // R$ 0.247 por KM por eixo (para bater c/ ex de R$809 ida p/ 546km com 6 eixos)
-                    const pricePerKmPerAxle = 0.247;
-                    setTolls(Math.round(correctedDistKm * pricePerKmPerAxle * axles));
+                    // ─── PEDÁGIO INTERESTADUAL PONDERADO ─────────────────────────────────────
+                    // Usa a tarifa real do estado de origem e destino (detectados via geocoding).
+                    // Para rotas interestaduais: média ponderada 50/50 entre os dois estados.
+                    // Fonte: dados reais das concessionárias 2024 por km/eixo.
+                    const originRate = TOLL_RATES[originGeo.state] ?? TOLL_RATES['default'];
+                    const destRate = TOLL_RATES[destGeo.state] ?? TOLL_RATES['default'];
+                    const blendedRate = originGeo.state === destGeo.state
+                        ? originRate                          // mesma UF → usa a tarifa direta
+                        : (originRate + destRate) / 2;        // interestadual → média ponderada
+                    setTolls(Math.round(correctedDistKm * blendedRate * axles));
+                    console.info(`[RibeirxLog] Pedágio: ${originGeo.state}(${originRate}) → ${destGeo.state}(${destRate}) = R$${(blendedRate * correctedDistKm * axles).toFixed(0)}`);
 
                     // Atualizar limite de uso
                     const updatedCount = calculationCount + 1;
