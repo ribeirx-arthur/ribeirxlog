@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ptBR } from "@clerk/localizations";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -45,7 +46,7 @@ export default function RootLayout({
     const clerkKey = "pk_test_YmVsb3ZlZC1kb3J5LTIzLmNsZXJrLmFjY291bnRzLmRldiQ";
 
     return (
-        <ClerkProvider publishableKey={clerkKey}>
+        <ClerkProvider publishableKey={clerkKey} localization={ptBR}>
             <html lang="pt-BR" className={inter.className}>
                 <head>
                     <meta charSet="utf-8" />
