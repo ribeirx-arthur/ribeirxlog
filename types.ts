@@ -24,6 +24,7 @@ export interface UserProfile {
     enableBI: boolean;
     enableFreightCalculator: boolean;
     calculateDepreciation: boolean;
+    enableOngoingTrips?: boolean; // Nova flag para aba de viagens em andamento
     costPerKmTire: number; // Valor fixado em reais por KM para pneus
     costPerKmMaintenance: number; // Valor fixado em reais por KM para manutenção
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
@@ -176,6 +177,11 @@ export interface Trip {
   transitStatus?: 'Agendado' | 'Em Trânsito' | 'Finalizado';
   checklistCompleted?: boolean;
   observations?: string;
+  // Campos PRO: Viagens em Andamento
+  paymentIda?: number;
+  paymentVolta?: number;
+  balanceIda?: number;
+  balanceVolta?: number;
 }
 
 export interface AppNotification {
@@ -274,4 +280,4 @@ export interface Geofence {
   active: boolean;
 }
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help' | 'compliance';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help' | 'compliance' | 'ongoing-trips';

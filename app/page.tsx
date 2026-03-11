@@ -20,6 +20,7 @@ const AdminPanel = React.lazy(() => import('../components/AdminPanel'));
 import DriverManagement from '../components/DriverManagement';
 const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
 const HelpCenter = React.lazy(() => import('../components/HelpCenter'));
+const OngoingTrips = React.lazy(() => import('../components/OngoingTrips'));
 import Onboarding from '../components/Onboarding';
 
 import LandingPage from '../components/LandingPage';
@@ -238,7 +239,11 @@ export default function Home() {
                             totalKm: Number(t.total_km),
                             transitStatus: t.transit_status,
                             checklistCompleted: t.checklist_completed,
-                            observations: t.observations
+                            observations: t.observations,
+                            paymentIda: Number(t.payment_ida || 0),
+                            paymentVolta: Number(t.payment_volta || 0),
+                            balanceIda: Number(t.balance_ida || 0),
+                            balanceVolta: Number(t.balance_volta || 0)
                         })),
                         loadTable('vehicles', setVehicles, (v: any) => ({
                             ...v,
@@ -380,7 +385,11 @@ export default function Home() {
                 total_km: Number(newTrip.totalKm || 0),
                 transit_status: newTrip.transitStatus || 'Agendado',
                 checklist_completed: newTrip.checklistCompleted || false,
-                observations: newTrip.observations || ''
+                observations: newTrip.observations || '',
+                payment_ida: Number(newTrip.paymentIda || 0),
+                payment_volta: Number(newTrip.paymentVolta || 0),
+                balance_ida: Number(newTrip.balanceIda || 0),
+                balance_volta: Number(newTrip.balanceVolta || 0)
             }).select().single();
 
             if (error) throw error;
@@ -402,7 +411,11 @@ export default function Home() {
                     totalKm: Number(data.total_km || 0),
                     transitStatus: data.transit_status,
                     checklistCompleted: data.checklist_completed,
-                    observations: data.observations
+                    observations: data.observations,
+                    paymentIda: Number(data.payment_ida || 0),
+                    paymentVolta: Number(data.payment_volta || 0),
+                    balanceIda: Number(data.balance_ida || 0),
+                    balanceVolta: Number(data.balance_volta || 0)
                 }, ...prev]);
                 showToast('Viagem salva!', 'success');
                 setActiveTab('trips');
@@ -438,7 +451,11 @@ export default function Home() {
                 total_km: Number(updatedTrip.totalKm),
                 transit_status: updatedTrip.transitStatus,
                 checklist_completed: updatedTrip.checklistCompleted,
-                observations: updatedTrip.observations || ''
+                observations: updatedTrip.observations || '',
+                payment_ida: Number(updatedTrip.paymentIda || 0),
+                payment_volta: Number(updatedTrip.paymentVolta || 0),
+                balance_ida: Number(updatedTrip.balanceIda || 0),
+                balance_volta: Number(updatedTrip.balanceVolta || 0)
             }).eq('id', updatedTrip.id);
 
             if (error) throw error;
@@ -1059,9 +1076,34 @@ export default function Home() {
                 );
             case 'trips':
                 if (isFreeUser) {
-                    return <Paywall title="Gestão de Viagens" plan="Piloto" price="R$ 49,90" features={['Registro de Viagens', 'Cálculo de Lucro Real', 'Histórico Completo']} onUpgrade={() => setActiveTab('subscription')} />;
+                    return <Paywall title="Gestão de Viagens" plan="Piloto" price="R$ 49,90" features={['Registro de Viagens', 'Cálculo de Lucro Real', 'Histórico Completos']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
                 return <Trips trips={trips} setTrips={setTrips} onUpdateTrip={handleUpdateTrip} onDeleteTrip={handleDeleteTrip} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} />;
+            case 'ongoing-trips':
+                // Aba exclusiva PRO
+                const isPro = ['gestor_pro', 'frota_elite', 'lifetime', 'anual'].includes(profile.plan_type || '');
+                if (!isPro && !isAdmin) {
+                    return <Paywall title="Viagens em Andamento" plan="Gestor Pro" price="R$ 89,90" features={['Monitoramento de Recebíveis', 'Controle Ida & Volta', 'Visão Estratégica Ativa']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return (
+                    <Suspense fallback={<div>Carregando monitoramento...</div>}>
+                        <OngoingTrips 
+                            trips={trips} 
+                            vehicles={vehicles} 
+                            drivers={drivers} 
+                            profile={profile} 
+                            onEditTrip={(t) => {
+                                // Reutiliza a lógica de edição do componente Trips se possível, 
+                                // ou abre um modal dedicado. Por simplicidade, vamos levar para a aba de trips com o ID selecionado?
+                                // Na verdade, OngoingTrips tem seu próprio botão de edição.
+                                // Para funcionar perfeitamente, o OngoingTrips deve abrir o modal.
+                                // Mas aqui no page.tsx, vamos apenas passar trips/handleUpdateTrip.
+                                // Vou deixar o OngoingTrips abrir um modal simples de edição de campos financeiros.
+                                handleUpdateTrip(t);
+                            }} 
+                        />
+                    </Suspense>
+                );
             case 'setup':
                 if (isFreeUser) {
                     return <Paywall title="Cadastro de Frota" plan="Piloto" price="R$ 49,90" features={['Cadastro de Veículos', 'Embarcadores', 'Unidades de Carga']} onUpgrade={() => setActiveTab('subscription')} />;

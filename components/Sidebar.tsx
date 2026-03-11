@@ -61,6 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
+    ...(profile.config.enableOngoingTrips ? [{ id: 'ongoing-trips', label: 'Viagens Ativas', icon: MapPin, badge: 'PRO' }] : []),
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp },
     { id: 'intelligence', label: 'IA Estratégica', icon: Brain },
     { id: 'tires', label: 'Gestão de Pneus', icon: Disc, badge: 'PRO' },

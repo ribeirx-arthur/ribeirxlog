@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, Shipper, UserProfile } from '../types';
 import { calculateTripFinance } from '../services/finance';
-import { generateAIInsights } from '../services/aiAnalysis';
+import { generateAIInsights, generateMonthlyProjections } from '../services/aiAnalysis';
 import { AIInsights } from './AIInsights';
 import { useAppMode } from '../contexts/AppModeContext';
 import {
@@ -22,7 +22,8 @@ import {
   Map as MapIcon,
   History,
   Zap,
-  Activity
+  Activity,
+  Sparkles
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -39,7 +40,6 @@ type TimeFilter = 'semanal' | 'mensal' | 'anual' | 'total';
 
 const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shippers, profile, onPopulateDemo, setActiveTab }) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('mensal');
-  const [activeView, setActiveView] = useState<'geral' | 'sociedade'>('geral');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -61,19 +61,12 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
   const filteredTrips = useMemo(() => {
     const now = new Date();
     return trips.filter(trip => {
-      // Filtro de Sociedade se ativo
-      if (activeView === 'sociedade') {
-        const v = vehicles.find(veh => veh.id === trip.vehicleId);
-        if (!v || v.type !== 'Sociedade') return false;
-      }
-
       if (timeFilter === 'total') return true;
 
-      // Usa a data de recebimento, mas se estiver vazia (viagem pendente), usa a data de saída
       const dateStr = trip.receiptDate || trip.departureDate;
       const targetDate = new Date(dateStr);
 
-      if (isNaN(targetDate.getTime())) return false; // Evita erro com datas inválidas
+      if (isNaN(targetDate.getTime())) return false;
 
       if (timeFilter === 'semanal') {
         const sevenDaysAgo = new Date();
@@ -88,13 +81,12 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       if (timeFilter === 'anual') return targetDate.getFullYear() === now.getFullYear();
       return true;
     });
-
-  }, [trips, timeFilter, activeView, vehicles]);
+  }, [trips, timeFilter]);
 
   const stats = useMemo(() => {
     let totalRevenue = 0;
-    let totalProfit = 0; // Lucro que fica para o dono (sociedade aplicada)
-    let totalNetProfit = 0; // Lucro líquido real total gerado pelo caminhão
+    let totalProfit = 0;
+    let totalNetProfit = 0;
     let driverCommissions = 0;
     let pendingReceivables = 0;
     let totalAdvanceBalance = 0;
@@ -105,7 +97,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       const finance = calculateTripFinance(trip, vehicle, driver, profile);
 
       totalRevenue += finance.totalBruto;
-      totalProfit += finance.lucroSociety;
+      totalProfit += finance.lucroLiquidoReal;
       totalNetProfit += finance.lucroLiquidoReal;
       driverCommissions += finance.comissaoMotorista;
       totalAdvanceBalance += finance.saldoAdiantamento;
@@ -119,7 +111,6 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       totalRevenue,
       totalProfit,
       totalNetProfit,
-      partnerProfit: totalNetProfit - totalProfit,
       pendingReceivables,
       driverCommissions
     };
@@ -127,18 +118,19 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
 
   const chartData = useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    
     const getYValue = (t: Trip) => {
       const v = vehicles.find(veh => veh.id === t.vehicleId) || { plate: 'GENERIC' } as Vehicle;
       const d = drivers.find(drv => drv.id === t.driverId) || { name: 'Generic' } as Driver;
       const finance = calculateTripFinance(t, v, d, profile);
-      return activeView === 'sociedade' ? finance.lucroLiquidoReal : finance.lucroSociety;
+      return finance.lucroLiquidoReal;
     };
 
     if (timeFilter === 'anual' || timeFilter === 'total') {
       return months.map((m, i) => ({
         name: m,
         value: filteredTrips
-          .filter(t => new Date(t.receiptDate).getMonth() === i)
+          .filter(t => t.receiptDate && new Date(t.receiptDate).getMonth() === i)
           .reduce((acc, t) => acc + getYValue(t), 0)
       }));
     }
@@ -146,25 +138,34 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       name: (t.receiptDate || '').split('-').reverse().slice(0, 2).join('/'),
       value: getYValue(t)
     }));
-  }, [filteredTrips, timeFilter, vehicles, drivers, profile, activeView]);
+  }, [filteredTrips, timeFilter, vehicles, drivers, profile]);
 
   const pieData = useMemo(() => {
-    if (activeView === 'sociedade') {
-      return [
-        { name: 'Sua Parte', value: stats.totalProfit, color: '#10b981' },
-        { name: 'Parte Sócio', value: stats.partnerProfit, color: '#3b82f6' },
-      ];
-    }
-    const propio = filteredTrips.filter(t => vehicles.find(v => v.id === t.vehicleId)?.type === 'Próprio').length;
-    const sociedade = filteredTrips.filter(t => vehicles.find(v => v.id === t.vehicleId)?.type === 'Sociedade').length;
-    return [
-      { name: 'Próprio', value: propio, color: '#10b981' },
-      { name: 'Sociedade', value: sociedade, color: '#f43f5e' },
-    ];
-  }, [filteredTrips, vehicles, activeView, stats]);
+    // Top 5 Caminhões por Renda
+    const revenueByVehicle: { [plate: string]: number } = {};
+    filteredTrips.forEach(t => {
+      const v = vehicles.find(veh => veh.id === t.vehicleId);
+      const plate = v?.plate || 'Outros';
+      const d = drivers.find(d => d.id === t.driverId) || { name: 'Generic' } as Driver;
+      const finance = calculateTripFinance(t, v || { plate: 'GENERIC' } as Vehicle, d, profile);
+      revenueByVehicle[plate] = (revenueByVehicle[plate] || 0) + finance.totalBruto;
+    });
+
+    const colors = ['#10b981', '#3b82f6', '#f43f5e', '#f59e0b', '#8b5cf6'];
+    const sorted = Object.entries(revenueByVehicle)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+
+    return sorted.map(([name, value], i) => ({
+      name,
+      value,
+      color: colors[i % colors.length]
+    }));
+  }, [filteredTrips, vehicles, drivers, profile]);
 
   const { uiStyle, features } = useAppMode();
   const aiInsights = useMemo(() => generateAIInsights(trips, vehicles, drivers, shippers, profile), [trips, vehicles, drivers, shippers, profile]);
+  const projections = useMemo(() => generateMonthlyProjections(trips, vehicles, drivers, profile), [trips, vehicles, drivers, profile]);
 
   if (!mounted) return null;
 
@@ -268,30 +269,14 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <h1 className={`text-2xl font-black text-white tracking-tighter ${uiStyle === 'deep' ? 'animate-pulse text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400' : ''}`}>
-              {uiStyle === 'deep' ? 'System Intel OS' : activeView === 'sociedade' ? 'Sociedade & Gestão' : 'Painel de Inteligência'}
+              {uiStyle === 'deep' ? 'System Intel OS' : 'Painel de Inteligência'}
             </h1>
             {isFree && <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[10px] font-black text-amber-500 uppercase tracking-widest uppercase">Grátis</span>}
             {uiStyle === 'deep' && <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />}
           </div>
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{uiStyle === 'deep' ? 'Acesso Prioritário RBS Engine' : activeView === 'sociedade' ? 'Visão de Divisão de Lucros' : 'Visão Estratégica da Frota'}</p>
+          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{uiStyle === 'deep' ? 'Acesso Prioritário RBS Engine' : 'Visão Estratégica da Frota'}</p>
         </div>
         <div className="flex flex-col md:flex-row items-center gap-4">
-          {hasSocietyVehicles && (
-            <div className="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-2xl shadow-inner">
-              <button
-                onClick={() => setActiveView('geral')}
-                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'geral' ? 'bg-white text-slate-950 shadow-lg' : 'text-slate-500 hover:text-slate-200'}`}
-              >
-                Geral
-              </button>
-              <button
-                onClick={() => setActiveView('sociedade')}
-                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'sociedade' ? 'bg-sky-500 text-white shadow-lg' : 'text-slate-500 hover:text-slate-200'}`}
-              >
-                Sociedade
-              </button>
-            </div>
-          )}
           <div className="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-2xl shadow-inner">
             {(['semanal', 'mensal', 'anual', 'total'] as TimeFilter[]).map((f) => (
               <button key={f} onClick={() => setTimeFilter(f)} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeFilter === f ? 'bg-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-slate-200'}`}>{f}</button>
@@ -313,25 +298,21 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         </div>
       )}
 
-      {profile.config.enableBI !== false && activeView === 'geral' && (
+      {profile.config.enableBI !== false && (
         <AIInsights insights={aiInsights} trips={trips} vehicles={vehicles} shippers={shippers} />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Faturamento Bruto" value={`R$ ${stats.totalRevenue.toLocaleString()}`} trend={timeFilter} isPositive={true} icon={DollarSign} uiStyle={uiStyle} />
         <StatCard
-          title={activeView === 'sociedade' ? "Lucro Gestor (Sua Parte)" : "Lucro Líquido Real"}
+          title="Lucro Líquido Real"
           value={`R$ ${stats.totalProfit.toLocaleString()}`}
-          trend={activeView === 'sociedade' ? "Líquido" : timeFilter}
+          trend={timeFilter}
           isPositive={true}
           icon={TrendingUp}
           uiStyle={uiStyle}
         />
-        {activeView === 'sociedade' ? (
-          <StatCard title="Lucro Sócio" value={`R$ ${stats.partnerProfit.toLocaleString()}`} trend="Divisão" isPositive={true} icon={Users} uiStyle={uiStyle} />
-        ) : (
-          <StatCard title="Saldo a Receber" value={`R$ ${stats.pendingReceivables.toLocaleString()}`} trend="Pendente" isPositive={false} icon={Clock} uiStyle={uiStyle} />
-        )}
+        <StatCard title="Saldo a Receber" value={`R$ ${stats.pendingReceivables.toLocaleString()}`} trend="Pendente" isPositive={false} icon={Clock} uiStyle={uiStyle} />
         {profile.config.userRole !== 'autonomo' && (
           <StatCard title="Custos Motoristas" value={`R$ ${stats.driverCommissions.toLocaleString()}`} trend="Comissões" isPositive={true} icon={CreditCard} uiStyle={uiStyle} />
         )}
@@ -349,7 +330,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         </div>
 
         <div className={`bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl flex flex-col justify-between relative overflow-hidden ${uiStyle === 'deep' ? 'ring-1 ring-emerald-500/20' : ''}`}>
-          <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-6 border-b border-slate-800 pb-4">Status de Operação</h3>
+          <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-6 border-b border-slate-800 pb-4">Ranking de Renda / Placa</h3>
           <div className="h-48 w-full flex items-center justify-center relative">
             <DashboardNeuralPie data={pieData} uiStyle={uiStyle} />
             {uiStyle === 'deep' && <div className="absolute inset-0 border-[1px] border-emerald-500/5 rounded-full animate-[spin_10s_linear_infinite]" />}
@@ -367,6 +348,44 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Projection Chart Section */}
+      <div className={`bg-slate-900 border border-slate-800 p-10 rounded-[3rem] shadow-2xl relative overflow-hidden ${uiStyle === 'deep' ? 'ring-1 ring-purple-500/20' : ''}`}>
+        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none rotate-12">
+          <Sparkles className="w-48 h-48 text-purple-500" />
+        </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b border-slate-800/50 pb-6">
+          <div>
+            <h3 className="font-black text-white uppercase text-xl tracking-tighter flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-purple-500" /> IA Predictive Insights
+            </h3>
+            <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.2em] mt-1">Projeção Baseada em Redes Neurais e Histórico de Rentabilidade</p>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-2xl">
+             <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+             <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Previsão Próximos 3 Meses</span>
+          </div>
+        </div>
+        
+        <div className="h-72 w-full">
+           <DashboardProjectionChart data={projections} uiStyle={uiStyle} />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-8 border-t border-slate-800/50">
+           {projections.filter(p => p.isFuture).map((p, i) => (
+             <div key={i} className="bg-slate-950/50 border border-slate-800 p-5 rounded-2xl flex flex-col gap-1">
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Expectativa {p.month}</span>
+                <span className="text-lg font-black text-purple-400 italic">R$ {p.projected.toLocaleString()}</span>
+                <div className="flex items-center gap-2 mt-1">
+                   <div className="h-1 flex-1 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-purple-500/50 animate-pulse" style={{ width: '70%' }} />
+                   </div>
+                   <span className="text-[8px] font-bold text-slate-600">Confiança 85%</span>
+                </div>
+             </div>
+           ))}
         </div>
       </div>
     </div>
@@ -440,6 +459,73 @@ const DashboardNeuralPie = ({ data, uiStyle }: { data: any[], uiStyle?: string }
       })}
       <circle cx="50" cy="50" r="28" fill="#0f172a" />
       {uiStyle === 'deep' && <circle cx="50" cy="50" r="22" fill="none" stroke="#10b981" strokeWidth="0.5" strokeDasharray="2 1" className="animate-[spin_20s_linear_infinite]" />}
+    </svg>
+  );
+};
+
+const DashboardProjectionChart = ({ data, uiStyle }: { data: any[], uiStyle?: string }) => {
+  if (!data || data.length === 0) return null;
+  const w = 800; const h = 300; const p = 40;
+  
+  // Encontrar o maior valor entre actual e projected para escala
+  const maxV = Math.max(...data.map(d => Math.max(d.actual, d.projected)), 1000) * 1.2;
+  const getX = (i: number) => p + (i * (w - 2 * p)) / (data.length - 1);
+  const getY = (v: number) => h - p - (v * (h - 2 * p)) / maxV;
+
+  // Pontos para a linha histórica (actual) e projetada
+  const historyPts = data.filter(d => !d.isFuture).map((d, i) => `${getX(i)},${getY(d.actual)}`).join(' ');
+  
+  // Projeção começa no último ponto histórico
+  const lastHistoryIndex = data.findIndex(d => d.isFuture) - 1;
+  const projectionPts = data.slice(lastHistoryIndex >= 0 ? lastHistoryIndex : 0).map((d, i) => {
+    const idx = (lastHistoryIndex >= 0 ? lastHistoryIndex : 0) + i;
+    return `${getX(idx)},${getY(d.projected)}`;
+  }).join(' ');
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full">
+      <defs>
+        <linearGradient id="progG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      
+      {/* Grid Lines */}
+      {[0, 0.25, 0.5, 0.75, 1].map(f => (
+        <line key={f} x1={p} y1={getY(maxV * f / 1.2)} x2={w-p} y2={getY(maxV * f / 1.2)} stroke="#1e293b" strokeDasharray="4 4" />
+      ))}
+
+      {/* Area under projection */}
+      <path 
+        d={`M ${getX(lastHistoryIndex)},${h-p} L ${projectionPts} L ${getX(data.length-1)},${h-p} Z`} 
+        fill="url(#progG)" 
+        className="opacity-50"
+      />
+
+      {/* Historical Line */}
+      <polyline points={historyPts} fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      
+      {/* Projection Line (Dashed) */}
+      <polyline points={projectionPts} fill="none" stroke="#a855f7" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="8 8" className="animate-[pulse_2s_infinite]" />
+
+      {/* Points */}
+      {data.map((d, i) => (
+        <g key={i}>
+          <circle 
+            cx={getX(i)} 
+            cy={getY(d.isFuture ? d.projected : d.actual)} 
+            r={d.isFuture ? "5" : "4"} 
+            fill="#0f172a" 
+            stroke={d.isFuture ? "#a855f7" : "#10b981"} 
+            strokeWidth="2" 
+          />
+          <text x={getX(i)} y={h - 10} textAnchor="middle" fill="#64748b" fontSize="10" fontWeight="bold" className="uppercase tracking-widest">{d.month}</text>
+          {d.isFuture && (
+             <text x={getX(i)} y={getY(d.projected) - 15} textAnchor="middle" fill="#a855f7" fontSize="9" fontWeight="black">R$ {Math.round(d.projected/1000)}k</text>
+          )}
+        </g>
+      ))}
     </svg>
   );
 };

@@ -179,3 +179,82 @@ export function generateGoldenTips(
 
     return tips;
 }
+
+export interface MonthlyProjection {
+    month: string;
+    actual: number;
+    projected: number;
+    isFuture: boolean;
+}
+
+export function generateMonthlyProjections(
+    trips: Trip[],
+    vehicles: Vehicle[],
+    drivers: Driver[],
+    profile: UserProfile
+): MonthlyProjection[] {
+    const monthsNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const now = new Date();
+    const projections: MonthlyProjection[] = [];
+
+    // 1. Coletar dados históricos dos últimos 6 meses
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthIndex = d.getMonth();
+        const year = d.getFullYear();
+        
+        const monthTrips = trips.filter(t => {
+            const rt = new Date(t.receiptDate || t.departureDate);
+            return rt.getMonth() === monthIndex && rt.getFullYear() === year;
+        });
+
+        let revenue = 0;
+        monthTrips.forEach(t => {
+            const v = vehicles.find(veh => veh.id === t.vehicleId) || { plate: 'GENERIC', type: 'Próprio', societySplitFactor: 100 } as Vehicle;
+            const drv = drivers.find(d => d.id === t.driverId) || { name: 'Generic' } as Driver;
+            const finance = calculateTripFinance(t, v, drv, profile);
+            revenue += finance.lucroLiquidoReal;
+        });
+
+        projections.push({
+            month: monthsNames[monthIndex],
+            actual: revenue,
+            projected: revenue,
+            isFuture: false
+        });
+    }
+
+    // 2. Calcular Tendência (IA Simples - Regressão Linear / Média de Crescimento)
+    // Se o último mês for maior que a média dos anteriores, a tendência é positiva
+    const pastValues = projections.map(p => p.actual);
+    const avgRevenue = pastValues.reduce((a, b) => a + b, 0) / (pastValues.length || 1);
+    
+    // Fator de crescimento simples baseado nos últimos 3 meses
+    let growthFactor = 1.0;
+    if (pastValues.length >= 3) {
+        const last3 = pastValues.slice(-3);
+        const diff1 = last3[2] - last3[1];
+        const diff2 = last3[1] - last3[0];
+        const avgDiff = (diff1 + diff2) / 2;
+        // Amortecer o crescimento para ser conservador
+        growthFactor = 1 + (avgDiff / (avgRevenue || 1)) * 0.5;
+        // Limitar entre 0.8 e 1.2 para não explodir
+        growthFactor = Math.max(0.85, Math.min(1.15, growthFactor));
+    }
+
+    // 3. Projetar próximos 3 meses
+    let lastValue = projections[projections.length - 1].actual;
+    for (let i = 1; i <= 3; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        const projectedValue = lastValue * Math.pow(growthFactor, i);
+        
+        projections.push({
+            month: monthsNames[d.getMonth()],
+            actual: 0,
+            projected: Math.round(projectedValue),
+            isFuture: true
+        });
+    }
+
+    return projections;
+}

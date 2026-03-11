@@ -458,6 +458,30 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     <input type="number" value={editingTrip.outrasDespesas || ''} onChange={e => setEditingTrip({ ...editingTrip, outrasDespesas: Number(e.target.value) })} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-white" placeholder="Despesas" />
                   </div>
 
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 flex items-center gap-2">
+                       Monitoramento Financeiro PRO <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded text-[8px]">EXCLUSIVO</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-2">
+                          <p className="text-[9px] font-bold text-slate-600 uppercase">Pagamento Ida</p>
+                          <input type="number" value={editingTrip.paymentIda || ''} onChange={e => setEditingTrip({ ...editingTrip, paymentIda: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold text-sm" placeholder="R$ 0,00" />
+                       </div>
+                       <div className="space-y-2">
+                          <p className="text-[9px] font-bold text-slate-600 uppercase">Saldo a Receber (Ida)</p>
+                          <input type="number" value={editingTrip.balanceIda || ''} onChange={e => setEditingTrip({ ...editingTrip, balanceIda: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-emerald-500 font-bold text-sm" placeholder="R$ 0,00" />
+                       </div>
+                       <div className="space-y-2">
+                          <p className="text-[9px] font-bold text-slate-600 uppercase">Pagamento Volta</p>
+                          <input type="number" value={editingTrip.paymentVolta || ''} onChange={e => setEditingTrip({ ...editingTrip, paymentVolta: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold text-sm" placeholder="R$ 0,00" />
+                       </div>
+                       <div className="space-y-2">
+                          <p className="text-[9px] font-bold text-slate-600 uppercase">Saldo a Receber (Volta)</p>
+                          <input type="number" value={editingTrip.balanceVolta || ''} onChange={e => setEditingTrip({ ...editingTrip, balanceVolta: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sky-400 font-bold text-sm" placeholder="R$ 0,00" />
+                       </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Observações da Viagem</label>
                     <textarea
