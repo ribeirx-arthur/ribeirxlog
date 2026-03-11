@@ -50,18 +50,7 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
 
   const handleQuickSave = () => {
     if (editingTrip) {
-      let updatedTrip = { ...editingTrip };
-      
-      // Auto-finish logic: if both balances are zero or negative, and there's some payment
-      const totalPaid = (updatedTrip.paymentIda || 0) + (updatedTrip.paymentVolta || 0);
-      const totalBalance = (updatedTrip.balanceIda || 0) + (updatedTrip.balanceVolta || 0);
-      
-      if (totalPaid > 0 && totalBalance <= 0) {
-        updatedTrip.transitStatus = 'Finalizado';
-        updatedTrip.status = 'Pago';
-      }
-
-      onEditTrip(updatedTrip);
+      onEditTrip(editingTrip);
       setShowSaved(true);
       setTimeout(() => {
         setShowSaved(false);
