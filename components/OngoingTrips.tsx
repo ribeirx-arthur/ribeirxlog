@@ -37,7 +37,7 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
   const [showSaved, setShowSaved] = useState(false);
 
   const ongoingTrips = useMemo(() => {
-    return trips.filter(t => t.transitStatus === 'Em Trânsito' || t.transitStatus === 'Agendado')
+    return trips.filter(t => t.status !== 'Pago' && (t.transitStatus === 'Em Trânsito' || t.transitStatus === 'Agendado'))
       .sort((a, b) => (b.departureDate || '').localeCompare(a.departureDate || ''));
   }, [trips]);
 
