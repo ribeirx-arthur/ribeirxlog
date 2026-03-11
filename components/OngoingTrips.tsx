@@ -50,13 +50,34 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
 
   const handleQuickSave = () => {
     if (editingTrip) {
-      onEditTrip(editingTrip);
+      let updatedTrip = { ...editingTrip };
+      
+      // Auto-finish logic: if both balances are zero or negative, and there's some payment
+      const totalPaid = (updatedTrip.paymentIda || 0) + (updatedTrip.paymentVolta || 0);
+      const totalBalance = (updatedTrip.balanceIda || 0) + (updatedTrip.balanceVolta || 0);
+      
+      if (totalPaid > 0 && totalBalance <= 0) {
+        updatedTrip.transitStatus = 'Finalizado';
+        updatedTrip.status = 'Pago';
+      }
+
+      onEditTrip(updatedTrip);
       setShowSaved(true);
       setTimeout(() => {
         setShowSaved(false);
         setEditingTrip(null);
       }, 1500);
     }
+  };
+
+  const handleForceFinish = (trip: Trip) => {
+    onEditTrip({
+      ...trip,
+      transitStatus: 'Finalizado',
+      status: 'Pago',
+      balanceIda: 0,
+      balanceVolta: 0
+    });
   };
 
   return (
@@ -175,12 +196,20 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
                       <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Pendente</p>
                       <p className="text-3xl font-black text-white tracking-tighter italic">R$ {totalToReceive.toLocaleString()}</p>
                     </div>
-                    <button 
-                      onClick={() => setEditingTrip(trip)}
-                      className="w-full lg:w-auto px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20 group/btn transition-all"
-                    >
-                      Editar Dados <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    <div className="flex flex-col gap-2 w-full lg:w-auto">
+                        <button 
+                          onClick={() => setEditingTrip(trip)}
+                          className="w-full px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 group/btn transition-all text-xs"
+                        >
+                          Editar Financeiro <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                        <button 
+                          onClick={() => handleForceFinish(trip)}
+                          className="w-full px-6 py-2.5 bg-slate-800 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30 border border-slate-700 text-slate-400 font-bold rounded-2xl flex items-center justify-center gap-2 transition-all text-[10px] uppercase tracking-widest"
+                        >
+                          <CheckCircle2 className="w-4 h-4" /> Concluir Viagem
+                        </button>
+                    </div>
                   </div>
                 </div>
 
@@ -196,6 +225,68 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Tabela de Devedores e Extrato */}
+      {ongoingTrips.some(t => (t.balanceIda || 0) > 0 || (t.balanceVolta || 0) > 0) && (
+        <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden mt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">Extrato de Devedores</h3>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Viagens ativas com saldo pedente</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                  <th className="pb-4 pl-4">ID Viagem</th>
+                  <th className="pb-4">Placa / Motorista</th>
+                  <th className="pb-4">Cliente / Origem → Destino</th>
+                  <th className="pb-4 text-right pr-4">Saldo Devedor (Total)</th>
+                  <th className="pb-4 text-center">Ação</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm font-bold text-slate-300">
+                {ongoingTrips
+                  .filter(t => (t.balanceIda || 0) > 0 || (t.balanceVolta || 0) > 0)
+                  .map(trip => {
+                    const vehicle = vehicles.find(v => v.id === trip.vehicleId);
+                    const driver = drivers.find(d => d.id === trip.driverId);
+                    const totalDev = (trip.balanceIda || 0) + (trip.balanceVolta || 0);
+                    return (
+                      <tr key={`debt-${trip.id}`} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors group">
+                        <td className="py-4 pl-4 text-slate-500">#{trip.id.substring(0, 6)}</td>
+                        <td className="py-4">
+                          <p className="text-white">{vehicle?.plate || '---'}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest">{driver?.name}</p>
+                        </td>
+                        <td className="py-4">
+                          <p className="text-slate-400 text-xs">{trip.origin} → {trip.destination}</p>
+                        </td>
+                        <td className="py-4 text-right pr-4">
+                          <span className="text-amber-500">R$ {totalDev.toLocaleString()}</span>
+                        </td>
+                        <td className="py-4 text-center">
+                          <button 
+                            onClick={() => setEditingTrip(trip)}
+                            className="p-2 bg-slate-800 text-slate-400 hover:text-emerald-500 rounded-lg group-hover:bg-slate-700 transition-all inline-flex mx-auto"
+                            title="Inspecionar / Editar"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
