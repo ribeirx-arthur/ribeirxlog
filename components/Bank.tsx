@@ -44,7 +44,7 @@ const Bank: React.FC<BankProps> = ({ trips, vehicles, drivers, shippers, profile
         list.push({
           id: `adv-${trip.id}`,
           tripId: trip.id,
-          date: trip.departureDate, // Data do adiantamento geralmente é na saída
+          date: trip.departureDate,
           type: 'Adiantamento',
           client: shipper?.name || 'Cliente Particular',
           amount: trip.adiantamento,
@@ -53,32 +53,50 @@ const Bank: React.FC<BankProps> = ({ trips, vehicles, drivers, shippers, profile
         });
       }
 
-      // 2. Pagamento de Ida (se estiver pago / status geral Pago)
-      if (trip.status === 'Pago' || trip.status === 'Parcial') {
-          if (trip.paymentIda && trip.paymentIda > 0) {
-              list.push({
-                  id: `pay-ida-${trip.id}`,
-                  tripId: trip.id,
-                  date: trip.receiptDate || trip.departureDate,
-                  type: 'Pagamento Ida',
-                  client: shipper?.name || 'Cliente Particular',
-                  amount: trip.paymentIda,
-                  status: 'Recebido',
-                  plate: vehicle?.plate || '---'
-              });
-          }
-           if (trip.paymentVolta && trip.paymentVolta > 0) {
-              list.push({
-                  id: `pay-volta-${trip.id}`,
-                  tripId: trip.id,
-                  date: trip.receiptDate || trip.departureDate,
-                  type: 'Pagamento Volta',
-                  client: shipper?.name || 'Cliente Particular',
-                  amount: trip.paymentVolta,
-                  status: 'Recebido',
-                  plate: vehicle?.plate || '---'
-              });
-          }
+      // 2. Pagamentos PRO (Ida/Volta) - Prioridade se existirem
+      const hasProPayments = (trip.paymentIda && trip.paymentIda > 0) || (trip.paymentVolta && trip.paymentVolta > 0);
+
+      if (hasProPayments) {
+        if (trip.paymentIda && trip.paymentIda > 0) {
+          list.push({
+            id: `pay-ida-${trip.id}`,
+            tripId: trip.id,
+            date: trip.receiptDate || trip.departureDate,
+            type: 'Pagamento Ida',
+            client: shipper?.name || 'Cliente Particular',
+            amount: trip.paymentIda,
+            status: 'Recebido',
+            plate: vehicle?.plate || '---'
+          });
+        }
+        if (trip.paymentVolta && trip.paymentVolta > 0) {
+          list.push({
+            id: `pay-volta-${trip.id}`,
+            tripId: trip.id,
+            date: trip.receiptDate || trip.departureDate,
+            type: 'Pagamento Volta',
+            client: shipper?.name || 'Cliente Particular',
+            amount: trip.paymentVolta,
+            status: 'Recebido',
+            plate: vehicle?.plate || '---'
+          });
+        }
+      } 
+      // 3. Fallback: Se a viagem está PAGA mas NÃO tem campos PRO preenchidos, lança o frete seco restante
+      else if (trip.status === 'Pago') {
+        const remainingFreight = trip.freteSeco - trip.adiantamento;
+        if (remainingFreight > 0) {
+          list.push({
+            id: `pay-full-${trip.id}`,
+            tripId: trip.id,
+            date: trip.receiptDate || trip.departureDate,
+            type: 'Saldo de Frete',
+            client: shipper?.name || 'Cliente Particular',
+            amount: remainingFreight,
+            status: 'Recebido',
+            plate: vehicle?.plate || '---'
+          });
+        }
       }
     });
 
