@@ -20,7 +20,8 @@ import {
   FolderOpen,
   Database,
   X,
-  Wrench
+  Wrench,
+  Landmark
 } from 'lucide-react';
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { useAppMode } from '../contexts/AppModeContext';
@@ -62,6 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'trips', label: 'Viagens', icon: Truck },
     ...(profile.config.enableOngoingTrips ? [{ id: 'ongoing-trips', label: 'Viagens Ativas', icon: MapPin, badge: 'PRO' }] : []),
+    ...(profile.config.enableBank ? [{ id: 'bank', label: 'Banco', icon: Landmark, badge: 'PRO' }] : []),
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp },
     { id: 'intelligence', label: 'IA Estratégica', icon: Brain },
     { id: 'tires', label: 'Gestão de Pneus', icon: Disc, badge: 'PRO' },

@@ -21,6 +21,7 @@ import DriverManagement from '../components/DriverManagement';
 const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
 const HelpCenter = React.lazy(() => import('../components/HelpCenter'));
 const OngoingTrips = React.lazy(() => import('../components/OngoingTrips'));
+const Bank = React.lazy(() => import('../components/Bank'));
 import Onboarding from '../components/Onboarding';
 
 import LandingPage from '../components/LandingPage';
@@ -1086,21 +1087,28 @@ export default function Home() {
                     return <Paywall title="Viagens em Andamento" plan="Gestor Pro" price="R$ 89,90" features={['Monitoramento de Recebíveis', 'Controle Ida & Volta', 'Visão Estratégica Ativa']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
                 return (
-                    <Suspense fallback={<div>Carregando monitoramento...</div>}>
+                    <Suspense fallback={<div>Carregando Monitoramento...</div>}>
                         <OngoingTrips 
                             trips={trips} 
                             vehicles={vehicles} 
                             drivers={drivers} 
                             profile={profile} 
-                            onEditTrip={(t) => {
-                                // Reutiliza a lógica de edição do componente Trips se possível, 
-                                // ou abre um modal dedicado. Por simplicidade, vamos levar para a aba de trips com o ID selecionado?
-                                // Na verdade, OngoingTrips tem seu próprio botão de edição.
-                                // Para funcionar perfeitamente, o OngoingTrips deve abrir o modal.
-                                // Mas aqui no page.tsx, vamos apenas passar trips/handleUpdateTrip.
-                                // Vou deixar o OngoingTrips abrir um modal simples de edição de campos financeiros.
-                                handleUpdateTrip(t);
-                            }} 
+                            onEditTrip={handleUpdateTrip}
+                        />
+                    </Suspense>
+                );
+            case 'bank':
+                if (!['gestor_pro', 'frota_elite', 'lifetime', 'anual'].includes(profile.plan_type || '') && !isAdmin) {
+                    return <Paywall title="Extrato Bancário" plan="Gestor Pro" price="R$ 149,90" features={['Extrato Consolidado', 'Controle de Entradas', 'Fluxo de Caixa']} onUpgrade={() => setActiveTab('subscription')} />;
+                }
+                return (
+                    <Suspense fallback={<div>Carregando Banco...</div>}>
+                        <Bank 
+                            trips={trips} 
+                            vehicles={vehicles} 
+                            drivers={drivers} 
+                            shippers={shippers}
+                            profile={profile} 
                         />
                     </Suspense>
                 );

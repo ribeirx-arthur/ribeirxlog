@@ -349,14 +349,24 @@ const Settings: React.FC<SettingsProps> = ({
 
                            {/* Nova Aba de Viagens em Andamento - Exclusiva PRO */}
                            {['gestor_pro', 'frota_elite', 'lifetime', 'anual'].includes(profile.plan_type || '') && (
-                              <ModuleCard
-                                 emoji="🚩"
-                                 label="Viagens em Andamento (PRO)"
-                                 desc="Nova aba estratégica para monitorar saldos de ida e volta e rentabilidade ativa em tempo real."
-                                 checked={profile.config.enableOngoingTrips ?? false}
-                                 onChange={v => cfg('enableOngoingTrips', v)}
-                                 tag="NOVO"
-                              />
+                              <>
+                                 <ModuleCard
+                                    emoji="🚩"
+                                    label="Viagens em Andamento (PRO)"
+                                    desc="Nova aba estratégica para monitorar saldos de ida e volta e rentabilidade ativa em tempo real."
+                                    checked={profile.config.enableOngoingTrips ?? false}
+                                    onChange={v => cfg('enableOngoingTrips', v)}
+                                    tag="NOVO"
+                                 />
+                                 <ModuleCard
+                                    emoji="🏦"
+                                    label="Extrato Bancário (PRO)"
+                                    desc="Aba de extrato mostrando as entradas de pagamentos e adiantamentos das viagens finalizadas."
+                                    checked={profile.config.enableBank ?? false}
+                                    onChange={v => cfg('enableBank', v)}
+                                    tag="NOVO"
+                                 />
+                              </>
                            )}
                         </div>
                      </Card>

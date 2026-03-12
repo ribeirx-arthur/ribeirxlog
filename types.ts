@@ -25,6 +25,7 @@ export interface UserProfile {
     enableFreightCalculator: boolean;
     calculateDepreciation: boolean;
     enableOngoingTrips?: boolean; // Nova flag para aba de viagens em andamento
+    enableBank?: boolean; // Nova flag para extrato bancário
     costPerKmTire: number; // Valor fixado em reais por KM para pneus
     costPerKmMaintenance: number; // Valor fixado em reais por KM para manutenção
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
@@ -280,4 +281,4 @@ export interface Geofence {
   active: boolean;
 }
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help' | 'compliance' | 'ongoing-trips';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help' | 'compliance' | 'ongoing-trips' | 'bank';
