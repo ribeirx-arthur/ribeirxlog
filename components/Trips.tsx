@@ -304,8 +304,12 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     )}
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Saldo a Receber</p>
-                    <p className="text-sky-400 text-sm font-black">R$ {tripFinance.saldoAReceber.toLocaleString()}</p>
+                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Saldos (Ida / Volta)</p>
+                    <div className="flex items-center gap-2">
+                       <p className={`text-sm font-black ${(trip.balanceIda || 0) > 0 ? 'text-emerald-500' : 'text-slate-700'}`}>R$ {(trip.balanceIda || 0).toLocaleString()}</p>
+                       <span className="text-slate-800">/</span>
+                       <p className={`text-sm font-black ${(trip.balanceVolta || 0) > 0 ? 'text-sky-400' : 'text-slate-700'}`}>R$ {(trip.balanceVolta || 0).toLocaleString()}</p>
+                    </div>
                   </div>
                   <div className="hidden md:block space-y-1">
                     <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Status</p>

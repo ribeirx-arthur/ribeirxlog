@@ -59,7 +59,11 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     receiptDate: '',
     status: 'Pendente' as PaymentStatus,
     totalKm: 0,
-    observations: ''
+    observations: '',
+    paymentIda: 0,
+    paymentVolta: 0,
+    balanceIda: 0,
+    balanceVolta: 0
   });
 
   // Carregar rascunho salvo ao montar o componente
@@ -363,6 +367,40 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
                 </div>
               </div>
             </div>
+
+            {/* Monitoramento PRO em Novo Lançamento */}
+            {['gestor_pro', 'frota_elite', 'lifetime', 'anual'].includes(profile.plan_type || '') && (
+              <div className="pt-6 border-t border-slate-800">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest">Monitoramento de Saldos PRO</h3>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Acompanhe recebíveis de Ida e Volta separadamente</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Pagamento (Ida)</label>
+                    <input type="number" value={formData.paymentIda || ''} onChange={e => setFormData({ ...formData, paymentIda: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-bold outline-none focus:border-emerald-500" placeholder="R$ 0,00" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Saldo a Receber (Ida)</label>
+                    <input type="number" value={formData.balanceIda || ''} onChange={e => setFormData({ ...formData, balanceIda: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-emerald-500 font-bold outline-none focus:border-emerald-500" placeholder="R$ 0,00" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Pagamento (Volta)</label>
+                    <input type="number" value={formData.paymentVolta || ''} onChange={e => setFormData({ ...formData, paymentVolta: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white font-bold outline-none focus:border-sky-500" placeholder="R$ 0,00" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Saldo a Receber (Volta)</label>
+                    <input type="number" value={formData.balanceVolta || ''} onChange={e => setFormData({ ...formData, balanceVolta: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sky-400 font-bold outline-none focus:border-sky-500" placeholder="R$ 0,00" />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="pt-4 border-t border-slate-800">
               <div className="max-w-md space-y-3">

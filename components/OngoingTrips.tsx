@@ -12,7 +12,12 @@ import {
   ArrowRightLeft,
   X,
   Save,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  Building2,
+  Calendar,
+  Layers,
+  FileText
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, UserProfile } from '../types';
 
@@ -34,6 +39,7 @@ const formatDate = (dateStr: string) => {
 
 const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, profile, onEditTrip }) => {
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+  const [viewingTrip, setViewingTrip] = useState<Trip | null>(null);
   const [showSaved, setShowSaved] = useState(false);
 
   const ongoingTrips = useMemo(() => {
@@ -198,6 +204,12 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
                         >
                           <CheckCircle2 className="w-4 h-4" /> Concluir Viagem
                         </button>
+                        <button 
+                          onClick={() => setViewingTrip(trip)}
+                          className="w-full px-6 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold rounded-2xl flex items-center justify-center gap-2 transition-all text-[10px] uppercase tracking-widest shadow-inner shadow-slate-950/50"
+                        >
+                          <Eye className="w-4 h-4" /> Ver Viagem Completa
+                        </button>
                     </div>
                   </div>
                 </div>
@@ -205,9 +217,9 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
                 {/* Progress bar simulation based on received vs total */}
                 <div className="absolute bottom-0 left-0 h-1 bg-slate-800 w-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all duration-1000"
+                    className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
                     style={{ 
-                      width: `${Math.max(0, 100 - (totalToReceive / ( ((trip.paymentIda || 0) + (trip.paymentVolta || 1)) ) * 100))}%` 
+                      width: `${Math.min(100, Math.max(0, (((trip.paymentIda || 0) + (trip.paymentVolta || 0) + (trip.adiantamento || 0)) / ((trip.paymentIda || 0) + (trip.balanceIda || 0) + (trip.paymentVolta || 0) + (trip.balanceVolta || 0) + (trip.adiantamento || 1))) * 100))}%` 
                     }}
                   />
                 </div>
@@ -275,6 +287,149 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Full Trip Details Modal */}
+      {viewingTrip && (
+        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[400] flex items-center justify-center p-4 lg:p-12 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-[3rem] w-full max-w-5xl my-auto shadow-3xl overflow-hidden relative animate-in slide-in-from-bottom-8 duration-500">
+            {/* Header decorativo */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-sky-500 to-emerald-500" />
+            
+            <div className="p-8 lg:p-12">
+              <div className="flex justify-between items-start mb-12">
+                <div className="space-y-2">
+                  <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">Dossiê da Viagem</span>
+                  <h3 className="text-4xl font-black text-white tracking-tighter uppercase italic">{viewingTrip.origin} <span className="text-emerald-500">→</span> {viewingTrip.destination}</h3>
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2 italic">
+                    <Hash className="w-3.5 h-3.5" /> ID da Viagem: #{viewingTrip.id.substring(0, 12)}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setViewingTrip(null)}
+                  className="p-4 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-3xl transition-all shadow-xl"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                {/* Col 1: Logística */}
+                <div className="space-y-8">
+                  <div className="bg-slate-950/50 rounded-[2rem] border border-slate-800 p-8 space-y-6">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                      <TruckIcon className="w-4 h-4 text-emerald-500" /> Detalhes da Frota
+                    </h4>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Placa do Veículo</p>
+                        <p className="text-xl font-black text-white">{vehicles.find(v => v.id === viewingTrip.vehicleId)?.plate || '---'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Motorista Designado</p>
+                        <p className="text-lg font-black text-slate-300">{drivers.find(d => d.id === viewingTrip.driverId)?.name || '---'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Datas da Operação</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <div className="flex items-center gap-1.5 text-xs text-white bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl font-bold">
+                            <Calendar className="w-3.5 h-3.5 text-sky-500" /> {formatDate(viewingTrip.departureDate)}
+                          </div>
+                          <span className="text-slate-700 font-bold">...</span>
+                          <div className="flex items-center gap-1.5 text-xs text-white bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl font-bold">
+                            <Clock className="w-3.5 h-3.5 text-amber-500" /> {viewingTrip.transitStatus}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Col 2: Financeiro */}
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-slate-950/80 rounded-[2rem] border border-emerald-500/20 p-8 space-y-4 shadow-xl">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest italic">Monitoramento IDA</span>
+                        <div className="p-2 bg-emerald-500/10 rounded-lg"><TrendingUp className="w-4 h-4 text-emerald-500" /></div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[8px] font-black text-slate-500 uppercase">Recebido</p>
+                          <p className="text-2xl font-black text-white italic">R$ {(viewingTrip.paymentIda || 0).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-[8px] font-black text-slate-500 uppercase">A Receber</p>
+                          <p className="text-2xl font-black text-emerald-500 italic">R$ {(viewingTrip.balanceIda || 0).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-950/80 rounded-[2rem] border border-sky-500/20 p-8 space-y-4 shadow-xl">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-sky-400 uppercase tracking-widest italic">Monitoramento VOLTA</span>
+                        <div className="p-2 bg-sky-500/10 rounded-lg"><ArrowRightLeft className="w-4 h-4 text-sky-400" /></div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[8px] font-black text-slate-500 uppercase">Recebido</p>
+                          <p className="text-2xl font-black text-white italic">R$ {(viewingTrip.paymentVolta || 0).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-[8px] font-black text-slate-500 uppercase">A Receber</p>
+                          <p className="text-2xl font-black text-sky-400 italic">R$ {(viewingTrip.balanceVolta || 0).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950/30 rounded-[2rem] border border-slate-800 p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div>
+                      <h4 className="text-[9px] font-black text-slate-600 uppercase mb-2">Frete Bruto</h4>
+                      <p className="font-black text-white">R$ {(viewingTrip.freteSeco || 0).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[9px] font-black text-slate-600 uppercase mb-2">Adiantamento</h4>
+                      <p className="font-black text-rose-500">R$ {(viewingTrip.adiantamento || 0).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[9px] font-black text-slate-600 uppercase mb-2">Combustível</h4>
+                      <p className="font-black text-slate-300">R$ {(viewingTrip.combustivel || 0).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[9px] font-black text-slate-600 uppercase mb-2">Total Pendente</h4>
+                      <p className="font-black text-emerald-500 text-xl italic">R$ {((viewingTrip.balanceIda || 0) + (viewingTrip.balanceVolta || 0)).toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-800/20 rounded-[2rem] border border-slate-800 p-8 space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 italic">
+                       <FileText className="w-4 h-4 text-white" /> Observações Operacionais
+                    </h4>
+                    <p className="text-sm text-slate-400 font-medium leading-relaxed italic">
+                      {viewingTrip.observations || "Nenhuma observação registrada para esta viagem."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12 pt-8 border-t border-slate-800 flex justify-end gap-4">
+                <button 
+                  onClick={() => { setEditingTrip(viewingTrip); setViewingTrip(null); }}
+                  className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black rounded-2xl flex items-center gap-3 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 text-xs uppercase tracking-widest"
+                >
+                  <CreditCard className="w-5 h-5" /> Ajustar Financeiro
+                </button>
+                <button 
+                  onClick={() => setViewingTrip(null)}
+                  className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-2xl flex items-center transition-all text-xs uppercase tracking-widest"
+                >
+                  Fechar Dossiê
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
