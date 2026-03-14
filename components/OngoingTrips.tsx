@@ -17,7 +17,8 @@ import {
   Building2,
   Calendar,
   Layers,
-  FileText
+  FileText,
+  Hash
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, UserProfile } from '../types';
 
