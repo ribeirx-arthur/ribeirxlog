@@ -183,6 +183,7 @@ export interface Trip {
   paymentVolta?: number;
   balanceIda?: number;
   balanceVolta?: number;
+  fleetManagerNote?: string;
 }
 
 export interface AppNotification {

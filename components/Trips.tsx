@@ -458,7 +458,6 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                   </div>
                   <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
                     <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Outros</h4>
-                    <input type="number" value={editingTrip.adiantamento || ''} onChange={e => setEditingTrip({ ...editingTrip, adiantamento: Number(e.target.value) })} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-white" placeholder="Adiant." />
                     <input type="number" value={editingTrip.outrasDespesas || ''} onChange={e => setEditingTrip({ ...editingTrip, outrasDespesas: Number(e.target.value) })} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-white" placeholder="Despesas" />
                   </div>
 
@@ -486,14 +485,27 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Observações da Viagem</label>
-                    <textarea
-                      value={editingTrip.observations || ''}
-                      onChange={e => setEditingTrip({ ...editingTrip, observations: e.target.value })}
-                      placeholder="Adicione observações importantes..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-300 font-medium min-h-[100px] resize-none outline-none focus:border-emerald-500 transition-all shadow-inner"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Observações Gerais</label>
+                        <textarea
+                        value={editingTrip.observations || ''}
+                        onChange={e => setEditingTrip({ ...editingTrip, observations: e.target.value })}
+                        placeholder="Observações da viagem..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-300 font-medium min-h-[100px] resize-none outline-none focus:border-emerald-500 transition-all shadow-inner"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-rose-500 uppercase ml-1 flex items-center gap-2">
+                            <Building2 className="w-3 h-3" /> Nota p/ Gerenciador
+                        </label>
+                        <textarea
+                        value={editingTrip.fleetManagerNote || ''}
+                        onChange={e => setEditingTrip({ ...editingTrip, fleetManagerNote: e.target.value })}
+                        placeholder="Instruções para a frota..."
+                        className="w-full bg-slate-950 border border-rose-500/20 rounded-xl p-4 text-slate-300 font-medium min-h-[100px] resize-none outline-none focus:border-rose-500 transition-all shadow-inner"
+                        />
+                    </div>
                   </div>
                 </div>
               </div>

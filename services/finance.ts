@@ -17,9 +17,9 @@ export const calculateTripFinance = (
   const totalBruto = freteSeco + diarias;
   const comissaoMotorista = isAutonomo ? 0 : (freteSeco * (percFrete / 100)) + (diarias * (percDiaria / 100));
 
-  // Saldo a Receber da Transportadora: valor bruto menos o que já foi adiantado.
-  // Se a viagem estiver marcada como Paga, o saldo é zerado.
-  const saldoAReceber = trip.status === 'Pago' ? 0 : totalBruto - adiantamento;
+  // Saldo a Receber da Transportadora: valor bruto menos o que já foi recebido (Ida, Volta ou Adiantamento legado)
+  const totalRecebido = (trip.paymentIda || 0) + (trip.paymentVolta || 0) + (trip.adiantamento || 0);
+  const saldoAReceber = trip.status === 'Pago' ? 0 : Math.max(0, totalBruto - totalRecebido);
 
   // Depreciation logic (Pneu e Manutenção)
   let depreciationCost = 0;

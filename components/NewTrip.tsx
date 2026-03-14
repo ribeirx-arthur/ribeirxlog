@@ -63,7 +63,8 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
     paymentIda: 0,
     paymentVolta: 0,
     balanceIda: 0,
-    balanceVolta: 0
+    balanceVolta: 0,
+    fleetManagerNote: ''
   });
 
   // Carregar rascunho salvo ao montar o componente
@@ -362,7 +363,6 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
               <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
                 <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Gestão de Fluxo</h4>
                 <div className="space-y-3">
-                  <input type="number" placeholder="Adiantamento" className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-rose-500 font-bold outline-none" value={formData.adiantamento || ''} onChange={e => setFormData({ ...formData, adiantamento: Number(e.target.value) })} />
                   <input type="number" placeholder="Outras Despesas" className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white font-bold outline-none" value={formData.outrasDespesas || ''} onChange={e => setFormData({ ...formData, outrasDespesas: Number(e.target.value) })} />
                 </div>
               </div>
@@ -422,14 +422,27 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
               </div>
             </div>
 
-            <div className="pt-6 border-t border-slate-800 space-y-3">
-              <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Observações da Viagem</label>
-              <textarea
-                placeholder="Adicione observações importantes sobre esta viagem, docs pendentes, etc..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-6 text-slate-300 focus:border-emerald-500 outline-none transition-all font-medium min-h-[120px] resize-none"
-                value={formData.observations}
-                onChange={e => setFormData({ ...formData, observations: e.target.value })}
-              />
+            <div className="pt-6 border-t border-slate-800 gap-6 grid grid-cols-1 md:grid-cols-2">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">Observações da Viagem</label>
+                <textarea
+                  placeholder="Docs pendentes, etc..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-slate-300 focus:border-emerald-500 outline-none transition-all font-medium min-h-[100px] resize-none"
+                  value={formData.observations}
+                  onChange={e => setFormData({ ...formData, observations: e.target.value })}
+                />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-rose-500 uppercase ml-1 tracking-widest flex items-center gap-2">
+                  <Building2 className="w-3.5 h-3.5" /> Nota para Gerenciador de Frotas
+                </label>
+                <textarea
+                  placeholder="Instruções para o gerenciador de frotas..."
+                  className="w-full bg-slate-950 border border-rose-500/20 rounded-2xl p-4 text-slate-300 focus:border-rose-500 outline-none transition-all font-medium min-h-[100px] resize-none"
+                  value={formData.fleetManagerNote}
+                  onChange={e => setFormData({ ...formData, fleetManagerNote: e.target.value })}
+                />
+              </div>
             </div>
           </section>
 

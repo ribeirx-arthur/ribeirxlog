@@ -443,6 +443,12 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                         onChange={(e) => setDistance(Number(e.target.value))}
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all"
                                     />
+                                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex gap-2">
+                                        <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                                        <p className="text-[9px] text-amber-500 font-black uppercase leading-tight">
+                                            ⚠️ SEMPRE VERIFIQUE A DISTÂNCIA NO QUALP ANTES DE FINALIZAR A COTAÇÃO PARA GARANTIR PRECISÃO.
+                                        </p>
+                                    </div>
                                     <p className="text-[9px] text-emerald-500 font-bold ml-2 animate-pulse">
                                         ✨ Distância e pedágios calculados via Inteligência Ribeirx
                                     </p>

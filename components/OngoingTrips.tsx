@@ -220,7 +220,7 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
                   <div 
                     className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
                     style={{ 
-                      width: `${Math.min(100, Math.max(0, (((trip.paymentIda || 0) + (trip.paymentVolta || 0) + (trip.adiantamento || 0)) / ((trip.paymentIda || 0) + (trip.balanceIda || 0) + (trip.paymentVolta || 0) + (trip.balanceVolta || 0) + (trip.adiantamento || 1))) * 100))}%` 
+                      width: `${Math.min(100, Math.max(0, (((trip.paymentIda || 0) + (trip.paymentVolta || 0)) / ((trip.paymentIda || 0) + (trip.balanceIda || 0) + (trip.paymentVolta || 0) + (trip.balanceVolta || 0) || 1)) * 100))}%` 
                     }}
                   />
                 </div>
@@ -392,8 +392,8 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
                       <p className="font-black text-white">R$ {(viewingTrip.freteSeco || 0).toLocaleString()}</p>
                     </div>
                     <div>
-                      <h4 className="text-[9px] font-black text-slate-600 uppercase mb-2">Adiantamento</h4>
-                      <p className="font-black text-rose-500">R$ {(viewingTrip.adiantamento || 0).toLocaleString()}</p>
+                      <h4 className="text-[9px] font-black text-slate-600 uppercase mb-2">Diárias</h4>
+                      <p className="font-black text-slate-300">R$ {(viewingTrip.diarias || 0).toLocaleString()}</p>
                     </div>
                     <div>
                       <h4 className="text-[9px] font-black text-slate-600 uppercase mb-2">Combustível</h4>
@@ -405,13 +405,23 @@ const OngoingTrips: React.FC<OngoingTripsProps> = ({ trips, vehicles, drivers, p
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/20 rounded-[2rem] border border-slate-800 p-8 space-y-4">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 italic">
-                       <FileText className="w-4 h-4 text-white" /> Observações Operacionais
-                    </h4>
-                    <p className="text-sm text-slate-400 font-medium leading-relaxed italic">
-                      {viewingTrip.observations || "Nenhuma observação registrada para esta viagem."}
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-slate-800/20 rounded-[2rem] border border-slate-800 p-8 space-y-4">
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 italic">
+                            <FileText className="w-4 h-4 text-white" /> Observações Operacionais
+                        </h4>
+                        <p className="text-sm text-slate-400 font-medium leading-relaxed italic">
+                            {viewingTrip.observations || "Nenhuma observação registrada."}
+                        </p>
+                    </div>
+                    <div className="bg-rose-500/5 rounded-[2rem] border border-rose-500/10 p-8 space-y-4">
+                        <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-2 italic">
+                            <Building2 className="w-4 h-4 text-rose-500" /> Nota p/ Gerenciador de Frotas
+                        </h4>
+                        <p className="text-sm text-slate-300 font-bold leading-relaxed">
+                            {viewingTrip.fleetManagerNote || "Nenhuma nota para o gerenciador."}
+                        </p>
+                    </div>
                   </div>
                 </div>
               </div>
