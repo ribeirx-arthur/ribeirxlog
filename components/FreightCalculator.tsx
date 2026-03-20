@@ -40,6 +40,54 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
     const [offeredFreight, setOfferedFreight] = useState(0);
     const [calculationCount, setCalculationCount] = useState(0);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [loadType, setLoadType] = useState('geral');
+    const [tollProfile, setTollProfile] = useState<'normal' | 'high' | 'none'>('normal');
+
+    const ANTT_LOAD_TYPES = [
+        { id: 'geral', label: '📦 Carga Geral', description: 'Carga comum em baú ou grade baixa' },
+        { id: 'granel_solido', label: '🌾 Granel Sólido', description: 'Soja, milho, fertilizantes' },
+        { id: 'granel_liquido', label: '🧪 Granel Líquido', description: 'Combustível, óleos, químicos líquidos' },
+        { id: 'frigorificada', label: '❄️ Frigorificada', description: 'Carnes, lácteos, perecíveis' },
+        { id: 'perigosa', label: '☣️ Carga Perigosa', description: 'Inflamáveis, tóxicos, corrosivos' },
+    ];
+
+    const ANTT_COEFFICIENTS: Record<string, Record<number, { ccd: number; cc: number }>> = {
+        'geral': {
+            2: { ccd: 2.76, cc: 247.95 },
+            3: { ccd: 3.48, cc: 295.40 },
+            4: { ccd: 4.15, cc: 342.85 },
+            6: { ccd: 5.49, cc: 437.75 },
+            9: { ccd: 7.50, cc: 580.10 }
+        },
+        'granel_solido': {
+            2: { ccd: 2.92, cc: 265.80 },
+            3: { ccd: 3.65, cc: 318.20 },
+            4: { ccd: 4.38, cc: 370.60 },
+            6: { ccd: 5.84, cc: 475.40 },
+            9: { ccd: 8.03, cc: 632.60 }
+        },
+        'granel_liquido': {
+            2: { ccd: 3.05, cc: 280.50 },
+            3: { ccd: 3.82, cc: 335.10 },
+            4: { ccd: 4.60, cc: 390.20 },
+            6: { ccd: 6.15, cc: 505.40 },
+            9: { ccd: 8.45, cc: 675.80 }
+        },
+        'frigorificada': {
+            2: { ccd: 3.20, cc: 305.20 },
+            3: { ccd: 4.05, cc: 370.80 },
+            4: { ccd: 4.90, cc: 435.50 },
+            6: { ccd: 6.60, cc: 565.10 },
+            9: { ccd: 9.20, cc: 760.30 }
+        },
+        'perigosa': {
+            2: { ccd: 3.55, cc: 350.40 },
+            3: { ccd: 4.50, cc: 430.20 },
+            4: { ccd: 5.45, cc: 510.80 },
+            6: { ccd: 7.40, cc: 670.50 },
+            9: { ccd: 10.35, cc: 910.10 }
+        }
+    };
 
     // Efeito para carregar limite de uso e preferências persistentes
     React.useEffect(() => {
@@ -207,11 +255,16 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                     // Fonte: dados reais das concessionárias 2024 por km/eixo.
                     const originRate = TOLL_RATES[originGeo.state] ?? TOLL_RATES['default'];
                     const destRate = TOLL_RATES[destGeo.state] ?? TOLL_RATES['default'];
-                    const blendedRate = originGeo.state === destGeo.state
+                    let blendedRate = originGeo.state === destGeo.state
                         ? originRate                          // mesma UF → usa a tarifa direta
                         : (originRate + destRate) / 2;        // interestadual → média ponderada
+                    
+                    // Fator de Intensidade por Perfil de Rodovia
+                    const tollMultiplier = tollProfile === 'high' ? 1.6 : tollProfile === 'none' ? 0 : 1.0;
+                    blendedRate = blendedRate * tollMultiplier;
+
                     setTolls(Math.round(correctedDistKm * blendedRate * axles));
-                    console.info(`[RibeirxLog] Pedágio: ${originGeo.state}(${originRate}) → ${destGeo.state}(${destRate}) = R$${(blendedRate * correctedDistKm * axles).toFixed(0)}`);
+                    console.info(`[RibeirxLog] Pedágio: ${originGeo.state}(${originRate}) → ${destGeo.state}(${destRate}) | Perfil: ${tollProfile} = R$${(blendedRate * correctedDistKm * axles).toFixed(0)}`);
 
                     // Atualizar limite de uso
                     const updatedCount = calculationCount + 1;
@@ -305,9 +358,24 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
         else if (profitPercentage > 0) status = 'warning';
         else status = 'danger';
 
+        // ANTT Minimum Freight Calculation (PNPM-TRC)
+        const loadCoeff = ANTT_COEFFICIENTS[loadType] || ANTT_COEFFICIENTS['geral'];
+        const axleCoeff = loadCoeff[axles as keyof typeof loadCoeff] || loadCoeff[6];
+        
+        const anttMinBase = (distance * axleCoeff.ccd) + axleCoeff.cc;
+        const anttMinTotal = isRoundTrip ? anttMinBase * 2 : anttMinBase;
+
         // Ribeirx AI - Sistema de Dicas Especialistas
         const aiAnalysis = () => {
             const tips = [];
+            const activeFreight = offeredFreight > 0 ? offeredFreight : suggestedFreight;
+            
+            if (activeFreight < anttMinTotal) {
+                tips.push(`📉 Abaixo do Piso ANTT: Este frete está R$ ${(anttMinTotal - activeFreight).toLocaleString()} abaixo do mínimo obrigatório (R$ ${anttMinTotal.toLocaleString()}).`);
+            } else {
+                tips.push(`⚖️ Compliance ANTT: O valor está ${Math.round((activeFreight / anttMinTotal - 1) * 100)}% acima do piso obrigatório.`);
+            }
+
             if (profitPercentage < 5) tips.push("⚠️ Risco Crítico: Este frete mal cobre o diesel e a manutenção. Só aceite se for para voltar vazio.");
             if (profitPercentage >= profitMargin) tips.push("🚀 Excelente Negócio: O valor cobre todos os custos invisíveis e sobra lucro real.");
             if (isChemical && profitPercentage < 20) tips.push("⚠️ Alerta Químico: O risco de carga perigosa exige uma margem maior (min. 20%).");
@@ -323,6 +391,7 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
             dieselCost: baseDieselCost,
             operationalCosts: fixedOperationalCosts,
             suggestedFreight,
+            anttMin: anttMinTotal,
             netProfit: realProfitWithOffer,
             tolls: calcTolls,
             tireWear: tireWearTotal,
@@ -332,7 +401,7 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
             status,
             aiTips: aiAnalysis()
         };
-    }, [distance, dieselPrice, profitMargin, driverCommissionPct, tolls, axles, isChemical, isLS, isRoundTrip, applyDepreciation, offeredFreight]);
+    }, [distance, dieselPrice, profitMargin, driverCommissionPct, tolls, axles, isChemical, isLS, isRoundTrip, applyDepreciation, offeredFreight, loadType]);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
@@ -454,6 +523,37 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                     </p>
                                 </div>
 
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between ml-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Perfil de Rodovia & Pedágio</label>
+                                        <Info className="w-3 h-3 text-slate-600" />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <button
+                                            onClick={() => setTollProfile('none')}
+                                            className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all ${tollProfile === 'none' ? 'bg-rose-500/10 border-rose-500 text-rose-500' : 'bg-slate-950 border-slate-800 text-slate-500'}`}
+                                        >
+                                            <span className="text-sm">🛑</span>
+                                            <span className="text-[8px] font-black uppercase">Sem Pedágio</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setTollProfile('normal')}
+                                            className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all ${tollProfile === 'normal' ? 'bg-sky-500/10 border-sky-500 text-sky-500' : 'bg-slate-950 border-slate-800 text-slate-500'}`}
+                                        >
+                                            <span className="text-sm">🛣️</span>
+                                            <span className="text-[8px] font-black uppercase">Padrão BR</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setTollProfile('high')}
+                                            className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all ${tollProfile === 'high' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-slate-950 border-slate-800 text-slate-500'}`}
+                                        >
+                                            <span className="text-sm">💎</span>
+                                            <span className="text-[8px] font-black uppercase">Alta Densidade</span>
+                                        </button>
+                                    </div>
+                                    <p className="text-[9px] text-slate-600 font-medium ml-2 uppercase italic">Ajusta o valor estimado de pedágios por rodovia</p>
+                                </div>
+
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Número de Eixos</label>
                                     <div className="grid grid-cols-5 gap-2">
@@ -467,7 +567,7 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="text-[9px] text-slate-500 font-medium ml-2 uppercase">Ajuste para precisão no pedágio</p>
+                                    <p className="text-[9px] text-slate-500 font-medium ml-2 uppercase">Base para cálculo ANTT e Pedágios</p>
                                 </div>
 
                                 <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between group cursor-pointer" onClick={() => setIsRoundTrip(!isRoundTrip)}>
@@ -554,6 +654,20 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                 <Truck className="w-4 h-4 text-emerald-500" /> Veículo & Carga
                             </h3>
                             <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest">Tipo de Carga (ANTT)</label>
+                                    <select
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all appearance-none"
+                                        value={loadType}
+                                        onChange={(e) => setLoadType(e.target.value)}
+                                    >
+                                        {ANTT_LOAD_TYPES.map(type => (
+                                            <option key={type.id} value={type.id}>{type.label}</option>
+                                        ))}
+                                    </select>
+                                    <p className="text-[9px] text-slate-600 font-medium ml-2 uppercase tracking-tight">Utilizado para calcular o piso mínimo oficial</p>
+                                </div>
+
                                 <select
                                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:border-emerald-500 outline-none transition-all"
                                     value={selectedVehicleId}
@@ -617,11 +731,32 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                                     <div className="relative z-10 space-y-6">
                                         <div>
-                                            <p className="text-[10px] font-black text-emerald-950/60 uppercase tracking-widest">Valor do Frete Sugerido</p>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <p className="text-[10px] font-black text-emerald-950/60 uppercase tracking-widest">Valor do Frete Sugerido</p>
+                                                <div className="px-2 py-0.5 bg-white/20 rounded-lg text-[8px] font-black text-white uppercase tracking-tighter">Matriz Ribeirx</div>
+                                            </div>
                                             <h2 className="text-5xl font-black text-white tracking-tighter">R$ {results.suggestedFreight.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/20">
+                                        <div className="p-4 bg-emerald-900/20 border border-white/10 rounded-2xl space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest">Piso Mínimo ANTT</span>
+                                                <span className="text-[10px] font-black text-white">R$ {results.anttMin.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                            <div className="h-1 w-full bg-emerald-900/40 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-emerald-300 transition-all duration-1000" 
+                                                    style={{ width: `${Math.min(100, (results.anttMin / results.suggestedFreight) * 100)}%` }}
+                                                />
+                                            </div>
+                                            <p className="text-[8px] text-emerald-200 font-medium italic opacity-80 leading-tight">
+                                                {results.suggestedFreight >= results.anttMin 
+                                                    ? '✓ O frete sugerido está acima do mínimo obrigatório por lei.' 
+                                                    : '⚠️ ATENÇÃO: O frete sugerido está abaixo do piso ANTT.'}
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 pt-2">
                                             <div>
                                                 <p className="text-[9px] font-black text-emerald-950/50 uppercase mb-1">Lucro Líquido Real</p>
                                                 <p className="text-xl font-black text-white">
@@ -644,11 +779,6 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                             {isRoundTrip && (
                                                 <div className="px-3 py-1 bg-emerald-900/30 rounded-full text-[9px] font-black text-white uppercase tracking-widest border border-white/10">
                                                     🔄 Ida e Volta ({distance * 2}km)
-                                                </div>
-                                            )}
-                                            {(isChemical || isLS) && (
-                                                <div className="px-3 py-1 bg-amber-400/20 rounded-full text-[9px] font-black text-white uppercase tracking-widest border border-white/10">
-                                                    ⚠️ Com Adicionais
                                                 </div>
                                             )}
                                         </div>

@@ -277,7 +277,7 @@ export default function Home() {
                         })),
                         loadTable('shippers', setShippers, (s: any) => ({
                             ...s,
-                            cnpj: s.cnpj_cpf,
+                            cnpj: s.cnpj,
                             avgPaymentDays: s.avg_payment_days,
                             logoUrl: s.logo_url
                         })),
@@ -958,12 +958,12 @@ export default function Home() {
 
             const dbS = {
                 user_id: userId,
-                name: s.name, cnpj_cpf: s.cnpj, avg_payment_days: s.avgPaymentDays,
+                name: s.name, cnpj: s.cnpj, avg_payment_days: s.avgPaymentDays,
                 email: s.email, phone: s.phone, logo_url: s.logoUrl
             };
             const { data, error } = await client.from('shippers').insert(dbS).select().single();
             if (error) throw error;
-            const newS = { ...data, cnpj: data.cnpj_cpf, avgPaymentDays: data.avg_payment_days, logoUrl: data.logo_url };
+            const newS = { ...data, cnpj: data.cnpj, avgPaymentDays: data.avg_payment_days, logoUrl: data.logo_url };
             setShippers(prev => [...prev, newS]);
             showToast('Transportadora adicionada!', 'success');
         } catch (e: any) { showToast(`Erro: ${e.message}`, 'error'); }
@@ -975,7 +975,7 @@ export default function Home() {
             const token = await getToken({ template: 'supabase' });
             const client = token ? createClerkSupabaseClient(token) : supabase;
             const { error } = await client.from('shippers').update({
-                name: s.name, cnpj_cpf: s.cnpj, avg_payment_days: s.avgPaymentDays,
+                name: s.name, cnpj: s.cnpj, avg_payment_days: s.avgPaymentDays,
                 email: s.email, phone: s.phone, logo_url: s.logoUrl
             }).eq('id', s.id);
             if (error) throw error;
