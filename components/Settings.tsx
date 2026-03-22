@@ -8,6 +8,7 @@ import {
    Check, ChevronRight, Info, Save, Settings2
 } from 'lucide-react';
 import { UserProfile, Vehicle, Driver, Shipper, Trip, MaintenanceRecord } from '../types';
+import FinancialContextEditor from './FinancialContextEditor';
 
 interface SettingsProps {
    profile: UserProfile;
@@ -21,7 +22,7 @@ interface SettingsProps {
    onResetData: () => void;
 }
 
-type Section = 'empresa' | 'calculos' | 'modulos' | 'alertas' | 'dados';
+type Section = 'empresa' | 'calculos' | 'modulos' | 'alertas' | 'dados' | 'ia_context';
 
 const Settings: React.FC<SettingsProps> = ({
    profile, setProfile,
@@ -112,6 +113,7 @@ const Settings: React.FC<SettingsProps> = ({
       { id: 'calculos', label: 'Comissões & Custos', emoji: '💰', desc: 'Como o lucro é calculado' },
       { id: 'modulos', label: 'Módulos do App', emoji: '🧩', desc: 'Ativar ou ocultar seções' },
       { id: 'alertas', label: 'Alertas', emoji: '🔔', desc: 'O que o sistema avisa' },
+      { id: 'ia_context', label: 'Contexto para IA', emoji: '🧠', desc: 'Dívidas, gastos fixos e metas' },
       { id: 'dados', label: 'Backup & Dados', emoji: '🗄️', desc: 'Exportar e importar' },
    ];
 
@@ -432,6 +434,18 @@ const Settings: React.FC<SettingsProps> = ({
                            />
                         </div>
                      </Card>
+                  </div>
+               )}
+
+               {/* ════════════════════════════ IA CONTEXT ════════════════════════════ */}
+               {active === 'ia_context' && (
+                  <div className="animate-in slide-in-from-bottom-3 duration-300">
+                     <FinancialContextEditor
+                        profile={profile}
+                        onSave={async (updates) => {
+                           setProfile({ ...profile, ...updates });
+                        }}
+                     />
                   </div>
                )}
 

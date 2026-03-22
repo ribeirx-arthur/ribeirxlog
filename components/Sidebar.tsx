@@ -21,7 +21,8 @@ import {
   Database,
   X,
   Wrench,
-  Landmark
+  Landmark,
+  Target
 } from 'lucide-react';
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { useAppMode } from '../contexts/AppModeContext';
@@ -66,6 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     ...(profile.config.enableBank ? [{ id: 'bank', label: 'Banco', icon: Landmark, badge: 'PRO' }] : []),
     { id: 'performance', label: 'BI & Performance', icon: TrendingUp },
     { id: 'intelligence', label: 'IA Estratégica', icon: Brain },
+    { id: 'goals', label: 'Metas & Sonhos', icon: Target, badge: 'NOVO' },
     { id: 'tires', label: 'Gestão de Pneus', icon: Disc, badge: 'PRO' },
     { id: 'compliance', label: 'Documentos & CNH', icon: ShieldCheck, badge: 'PRO' },
     { id: 'help', label: 'Central de Ajuda', icon: HelpCircle },

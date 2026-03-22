@@ -167,9 +167,15 @@ const HelpCenter: React.FC = () => {
                 },
                 {
                     icon: Settings,
-                    title: 'Passo 5 — Configure suas taxas',
-                    desc: 'Em "Configurações" defina a comissão padrão dos motoristas, ative a depreciação global de pneus/mecânica e personalize o app para sua operação.',
+                    title: 'Passo 5 — Configure suas taxas e IA',
+                    desc: 'Em "Configurações" defina a comissão padrão e a sua chave da Gemini API. Sem a chave, as funções de inteligência ficam desativadas.',
                 },
+                {
+                    icon: Brain,
+                    title: 'Passo 6 — Converse com o Cérebro',
+                    desc: 'Acesse "Inteligência" e use o chat para tirar dúvidas estratégicas. Ele conhece seu faturamento e pode te guiar para o próximo nível.',
+                    tip: 'Perunte: "Como posso aumentar meu lucro líquido este mês?"'
+                }
             ],
         },
 
@@ -298,17 +304,17 @@ const HelpCenter: React.FC = () => {
         },
 
         'inteligencia': {
-            title: '🧠 Inteligência IA — Seu assistente estratégico',
-            subtitle: 'A IA do RBX Log analisa seus dados e entrega insights que você nunca veria sozinho.',
+            title: '🧠 Inteligência IA — O Cérebro do seu Negócio',
+            subtitle: 'A IA do RBX Log não apenas mostra números, ela entende o seu momento e sugere caminhos.',
             steps: [
-                { icon: Brain, title: 'Golden Tips', desc: 'Dicas personalizadas baseadas nos seus dados reais. A IA identifica padrões e alerta sobre riscos ou oportunidades na sua operação.' },
-                { icon: TrendingUp, title: 'Análise de Tendências', desc: 'Previsão de faturamento baseada no histórico. A IA identifica se seu negócio está em crescimento ou precisa de atenção.' },
-                { icon: AlertTriangle, title: 'Alertas Proativos', desc: 'A IA alerta quando um embarcador está atrasando pagamentos repetidamente, quando um motorista está abaixo da média, ou quando uma rota ficou menos lucrativa.' },
+                { icon: MessageCircle, title: 'Chat Estratégico', desc: 'Um chat onde você conversa com um consultor logístico que tem acesso aos seus dados. Ele responde sobre expansão, redução de custos e até questões jurídicas de abertura de transportadora.' },
+                { icon: TrendingUp, title: 'Projeção de Futuro', desc: 'Um gráfico que "enxerga o amanhã". Baseado no faturamento passado, ele projeta quanto você deve lucrar nos próximos 3 meses.' },
+                { icon: Zap, title: 'Preservação de Lucro (Snapshot)', desc: 'Função automática: se você mudar a % de um motorista hoje, o lucro das viagens passadas NÃO MUDA. O sistema congela a taxa no momento da viagem.' },
             ],
             tips: [
-                'Quanto mais viagens você lançar, mais precisa fica a IA.',
-                'As dicas aparecem no Dashboard e na aba de Inteligência.',
-                'A análise de rotas identifica quais destinos têm melhor custo-benefício para sua frota.',
+                'Use o chat para simular cenários: "E se eu comprar mais um caminhão?"',
+                'As projeções ficam mais precisas quanto mais meses de dados você tiver acumulado.',
+                'A IA identifica rotas "escondidas" que dão mais lucro real que os fretes famosos.',
             ]
         },
 
@@ -394,6 +400,14 @@ const HelpCenter: React.FC = () => {
                 {
                     q: 'Como gero um PDF de recibo para o cliente?',
                     a: 'No histórico de Viagens, clique no menu "⋮" de qualquer viagem e selecione "Gerar PDF".'
+                },
+                {
+                    q: 'Mudei a comissão do motorista, vai estragar meu lucro passado?',
+                    a: 'Não! Graças à nossa nova tecnologia de "Snapshot", a comissão usada no cálculo de lucro é a que estava salva no momento da viagem. Alterações no perfil do motorista só valem para as próximas viagens.'
+                },
+                {
+                    q: 'O Chat da IA é seguro?',
+                    a: 'Totalmente. Seus dados financeiros são processados de forma anônima e apenas para te dar a resposta. Nada é compartilhado externamente fora do motor do Google Gemini.'
                 },
             ]
         }

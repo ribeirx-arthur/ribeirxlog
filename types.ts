@@ -1,4 +1,11 @@
 
+export interface MonthlyExpenseItem {
+  id: string;
+  label: string;        // ex: "Financiamento caminhão", "Aluguel", "Contador"
+  amount: number;       // valor em R$
+  category: 'debt' | 'fixed' | 'variable'; // tipo
+}
+
 export interface UserProfile {
   id?: string;
   name: string;
@@ -8,12 +15,15 @@ export interface UserProfile {
   signatureUrl?: string;
   phone?: string;
   cpfCnpj?: string;
+  // ─── Contexto Financeiro para IA ───────────────────────────────
+  monthlyExpenses?: MonthlyExpenseItem[]; // Dívidas mensais e gastos fixos
+  personalMonthlyNeeds?: number;          // Quanto precisa retirar por mês (pró-labore mínimo)
+  savingsGoalPct?: number;                // % do lucro que quer guardar por mês (ex: 20)
   config: {
     percMotFrete: number;
     percMotDiaria: number;
     autoSplitSociety: boolean;
     showMileage: boolean;
-    // Novas flags de Notificação
     paymentAlertDays: number;
     notifyIncompleteData: boolean;
     notifyMaintenance: boolean;
@@ -24,10 +34,10 @@ export interface UserProfile {
     enableBI: boolean;
     enableFreightCalculator: boolean;
     calculateDepreciation: boolean;
-    enableOngoingTrips?: boolean; // Nova flag para aba de viagens em andamento
-    enableBank?: boolean; // Nova flag para extrato bancário
-    costPerKmTire: number; // Valor fixado em reais por KM para pneus
-    costPerKmMaintenance: number; // Valor fixado em reais por KM para manutenção
+    enableOngoingTrips?: boolean;
+    enableBank?: boolean;
+    costPerKmTire: number;
+    costPerKmMaintenance: number;
     appMode: 'simple' | 'intermediate' | 'advanced' | 'custom';
     userRole?: 'autonomo' | 'transportadora';
     enabledFeatures?: string[];
@@ -184,6 +194,9 @@ export interface Trip {
   balanceIda?: number;
   balanceVolta?: number;
   fleetManagerNote?: string;
+  // Snapshot fields for fixed historical calculations
+  driverCommissionPct?: number;
+  driverDiariaPct?: number;
 }
 
 export interface AppNotification {
@@ -282,4 +295,37 @@ export interface Geofence {
   active: boolean;
 }
 
-export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help' | 'compliance' | 'ongoing-trips' | 'bank';
+export type TabType = 'dashboard' | 'trips' | 'performance' | 'settings' | 'setup' | 'maintenance' | 'new-trip' | 'subscription' | 'tires' | 'buggies' | 'intelligence' | 'admin' | 'freight-calculator' | 'gps-tracking' | 'drivers' | 'proof-gallery' | 'help' | 'compliance' | 'ongoing-trips' | 'bank' | 'goals';
+
+// ─── Goal System ───────────────────────────────────────────────────────────────
+
+export type GoalCategory = 'business' | 'financial' | 'fleet' | 'personal';
+
+export interface GoalStep {
+  id: string;
+  goalId: string;
+  order: number;
+  title: string;
+  description: string;
+  actionTip: string;       // dica prática do passo
+  estimatedValue?: number; // valor a guardar (ex: taxa do CNPJ)
+  resourceUrl?: string;    // link externo útil
+  completed: boolean;
+  completedAt?: string;
+  notesFromUser?: string;  // o usuário pode deixar uma observação ao concluir
+}
+
+export interface Goal {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  category: GoalCategory;
+  targetDate?: string;
+  steps: GoalStep[];
+  currentStepIndex: number;
+  status: 'active' | 'paused' | 'completed';
+  createdAt: string;
+  updatedAt: string;
+  aiContext?: string; // context prompt extra para o coach IA
+}

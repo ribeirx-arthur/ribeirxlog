@@ -9,10 +9,10 @@ export const calculateTripFinance = (
 ): FinancialResults => {
   const { freteSeco, diarias, adiantamento, combustivel, outrasDespesas } = trip;
 
-  // Commission logic
+  // Commission logic (Check for snapshot first)
   const isAutonomo = profile.config.userRole === 'autonomo';
-  const percFrete = driver.customCommission?.frete ?? profile.config.percMotFrete;
-  const percDiaria = driver.customCommission?.diaria ?? profile.config.percMotDiaria;
+  const percFrete = trip.driverCommissionPct ?? (driver.customCommission?.frete ?? profile.config.percMotFrete);
+  const percDiaria = trip.driverDiariaPct ?? (driver.customCommission?.diaria ?? profile.config.percMotDiaria);
 
   const totalBruto = freteSeco + diarias;
   const comissaoMotorista = isAutonomo ? 0 : (freteSeco * (percFrete / 100)) + (diarias * (percDiaria / 100));

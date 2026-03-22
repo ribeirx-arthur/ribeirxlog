@@ -18,10 +18,13 @@ import {
     Wallet,
     ArrowDownRight,
     HelpCircle,
-    Filter
+    Filter,
+    RefreshCcw
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, Shipper, UserProfile, MaintenanceRecord, Tire, Buggy } from '../types';
 import { calculateTripFinance } from '../services/finance';
+import { generateMonthlyProjections } from '../services/aiAnalysis';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 interface StrategicIntelligenceProps {
     trips: Trip[];
@@ -40,7 +43,43 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
     trips, vehicles, drivers, shippers, profile, maintenances, tires, buggies
 }) => {
     const [activeCategory, setActiveCategory] = useState<InsightCategory>('Tudo');
+    const [aiAdvice, setAiAdvice] = useState<string | null>(null);
+    const [loadingAI, setLoadingAI] = useState(false);
+    const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
+    const [input, setInput] = useState('');
 
+    const projections = useMemo(() => {
+        return generateMonthlyProjections(trips, vehicles, drivers, profile);
+    }, [trips, vehicles, drivers, profile]);
+
+    const handleSendMessage = async (text?: string) => {
+        const messageToSend = text || input;
+        if (!messageToSend.trim()) return;
+
+        const newMessages = [...chatMessages, { role: 'user', content: messageToSend } as const];
+        setChatMessages(newMessages);
+        setInput('');
+        setLoadingAI(true);
+        
+        try {
+            const resp = await fetch('/api/ai/advice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    trips, vehicles, drivers, profile, 
+                    messages: newMessages 
+                })
+            });
+            const data = await resp.json();
+            if (data.advice) {
+                setChatMessages(prev => [...prev, { role: 'assistant', content: data.advice }]);
+            }
+        } catch (e) {
+            console.error("Erro Chat AI:", e);
+        } finally {
+            setLoadingAI(false);
+        }
+    };
     const analytics = useMemo(() => {
         const list: any[] = [];
         const now = new Date();
@@ -231,6 +270,152 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* AI FUTURE PROJECTION CHART */}
+            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] relative overflow-hidden group">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h3 className="text-xl font-black text-white uppercase italic flex items-center gap-3">
+                            <TrendingUp className="text-indigo-400 w-5 h-5" />
+                            Projeção de Lucro (6 Meses + 3 Futuros)
+                        </h3>
+                        <p className="text-slate-500 text-[10px] font-black tracking-widest uppercase mt-1">Análise de Tendência Estatística via IA</p>
+                    </div>
+                </div>
+                
+                <div className="h-[300px] w-full mt-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={projections}>
+                            <defs>
+                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                            <XAxis 
+                                dataKey="month" 
+                                stroke="#475569" 
+                                fontSize={10} 
+                                tickLine={false} 
+                                axisLine={false} 
+                                tick={{fontWeight: '900'}}
+                            />
+                            <YAxis 
+                                stroke="#475569" 
+                                fontSize={10} 
+                                tickLine={false} 
+                                axisLine={false} 
+                                hide
+                            />
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem', fontSize: '12px', fontWeight: 'bold' }}
+                                itemStyle={{ color: '#fff' }}
+                            />
+                            <Area 
+                                type="monotone" 
+                                dataKey={d => d.isFuture ? d.projected : d.actual} 
+                                name="Lucro Estimado"
+                                stroke="#6366f1" 
+                                strokeWidth={4}
+                                fillOpacity={1} 
+                                fill="url(#colorValue)" 
+                                animationDuration={2000}
+                                dot={(props) => {
+                                    const { cx, cy, payload } = props;
+                                    if (payload.isFuture) return <circle cx={cx} cy={cy} r={4} fill="#f43f5e" stroke="none" />;
+                                    return <circle cx={cx} cy={cy} r={3} fill="#6366f1" stroke="none" />;
+                                }}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+                
+                <div className="flex items-center gap-4 mt-6 pt-6 border-t border-white/5">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-indigo-500" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Realizado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-rose-500" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Projeção IA Futuro</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* GEMINI AI ADVICE BUTTON/SECTION */}
+            <div className="bg-indigo-600/10 border border-indigo-500/20 p-8 rounded-[3rem] flex flex-col items-center text-center gap-6">
+                <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center animate-bounce shadow-lg shadow-indigo-500/50">
+                    <Brain className="text-white w-7 h-7" />
+                </div>
+                <div className="max-w-2xl">
+                    <h3 className="text-2xl font-black text-white uppercase italic mb-2 tracking-tighter">Consultoria Estratégica Gemini</h3>
+                    <p className="text-slate-400 text-sm font-bold leading-relaxed mb-6">
+                        "Arthur, o Gemini pode ler todas as métricas acima e te dar conselhos personalizados. Clique abaixo para gerar sua análise estratégica quinzenal."
+                    </p>
+                    
+                    {loadingAI && chatMessages.length === 0 ? (
+                        <div className="flex items-center gap-3 bg-white/5 px-8 py-4 rounded-full border border-white/10">
+                            <RefreshCcw className="w-4 h-4 text-indigo-400 animate-spin" />
+                            <span className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Cérebro Processando...</span>
+                        </div>
+                    ) : chatMessages.length === 0 ? (
+                        <button 
+                            onClick={() => handleSendMessage("Gere 3 dicas estratégicas para meu negócio agora.")}
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-full text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-500/30 transition-all active:scale-95"
+                        >
+                            Gerar Insights Iniciais
+                        </button>
+                    ) : null}
+
+                    {chatMessages.length > 0 && (
+                        <div className="mt-8 flex flex-col gap-4 w-full text-left">
+                            <div className="max-h-[500px] overflow-y-auto pr-4 space-y-6 custom-scrollbar">
+                                {chatMessages.map((msg, i) => (
+                                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] p-6 rounded-[2rem] text-sm leading-relaxed shadow-sm
+                                            ${msg.role === 'user' 
+                                                ? 'bg-indigo-600 text-white rounded-tr-none' 
+                                                : 'bg-slate-900 border border-indigo-500/20 text-slate-300 rounded-tl-none border-l-4 border-l-indigo-600'}`}>
+                                            <p className="whitespace-pre-line">{msg.content}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {loadingAI && (
+                                    <div className="flex justify-start">
+                                        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3">
+                                            <div className="flex gap-1">
+                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
+                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                            </div>
+                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">IA Analisando...</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="relative mt-4 group">
+                                <input 
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                    placeholder="Ex: Como abrir uma transportadora com meu lucro atual?"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-full py-5 px-8 pr-16 text-sm text-white placeholder-slate-600 focus:border-indigo-500 outline-none transition-all"
+                                />
+                                <button 
+                                    onClick={() => handleSendMessage()}
+                                    disabled={!input.trim() || loadingAI}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                                >
+                                    <ArrowUpRight className="text-white w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -22,6 +22,7 @@ const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
 const HelpCenter = React.lazy(() => import('../components/HelpCenter'));
 const OngoingTrips = React.lazy(() => import('../components/OngoingTrips'));
 const Bank = React.lazy(() => import('../components/Bank'));
+const GoalsDashboard = React.lazy(() => import('../components/GoalsDashboard'));
 import Onboarding from '../components/Onboarding';
 
 import LandingPage from '../components/LandingPage';
@@ -42,7 +43,8 @@ import {
     MaintenanceRecord,
     MaintenanceThresholds,
     VehicleLocation,
-    GPSAlert
+    GPSAlert,
+    Goal
 } from '../types';
 import {
     INITIAL_PROFILE
@@ -102,6 +104,7 @@ export default function Home() {
     const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([]);
     const [locations, setLocations] = useState<VehicleLocation[]>([]);
     const [gpsAlerts, setGpsAlerts] = useState<GPSAlert[]>([]);
+    const [goals, setGoals] = useState<Goal[]>([]);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         setToast({ message, type });
@@ -244,7 +247,9 @@ export default function Home() {
                             paymentIda: Number(t.payment_ida || 0),
                             paymentVolta: Number(t.payment_volta || 0),
                             balanceIda: Number(t.balance_ida || 0),
-                            balanceVolta: Number(t.balance_volta || 0)
+                            balanceVolta: Number(t.balance_volta || 0),
+                            driverCommissionPct: t.driver_commission_pct ? Number(t.driver_commission_pct) : undefined,
+                            driverDiariaPct: t.driver_diaria_pct ? Number(t.driver_diaria_pct) : undefined
                         })),
                         loadTable('vehicles', setVehicles, (v: any) => ({
                             ...v,
@@ -390,7 +395,9 @@ export default function Home() {
                 payment_ida: Number(newTrip.paymentIda || 0),
                 payment_volta: Number(newTrip.paymentVolta || 0),
                 balance_ida: Number(newTrip.balanceIda || 0),
-                balance_volta: Number(newTrip.balanceVolta || 0)
+                balance_volta: Number(newTrip.balanceVolta || 0),
+                driver_commission_pct: Number(newTrip.driverCommissionPct ?? (drivers.find(d => d.id === newTrip.driverId)?.customCommission?.frete ?? profile.config.percMotFrete)),
+                driver_diaria_pct: Number(newTrip.driverDiariaPct ?? (drivers.find(d => d.id === newTrip.driverId)?.customCommission?.diaria ?? profile.config.percMotDiaria))
             }).select().single();
 
             if (error) throw error;
@@ -456,7 +463,9 @@ export default function Home() {
                 payment_ida: Number(updatedTrip.paymentIda || 0),
                 payment_volta: Number(updatedTrip.paymentVolta || 0),
                 balance_ida: Number(updatedTrip.balanceIda || 0),
-                balance_volta: Number(updatedTrip.balanceVolta || 0)
+                balance_volta: Number(updatedTrip.balanceVolta || 0),
+                driver_commission_pct: Number(updatedTrip.driverCommissionPct ?? (drivers.find(d => d.id === updatedTrip.driverId)?.customCommission?.frete ?? profile.config.percMotFrete)),
+                driver_diaria_pct: Number(updatedTrip.driverDiariaPct ?? (drivers.find(d => d.id === updatedTrip.driverId)?.customCommission?.diaria ?? profile.config.percMotDiaria))
             }).eq('id', updatedTrip.id);
 
             if (error) throw error;
@@ -1232,6 +1241,38 @@ export default function Home() {
                 return <AdminPanel profile={profile} supabaseClient={authenticatedClient} />;
 
 
+            case 'goals':
+                return (
+                    <Suspense fallback={<div>Carregando metas...</div>}>
+                        <GoalsDashboard
+                            goals={goals}
+                            profile={profile}
+                            trips={trips}
+                            vehicles={vehicles}
+                            drivers={drivers}
+                            onCreateGoal={async (partial) => {
+                                const newGoal: Goal = {
+                                    ...partial,
+                                    id: `goal-${Date.now()}`,
+                                    userId: user?.id || 'demo',
+                                    currentStepIndex: 0,
+                                    status: 'active',
+                                    createdAt: new Date().toISOString(),
+                                    updatedAt: new Date().toISOString(),
+                                    steps: (partial.steps || []).map(s => ({ ...s, goalId: `goal-${Date.now()}` }))
+                                };
+                                setGoals(prev => [...prev, newGoal]);
+                                return newGoal;
+                            }}
+                            onUpdateGoal={async (updated) => {
+                                setGoals(prev => prev.map(g => g.id === updated.id ? updated : g));
+                            }}
+                            onDeleteGoal={async (goalId) => {
+                                setGoals(prev => prev.filter(g => g.id !== goalId));
+                            }}
+                        />
+                    </Suspense>
+                );
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} setActiveTab={setActiveTab} />;
         }
     };
