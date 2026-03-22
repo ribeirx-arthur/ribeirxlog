@@ -5,10 +5,19 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export interface AIInsight {
     id: string;
     title: string;
-    message: string;
-    type: 'success' | 'warning' | 'info';
+    message?: string;
+    description?: string; // Usado por AIInsights.tsx
+    type: 'success' | 'warning' | 'info' | 'positive' | 'negative' | 'neutral';
     date: string;
+    impactScore?: number; // Usado por AIInsights.tsx
 }
+
+export interface GoldenTip {
+    title: string;
+    description: string;
+    impact: string;
+}
+
 
 export interface MonthlyProjection {
     month: string;
@@ -17,7 +26,13 @@ export interface MonthlyProjection {
     isFuture: boolean;
 }
 
-export function generateAIInsights(trips: Trip[]): AIInsight[] {
+export function generateAIInsights(
+    trips: Trip[],
+    vehicles?: Vehicle[],
+    drivers?: Driver[],
+    shippers?: any[],
+    profile?: UserProfile
+): AIInsight[] {
     const insights: AIInsight[] = [];
     const now = new Date();
 
@@ -32,7 +47,9 @@ export function generateAIInsights(trips: Trip[]): AIInsight[] {
             id: 'profit-good',
             title: 'Alta Rentabilidade',
             message: 'Suas últimas viagens estão com margem acima da média. Ótimo trabalho!',
-            type: 'success',
+            description: 'Suas últimas viagens estão com margem acima da média. Ótimo trabalho!',
+            type: 'positive',
+            impactScore: 85,
             date: now.toISOString()
         });
     }
@@ -44,7 +61,9 @@ export function generateAIInsights(trips: Trip[]): AIInsight[] {
             id: 'maintenance-check',
             title: 'Revisão Necessária',
             message: 'Vários veículos rodaram distâncias longas recentemente. Verifique o óleo.',
-            type: 'warning',
+            description: 'Vários veículos rodaram distâncias longas recentemente. Verifique o óleo.',
+            type: 'negative',
+            impactScore: 80,
             date: now.toISOString()
         });
     }
@@ -52,13 +71,28 @@ export function generateAIInsights(trips: Trip[]): AIInsight[] {
     return insights;
 }
 
-export function generateGoldenTips(trips: Trip[]): string[] {
-    const tips = [
-        "Negocie o diesel em postos parceiros para economizar até 5%.",
-        "Rotas para o Sudeste estão com frete retorno 12% mais alto esta semana.",
-        "Mantenha a calibragem dos pneus em dia para reduzir o consumo em 3%."
+export function generateGoldenTips(
+    trips: Trip[],
+    vehicles?: Vehicle[],
+    shippers?: any[]
+): GoldenTip[] {
+    return [
+        {
+            title: "Abastecimento Estratégico",
+            description: "Negocie o diesel em postos parceiros fixos nas suas rotas mais comuns. Parcerias de fidelidade podem reduzir em até 5%.",
+            impact: "Redução de 5% no custo",
+        },
+        {
+            title: "Rotas Mais Lucrativas do Sudeste",
+            description: "Rotas retornando para o Sudeste estão com frete 12% mais alto esta semana devido ao escoamento da safra.",
+            impact: "Aumento de Receita",
+        },
+        {
+            title: "Desgaste de Arrastos Menor",
+            description: "Mantenha a calibragem dos pneus milimetricamente em dia. Pressões fora do ideal aumentam consumo em 3% e destroem lonas.",
+            impact: "Redução de depreciação",
+        }
     ];
-    return tips;
 }
 
 export function generateMonthlyProjections(
