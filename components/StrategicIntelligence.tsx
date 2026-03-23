@@ -315,7 +315,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                             />
                             <Area 
                                 type="monotone" 
-                                dataKey={d => d.isFuture ? d.projected : d.actual} 
+                                dataKey="value" 
                                 name="Lucro Estimado"
                                 stroke="#6366f1" 
                                 strokeWidth={4}

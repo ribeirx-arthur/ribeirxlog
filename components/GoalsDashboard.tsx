@@ -76,6 +76,11 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
             });
             const data = await resp.json();
 
+            if (!resp.ok || data.error) {
+                alert(data.error || 'Erro ao gerar meta com IA. Tente novamente.');
+                return;
+            }
+
             const rawSteps: GoalStep[] = (data.steps || []).map((s: any, idx: number) => ({
                 id: `step-${Date.now()}-${idx}`,
                 goalId: '',
@@ -104,7 +109,7 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
         } finally {
             setGeneratingPlan(false);
         }
-    }, [newGoalTitle, newGoalDesc, newGoalCategory, financialSummary, onCreateGoal]);
+    }, [newGoalTitle, newGoalDesc, newGoalCategory, financialSummary, onCreateGoal, trips, vehicles, drivers, profile]);
 
     const handleCompleteStep = useCallback(async (step: GoalStep) => {
         if (!activeGoal) return;

@@ -23,6 +23,7 @@ export interface MonthlyProjection {
     month: string;
     actual: number;
     projected: number;
+    value?: number;
     isFuture: boolean;
 }
 
@@ -126,8 +127,9 @@ export function generateMonthlyProjections(
 
         projections.push({
             month: monthsNames[monthIndex],
-            actual: revenue,
-            projected: revenue,
+            actual: isNaN(revenue) ? 0 : revenue,
+            projected: isNaN(revenue) ? 0 : revenue,
+            value: isNaN(revenue) ? 0 : revenue,
             isFuture: false
         });
     }
@@ -159,7 +161,8 @@ export function generateMonthlyProjections(
         projections.push({
             month: monthsNames[d.getMonth()],
             actual: 0,
-            projected: Math.round(projectedValue),
+            projected: isNaN(projectedValue) ? 0 : Math.round(projectedValue),
+            value: isNaN(projectedValue) ? 0 : Math.round(projectedValue),
             isFuture: true
         });
     }
