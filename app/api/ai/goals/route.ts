@@ -7,9 +7,9 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { action, contextString, goalTitle, goalDescription, currentStep, userNote } = body;
 
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
-            return NextResponse.json({ error: 'GEMINI_API_KEY não configurada.' }, { status: 400 });
+        const apiKey = (process.env.GEMINI_API_KEY || '').trim();
+        if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY' || apiKey.length < 10) {
+            return NextResponse.json({ error: 'GEMINI_API_KEY não configurada corretamente.' }, { status: 400 });
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);

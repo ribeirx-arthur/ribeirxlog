@@ -183,7 +183,8 @@ export async function getStrategicAIAdvice(
     }
 
     try {
-        const genAI = new GoogleGenerativeAI(apiKey);
+        const cleanApiKey = apiKey.trim();
+        const genAI = new GoogleGenerativeAI(cleanApiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const stats = {
