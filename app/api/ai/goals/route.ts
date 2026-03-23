@@ -5,7 +5,7 @@ import { buildAIContext, serializeContextToPrompt } from '../../../../services/b
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { action, trips, vehicles, drivers, profile, goalTitle, goalDescription, currentStep, userNote } = body;
+        const { action, contextString, goalTitle, goalDescription, currentStep, userNote } = body;
 
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
@@ -15,9 +15,7 @@ export async function POST(req: NextRequest) {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-        // ─── Pré-calcular contexto completo ─────────────────────────────────────
-        const ctx = buildAIContext(trips || [], vehicles || [], drivers || [], profile);
-        const contextBlock = serializeContextToPrompt(ctx);
+        const contextBlock = contextString || '';
 
         let prompt = '';
 
@@ -66,7 +64,7 @@ PASSO RECÉM CONCLUÍDO: "${currentStep?.title}"
 DESCRIÇÃO DO PASSO: "${currentStep?.description}"
 OBSERVAÇÃO DO USUÁRIO: "${userNote || 'Nenhuma observação'}"
 
-Escreva uma mensagem de parabéns curta (2-3 linhas), mencionando o nome "${ctx.ownerName}" e,
+Escreva uma mensagem de parabéns curta (2-3 linhas), mencionando o transportador pelo nome, ou apenas como "Parceiro" se não souber o nome, e,
 se relevante, faça um comentário sobre como esse passo impacta o fluxo de caixa ou os objetivos.
 Apresente uma pequena dica de transição para o próximo passo.
 Português, pessoal e motivador. Máximo 150 palavras.`;

@@ -9,6 +9,7 @@ import {
     AlertCircle, X, CornerDownRight
 } from 'lucide-react';
 import { Goal, GoalStep, GoalCategory, UserProfile, Trip, Vehicle, Driver } from '../types';
+import { buildAIContext, serializeContextToPrompt } from '../services/buildAIContext';
 
 interface GoalsDashboardProps {
     goals: Goal[];
@@ -67,11 +68,7 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
                     action: 'generate_plan',
                     goalTitle: newGoalTitle,
                     goalDescription: newGoalDesc,
-                    // Dados brutos completos — a API calculará tudo
-                    trips,
-                    vehicles,
-                    drivers,
-                    profile,
+                    contextString: serializeContextToPrompt(buildAIContext(trips, vehicles, drivers, profile))
                 })
             });
             const data = await resp.json();
@@ -127,6 +124,7 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
                     goalTitle: activeGoal.title,
                     currentStep: step,
                     userNote: stepNote,
+                    contextString: serializeContextToPrompt(buildAIContext(trips, vehicles, drivers, profile))
                 })
             });
             const coachData = await coachResp.json();
