@@ -186,7 +186,7 @@ export async function getStrategicAIAdvice(
         const cleanApiKey = apiKey.trim();
         const genAI = new GoogleGenerativeAI(cleanApiKey);
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
+            model: "gemini-flash-latest",
             systemInstruction: "Você é um consultor sênior apaixonado por logística e ERP. Responda em Português Brasil. Seja estratégico e motivador."
         });
 

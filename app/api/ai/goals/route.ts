@@ -13,9 +13,19 @@ export async function POST(req: NextRequest) {
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
+        
+        let systemInstruction = "Você é um consultor sênior de logística e ERP. Responda sempre em Português-Brasil.";
+        if (action === 'generate_plan') {
+            systemInstruction = `Você é um consultor de negócios especialista em logística e empreendedorismo brasileiro.
+            Seu objetivo é gerar planos de metas realistas baseados em dados financeiros reais de frotas.
+            Você deve SEMPRE retornar um JSON válido seguindo exatamente a estrutura solicitada.`;
+        } else if (action === 'coach_advance') {
+            systemInstruction = "Você é o coach oficial do RibeirxLog. Seja motivador e direto.";
+        }
+
         const model = genAI.getGenerativeModel({ 
-            model: 'gemini-1.5-flash',
-            systemInstruction: "Você é um consultor estratégico de logística."
+            model: 'gemini-flash-latest',
+            systemInstruction
         });
 
         const contextBlock = contextString || '';
