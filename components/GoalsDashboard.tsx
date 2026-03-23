@@ -75,9 +75,11 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
                 })
             });
             const data = await resp.json();
+            console.log('AI Goals Response:', data);
 
             if (!resp.ok || data.error) {
-                alert(data.error || 'Erro ao gerar meta com IA. Tente novamente.');
+                console.error('API Error:', data.error || 'Unknown error');
+                alert(`Erro na IA: ${data.error || 'Lamento, não foi possível contatar o Google Gemini.'}`);
                 return;
             }
 
@@ -104,8 +106,9 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
             setShowNewGoalForm(false);
             setNewGoalTitle('');
             setNewGoalDesc('');
-        } catch (e) {
-            console.error('Erro ao criar meta:', e);
+        } catch (e: any) {
+            console.error('Erro ao criar meta (CATCH):', e);
+            alert(`Falha ao salvar meta no banco de dados: ${e.message || 'Erro desconhecido'}`);
         } finally {
             setGeneratingPlan(false);
         }

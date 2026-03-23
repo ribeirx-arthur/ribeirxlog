@@ -47,6 +47,11 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
     const [loadingAI, setLoadingAI] = useState(false);
     const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
     const [input, setInput] = useState('');
+    const [mounted, setMounted] = useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const projections = useMemo(() => {
         return generateMonthlyProjections(trips, vehicles, drivers, profile);
@@ -223,6 +228,8 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
         return { revenue, profit, margin: (profit / revenue) * 100 || 0 };
     }, [trips, vehicles, drivers, profile]);
 
+    if (!mounted) return null;
+
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-24">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -307,6 +314,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                                 fontSize={10} 
                                 tickLine={false} 
                                 axisLine={false} 
+                                domain={['auto', 'auto']}
                                 hide
                             />
                             <Tooltip 

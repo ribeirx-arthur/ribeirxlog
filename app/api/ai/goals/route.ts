@@ -83,7 +83,7 @@ Português, pessoal e motivador. Máximo 150 palavras.`;
 
         return NextResponse.json({ message: text });
     } catch (error: any) {
-        console.error('Goals API Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error('Goals API System Error:', error);
+        return NextResponse.json({ error: error.message || 'Unknown internal error' }, { status: 500 });
     }
 }
