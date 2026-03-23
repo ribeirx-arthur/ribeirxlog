@@ -171,12 +171,13 @@ export function generateMonthlyProjections(
 }
 
 export async function getStrategicAIAdvice(
-    trips: Trip[],
-    vehicles: Vehicle[],
-    drivers: Driver[],
-    profile: UserProfile,
+    trips: Trip[] = [],
+    vehicles: Vehicle[] = [],
+    drivers: Driver[] = [],
+    profile: UserProfile = {} as UserProfile,
     apiKey: string,
-    messages?: { role: string; content: string }[]
+    messages?: { role: string; content: string }[],
+    contextString?: string
 ) {
     if (!apiKey || apiKey.includes('PLACEHOLDER')) {
         return "Configure sua GEMINI_API_KEY no arquivo .env para receber conselhos estratégicos personalizados da IA.";
@@ -190,7 +191,7 @@ export async function getStrategicAIAdvice(
             systemInstruction: "Você é um consultor sênior apaixonado por logística e ERP. Responda em Português Brasil. Seja estratégico e motivador."
         });
 
-        const stats = {
+        const stats = contextString ? null : {
             totalTrips: trips.length,
             avgRevenue: trips.reduce((acc, t) => acc + t.freteSeco, 0) / (trips.length || 1),
             vehiclesCount: vehicles.length,
@@ -203,12 +204,12 @@ export async function getStrategicAIAdvice(
             }, 0)
         };
 
-        const contextPrompt = `Contexto da Frota do Usuário:
-        - Viagens: ${stats.totalTrips}
-        - Faturamento Médio: R$ ${stats.avgRevenue.toFixed(2)}
-        - Lucro Líquido Real: R$ ${stats.totalLucro.toFixed(2)}
-        - Principais Destinos: ${stats.mainDestinations.join(', ')}
-        - Veículos: ${stats.vehiclesCount}
+        const contextPrompt = contextString || `Contexto da Frota do Usuário:
+        - Viagens: ${stats?.totalTrips}
+        - Faturamento Médio: R$ ${stats?.avgRevenue.toFixed(2)}
+        - Lucro Líquido Real: R$ ${stats?.totalLucro.toFixed(2)}
+        - Principais Destinos: ${stats?.mainDestinations.join(', ')}
+        - Veículos: ${stats?.vehiclesCount}
         
         Se houver mensagens anteriores, continue a conversa com o usuário. Caso contrário, dê 3 dicas estratégicas rápidas baseadas no lucro e destinos acima.`;
 

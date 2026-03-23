@@ -4,9 +4,9 @@ import { getStrategicAIAdvice } from '../../../../services/aiAnalysis';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { trips, vehicles, drivers, profile, messages } = body;
+        const { trips, vehicles, drivers, profile, messages, contextString } = body;
         
-        const apiKey = process.env.GEMINI_API_KEY;
+        const apiKey = (process.env.GEMINI_API_KEY || '').trim();
 
         if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
             return NextResponse.json({ 
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
-        const advice = await getStrategicAIAdvice(trips, vehicles, drivers, profile, apiKey, messages);
+        const advice = await getStrategicAIAdvice(trips, vehicles, drivers, profile, apiKey, messages, contextString);
 
         return NextResponse.json({ advice });
     } catch (error: any) {

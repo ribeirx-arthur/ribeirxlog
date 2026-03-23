@@ -24,6 +24,7 @@ import {
 import { Trip, Vehicle, Driver, Shipper, UserProfile, MaintenanceRecord, Tire, Buggy } from '../types';
 import { calculateTripFinance } from '../services/finance';
 import { generateMonthlyProjections } from '../services/aiAnalysis';
+import { buildAIContext, serializeContextToPrompt } from '../services/buildAIContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 interface StrategicIntelligenceProps {
@@ -67,11 +68,15 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
         setLoadingAI(true);
         
         try {
+            // Construir contexto no cliente para evitar payload 413
+            const rawCtx = buildAIContext(trips, vehicles, drivers, profile);
+            const contextString = serializeContextToPrompt(rawCtx);
+
             const resp = await fetch('/api/ai/advice', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    trips, vehicles, drivers, profile, 
+                    contextString,
                     messages: newMessages 
                 })
             });
@@ -315,7 +320,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                                 tickLine={false} 
                                 axisLine={false} 
                                 domain={['auto', 'auto']}
-                                hide
+                                tickFormatter={(val) => `R$ ${val >= 1000 ? (val/1000).toFixed(1) + 'k' : val}`}
                             />
                             <Tooltip 
                                 contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem', fontSize: '12px', fontWeight: 'bold' }}
