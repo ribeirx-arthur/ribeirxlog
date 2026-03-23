@@ -212,13 +212,26 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
                 </div>
 
                 {/* New Goal Button */}
-                <button
-                    onClick={() => setShowNewGoalForm(true)}
-                    className="w-full flex items-center justify-center gap-3 p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-500/20 transition-all active:scale-95"
-                >
-                    <Plus className="w-4 h-4" />
-                    Nova Meta com IA
-                </button>
+                {profile.plan_type === 'piloto' && goals.length >= 3 ? (
+                    <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-2xl space-y-3">
+                        <div className="flex items-center gap-2 text-amber-500">
+                            <Lock className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Limite Atingido</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-medium leading-tight">Planos Piloto podem ter no máximo 3 metas ativas.</p>
+                        <button className="w-full py-2 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-500/20 transition-colors">
+                            Fazer Upgrade para Ilimitado
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setShowNewGoalForm(true)}
+                        className="w-full flex items-center justify-center gap-3 p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-500/20 transition-all active:scale-95"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Nova Meta com IA
+                    </button>
+                )}
             </aside>
 
             {/* ─── RIGHT: Active Goal Detail ─── */}

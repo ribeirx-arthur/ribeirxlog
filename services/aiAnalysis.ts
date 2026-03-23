@@ -112,8 +112,17 @@ export function generateMonthlyProjections(
         const monthIndex = d.getMonth();
         const year = d.getFullYear();
         
+        const parseDate = (dStr: string) => {
+            if (!dStr) return new Date(NaN);
+            if (dStr.includes('/')) {
+                const [d, m, y] = dStr.split('/').map(Number);
+                return new Date(y, m - 1, d);
+            }
+            return new Date(dStr);
+        };
+
         const monthTrips = trips.filter(t => {
-            const rt = new Date(t.receiptDate || t.departureDate);
+            const rt = parseDate(t.receiptDate || t.departureDate);
             return rt.getMonth() === monthIndex && rt.getFullYear() === year;
         });
 
@@ -224,10 +233,13 @@ export async function getStrategicAIAdvice(
 
         const chat = model.startChat({
             history: history,
-            generationConfig: { maxOutputTokens: 1000 }
+            generationConfig: { 
+                maxOutputTokens: 2500, // Aumentado para evitar cortes
+                temperature: 0.7 
+            }
         });
 
-        const result = await chat.sendMessage(`${contextPrompt}\n\nPergunta do usuário: ${currentMessage}`);
+        const result = await chat.sendMessage(`${contextPrompt}\n\nRELEVANT: Não corte a resposta no meio. Conclua o raciocínio.\n\nPergunta do usuário: ${currentMessage}`);
         const response = await result.response;
         return response.text();
     } catch (error) {

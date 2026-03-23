@@ -85,7 +85,9 @@ Português, pessoal e motivador. Máximo 150 palavras.`;
 
         const result = await model.generateContent({
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: action === 'generate_plan' ? { responseMimeType: 'application/json' } : undefined
+            generationConfig: action === 'generate_plan' 
+                ? { responseMimeType: 'application/json', maxOutputTokens: 2500 } 
+                : { maxOutputTokens: 2048 }
         });
         const text = result.response.text();
 

@@ -19,7 +19,8 @@ import {
     ArrowDownRight,
     HelpCircle,
     Filter,
-    RefreshCcw
+    RefreshCcw,
+    Lock
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, Shipper, UserProfile, MaintenanceRecord, Tire, Buggy } from '../types';
 import { calculateTripFinance } from '../services/finance';
@@ -49,10 +50,21 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
     const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
     const [input, setInput] = useState('');
     const [mounted, setMounted] = useState(false);
+    const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     React.useEffect(() => {
         setMounted(true);
     }, []);
+
+    React.useEffect(() => {
+        if (chatMessages.length > 0) {
+            scrollToBottom();
+        }
+    }, [chatMessages, loadingAI]);
 
     const projections = useMemo(() => {
         return generateMonthlyProjections(trips, vehicles, drivers, profile);
@@ -96,9 +108,18 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
+        const parseDate = (dStr: string) => {
+            if (!dStr) return new Date(NaN);
+            if (dStr.includes('/')) {
+                const [d, m, y] = dStr.split('/').map(Number);
+                return new Date(y, m - 1, d);
+            }
+            return new Date(dStr);
+        };
+
         // --- 1. FINANCIAL ANALYSIS ---
         const monthTrips = trips.filter(t => {
-            const d = new Date(t.departureDate);
+            const d = parseDate(t.departureDate);
             return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
         });
 
@@ -368,65 +389,81 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                         "Arthur, o Gemini pode ler todas as métricas acima e te dar conselhos personalizados. Clique abaixo para gerar sua análise estratégica quinzenal."
                     </p>
                     
-                    {loadingAI && chatMessages.length === 0 ? (
-                        <div className="flex items-center gap-3 bg-white/5 px-8 py-4 rounded-full border border-white/10">
-                            <RefreshCcw className="w-4 h-4 text-indigo-400 animate-spin" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Cérebro Processando...</span>
+                    {profile.plan_type === 'piloto' || profile.plan_type === 'none' ? (
+                        <div className="bg-slate-950/80 backdrop-blur-sm border border-slate-800 p-8 rounded-[2rem] flex flex-col items-center text-center gap-4">
+                            <Lock className="w-10 h-10 text-amber-500 mb-2" />
+                            <h4 className="text-lg font-black text-white uppercase italic">Consultoria Exclusiva PRO</h4>
+                            <p className="text-slate-400 text-xs font-bold leading-relaxed max-w-sm">
+                                Arthur, o chat estratégico em tempo real é um recurso avançado. Faça o upgrade para o plano **PRO** para desbloquear o cérebro digital completo.
+                            </p>
+                            <button className="mt-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-amber-950 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20">
+                                Liberar Acesso PRO
+                            </button>
                         </div>
-                    ) : chatMessages.length === 0 ? (
-                        <button 
-                            onClick={() => handleSendMessage("Gere 3 dicas estratégicas para meu negócio agora.")}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-full text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-500/30 transition-all active:scale-95"
-                        >
-                            Gerar Insights Iniciais
-                        </button>
-                    ) : null}
-
-                    {chatMessages.length > 0 && (
-                        <div className="mt-8 flex flex-col gap-4 w-full text-left">
-                            <div className="max-h-[500px] overflow-y-auto pr-4 space-y-6 custom-scrollbar">
-                                {chatMessages.map((msg, i) => (
-                                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[85%] p-6 rounded-[2rem] text-sm leading-relaxed shadow-sm
-                                            ${msg.role === 'user' 
-                                                ? 'bg-indigo-600 text-white rounded-tr-none' 
-                                                : 'bg-slate-900 border border-indigo-500/20 text-slate-300 rounded-tl-none border-l-4 border-l-indigo-600'}`}>
-                                            <p className="whitespace-pre-line">{msg.content}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                                {loadingAI && (
-                                    <div className="flex justify-start">
-                                        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3">
-                                            <div className="flex gap-1">
-                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
-                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
-                                            </div>
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">IA Analisando...</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="relative mt-4 group">
-                                <input 
-                                    type="text"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                    placeholder="Ex: Como abrir uma transportadora com meu lucro atual?"
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-full py-5 px-8 pr-16 text-sm text-white placeholder-slate-600 focus:border-indigo-500 outline-none transition-all"
-                                />
+                    ) : (
+                        <>
+                            {loadingAI && chatMessages.length === 0 ? (
+                                <div className="flex items-center gap-3 bg-white/5 px-8 py-4 rounded-full border border-white/10">
+                                    <RefreshCcw className="w-4 h-4 text-indigo-400 animate-spin" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Cérebro Processando...</span>
+                                </div>
+                            ) : chatMessages.length === 0 ? (
                                 <button 
-                                    onClick={() => handleSendMessage()}
-                                    disabled={!input.trim() || loadingAI}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                                    onClick={() => handleSendMessage("Gere 3 dicas estratégicas para meu negócio agora.")}
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-full text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-500/30 transition-all active:scale-95"
                                 >
-                                    <ArrowUpRight className="text-white w-5 h-5" />
+                                    Gerar Insights Iniciais
                                 </button>
-                            </div>
-                        </div>
+                            ) : null}
+
+                            {chatMessages.length > 0 && (
+                                <div className="mt-8 flex flex-col gap-4 w-full text-left">
+                                    <div className="max-h-[500px] overflow-y-auto pr-4 space-y-6 custom-scrollbar">
+                                        {chatMessages.map((msg, i) => (
+                                            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                                <div className={`max-w-[85%] p-6 rounded-[2rem] text-sm leading-relaxed shadow-sm
+                                                    ${msg.role === 'user' 
+                                                        ? 'bg-indigo-600 text-white rounded-tr-none' 
+                                                        : 'bg-slate-900 border border-indigo-500/20 text-slate-300 rounded-tl-none border-l-4 border-l-indigo-600'}`}>
+                                                    <p className="whitespace-pre-line">{msg.content}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div ref={messagesEndRef} />
+                                        {loadingAI && (
+                                            <div className="flex justify-start">
+                                                <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3">
+                                                    <div className="flex gap-1">
+                                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
+                                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">IA Analisando...</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="relative mt-4 group">
+                                        <input 
+                                            type="text"
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                            placeholder="Ex: Como abrir uma transportadora com meu lucro atual?"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-full py-5 px-8 pr-16 text-sm text-white placeholder-slate-600 focus:border-indigo-500 outline-none transition-all"
+                                        />
+                                        <button 
+                                            onClick={() => handleSendMessage()}
+                                            disabled={!input.trim() || loadingAI}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                                        >
+                                            <ArrowUpRight className="text-white w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
