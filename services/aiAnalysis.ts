@@ -185,7 +185,10 @@ export async function getStrategicAIAdvice(
     try {
         const cleanApiKey = apiKey.trim();
         const genAI = new GoogleGenerativeAI(cleanApiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            systemInstruction: "Você é um consultor sênior apaixonado por logística e ERP. Responda em Português Brasil. Seja estratégico e motivador."
+        });
 
         const stats = {
             totalTrips: trips.length,
@@ -207,8 +210,7 @@ export async function getStrategicAIAdvice(
         - Principais Destinos: ${stats.mainDestinations.join(', ')}
         - Veículos: ${stats.vehiclesCount}
         
-        Aja como um consultor sênior apaixonado por logística e ERP. Responda em Português Brasil. 
-        Se houver mensagens anteriores, continue a conversa. Caso contrário, dê 3 dicas estratégicas.`;
+        Se houver mensagens anteriores, continue a conversa com o usuário. Caso contrário, dê 3 dicas estratégicas rápidas baseadas no lucro e destinos acima.`;
 
         const history = messages?.slice(0, -1).map(m => ({
             role: m.role === 'user' ? 'user' : 'model',

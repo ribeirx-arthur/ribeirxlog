@@ -13,7 +13,10 @@ export async function POST(req: NextRequest) {
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ 
+            model: 'gemini-1.5-flash',
+            systemInstruction: "Você é um consultor estratégico de logística."
+        });
 
         const contextBlock = contextString || '';
 
@@ -70,13 +73,20 @@ Apresente uma pequena dica de transição para o próximo passo.
 Português, pessoal e motivador. Máximo 150 palavras.`;
         }
 
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: action === 'generate_plan' ? { responseMimeType: 'application/json' } : undefined
+        });
         const text = result.response.text();
 
         if (action === 'generate_plan') {
-            const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            const parsed = JSON.parse(cleanedText);
-            return NextResponse.json(parsed);
+            try {
+                const parsed = JSON.parse(text);
+                return NextResponse.json(parsed);
+            } catch (e) {
+                console.error("JSON Parse Error. Raw text:", text);
+                return NextResponse.json({ error: "Falha na estruturação da IA. Tente novamente." }, { status: 500 });
+            }
         }
 
         return NextResponse.json({ message: text });
