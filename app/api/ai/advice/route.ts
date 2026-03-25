@@ -6,11 +6,11 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { trips, vehicles, drivers, profile, messages, contextString } = body;
         
-        const apiKey = (process.env.GEMINI_API_KEY || '').trim();
+        const apiKey = (process.env.GROQ_API_KEY || '').trim();
 
         if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
             return NextResponse.json({ 
-                error: 'Sua chave do Gemini não está configurada no .env.local' 
+                error: 'Sua chave da Groq não está configurada no .env.local' 
             }, { status: 400 });
         }
 

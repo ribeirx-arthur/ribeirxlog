@@ -209,11 +209,15 @@ export default function Home() {
                         const tablesWithUserId = [
                             'trips', 'vehicles', 'drivers', 'shippers',
                             'buggies', 'tires', 'maintenance_records', 'profiles',
-                            'vehicle_locations', 'gps_alerts' // Added for demo mode consistency
+                            'vehicle_locations', 'gps_alerts', 'goals'
                         ];
 
                         if (tablesWithUserId.includes(table)) {
                             query = query.eq('user_id', targetUserId);
+                        }
+
+                        if (table === 'goals') {
+                            query = client.from('goals').select('*, goal_steps(*)').eq('user_id', targetUserId).order('created_at', { ascending: false });
                         }
 
                         const { data, error } = await query;
@@ -311,9 +315,24 @@ export default function Home() {
                             timestamp: l.timestamp
                         })),
                         loadTable('gps_alerts', setGpsAlerts, (a: any) => ({
-                            ...a,
                             vehicleId: a.vehicle_id,
                             resolved: !!a.resolved
+                        })),
+                        loadTable('goals', setGoals, (g: any) => ({
+                            ...g,
+                            userId: g.user_id,
+                            targetDate: g.target_date,
+                            createdAt: g.created_at,
+                            updatedAt: g.updated_at,
+                            steps: (g.goal_steps || []).map((s: any) => ({
+                                ...s,
+                                goalId: s.goal_id,
+                                actionTip: s.action_tip,
+                                estimatedValue: s.estimated_value,
+                                resourceUrl: s.resource_url,
+                                completedAt: s.completed_at,
+                                notesFromUser: s.notes_from_user
+                            })).sort((a: any, b: any) => a.order - b.order)
                         }))
                     ]);
                 } catch (error) {
@@ -1251,24 +1270,114 @@ export default function Home() {
                             vehicles={vehicles}
                             drivers={drivers}
                             onCreateGoal={async (partial) => {
-                                const newGoal: Goal = {
-                                    ...partial,
-                                    id: `goal-${Date.now()}`,
-                                    userId: user?.id || 'demo',
-                                    currentStepIndex: 0,
-                                    status: 'active',
-                                    createdAt: new Date().toISOString(),
-                                    updatedAt: new Date().toISOString(),
-                                    steps: (partial.steps || []).map(s => ({ ...s, goalId: `goal-${Date.now()}` }))
-                                };
-                                setGoals(prev => [...prev, newGoal]);
-                                return newGoal;
+                                try {
+                                    const token = await getToken({ template: 'supabase' });
+                                    const client = token ? createClerkSupabaseClient(token) : supabase;
+                                    const userId = isDemo ? DEMO_USER_ID : user?.id;
+
+                                    // 1. Inserir a Meta Principal
+                                    const { data: goalData, error: goalError } = await client
+                                        .from('goals')
+                                        .insert({
+                                            user_id: userId,
+                                            title: partial.title,
+                                            description: partial.description,
+                                            category: partial.category,
+                                            target_date: partial.targetDate,
+                                            status: 'active',
+                                            ai_context: partial.aiContext
+                                        })
+                                        .select()
+                                        .single();
+
+                                    if (goalError) throw goalError;
+
+                                    // 2. Inserir os Passos (Steps)
+                                    if (partial.steps && partial.steps.length > 0) {
+                                        const stepsToInsert = partial.steps.map(s => ({
+                                            goal_id: goalData.id,
+                                            order: s.order,
+                                            title: s.title,
+                                            description: s.description,
+                                            action_tip: s.actionTip,
+                                            estimated_value: s.estimatedValue,
+                                            resource_url: s.resourceUrl,
+                                            completed: false
+                                        }));
+
+                                        const { error: stepsError } = await client
+                                            .from('goal_steps')
+                                            .insert(stepsToInsert);
+
+                                        if (stepsError) throw stepsError;
+                                    }
+
+                                    // 3. Recarregar metas para garantir consistência
+                                    setRefreshTrigger(prev => prev + 1);
+                                    showToast('Meta estratégica criada!', 'success');
+                                    
+                                    return {
+                                        ...goalData,
+                                        userId: goalData.user_id,
+                                        targetDate: goalData.target_date,
+                                        createdAt: goalData.created_at,
+                                        updatedAt: goalData.updated_at,
+                                        steps: partial.steps || []
+                                    } as Goal;
+                                } catch (err: any) {
+                                    showToast(`Erro ao salvar meta: ${err.message}`, 'error');
+                                    return partial as Goal;
+                                }
                             }}
                             onUpdateGoal={async (updated) => {
-                                setGoals(prev => prev.map(g => g.id === updated.id ? updated : g));
+                                try {
+                                    const token = await getToken({ template: 'supabase' });
+                                    const client = token ? createClerkSupabaseClient(token) : supabase;
+
+                                    // Atualizar meta
+                                    const { error: goalError } = await client
+                                        .from('goals')
+                                        .update({
+                                            title: updated.title,
+                                            description: updated.description,
+                                            category: updated.category,
+                                            target_date: updated.targetDate,
+                                            status: updated.status,
+                                            current_step_index: updated.currentStepIndex
+                                        })
+                                        .eq('id', updated.id);
+
+                                    if (goalError) throw goalError;
+
+                                    // Atualizar steps (simplificado: deletar e reinserir ou atualizar um a um)
+                                    // Para performance e simplicidade aqui, vamos apenas atualizar os campos de status do step
+                                    for (const step of updated.steps) {
+                                        await client.from('goal_steps').update({
+                                            completed: step.completed,
+                                            completed_at: step.completedAt,
+                                            notes_from_user: step.notesFromUser
+                                        }).eq('id', step.id);
+                                    }
+
+                                    setGoals(prev => prev.map(g => g.id === updated.id ? updated : g));
+                                    showToast('Progresso salvo!', 'success');
+                                } catch (err: any) {
+                                    showToast('Erro ao atualizar meta', 'error');
+                                }
                             }}
                             onDeleteGoal={async (goalId) => {
-                                setGoals(prev => prev.filter(g => g.id !== goalId));
+                                try {
+                                    const token = await getToken({ template: 'supabase' });
+                                    const client = token ? createClerkSupabaseClient(token) : supabase;
+                                    
+                                    const { error } = await client.from('goals').delete().eq('id', goalId);
+                                    if (error) throw error;
+
+                                    setGoals(prev => prev.filter(g => g.id !== goalId));
+                                    showToast('Meta removida', 'info');
+                                } catch (err: any) {
+                                    showToast('Erro ao excluir meta', 'error');
+                                }
                             }}
                         />
                     </Suspense>

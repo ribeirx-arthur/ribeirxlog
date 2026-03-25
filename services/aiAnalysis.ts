@@ -1,6 +1,5 @@
 import { Trip, Vehicle, Driver, UserProfile } from '../types';
 import { calculateTripFinance } from './finance';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export interface AIInsight {
     id: string;
@@ -189,17 +188,10 @@ export async function getStrategicAIAdvice(
     contextString?: string
 ) {
     if (!apiKey || apiKey.includes('PLACEHOLDER')) {
-        return "Configure sua GEMINI_API_KEY no arquivo .env para receber conselhos estratégicos personalizados da IA.";
+        return "Configure sua GROQ_API_KEY no arquivo .env para receber conselhos estratégicos personalizados.";
     }
 
     try {
-        const cleanApiKey = apiKey.trim();
-        const genAI = new GoogleGenerativeAI(cleanApiKey);
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-flash-latest",
-            systemInstruction: "Você é um consultor sênior apaixonado por logística e ERP. Responda em Português Brasil. Seja estratégico e motivador."
-        });
-
         const stats = contextString ? null : {
             totalTrips: trips.length,
             avgRevenue: trips.reduce((acc, t) => acc + t.freteSeco, 0) / (trips.length || 1),
@@ -214,36 +206,45 @@ export async function getStrategicAIAdvice(
         };
 
         const contextPrompt = contextString || `Contexto da Frota do Usuário:
-        - Viagens: ${stats?.totalTrips}
-        - Faturamento Médio: R$ ${stats?.avgRevenue.toFixed(2)}
-        - Lucro Líquido Real: R$ ${stats?.totalLucro.toFixed(2)}
-        - Principais Destinos: ${stats?.mainDestinations.join(', ')}
-        - Veículos: ${stats?.vehiclesCount}
-        
-        Se houver mensagens anteriores, continue a conversa com o usuário. Caso contrário, dê 3 dicas estratégicas rápidas baseadas no lucro e destinos acima.`;
+- Viagens: ${stats?.totalTrips}
+- Faturamento Médio: R$ ${stats?.avgRevenue.toFixed(2)}
+- Lucro Líquido Real: R$ ${stats?.totalLucro.toFixed(2)}
+- Principais Destinos: ${stats?.mainDestinations.join(', ')}
+- Veículos: ${stats?.vehiclesCount}
 
-        const history = messages?.slice(0, -1).map(m => ({
-            role: m.role === 'user' ? 'user' : 'model',
-            parts: [{ text: m.content }]
-        })) || [];
+Se houver mensagens anteriores, continue a conversa com o usuário. Caso contrário, dê 3 dicas estratégicas rápidas baseadas no lucro e destinos acima. Seja breve e responda SEMPRE em Português-Brasil.`;
 
-        const currentMessage = messages && messages.length > 0 
-            ? messages[messages.length - 1].content 
-            : "Gere 3 dicas estratégicas para meu negócio agora.";
-
-        const chat = model.startChat({
-            history: history,
-            generationConfig: { 
-                maxOutputTokens: 2500, // Aumentado para evitar cortes
-                temperature: 0.7 
-            }
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [
+                    { role: 'system', content: 'Você é um consultor sênior de logística e ERP. Responda em Português-Brasil. Seja estratégico e motivador.' },
+                    { role: 'system', content: contextPrompt },
+                    ...(messages || []).map(m => ({
+                        role: m.role === 'user' ? 'user' : 'assistant',
+                        content: m.content
+                    }))
+                ],
+                temperature: 0.7,
+                max_tokens: 2048
+            })
         });
 
-        const result = await chat.sendMessage(`${contextPrompt}\n\nRELEVANT: Não corte a resposta no meio. Conclua o raciocínio.\n\nPergunta do usuário: ${currentMessage}`);
-        const response = await result.response;
-        return response.text();
-    } catch (error) {
-        console.error("Gemini AI Error:", error);
-        return "Tive um problema ao processar sua dúvida. Verifique sua chave de API ou tente novamente em instantes.";
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error?.message || 'Erro na API da Groq');
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content;
+
+    } catch (error: any) {
+        console.error('Groq API Error:', error);
+        return `Tive um problema ao processar sua dúvida: ${error.message}. Verifique sua chave de API ou tente novamente em instantes.`;
     }
 }

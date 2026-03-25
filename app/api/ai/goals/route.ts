@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { buildAIContext, serializeContextToPrompt } from '../../../../services/buildAIContext';
 
 export async function POST(req: NextRequest) {
@@ -7,13 +6,11 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { action, contextString, goalTitle, goalDescription, currentStep, userNote } = body;
 
-        const apiKey = (process.env.GEMINI_API_KEY || '').trim();
-        if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY' || apiKey.length < 10) {
-            return NextResponse.json({ error: 'GEMINI_API_KEY não configurada corretamente.' }, { status: 400 });
+        const apiKey = (process.env.GROQ_API_KEY || '').trim();
+        if (!apiKey || apiKey === 'PLACEHOLDER' || apiKey.length < 10) {
+            return NextResponse.json({ error: 'GROQ_API_KEY não configurada corretamente.' }, { status: 400 });
         }
 
-        const genAI = new GoogleGenerativeAI(apiKey);
-        
         let systemInstruction = "Você é um consultor sênior de logística e ERP. Responda sempre em Português-Brasil.";
         if (action === 'generate_plan') {
             systemInstruction = `Você é um consultor de negócios especialista em logística e empreendedorismo brasileiro.
@@ -23,13 +20,7 @@ export async function POST(req: NextRequest) {
             systemInstruction = "Você é o coach oficial do RibeirxLog. Seja motivador e direto.";
         }
 
-        const model = genAI.getGenerativeModel({ 
-            model: 'gemini-flash-latest',
-            systemInstruction
-        });
-
         const contextBlock = contextString || '';
-
         let prompt = '';
 
         if (action === 'generate_plan') {
@@ -77,19 +68,35 @@ PASSO RECÉM CONCLUÍDO: "${currentStep?.title}"
 DESCRIÇÃO DO PASSO: "${currentStep?.description}"
 OBSERVAÇÃO DO USUÁRIO: "${userNote || 'Nenhuma observação'}"
 
-Escreva uma mensagem de parabéns curta (2-3 linhas), mencionando o transportador pelo nome, ou apenas como "Parceiro" se não souber o nome, e,
-se relevante, faça um comentário sobre como esse passo impacta o fluxo de caixa ou os objetivos.
-Apresente uma pequena dica de transição para o próximo passo.
+Escreva uma mensagem de parabéns curta (2-3 linhas), mencionando o transportador pelo nome e, se relevante, faça um comentário sobre como esse passo impacta o fluxo de caixa.
 Português, pessoal e motivador. Máximo 150 palavras.`;
         }
 
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: action === 'generate_plan' 
-                ? { responseMimeType: 'application/json', maxOutputTokens: 2500 } 
-                : { maxOutputTokens: 2048 }
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [
+                    { role: 'system', content: systemInstruction },
+                    { role: 'user', content: prompt }
+                ],
+                temperature: action === 'generate_plan' ? 0.1 : 0.7,
+                max_tokens: 2500,
+                response_format: action === 'generate_plan' ? { type: 'json_object' } : undefined
+            })
         });
-        const text = result.response.text();
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error?.message || 'Erro na Groq API');
+        }
+
+        const data = await response.json();
+        const text = data.choices[0].message.content;
 
         if (action === 'generate_plan') {
             try {

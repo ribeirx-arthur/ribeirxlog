@@ -306,7 +306,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
             </div>
 
             {/* AI FUTURE PROJECTION CHART */}
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] relative overflow-hidden group">
+            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] relative group">
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h3 className="text-xl font-black text-white uppercase italic flex items-center gap-3">
@@ -384,10 +384,10 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                     <Brain className="text-white w-7 h-7" />
                 </div>
                 <div className="max-w-2xl">
-                    <h3 className="text-2xl font-black text-white uppercase italic mb-2 tracking-tighter">Consultoria Estratégica Gemini</h3>
-                    <p className="text-slate-400 text-sm font-bold leading-relaxed mb-6">
-                        "Arthur, o Gemini pode ler todas as métricas acima e te dar conselhos personalizados. Clique abaixo para gerar sua análise estratégica quinzenal."
-                    </p>
+                <h3 className="text-2xl font-black text-white uppercase italic mb-2 tracking-tighter">Inteligência Estratégica RBX (Groq)</h3>
+                <p className="text-slate-400 text-sm font-bold leading-relaxed mb-6">
+                    "Arthur, agora uso o motor ultra-veloz da Groq para ler todas as suas métricas e te dar planos de ação em milissegundos. Clique abaixo para gerar sua análise estratégica."
+                </p>
                     
                     {profile.plan_type === 'piloto' || profile.plan_type === 'none' ? (
                         <div className="bg-slate-950/80 backdrop-blur-sm border border-slate-800 p-8 rounded-[2rem] flex flex-col items-center text-center gap-4">
