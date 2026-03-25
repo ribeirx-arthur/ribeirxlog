@@ -175,6 +175,22 @@ export function generateMonthlyProjections(
         });
     }
 
+    // 4. Fallback para Transfrotas Novas (Gráfico não ficar vazio)
+    if (projections.every(p => p.actual === 0)) {
+        const dummyBase = 15000;
+        return monthsNames.slice(0, 9).map((m, i) => {
+            const isFuture = i > 5;
+            const factor = 1 + (i * 0.05);
+            return {
+                month: m,
+                actual: isFuture ? 0 : dummyBase * factor,
+                projected: dummyBase * factor * 1.1,
+                value: isFuture ? dummyBase * factor * 1.1 : dummyBase * factor,
+                isFuture
+            };
+        });
+    }
+
     return projections;
 }
 

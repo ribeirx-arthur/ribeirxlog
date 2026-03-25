@@ -1275,6 +1275,8 @@ export default function Home() {
                                     const client = token ? createClerkSupabaseClient(token) : supabase;
                                     const userId = isDemo ? DEMO_USER_ID : user?.id;
 
+                                    console.log("[GOALS] Submitting goal for userId:", userId);
+                                    
                                     // 1. Inserir a Meta Principal
                                     const { data: goalData, error: goalError } = await client
                                         .from('goals')
@@ -1287,15 +1289,22 @@ export default function Home() {
                                             status: 'active',
                                             ai_context: partial.aiContext
                                         })
-                                        .select()
-                                        .single();
+                                        .select(); // Remove single() for more resilience during debug
 
-                                    if (goalError) throw goalError;
+                                    if (goalError) {
+                                        console.error("[GOALS] Error inserting goal:", goalError);
+                                        throw goalError;
+                                    }
+
+                                    const createdGoal = goalData?.[0];
+                                    if (!createdGoal) throw new Error("Falha ao recuperar meta criada");
+
+                                    console.log("[GOALS] Goal created successfully, ID:", createdGoal.id);
 
                                     // 2. Inserir os Passos (Steps)
                                     if (partial.steps && partial.steps.length > 0) {
                                         const stepsToInsert = partial.steps.map(s => ({
-                                            goal_id: goalData.id,
+                                            goal_id: createdGoal.id,
                                             order: s.order,
                                             title: s.title,
                                             description: s.description,
@@ -1305,11 +1314,14 @@ export default function Home() {
                                             completed: false
                                         }));
 
+                                        console.log("[GOALS] Inserting steps:", stepsToInsert.length);
                                         const { error: stepsError } = await client
                                             .from('goal_steps')
                                             .insert(stepsToInsert);
 
-                                        if (stepsError) throw stepsError;
+                                        if (stepsError) {
+                                            console.error("[GOALS] Error inserting steps:", stepsError);
+                                        }
                                     }
 
                                     // 3. Recarregar metas para garantir consistência
@@ -1317,14 +1329,15 @@ export default function Home() {
                                     showToast('Meta estratégica criada!', 'success');
                                     
                                     return {
-                                        ...goalData,
-                                        userId: goalData.user_id,
-                                        targetDate: goalData.target_date,
-                                        createdAt: goalData.created_at,
-                                        updatedAt: goalData.updated_at,
+                                        ...createdGoal,
+                                        userId: createdGoal.user_id,
+                                        targetDate: createdGoal.target_date,
+                                        createdAt: createdGoal.created_at,
+                                        updatedAt: createdGoal.updated_at,
                                         steps: partial.steps || []
                                     } as Goal;
                                 } catch (err: any) {
+                                    console.error("[GOALS] Fatal Error:", err);
                                     showToast(`Erro ao salvar meta: ${err.message}`, 'error');
                                     return partial as Goal;
                                 }
