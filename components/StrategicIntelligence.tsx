@@ -67,7 +67,9 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
     }, [chatMessages, loadingAI]);
 
     const projections = useMemo(() => {
-        return generateMonthlyProjections(trips, vehicles, drivers, profile);
+        const data = generateMonthlyProjections(trips, vehicles, drivers, profile);
+        console.log("[DEBUG] Gráfico Projections Data:", data);
+        return data;
     }, [trips, vehicles, drivers, profile]);
 
     const handleSendMessage = async (text?: string) => {
@@ -317,53 +319,60 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                     </div>
                 </div>
                 
-                <div className="h-[300px] w-full mt-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={projections}>
-                            <defs>
-                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                            <XAxis 
-                                dataKey="month" 
-                                stroke="#475569" 
-                                fontSize={10} 
-                                tickLine={false} 
-                                axisLine={false} 
-                                tick={{fontWeight: '900'}}
-                            />
-                            <YAxis 
-                                stroke="#475569" 
-                                fontSize={10} 
-                                tickLine={false} 
-                                axisLine={false} 
-                                domain={['auto', 'auto']}
-                                tickFormatter={(val) => `R$ ${val >= 1000 ? (val/1000).toFixed(1) + 'k' : val}`}
-                            />
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem', fontSize: '12px', fontWeight: 'bold' }}
-                                itemStyle={{ color: '#fff' }}
-                            />
-                            <Area 
-                                type="monotone" 
-                                dataKey="value" 
-                                name="Lucro Estimado"
-                                stroke="#6366f1" 
-                                strokeWidth={4}
-                                fillOpacity={1} 
-                                fill="url(#colorValue)" 
-                                animationDuration={2000}
-                                dot={(props) => {
-                                    const { cx, cy, payload } = props;
-                                    if (payload.isFuture) return <circle cx={cx} cy={cy} r={4} fill="#f43f5e" stroke="none" />;
-                                    return <circle cx={cx} cy={cy} r={3} fill="#6366f1" stroke="none" />;
-                                }}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                <div className="h-[300px] w-full mt-4 flex items-center justify-center">
+                    {mounted ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={projections} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <XAxis 
+                                    dataKey="month" 
+                                    stroke="#475569" 
+                                    fontSize={10} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                    tick={{fontWeight: '900', fill: '#94a3b8'}}
+                                />
+                                <YAxis 
+                                    stroke="#475569" 
+                                    fontSize={10} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                    domain={['auto', 'auto']}
+                                    tickFormatter={(val) => `R$ ${val >= 1000 ? (val/1000).toFixed(1) + 'k' : val}`}
+                                    tick={{fontWeight: '900', fill: '#94a3b8'}}
+                                />
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem', fontSize: '12px', fontWeight: 'bold' }}
+                                    itemStyle={{ color: '#fff' }}
+                                />
+                                <Area 
+                                    type="monotone" 
+                                    dataKey="value" 
+                                    name="Lucro Estimado"
+                                    stroke="#6366f1" 
+                                    strokeWidth={4}
+                                    fillOpacity={1} 
+                                    fill="url(#colorValue)" 
+                                    animationDuration={2000}
+                                    dot={(props) => {
+                                        const { cx, cy, payload } = props;
+                                        if (payload.isFuture) return <circle key={`dot-future-${cx}`} cx={cx} cy={cy} r={4} fill="#f43f5e" stroke="none" />;
+                                        return <circle key={`dot-actual-${cx}`} cx={cx} cy={cy} r={3} fill="#6366f1" stroke="none" />;
+                                    }}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="flex flex-col items-center gap-3 text-slate-700">
+                            <RefreshCcw className="w-6 h-6 animate-spin opacity-20" />
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-20">Iniciando Gráfico...</p>
+                        </div>
+                    )}
                 </div>
                 
                 <div className="flex items-center gap-4 mt-6 pt-6 border-t border-white/5">

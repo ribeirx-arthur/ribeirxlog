@@ -202,30 +202,66 @@ export default function Home() {
                     }
 
                     const loadTable = async (table: string, setter: any, mapper?: any) => {
-                        console.log(`[DEBUG] Loading table: ${table} for User ID: ${targetUserId}`);
-                        let query = client.from(table).select('*');
+                        try {
+                            console.log(`[DEBUG] Loading table: ${table} for User ID: ${targetUserId}`);
+                            let query = client.from(table).select('*');
 
-                        // Tables that have user_id column
-                        const tablesWithUserId = [
-                            'trips', 'vehicles', 'drivers', 'shippers',
-                            'buggies', 'tires', 'maintenance_records', 'profiles',
-                            'vehicle_locations', 'gps_alerts', 'goals'
-                        ];
+                            const tablesWithUserId = [
+                                'trips', 'vehicles', 'drivers', 'shippers',
+                                'buggies', 'tires', 'maintenance_records', 'profiles',
+                                'vehicle_locations', 'gps_alerts', 'goals'
+                            ];
 
-                        if (tablesWithUserId.includes(table)) {
-                            query = query.eq('user_id', targetUserId);
-                        }
+                            if (tablesWithUserId.includes(table)) {
+                                query = query.eq('user_id', targetUserId);
+                            }
 
-                        if (table === 'goals') {
-                            query = client.from('goals').select('*, goal_steps(*)').eq('user_id', targetUserId).order('created_at', { ascending: false });
-                        }
+                            if (table === 'goals') {
+                                // Buscar Metas
+                                const { data: goalsData, error: goalsError } = await client
+                                    .from('goals')
+                                    .select('*')
+                                    .eq('user_id', targetUserId)
+                                    .order('created_at', { ascending: false });
 
-                        const { data, error } = await query;
-                        if (error) {
-                            console.error(`[DEBUG] Error loading ${table}:`, error);
-                        } else if (data) {
-                            console.log(`[DEBUG] Loaded ${data.length} records from ${table}`);
-                            setter(mapper ? data.map(mapper) : data);
+                                if (goalsError) throw goalsError;
+
+                                // Buscar Passos separadamente para garantir carga
+                                const { data: stepsData, error: stepsError } = await client
+                                    .from('goal_steps')
+                                    .select('*');
+
+                                if (stepsError) console.error("Erro ao carregar passos:", stepsError);
+
+                                const merged = (goalsData || []).map(g => ({
+                                    ...g,
+                                    userId: g.user_id,
+                                    targetDate: g.target_date,
+                                    createdAt: g.created_at,
+                                    updatedAt: g.updated_at,
+                                    steps: (stepsData || [])
+                                        .filter((s: any) => s.goal_id === g.id)
+                                        .map((s: any) => ({
+                                            ...s,
+                                            goalId: s.goal_id,
+                                            actionTip: s.action_tip,
+                                            estimatedValue: s.estimated_value,
+                                            resourceUrl: s.resource_url,
+                                            completedAt: s.completed_at,
+                                            notesFromUser: s.notes_from_user
+                                        }))
+                                        .sort((a: any, b: any) => a.order - b.order)
+                                }));
+
+                                console.log(`[DEBUG] Loaded ${merged.length} goals with steps.`);
+                                setGoals(merged);
+                            } else {
+                                const { data, error } = await query;
+                                if (error) throw error;
+                                setter(mapper ? data.map(mapper) : data);
+                            }
+                        } catch (err) {
+                            console.error(`[DEBUG] Error loading ${table}:`, err);
                         }
                     };
 
@@ -1208,7 +1244,11 @@ export default function Home() {
                 if (isFreeUser) {
                     return <Paywall title="Inteligência de Dados" plan="Gestor Pro" price="R$ 89,90" features={['Previsão de Gastos', 'Alertas de Ineficiência', 'Otimização de Rotas']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
-                return <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />;
+                return (
+                    <Suspense fallback={<div>Iniciando Inteligência Estratégica...</div>}>
+                        <Intelligence trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} maintenances={maintenances} tires={tires} buggies={buggies} />
+                    </Suspense>
+                );
             case 'freight-calculator':
                 if (isFreeUser) {
                     return <Paywall title="Calculadora de Frete" plan="Piloto" price="R$ 49,90" features={['Cálculo de Custos', 'Margem de Lucro', 'Estimativa de Diesel']} onUpgrade={() => setActiveTab('subscription')} />;

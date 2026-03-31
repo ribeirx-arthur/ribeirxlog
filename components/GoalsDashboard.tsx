@@ -342,6 +342,17 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
                                                 ✓ Concluída!
                                             </span>
                                         )}
+                                        <button 
+                                            onClick={() => {
+                                                if(confirm('Tem certeza que deseja excluir esta meta?')) {
+                                                    onDeleteGoal(activeGoal.id);
+                                                }
+                                            }}
+                                            className="ml-auto p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 rounded-xl transition-all group"
+                                            title="Excluir Meta"
+                                        >
+                                            <X className="w-3.5 h-3.5 group-hover:scale-110" />
+                                        </button>
                                     </div>
                                     <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">
                                         {activeGoal.title}

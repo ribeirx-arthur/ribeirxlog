@@ -176,19 +176,39 @@ export function generateMonthlyProjections(
     }
 
     // 4. Fallback para Transfrotas Novas (Gráfico não ficar vazio)
-    if (projections.every(p => p.actual === 0)) {
-        const dummyBase = 15000;
-        return monthsNames.slice(0, 9).map((m, i) => {
-            const isFuture = i > 5;
-            const factor = 1 + (i * 0.05);
-            return {
-                month: m,
-                actual: isFuture ? 0 : dummyBase * factor,
-                projected: dummyBase * factor * 1.1,
-                value: isFuture ? dummyBase * factor * 1.1 : dummyBase * factor,
-                isFuture
-            };
-        });
+    const hasHistory = projections.some(p => p.actual > 0);
+    if (!hasHistory || trips.length === 0) {
+        const dummyBase = 12000;
+        const simulatedProjections: MonthlyProjection[] = [];
+        
+        // Simular 6 meses passados até o atual
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const factor = 1 + (Math.sin((5 - i) * 0.5) * 0.1); // Leve variação para não ser linha reta
+            const val = dummyBase * (1 + (5 - i) * 0.05) * factor;
+            simulatedProjections.push({
+                month: monthsNames[d.getMonth()],
+                actual: Math.round(val),
+                projected: Math.round(val),
+                value: Math.round(val),
+                isFuture: false
+            });
+        }
+        
+        // Simular 3 meses futuros
+        const lastVal = simulatedProjections[5].actual;
+        for (let i = 1; i <= 3; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+            const val = lastVal * Math.pow(1.08, i);
+            simulatedProjections.push({
+                month: monthsNames[d.getMonth()],
+                actual: 0,
+                projected: Math.round(val),
+                value: Math.round(val),
+                isFuture: true
+            });
+        }
+        return simulatedProjections;
     }
 
     return projections;
