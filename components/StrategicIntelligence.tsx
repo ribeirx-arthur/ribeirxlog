@@ -26,7 +26,7 @@ import { Trip, Vehicle, Driver, Shipper, UserProfile, MaintenanceRecord, Tire, B
 import { calculateTripFinance } from '../services/finance';
 import { generateMonthlyProjections } from '../services/aiAnalysis';
 import { buildAIContext, serializeContextToPrompt } from '../services/buildAIContext';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+// Recharts import removido em prol de um SVG Custom Failsafe (NeuralProjectionSVG)
 
 interface StrategicIntelligenceProps {
     trips: Trip[];
@@ -319,52 +319,8 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                     </div>
                 </div>
                 
-                <div style={{ width: '100%', height: 300, position: 'relative' }} className="mt-4">
-                    <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={projections} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="colorProjection" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
-                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.02}/>
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                            <XAxis 
-                                dataKey="month" 
-                                stroke="#475569" 
-                                fontSize={10} 
-                                tickLine={false} 
-                                axisLine={false} 
-                                tick={{ fontWeight: 900, fill: '#94a3b8' }}
-                            />
-                            <YAxis 
-                                stroke="#475569" 
-                                fontSize={10} 
-                                tickLine={false} 
-                                axisLine={false} 
-                                domain={['auto', 'auto']}
-                                tickFormatter={(val: number) => `R$ ${val >= 1000 ? (val/1000).toFixed(1) + 'k' : val}`}
-                                tick={{ fontWeight: 900, fill: '#94a3b8' }}
-                            />
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem', fontSize: '12px', fontWeight: 'bold' }}
-                                itemStyle={{ color: '#fff' }}
-                                formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Lucro']}
-                            />
-                            <Area 
-                                type="monotone" 
-                                dataKey="value" 
-                                name="Lucro Estimado"
-                                stroke="#6366f1" 
-                                strokeWidth={3}
-                                fillOpacity={1} 
-                                fill="url(#colorProjection)" 
-                                isAnimationActive={false}
-                                dot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
-                                activeDot={{ r: 6, fill: '#818cf8', stroke: '#fff', strokeWidth: 2 }}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                <div className="h-[300px] w-full mt-4 flex items-center justify-center relative">
+                    <NeuralProjectionSVG data={projections} />
                 </div>
                 
                 <div className="flex items-center gap-4 mt-6 pt-6 border-t border-white/5">
@@ -572,6 +528,97 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                 </div>
             </div>
         </div>
+    );
+};
+
+// ------------------------------------------------------------------------------------------------
+// NEURAL CUSTOM SVG COMPONENT (Failsafe for Next.js SSR / Recharts Bug)
+// ------------------------------------------------------------------------------------------------
+const NeuralProjectionSVG = ({ data }: { data: any[] }) => {
+    if (!data || data.length === 0) return null;
+
+    const width = 800;
+    const height = 300;
+    const padding = 40;
+
+    const maxVal = Math.max(...data.map(d => d.value), 100);
+    const globalMax = maxVal * 1.05;
+
+    const getX = (index: number) => (index * (width - 2 * padding)) / (data.length - 1) + padding;
+    const getY = (val: number) => height - padding - (val * (height - 2 * padding)) / globalMax;
+
+    const points = data.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' ');
+    const areaPath = `M ${getX(0)},${height - padding} L ${points} L ${getX(data.length - 1)},${height - padding} Z`;
+
+    return (
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible drop-shadow-2xl">
+            <defs>
+                <linearGradient id="projGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                </linearGradient>
+                <filter id="glowLine"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+            </defs>
+
+            {/* Grid and Y-Axis */}
+            {[0, 0.25, 0.5, 0.75, 1].map((v, i) => {
+                const yPos = getY(globalMax * v);
+                const val = globalMax * v;
+                return (
+                    <g key={i}>
+                        <line x1={padding} y1={yPos} x2={width - padding} y2={yPos} stroke="#1e293b" strokeWidth="1" strokeDasharray="5,5" />
+                        <text x={padding - 10} y={yPos + 3} fill="#475569" fontSize="10" fontWeight="900" textAnchor="end">
+                            R$ {val >= 1000 ? (val / 1000).toFixed(1) + 'k' : Math.round(val)}
+                        </text>
+                    </g>
+                );
+            })}
+
+            {/* Gradient Area */}
+            <path d={areaPath} fill="url(#projGrad)" className="animate-in fade-in zoom-in-95 duration-1000" />
+            
+            {/* Segments for Solid (Actual) and Dashed (Future) */}
+            {data.map((d, i) => {
+                if (i === 0) return null;
+                const prev = data[i - 1];
+                return (
+                    <line 
+                        key={`line-${i}`}
+                        x1={getX(i - 1)} y1={getY(prev.value)} 
+                        x2={getX(i)} y2={getY(d.value)} 
+                        stroke={d.isFuture ? "#f43f5e" : "#6366f1"} 
+                        strokeWidth={d.isFuture ? "3" : "4"} 
+                        strokeDasharray={d.isFuture ? "6,4" : "none"}
+                        strokeLinecap="round" 
+                        filter={d.isFuture ? "none" : "url(#glowLine)"} 
+                    />
+                );
+            })}
+
+            {/* X-Axis Labels */}
+            {data.map((d, i) => (
+                <text key={`label-${i}`} x={getX(i)} y={height - 10} textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="900" className="uppercase">
+                    {d.month}
+                </text>
+            ))}
+
+            {/* Data Points */}
+            {data.map((d, i) => (
+                <circle 
+                    key={`dot-${i}`} 
+                    cx={getX(i)} 
+                    cy={getY(d.value)} 
+                    r={d.isFuture ? "4" : "5"} 
+                    fill={d.isFuture ? "#f43f5e" : "#6366f1"} 
+                    stroke="#0f172a" 
+                    strokeWidth="2" 
+                    className="hover:scale-150 transition-transform cursor-crosshair origin-center"
+                    style={{ transformOrigin: `${getX(i)}px ${getY(d.value)}px` }}
+                >
+                    <title>{d.month}: R$ {Math.round(d.value).toLocaleString()}</title>
+                </circle>
+            ))}
+        </svg>
     );
 };
 
