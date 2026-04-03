@@ -142,35 +142,73 @@ export function generateMonthlyProjections(
         });
     }
 
-    // 2. Calcular Tendência
-    const pastValues = projections.map(p => p.actual);
-    const avgRevenue = pastValues.reduce((a, b) => a + b, 0) / (pastValues.length || 1);
+    // 2. Calcular Tendência Inteligente
+    // Removemos os meses zerados (antes do usuário usar o app) e o mês ATUAL (que está sempre incompleto no início)
+    const validPastValues = projections.slice(0, 5).map(p => p.actual).filter(v => v > 0);
     
-    let growthFactor = 1.0;
-    if (pastValues.length >= 3) {
-        const last3 = pastValues.slice(-3);
-        const diff1 = last3[2] - last3[1];
-        const diff2 = last3[1] - last3[0];
-        const avgDiff = (diff1 + diff2) / 2;
-         growthFactor = 1 + (avgDiff / (avgRevenue || 1)) * 0.5;
-         growthFactor = Math.max(0.85, Math.min(1.15, growthFactor));
+    // Média de lucros reais (apenas meses concluídos)
+    const avgRevenue = validPastValues.length > 0
+        ? validPastValues.reduce((a, b) => a + b, 0) / validPastValues.length
+        : 0;
+        
+    let growthFactor = 1.02; // Crescimento base suave de 2% 
+    
+    if (validPastValues.length >= 2) {
+        const last = validPastValues[validPastValues.length - 1];
+        const prev = validPastValues[validPastValues.length - 2];
+        const diff = last - prev;
+        // Limitamos o fator entre -5% e +10% para não explodir o gráfico pra cima nem afundar pra baixo
+        growthFactor = 1 + Math.max(-0.05, Math.min(0.10, diff / (prev || 1))); 
     }
 
     // 3. Projetar próximos 3 meses
-    let lastValue = projections[projections.length - 1].actual;
-    if (lastValue > avgRevenue * 2 || lastValue < avgRevenue * 0.5) {
-        lastValue = (lastValue + avgRevenue) / 2;
+    // A base da projeção DEVE SER o último mês concluído com lucro, ou a média
+    let baseProjectionValue = validPastValues.length > 0 
+        ? validPastValues[validPastValues.length - 1] 
+        : (projections[5].actual || 15000); 
+
+    // Se o último mês concluído foi anômalo, suaviza com a média normal dele
+    if (validPastValues.length > 1 && (baseProjectionValue < avgRevenue * 0.7 || baseProjectionValue > avgRevenue * 1.5)) {
+        baseProjectionValue = (baseProjectionValue + avgRevenue) / 2;
     }
+
+    // AJUSTE CRÍTICO: O mês atual (index 5) quase sempre estará incompleto e "puxaria" a linha pra baixo.
+    // Vamos calcular o "Pace" (Ritmo) de ganhos até o momento para estimar como o mês vai fechar
+    const currentMonthDaysPassed = Math.max(1, now.getDate());
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    
+    // Projeção matématica de como o mês atual deve fechar se manter o mesmo ritmo
+    const currentPaceExpected = (projections[5].actual / currentMonthDaysPassed) * daysInMonth;
+
+    // Se ele ainda fez poucas viagens no início do mês, misturamos a expectativa com a média histórica dele 
+    // para a linha não aparentar queda vertiginosa
+    let expectedCurrentMonth = 0;
+    if (currentMonthDaysPassed <= 10) {
+        // Início do mês: pesa mais o histórico (70%) do que o ritmo atual (30%)
+        expectedCurrentMonth = (baseProjectionValue * 0.7) + (currentPaceExpected * 0.3);
+    } else {
+        // Fim do mês: pesa mais o ritmo atual (80%) do que o histórico (20%)
+        expectedCurrentMonth = (currentPaceExpected * 0.8) + (baseProjectionValue * 0.2);
+    }
+
+    // Atualizamos a "value" (que desenha o gráfico) do mês atual para ser a expectativa.
+    // O "actual" se mantém como o dinheiro real q ele tem hoje.
+    projections[5].value = Math.max(projections[5].actual, Math.round(expectedCurrentMonth));
+
+    // A partir do mês atual estimado, desenhamos os próximos 3 meses
+    let lastValue = projections[5].value;
 
     for (let i = 1; i <= 3; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-        const projectedValue = lastValue * Math.pow(growthFactor, i);
+        
+        // Aplica o fator de crescimento, mas previne que um crescimento irreal cause valores exponenciais
+        const projectedValue = lastValue * Math.pow(Math.max(1, growthFactor), i);
         
         projections.push({
             month: monthsNames[d.getMonth()],
             actual: 0,
-            projected: isNaN(projectedValue) ? 0 : Math.round(projectedValue),
-            value: isNaN(projectedValue) ? 0 : Math.round(projectedValue),
+            projected: Math.round(projectedValue),
+            value: Math.round(projectedValue),
             isFuture: true
         });
     }
