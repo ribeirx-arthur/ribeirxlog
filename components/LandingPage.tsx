@@ -1,4 +1,4 @@
-﻿
+
 import React, { useState } from 'react';
 import LegalModal from './LegalModal';
 import {
@@ -133,11 +133,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                             </div>
 
                             <h1 className="text-5xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
-                                GESTÃO <span className="text-emerald-500">SIMPLES</span> PARA QUEM ENTENDE DE ESTRADA.
+                                VOCÊ ESTÁ DEIXANDO <br />
+                                <span className="text-emerald-500">DINHEIRO NA MESA.</span>
                             </h1>
 
                             <p className="text-lg md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
-                                O único app que transforma seu celular em um verdadeiro gestor. Controle lucros, fretes e motoristas sem complicação, <span className="text-white font-bold">por menos que um almoço por mês.</span>
+                                Descubra com a Inteligência Artificial para onde o seu lucro está fugindo. O único aplicativo que rastreia seus custos reais e cria metas gerenciais usando IA. <span className="text-white font-bold">Por menos que um almoço.</span>
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in zoom-in-95 duration-1000 delay-700">
@@ -346,14 +347,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                                 Funcionalidade Liberada
                             </div>
                             <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6 italic uppercase leading-none">
-                                Calculadora de <br /><span className="text-emerald-500">Frete Rápida.</span>
+                                Seu Negócio Guiado <br /><span className="text-emerald-500">por Inteligência Artificial.</span>
                             </h3>
                             <p className="text-lg text-slate-400 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
-                                <span className="text-white font-bold">Nunca mais pague para trabalhar.</span> Simule diesel, pedágio, manutenção e sua margem de lucro em segundos. Transparente e direto ao ponto.
+                                <span className="text-white font-bold">O 1º Algoritmo Financeiro de Frotas.</span> Nossa Inteligência Artificial mapeia sua transportadora e cospe um plano passo-a-passo no seu celular para aumentar seus lucros em 30%. Sem planilhas difíceis.
                             </p>
                             <div className="flex justify-center">
                                 <a href="#planos" className="px-10 py-5 bg-white text-slate-950 font-black rounded-2xl flex items-center gap-4 hover:scale-105 transition-all shadow-2xl uppercase tracking-widest text-sm">
-                                    SIMULAR AGORA <ArrowRight className="w-4 h-4" />
+                                    GERAR MEU PLANO <ArrowRight className="w-4 h-4" />
                                 </a>
                             </div>
                         </div>
@@ -446,10 +447,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-32 space-y-6">
-                        <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.3em]">
-                            <Star className="w-3 h-3" /> Parceria & Investimento
+                        <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
+                            <Zap className="w-3 h-3" /> 30 Dias Grátis — Sem Cartão
                         </div>
-                        <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter italic uppercase">Escolha sua <br /> <span className="text-emerald-500">POTÊNCIA.</span></h2>
+                        <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter italic uppercase">Teste 30 dias. <br /> <span className="text-emerald-500">Pague só se gostar.</span></h2>
+                        <p className="text-slate-400 font-medium max-w-xl mx-auto">Libere todas as funções por 30 dias, incluindo a IA que analisa seus custos ocultos. Zero risco.</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-end">
@@ -573,26 +575,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                         <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px] pointer-events-none"></div>
 
                         <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-tight relative z-10">
-                            PRONTO PARA DEIXAR O <br />
-                            <span className="text-emerald-500 underline decoration-emerald-500/30">AMADORISMO PARA TRÁS?</span>
+                            QUANTO DINHEIRO VOCÊ <br />
+                            <span className="text-emerald-500 underline decoration-emerald-500/30">PERDEU ESSE MÊS?</span>
                         </h2>
+                        <p className="text-slate-400 text-lg relative z-10 max-w-xl mx-auto">A IA do RBX Log descobre isso em 2 minutos. <strong className="text-white">30 dias grátis para você provar.</strong></p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 relative z-10">
                             <button
                                 onClick={onGetStarted}
                                 className="w-full sm:w-auto px-16 py-8 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-[2.5rem] shadow-2xl transition-all text-2xl hover:scale-105 active:scale-95"
                             >
-                                COMEÇAR GRÁTIS AGORA
+                                TESTAR 30 DIAS GRÁTIS
                             </button>
                             <button
                                 onClick={handleWhatsAppContact}
                                 className="w-full sm:w-auto px-12 py-8 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-[2.5rem] transition-all text-xl flex items-center justify-center gap-4"
                             >
-                                <MessageCircle className="w-7 h-7" /> TIRAR DÚVIDAS NO ZAP
+                                <MessageCircle className="w-7 h-7" /> QUERO UMA DEMO AO VIVO
                             </button>
                         </div>
 
-                        <p className="text-slate-500 text-xs font-black uppercase tracking-widest relative z-10 mt-6">Teste sem cartão de crédito. Você só assina se gostar.</p>
+                        <p className="text-slate-500 text-xs font-black uppercase tracking-widest relative z-10 mt-6">Sem cartão. Sem contrato. Cancele quando quiser.</p>
                     </div>
                 </div>
             </section>
@@ -675,8 +678,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
 const LandingPricingCard = ({ title, price, period, desc, features, isPopular, onSelect }: any) => (
     <div className={`p-8 md:p-16 rounded-[3rem] md:rounded-[4.5rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 md:scale-105 shadow-[0_40px_100px_rgba(16,185,129,0.15)] z-10' : 'bg-slate-900/50 border-white/5 hover:border-white/10'}`}>
         {isPopular && (
-            <div className="absolute top-8 right-8 px-6 py-2 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl">
-                MAIS VENDIDO
+            <div className="absolute top-8 right-8 px-6 py-2 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl animate-pulse">
+                30 DIAS GRÁTIS
             </div>
         )}
         <div className="mb-12">

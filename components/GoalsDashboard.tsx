@@ -575,13 +575,27 @@ export const GoalsDashboard: React.FC<GoalsDashboardProps> = ({
                                 A IA vai criar um plano passo a passo personalizado. Desde abrir sua transportadora até comprar sua frota própria.
                             </p>
                         </div>
-                        <button
-                            onClick={() => setShowNewGoalForm(true)}
-                            className="flex items-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-500/20 transition-all"
-                        >
-                            <Sparkles className="w-4 h-4" />
-                            Criar minha primeira Meta
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                            <button
+                                onClick={() => setShowNewGoalForm(true)}
+                                className="flex items-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-500/20 transition-all"
+                            >
+                                <Sparkles className="w-4 h-4" />
+                                Criar Minha Meta
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setNewGoalTitle('Plano de Resgate de Margem');
+                                    setNewGoalDesc('SIMULAÇÃO DEMO: Sou pequeno frotista rodando no Sul. Faturação alta mas no fim do mês falta caixa. Sinto que custos ocultos estão comendo a margem do frete. Faça uma auditoria baseada nos meus dados (simulados).');
+                                    setNewGoalCategory('financial');
+                                    setShowNewGoalForm(true);
+                                }}
+                                className="flex items-center gap-3 px-8 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-full font-black text-sm uppercase tracking-widest shadow-xl transition-all"
+                            >
+                                <Brain className="w-4 h-4 text-emerald-400" />
+                                Testar IA (Modo Demo)
+                            </button>
+                        </div>
                     </div>
                 )}
             </main>
