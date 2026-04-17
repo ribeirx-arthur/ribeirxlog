@@ -226,6 +226,13 @@ export default function Home() {
                                 query = query.eq('user_id', targetUserId);
                             }
 
+                            const { data, error } = await query;
+                            if (error) throw error;
+                            
+                            if (data) {
+                                setter(mapper ? data.map(mapper) : data);
+                            }
+
                         } catch (err) {
                             console.error(`[DEBUG] Error loading ${table}:`, err);
                         }
