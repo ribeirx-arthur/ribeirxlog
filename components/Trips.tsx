@@ -195,65 +195,104 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
   const finance = selectedTrip && selectedVehicle && selectedDriver ? calculateTripFinance(selectedTrip, selectedVehicle, selectedDriver, profile) : null;
 
   return (
-    <div className="space-y-6">
-      {/* Filtros e Top Bar */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-black text-white tracking-tight">Viagens</h2>
-            <p className="text-slate-400 text-sm mt-1">Gerenciamento dinâmico de fretes e rentabilidade.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleGenerateMonthlyReport}
-              className="flex items-center gap-2 px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition-all text-sm font-bold shadow-lg shadow-sky-500/20"
-            >
-              <Download className="w-4 h-4" /> Relatório Mensal PDF
-            </button>
-            <div className="hidden lg:flex items-center gap-4 bg-slate-900/50 border border-slate-800 rounded-2xl px-4 py-2">
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold text-slate-500">Lucro Filtrado</span>
-                <span className="text-emerald-500 font-bold text-sm">R$ {statsSummary.profit.toLocaleString()}</span>
-              </div>
-              <div className="w-px h-8 bg-slate-800"></div>
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold text-slate-500">Total Bruto</span>
-                <span className="text-white font-bold text-sm">R$ {statsSummary.gross.toLocaleString()}</span>
-              </div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+      {/* Hero Section - Neural Intel Design */}
+      <div className="relative h-64 md:h-80 rounded-[3rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
+        <img 
+          src="/trips_hero_bg_1776391959496.png" 
+          alt="Trips Hero" 
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 brightness-[0.4]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent"></div>
+        
+        <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-10 h-1 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] italic">Logistics Command</span>
             </div>
-            <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all text-sm font-bold ${showFilters ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'}`}>
-              <Filter className="w-4 h-4" /> Filtros Avançados
-            </button>
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none italic uppercase">
+              Fluxo de <span className="text-emerald-500">Operações</span>
+            </h2>
+            <p className="text-slate-400 text-sm md:text-base font-medium max-w-xl">
+              Gerencie cada etapa da sua operação logística com precisão cirúrgica e inteligência financeira.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-3xl p-5 shadow-2xl">
+               <div className="flex items-center gap-4">
+                  <div className="p-3 bg-emerald-500/10 rounded-2xl">
+                    <TrendingUp className="w-6 h-6 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Lucro Filtrado</p>
+                    <p className="text-xl font-black text-white leading-none">R$ {statsSummary.profit.toLocaleString()}</p>
+                  </div>
+               </div>
+             </div>
+             <button
+               onClick={handleGenerateMonthlyReport}
+               className="h-full px-8 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-[2rem] font-black uppercase text-xs tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.3)] flex items-center gap-2"
+             >
+               <Download className="w-4 h-4" /> Relatório Semanal
+             </button>
           </div>
         </div>
+      </div>
+
+      {/* Control Bar */}
+      <div className="flex flex-col bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-6 shadow-xl">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <input 
+              type="text" 
+              placeholder="Pesquisar placa, destino ou ID da operação..." 
+              className="w-full bg-slate-950/50 border border-slate-800 rounded-3xl pl-16 pr-8 py-5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-bold placeholder:text-slate-600" 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+            />
+          </div>
+          <button 
+            onClick={() => setShowFilters(!showFilters)} 
+            className={`flex items-center gap-3 px-8 py-5 rounded-3xl border transition-all text-xs font-black uppercase tracking-widest ${showFilters ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-slate-950/50 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700'}`}
+          >
+            <Filter className="w-5 h-5" /> 
+            {showFilters ? 'Ocultar Filtros' : 'Filtros'}
+          </button>
+        </div>
+
         {showFilters && (
-          <div className="bg-slate-800/40 border border-slate-700/50 rounded-3xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Pesquisa Inteligente</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input type="text" placeholder="Placa, destino ou ID..." className="w-full bg-slate-900/50 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Status Financeiro</label>
-              <div className="flex p-1 bg-slate-900/50 rounded-xl border border-slate-700">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-top-4 duration-300 pt-4 border-t border-white/5 mt-4">
+            <div className="space-y-4">
+              <label className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2 italic">Status da Operação</label>
+              <div className="flex p-2 bg-slate-950/50 rounded-2xl border border-slate-800/50">
                 {(['all', 'pending', 'paid'] as StatusFilter[]).map((f) => (
-                  <button key={f} onClick={() => setStatusFilter(f)} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${statusFilter === f ? 'bg-emerald-500 text-white' : 'text-slate-500 hover:text-slate-300'}`}>
-                    {f === 'all' ? 'Todos' : f === 'pending' ? 'Pendentes' : 'Pagos'}
+                  <button 
+                    key={f} 
+                    onClick={() => setStatusFilter(f)} 
+                    className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === f ? 'bg-emerald-500 text-slate-950 shadow-lg' : 'text-slate-600 hover:text-slate-400 hover:bg-white/5'}`}
+                  >
+                    {f === 'all' ? 'Tudo' : f === 'pending' ? 'Pendentes' : 'Concluídos'}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ordenar Por</label>
+            <div className="space-y-4">
+              <label className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2 italic">Priorização de Fluxo</label>
               <div className="relative">
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 appearance-none focus:outline-none">
-                  <option value="recent">Mais Recentes</option>
-                  <option value="profit">Maior Lucratividade</option>
-                  <option value="gross">Maior Valor Bruto</option>
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value as SortOption)} 
+                  className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl px-6 py-4 text-sm text-slate-300 appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-bold"
+                >
+                  <option value="recent">Cronologia Recente</option>
+                  <option value="profit">Máxima Rentabilidade</option>
+                  <option value="gross">Volume Bruto</option>
                 </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -261,92 +300,94 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
       </div>
 
       {/* Listagem de Viagens */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         {filteredAndSortedTrips.map(trip => {
           const vehicle = vehicles.find(v => v.id === trip.vehicleId) || { plate: 'DOC. PENDENTE', name: 'Veículo não vinculado' } as Vehicle;
           const driver = drivers.find(d => d.id === trip.driverId) || { name: 'Motorista não vinculado' } as Driver;
           const tripFinance = calculateTripFinance(trip, vehicle, driver, profile);
+          
           return (
-            <div key={trip.id} className="bg-slate-800/40 border border-slate-700/50 rounded-3xl p-6 hover:bg-slate-800/60 transition-all group relative">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div className="flex items-start gap-4 lg:w-1/4">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${trip.status === 'Pago' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                    <MapPin className="w-7 h-7" />
+            <div key={trip.id} className="group relative bg-slate-900/30 backdrop-blur-sm border border-white/5 rounded-[2.5rem] p-8 hover:bg-slate-800/40 transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl hover:shadow-emerald-500/5 shadow-lg overflow-hidden">
+               {/* Accent bar */}
+               <div className={`absolute left-0 top-0 bottom-0 w-2 transition-all group-hover:w-3 ${trip.status === 'Pago' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+               
+               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                <div className="flex items-center gap-6 lg:w-1/3">
+                  <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center shrink-0 shadow-2xl relative group-hover:rotate-12 transition-transform duration-500 ${trip.status === 'Pago' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>
+                    <MapPin className="w-10 h-10" />
+                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center">
+                        <span className={`w-2 h-2 rounded-full ${trip.transitStatus === 'Em Trânsito' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-black text-white text-lg leading-tight mb-1 group-hover:text-emerald-400 transition-colors">{trip.destination || 'Destino Pendente'}</h4>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2 py-0.5 bg-slate-900 border border-slate-700 rounded text-[9px] font-black text-slate-400 uppercase">{vehicle.plate}</span>
-                      <p className="text-slate-500 text-xs font-medium flex items-center gap-1.5"><CalendarIcon className="w-3 h-3 text-emerald-500" /> {formatDate(trip.departureDate)}</p>
-
-                      {/* Transit Status Pill/Dot */}
-                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 border border-slate-700/50 rounded-lg">
-                        <span className={`w-1.5 h-1.5 rounded-full ${trip.transitStatus === 'Em Trânsito' ? 'bg-sky-400 animate-pulse' :
-                          trip.transitStatus === 'Finalizado' ? 'bg-slate-500' : 'bg-amber-400'
-                          }`}></span>
-                        <span className="text-[9px] font-black uppercase text-slate-400">{trip.transitStatus || 'Agendado'}</span>
+                  <div className="space-y-2">
+                    <h4 className="font-black text-white text-2xl tracking-tighter leading-none group-hover:text-emerald-400 transition-colors italic uppercase">{trip.destination || 'Em Aberto'}</h4>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="px-3 py-1 bg-slate-950 text-[10px] font-black text-emerald-500 border border-emerald-500/30 rounded-full uppercase tracking-widest">{vehicle.plate}</span>
+                      <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-400">
+                        <CalendarIcon className="w-3 h-3 text-emerald-500" />
+                        {formatDate(trip.departureDate)}
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 flex-1 px-4 border-l border-slate-700/50">
-                  <div className="space-y-1">
-                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Equipe & Cliente</p>
-                    <p className="text-white text-sm font-bold truncate">{driver.name}</p>
+
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 flex-1 pl-8 lg:border-l lg:border-white/5">
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] uppercase font-black text-slate-600 tracking-[0.2em] italic">Comando & Log</p>
+                    <p className="text-white text-sm font-bold truncate tracking-tight">{driver.name}</p>
+                    <p className="text-[10px] font-black text-emerald-500/70 uppercase">vessel: {vehicle.name}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Rentabilidade</p>
-                    <p className="text-emerald-500 text-sm font-black">
-                      R$ {(vehicle.type === 'Sociedade' ? tripFinance.lucroSociety : tripFinance.lucroLiquidoReal).toLocaleString()}
+                  
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] uppercase font-black text-slate-600 tracking-[0.2em] italic">Rentabilidade</p>
+                    <p className="text-2xl font-black text-white tracking-tighter leading-none">
+                      <span className="text-xs text-slate-500 font-bold mr-1">R$</span>
+                      {(vehicle.type === 'Sociedade' ? tripFinance.lucroSociety : tripFinance.lucroLiquidoReal).toLocaleString()}
                     </p>
-                    {vehicle.type === 'Sociedade' && (
-                      <p className="text-[8px] text-slate-500 font-bold">({vehicle.societySplitFactor}% sociedade)</p>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Saldos (Ida / Volta)</p>
                     <div className="flex items-center gap-2">
-                       <p className={`text-sm font-black ${(trip.balanceIda || 0) > 0 ? 'text-emerald-500' : 'text-slate-700'}`}>R$ {(trip.balanceIda || 0).toLocaleString()}</p>
-                       <span className="text-slate-800">/</span>
-                       <p className={`text-sm font-black ${(trip.balanceVolta || 0) > 0 ? 'text-sky-400' : 'text-slate-700'}`}>R$ {(trip.balanceVolta || 0).toLocaleString()}</p>
+                       <span className="w-1 h-1 rounded-full bg-emerald-500" />
+                       <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Impacto Positivo</span>
                     </div>
                   </div>
-                  <div className="hidden md:block space-y-1">
-                    <p className="text-[9px] uppercase font-black text-slate-600 tracking-widest">Status</p>
-                    <div className={`flex items-center gap-1.5 text-xs font-black ${trip.status === 'Pago' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                      {trip.status === 'Pago' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />} {trip.status}
+
+                  <div className="hidden lg:flex flex-col justify-center space-y-2">
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest self-start ${trip.status === 'Pago' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>
+                      {trip.status === 'Pago' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                      STATUS: {trip.status}
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-950/50 rounded-2xl border border-white/5 text-[10px] font-black text-slate-500 uppercase tracking-widest self-start">
+                        Fase: {trip.transitStatus || 'Pendente'}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-end gap-3 lg:w-auto">
+
+                <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={() => handleGenerateReceipt(trip.id)}
-                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 border border-emerald-400 rounded-2xl text-xs font-black text-white transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                    className="p-5 bg-white/5 hover:bg-emerald-500 hover:text-slate-950 border border-white/10 rounded-[2rem] text-white transition-all duration-300 shadow-xl group/btn"
+                    title="Baixar Recibo"
                   >
-                    <FileText className="w-3.5 h-3.5" /> Gerar Recibo PDF
+                    <FileText className="w-6 h-6 transition-transform group-hover/btn:scale-110" />
                   </button>
-                  <button onClick={() => setMenuOpenId(menuOpenId === trip.id ? null : trip.id)} className="p-3 bg-slate-900/50 border border-slate-800 rounded-2xl text-slate-500 hover:text-white"> <MoreVertical className="w-5 h-5" /> </button>
+                  <button 
+                    onClick={() => setMenuOpenId(menuOpenId === trip.id ? null : trip.id)} 
+                    className="p-5 bg-slate-950 hover:bg-slate-900 border border-white/5 rounded-[2rem] text-slate-500 hover:text-white transition-all shadow-xl"
+                  > 
+                    <MoreVertical className="w-6 h-6" /> 
+                  </button>
+                  
                   {menuOpenId === trip.id && (
-                    <div className="absolute right-0 mt-3 w-56 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-20 py-2">
-                      <button onClick={() => { setEditingTrip({ ...trip }); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-emerald-500 hover:bg-emerald-500/10 font-bold"> <Edit3 className="w-4 h-4" /> Editar </button>
-                      {trip.transitStatus === 'Finalizado' && (
-                        <button
-                          onClick={() => {
-                            const msg = `Resumo da Viagem RibeirxLog:\nDestino: ${trip.destination}\nPlaca: ${vehicle.plate}\nData: ${formatDate(trip.departureDate)}\nStatus: ${trip.transitStatus || 'Agendado'}`;
-                            window.open(`https://wa.me/${driver.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
-                            setMenuOpenId(null);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-emerald-400 hover:bg-emerald-500/10 font-bold"
-                        >
-                          <MessageCircle className="w-4 h-4" /> Enviar p/ WhatsApp
-                        </button>
-                      )}
-                      <button onClick={() => { setViewingFilesTripId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-sky-500 hover:bg-sky-500/10 font-bold"> <FileText className="w-4 h-4" /> Ver Rastreio & Docs </button>
-                      <button onClick={() => { setTripToDeleteId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-rose-500 hover:bg-rose-500/10 font-bold"> <Trash2 className="w-4 h-4" /> Excluir </button>
+                    <div className="absolute right-0 top-full mt-4 w-64 bg-slate-900 border border-white/10 rounded-[2rem] shadow-2xl z-[100] py-4 overflow-hidden animate-in zoom-in-95 duration-200">
+                      <div className="px-6 py-2 mb-2 border-b border-white/5">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Ações Rápidas</p>
+                      </div>
+                      <button onClick={() => { setEditingTrip({ ...trip }); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-white hover:bg-emerald-500/10 font-black uppercase tracking-widest transition-all"> <Edit3 className="w-5 h-5 text-emerald-500" /> Modificar </button>
+                      <button onClick={() => { setViewingFilesTripId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-white hover:bg-sky-500/10 font-black uppercase tracking-widest transition-all"> <ExternalLink className="w-5 h-5 text-sky-500" /> Inteligência </button>
+                      <button onClick={() => { setTripToDeleteId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-rose-500 hover:bg-rose-500/10 font-black uppercase tracking-widest transition-all"> <Trash2 className="w-5 h-5" /> Eliminar </button>
                     </div>
                   )}
                 </div>
-              </div>
+               </div>
             </div>
           );
         })}

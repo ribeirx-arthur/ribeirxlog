@@ -22,8 +22,7 @@ const ProofGallery = React.lazy(() => import('../components/ProofGallery'));
 const HelpCenter = React.lazy(() => import('../components/HelpCenter'));
 const OngoingTrips = React.lazy(() => import('../components/OngoingTrips'));
 const Bank = React.lazy(() => import('../components/Bank'));
-const GoalsDashboard = React.lazy(() => import('../components/GoalsDashboard'));
-import Onboarding from '../components/Onboarding';
+import { OnboardingModal } from '../components/OnboardingModal';
 const TutorialSidebar = React.lazy(() => import('../components/TutorialSidebar'));
 
 import LandingPage from '../components/LandingPage';
@@ -44,8 +43,7 @@ import {
     MaintenanceRecord,
     MaintenanceThresholds,
     VehicleLocation,
-    GPSAlert,
-    Goal
+    GPSAlert
 } from '../types';
 import {
     INITIAL_PROFILE
@@ -106,7 +104,6 @@ export default function Home() {
     const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([]);
     const [locations, setLocations] = useState<VehicleLocation[]>([]);
     const [gpsAlerts, setGpsAlerts] = useState<GPSAlert[]>([]);
-    const [goals, setGoals] = useState<Goal[]>([]);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         setToast({ message, type });
@@ -211,57 +208,13 @@ export default function Home() {
                             const tablesWithUserId = [
                                 'trips', 'vehicles', 'drivers', 'shippers',
                                 'buggies', 'tires', 'maintenance_records', 'profiles',
-                                'vehicle_locations', 'gps_alerts', 'goals'
+                                'vehicle_locations', 'gps_alerts'
                             ];
 
                             if (tablesWithUserId.includes(table)) {
                                 query = query.eq('user_id', targetUserId);
                             }
 
-                            if (table === 'goals') {
-                                // Buscar Metas
-                                const { data: goalsData, error: goalsError } = await client
-                                    .from('goals')
-                                    .select('*')
-                                    .eq('user_id', targetUserId)
-                                    .order('created_at', { ascending: false });
-
-                                if (goalsError) throw goalsError;
-
-                                // Buscar Passos separadamente para garantir carga
-                                const { data: stepsData, error: stepsError } = await client
-                                    .from('goal_steps')
-                                    .select('*');
-
-                                if (stepsError) console.error("Erro ao carregar passos:", stepsError);
-
-                                const merged = (goalsData || []).map(g => ({
-                                    ...g,
-                                    userId: g.user_id,
-                                    targetDate: g.target_date,
-                                    createdAt: g.created_at,
-                                    updatedAt: g.updated_at,
-                                    steps: (stepsData || [])
-                                        .filter((s: any) => s.goal_id === g.id)
-                                        .map((s: any) => ({
-                                            ...s,
-                                            goalId: s.goal_id,
-                                            actionTip: s.action_tip,
-                                            estimatedValue: s.estimated_value,
-                                            resourceUrl: s.resource_url,
-                                            completedAt: s.completed_at,
-                                            notesFromUser: s.notes_from_user
-                                        }))
-                                        .sort((a: any, b: any) => a.order - b.order)
-                                }));
-
-                                console.log(`[DEBUG] Loaded ${merged.length} goals with steps.`);
-                                setGoals(merged);
-                            } else {
-                                const { data, error } = await query;
-                                if (error) throw error;
-                                setter(mapper ? data.map(mapper) : data);
-                            }
                         } catch (err) {
                             console.error(`[DEBUG] Error loading ${table}:`, err);
                         }
@@ -355,22 +308,6 @@ export default function Home() {
                         loadTable('gps_alerts', setGpsAlerts, (a: any) => ({
                             vehicleId: a.vehicle_id,
                             resolved: !!a.resolved
-                        })),
-                        loadTable('goals', setGoals, (g: any) => ({
-                            ...g,
-                            userId: g.user_id,
-                            targetDate: g.target_date,
-                            createdAt: g.created_at,
-                            updatedAt: g.updated_at,
-                            steps: (g.goal_steps || []).map((s: any) => ({
-                                ...s,
-                                goalId: s.goal_id,
-                                actionTip: s.action_tip,
-                                estimatedValue: s.estimated_value,
-                                resourceUrl: s.resource_url,
-                                completedAt: s.completed_at,
-                                notesFromUser: s.notes_from_user
-                            })).sort((a: any, b: any) => a.order - b.order)
                         }))
                     ]);
                 } catch (error) {
@@ -1325,143 +1262,6 @@ export default function Home() {
             case 'admin':
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} setActiveTab={setActiveTab} />;
                 return <AdminPanel profile={profile} supabaseClient={authenticatedClient} />;
-
-
-            case 'goals':
-                return (
-                    <Suspense fallback={<div>Carregando metas...</div>}>
-                        <GoalsDashboard
-                            goals={goals}
-                            profile={profile}
-                            trips={trips}
-                            vehicles={vehicles}
-                            drivers={drivers}
-                            onCreateGoal={async (partial) => {
-                                try {
-                                    const token = await getToken({ template: 'supabase' });
-                                    const client = token ? createClerkSupabaseClient(token) : supabase;
-                                    const userId = isDemo ? DEMO_USER_ID : user?.id;
-
-                                    console.log("[GOALS] Submitting goal for userId:", userId);
-                                    
-                                    // 1. Inserir a Meta Principal
-                                    const { data: goalData, error: goalError } = await client
-                                        .from('goals')
-                                        .insert({
-                                            user_id: userId,
-                                            title: partial.title,
-                                            description: partial.description,
-                                            category: partial.category,
-                                            target_date: partial.targetDate,
-                                            status: 'active',
-                                            ai_context: partial.aiContext
-                                        })
-                                        .select(); // Remove single() for more resilience during debug
-
-                                    if (goalError) {
-                                        console.error("[GOALS] Error inserting goal:", goalError);
-                                        throw goalError;
-                                    }
-
-                                    const createdGoal = goalData?.[0];
-                                    if (!createdGoal) throw new Error("Falha ao recuperar meta criada");
-
-                                    console.log("[GOALS] Goal created successfully, ID:", createdGoal.id);
-
-                                    // 2. Inserir os Passos (Steps)
-                                    if (partial.steps && partial.steps.length > 0) {
-                                        const stepsToInsert = partial.steps.map(s => ({
-                                            goal_id: createdGoal.id,
-                                            order: s.order,
-                                            title: s.title,
-                                            description: s.description,
-                                            action_tip: s.actionTip,
-                                            estimated_value: s.estimatedValue,
-                                            resource_url: s.resourceUrl,
-                                            completed: false
-                                        }));
-
-                                        console.log("[GOALS] Inserting steps:", stepsToInsert.length);
-                                        const { error: stepsError } = await client
-                                            .from('goal_steps')
-                                            .insert(stepsToInsert);
-
-                                        if (stepsError) {
-                                            console.error("[GOALS] Error inserting steps:", stepsError);
-                                        }
-                                    }
-
-                                    // 3. Recarregar metas para garantir consistência
-                                    setRefreshTrigger(prev => prev + 1);
-                                    showToast('Meta estratégica criada!', 'success');
-                                    
-                                    return {
-                                        ...createdGoal,
-                                        userId: createdGoal.user_id,
-                                        targetDate: createdGoal.target_date,
-                                        createdAt: createdGoal.created_at,
-                                        updatedAt: createdGoal.updated_at,
-                                        steps: partial.steps || []
-                                    } as Goal;
-                                } catch (err: any) {
-                                    console.error("[GOALS] Fatal Error:", err);
-                                    showToast(`Erro ao salvar meta: ${err.message}`, 'error');
-                                    return partial as Goal;
-                                }
-                            }}
-                            onUpdateGoal={async (updated) => {
-                                try {
-                                    const token = await getToken({ template: 'supabase' });
-                                    const client = token ? createClerkSupabaseClient(token) : supabase;
-
-                                    // Atualizar meta
-                                    const { error: goalError } = await client
-                                        .from('goals')
-                                        .update({
-                                            title: updated.title,
-                                            description: updated.description,
-                                            category: updated.category,
-                                            target_date: updated.targetDate,
-                                            status: updated.status,
-                                            current_step_index: updated.currentStepIndex
-                                        })
-                                        .eq('id', updated.id);
-
-                                    if (goalError) throw goalError;
-
-                                    // Atualizar steps (simplificado: deletar e reinserir ou atualizar um a um)
-                                    // Para performance e simplicidade aqui, vamos apenas atualizar os campos de status do step
-                                    for (const step of updated.steps) {
-                                        await client.from('goal_steps').update({
-                                            completed: step.completed,
-                                            completed_at: step.completedAt,
-                                            notes_from_user: step.notesFromUser
-                                        }).eq('id', step.id);
-                                    }
-
-                                    setGoals(prev => prev.map(g => g.id === updated.id ? updated : g));
-                                    showToast('Progresso salvo!', 'success');
-                                } catch (err: any) {
-                                    showToast('Erro ao atualizar meta', 'error');
-                                }
-                            }}
-                            onDeleteGoal={async (goalId) => {
-                                try {
-                                    const token = await getToken({ template: 'supabase' });
-                                    const client = token ? createClerkSupabaseClient(token) : supabase;
-                                    
-                                    const { error } = await client.from('goals').delete().eq('id', goalId);
-                                    if (error) throw error;
-
-                                    setGoals(prev => prev.filter(g => g.id !== goalId));
-                                    showToast('Meta removida', 'info');
-                                } catch (err: any) {
-                                    showToast('Erro ao excluir meta', 'error');
-                                }
-                            }}
-                        />
-                    </Suspense>
-                );
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} setActiveTab={setActiveTab} />;
         }
     };
@@ -1514,27 +1314,48 @@ export default function Home() {
         );
     }
 
-    // ─── RENDER ONBOARDING ───
-    if (isSignedIn && isLoaded && !loadingData && profile?.config && profile.config.onboardingCompleted !== true) {
-        return (
-            <Onboarding
-                profile={profile}
-                onComplete={handleOnboardingComplete as any}
-                onSkip={() => handleOnboardingComplete({
-                    companyName: profile.companyName || 'Minha Transportadora',
-                    city: '',
-                    vehicle: {},
-                    driver: {},
-                    appMode: 'simple',
-                    userRole: 'transportadora',
-                })}
-            />
-        );
-    }
+    // ─── FINAL RENDER ───
+    const isProfileIncomplete = isSignedIn && (!profile.name || !profile.phone || !profile.config.onboardingCompleted);
+    const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+    useEffect(() => {
+        if (isProfileIncomplete && mounted) {
+            setShowOnboardingModal(true);
+        }
+    }, [isProfileIncomplete, mounted]);
+
+    const handleOnboardingComplete = async (updatedData: Partial<UserProfile>) => {
+        const newProfile = { ...profile, ...updatedData };
+        setProfile(newProfile);
+        setShowOnboardingModal(false);
+        
+        if (!isDemo && user) {
+            try {
+                const { error } = await authenticatedClient
+                    .from('profiles')
+                    .update(updatedData)
+                    .eq('id', user.id);
+                
+                if (error) throw error;
+                showToast('Perfil configurado com sucesso!', 'success');
+            } catch (e) {
+                console.error("Error saving onboarding:", e);
+                showToast('Erro ao salvar perfil, mas você pode continuar.', 'error');
+            }
+        }
+    };
 
     return (
-        <AppModeProvider profile={profile}>
-            <div className="min-h-screen bg-slate-950 text-slate-200">
+        <AppModeProvider initialMode={profile.config.appMode || 'simple'}>
+            <div className={`min-h-screen bg-slate-950 text-white font-sans selection:bg-emerald-500/30 selection:text-emerald-200 overflow-x-hidden ${!mounted ? 'opacity-0' : 'opacity-100 transition-opacity duration-1000'}`}>
+                
+                <OnboardingModal 
+                    isOpen={showOnboardingModal} 
+                    onComplete={handleOnboardingComplete}
+                    profile={profile}
+                />
+
                 <Sidebar
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
@@ -1543,6 +1364,8 @@ export default function Home() {
                     onClose={() => setIsMobileMenuOpen(false)}
                     appVersion={APP_VERSION}
                     isDemo={isDemo}
+                    isCollapsed={isSidebarCollapsed}
+                    setIsCollapsed={setIsSidebarCollapsed}
                 />
                 <Header
                     profile={profile}
@@ -1555,8 +1378,9 @@ export default function Home() {
                     isDemo={isDemo}
                     setIsMobileMenuOpen={setIsMobileMenuOpen}
                     onOpenTutorial={() => setShowTutorial(true)}
+                    isSidebarCollapsed={isSidebarCollapsed}
                 />
-                <main className="md:ml-64 p-4 md:p-8">
+                <main className={`transition-all duration-500 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'} p-4 md:p-8`}>
                     <div className="max-w-7xl mx-auto pb-24 md:pb-8">
                         <Suspense fallback={<div>Carregando...</div>}>
                             {renderContent()}

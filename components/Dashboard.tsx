@@ -8,7 +8,13 @@ import {
   Clock,
   Calendar,
   PieChart as PieIcon,
-  Users
+  Users,
+  ChevronDown,
+  Filter,
+  Search,
+  Download,
+  Maximize2,
+  RefreshCw
 } from 'lucide-react';
 import { Trip, Vehicle, Driver, Shipper, UserProfile } from '../types';
 import { calculateTripFinance } from '../services/finance';
@@ -36,10 +42,13 @@ interface DashboardProps {
   setActiveTab?: (tab: any) => void;
 }
 
-type TimeFilter = 'semanal' | 'mensal' | 'anual' | 'total';
+type TimeFilter = 'semanal' | 'mensal' | 'anual' | 'total' | 'personalizado';
 
 const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shippers, profile, onPopulateDemo, setActiveTab }) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('mensal');
+  const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -68,6 +77,13 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
 
       if (isNaN(targetDate.getTime())) return false;
 
+      if (timeFilter === 'personalizado') {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return targetDate >= start && targetDate <= end;
+      }
+
       if (timeFilter === 'semanal') {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(now.getDate() - 7);
@@ -81,7 +97,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       if (timeFilter === 'anual') return targetDate.getFullYear() === now.getFullYear();
       return true;
     });
-  }, [trips, timeFilter]);
+  }, [trips, timeFilter, startDate, endDate]);
 
   const stats = useMemo(() => {
     let totalRevenue = 0;
@@ -174,31 +190,51 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-black text-white tracking-tight">Painel de Controle <span className="text-emerald-500">Simples</span></h1>
-          <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Resumo Financeiro & Operacional</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">
+              Painel <span className="text-emerald-500">RBS v2.0</span>
+            </h1>
+            <div className="h-1 flex-1 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full" />
+          </div>
+          <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest pl-1">Inteligência Logística para Autônomos</p>
         </header>
 
-        {/* Big Balance Card with Background Image */}
-        <div className="bg-emerald-500 rounded-[2.5rem] p-10 shadow-2xl shadow-emerald-500/20 relative overflow-hidden group">
-          <img
-            src="/dashboard-caminhão-futurista2.png.png"
-            className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"
-            alt="Dashboard"
-          />
-          <div className="absolute right-[-20px] top-[-20px] opacity-10 group-hover:scale-110 transition-transform duration-1000">
-            <Zap className="w-64 h-64 text-white" />
-          </div>
-          <div className="relative z-10 space-y-4">
-            <p className="text-emerald-950/60 font-black uppercase text-[10px] tracking-widest">Saldo de Lucro Líquido</p>
-            <h2 className="text-6xl font-black text-emerald-950 tracking-tighter">R$ {stats.totalProfit.toLocaleString()}</h2>
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="bg-emerald-600/30 px-6 py-3 rounded-2xl border border-emerald-400/30 backdrop-blur-md">
-                <p className="text-emerald-950/70 text-[9px] font-black uppercase mb-1">Total Receita</p>
-                <p className="text-emerald-950 font-black">R$ {stats.totalRevenue.toLocaleString()}</p>
+        {/* Big Balance Card with Futuristic Background */}
+        <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-1 shadow-2xl relative overflow-hidden group">
+          <div className="bg-emerald-500 rounded-[2.8rem] p-10 relative overflow-hidden">
+            <img
+              src="/futuristic_logistics_dashboard_bg_1776391496908.png"
+              className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay group-hover:scale-105 transition-transform duration-1000"
+              alt="Dashboard"
+            />
+            <div className="absolute right-[-20px] top-[-20px] opacity-10 group-hover:rotate-12 transition-transform duration-1000">
+              <Zap className="w-80 h-80 text-white" />
+            </div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-950/20 rounded-full border border-emerald-950/10">
+                  <Activity className="w-3 h-3 text-emerald-950" />
+                  <span className="text-emerald-950/70 font-black uppercase text-[10px] tracking-widest">Saldo de Lucro Líquido</span>
+                </div>
+                <h2 className="text-7xl font-black text-emerald-950 tracking-tighter leading-none">R$ {stats.totalProfit.toLocaleString()}</h2>
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="px-3 py-1 bg-emerald-600/20 border border-emerald-400/20 rounded-xl">
+                     <p className="text-[10px] font-black text-emerald-950 uppercase tracking-widest">
+                       {filteredTrips.length} Viagens Filtradas
+                     </p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-emerald-600/30 px-6 py-3 rounded-2xl border border-emerald-400/30 backdrop-blur-md">
-                <p className="text-emerald-950/70 text-[9px] font-black uppercase mb-1">Saldo a Receber</p>
-                <p className="text-emerald-950 font-black">R$ {stats.pendingReceivables.toLocaleString()}</p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
+                <div className="bg-emerald-600/30 px-8 py-5 rounded-[2rem] border border-white/20 backdrop-blur-xl shadow-xl">
+                  <p className="text-emerald-950/70 text-[10px] font-black uppercase tracking-widest mb-1">Total Receita</p>
+                  <p className="text-2xl font-black text-emerald-950 italic tracking-tighter">R$ {stats.totalRevenue.toLocaleString()}</p>
+                </div>
+                <div className="bg-white/10 px-8 py-5 rounded-[2rem] border border-white/20 backdrop-blur-xl shadow-xl">
+                  <p className="text-emerald-950/70 text-[10px] font-black uppercase tracking-widest mb-1 font-bold">Saldo a Receber</p>
+                  <p className="text-2xl font-black text-emerald-950 italic tracking-tighter">R$ {stats.pendingReceivables.toLocaleString()}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -262,39 +298,197 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
     );
   }
 
-  // RENDER NEURAL/DEEP DASHBOARD (ADVANCED/INTERMEDIATE)
-  return (
-    <div className="space-y-6 animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <h1 className={`text-2xl font-black text-white tracking-tighter ${uiStyle === 'deep' ? 'animate-pulse text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400' : ''}`}>
-              {uiStyle === 'deep' ? 'System Intel OS' : 'Painel de Inteligência'}
-            </h1>
-            {isFree && <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[10px] font-black text-amber-500 uppercase tracking-widest uppercase">Grátis</span>}
-            {uiStyle === 'deep' && <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />}
-          </div>
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{uiStyle === 'deep' ? 'Acesso Prioritário RBS Engine' : 'Visão Estratégica da Frota'}</p>
-        </div>
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-2xl shadow-inner">
-            {(['semanal', 'mensal', 'anual', 'total'] as TimeFilter[]).map((f) => (
-              <button key={f} onClick={() => setTimeFilter(f)} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeFilter === f ? 'bg-emerald-500 text-emerald-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-slate-200'}`}>{f}</button>
-            ))}
-          </div>
-        </div>
-      </header>
+  // RENDER NEURAL/DEEP DASHBOARD (ADVANCE  return (
+    <div className="space-y-12 animate-in fade-in duration-700 pb-20 relative">
+      {/* Background Ambience */}
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Info Alert about Receivables Impact */}
+      {/* ─── ORBITAL NAVIGATION & FILTERS ─── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 z-10 relative">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-sky-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+              <div className="relative w-16 h-16 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center text-emerald-500 shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent" />
+                <BarChart3 className="w-8 h-8 relative z-10" />
+                {uiStyle === 'deep' && (
+                  <div className="absolute inset-0 border-2 border-emerald-500/20 rounded-2xl animate-[ping_3s_linear_infinite]" />
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+                  Neural <span className="text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">Intel</span>
+                </h1>
+                {isFree && (
+                  <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] font-black text-amber-500 uppercase tracking-widest shadow-lg shadow-amber-500/5">
+                    Free Tier
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mt-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.34em]">
+                    {uiStyle === 'deep' ? 'Quantum Logistics Monitor v5.0' : 'Estratégia Operacional RBS'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <button
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className={`flex items-center gap-4 px-6 py-4 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl transition-all hover:border-emerald-500/40 group shadow-2xl ${timeFilter === 'personalizado' ? 'border-emerald-500 bg-emerald-500/10' : ''}`}
+            >
+              <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-500/30 group-hover:scale-110 transition-transform">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div className="text-left pr-4">
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Janela de Dados</p>
+                <p className="text-sm font-black text-white uppercase tracking-tight leading-none group-hover:text-emerald-400 transition-colors">
+                  {timeFilter === 'personalizado' ? `${startDate.split('-').reverse().slice(0, 2).join('/')} - ${endDate.split('-').reverse().slice(0, 2).join('/')}` : timeFilter}
+                </p>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-500 ${showDatePicker ? 'rotate-180 text-emerald-500' : ''}`} />
+            </button>
+
+            {showDatePicker && (
+              <div className="absolute top-full right-0 mt-4 w-80 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-3xl p-8 z-[200] animate-in fade-in zoom-in-95 duration-300">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Presets Orbitais</h4>
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                </div>
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                  {(['semanal', 'mensal', 'anual', 'total'] as TimeFilter[]).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => { setTimeFilter(f); setShowDatePicker(false); }}
+                      className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${timeFilter === f ? 'bg-emerald-500 text-slate-950 shadow-xl shadow-emerald-500/20' : 'bg-white/5 text-slate-500 border border-white/5 hover:border-white/10 hover:text-white'}`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Ignition Point</label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => { setStartDate(e.target.value); setTimeFilter('personalizado'); }}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 text-xs text-white outline-none focus:border-emerald-500/50 transition-all font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Terminal Point</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => { setEndDate(e.target.value); setTimeFilter('personalizado'); }}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 text-xs text-white outline-none focus:border-emerald-500/50 transition-all font-bold"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setShowDatePicker(false)}
+                    className="w-full py-4 bg-emerald-500 text-slate-950 font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-emerald-500/30 active:scale-95 transition-all"
+                  >
+                    Sync Intelligence
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={() => window.location.reload()}
+            className="p-4 bg-slate-900 border border-white/10 rounded-2xl text-slate-400 hover:text-emerald-500 transition-all shadow-xl"
+          >
+            <RefreshCw className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* ─── HI-IMPACT HERO BANNER ─── */}
+      <div className="relative h-[480px] w-full bg-slate-900 rounded-[4rem] overflow-hidden border border-slate-800 shadow-3xl group">
+        <img
+          src="/futuristic_logistics_dashboard_bg_1776391496908.png"
+          className="absolute inset-0 w-full h-full object-cover opacity-70 mix-blend-screen group-hover:scale-105 transition-transform duration-[30s] ease-linear"
+          alt="Dashboard Neural"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+        
+        <div className="absolute top-12 left-12">
+           <div className="flex items-center gap-3 bg-slate-950/50 backdrop-blur-xl border border-white/5 px-4 py-2 rounded-2xl">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] italic">Neural Link Active</span>
+           </div>
+        </div>
+
+        <div className="absolute bottom-12 left-12 right-12 flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+          <div className="space-y-6 max-w-3xl">
+             <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span className="text-white text-[10px] font-black uppercase tracking-[0.25em]">Strategic Pulse Monitor</span>
+             </div>
+             <h2 className="text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.85]">
+               Intelligence <br /> 
+               <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]">Redefined</span>
+             </h2>
+             <p className="text-slate-300 text-lg font-medium leading-relaxed max-w-xl">
+               Análise profunda de rentabilidade, gestão de custos invisíveis e projeções financeiras alimentadas por inteligência artificial tática.
+             </p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+             <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-8 rounded-[3rem] shadow-2xl space-y-3 min-w-[200px] hover:border-emerald-500/30 transition-all group/card">
+                <div className="flex justify-between items-center">
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Next Payout</p>
+                   <TrendingUp className="w-4 h-4 text-emerald-500" />
+                </div>
+                <p className="text-3xl font-black text-white italic tracking-tighter">+ R$ {(projections.length > 0 ? (projections[0].projected || 0) : 0).toLocaleString()}</p>
+                <div className="h-1 w-full bg-slate-800 rounded-full mt-2 overflow-hidden">
+                   <div className="h-full bg-emerald-500 w-[65%] group-hover/card:w-[85%] transition-all duration-1000" />
+                </div>
+             </div>
+             <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-8 rounded-[3rem] shadow-2xl space-y-3 min-w-[200px] hover:border-sky-500/30 transition-all group/card">
+                <div className="flex justify-between items-center">
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global Rank</p>
+                   <Activity className="w-4 h-4 text-sky-500" />
+                </div>
+                <p className="text-3xl font-black text-white italic tracking-tighter">Elite <span className="text-sky-500 text-xl font-medium">9.2</span></p>
+                <div className="h-1 w-full bg-slate-800 rounded-full mt-2 overflow-hidden">
+                   <div className="h-full bg-sky-500 w-[45%] group-hover/card:w-[75%] transition-all duration-1000" />
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── PENDING MONITOR ALERT ─── */}
       {stats.pendingReceivables > 0 && (
-        <div className="bg-slate-900/40 border border-indigo-500/20 p-4 rounded-2xl flex items-center gap-4 animate-in slide-in-from-top-2">
-          <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 shrink-0">
-            <Zap className="w-5 h-5" />
+        <div className="bg-gradient-to-r from-slate-900 to-indigo-950/40 border border-indigo-500/20 p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 animate-in slide-in-from-top-4 duration-500 shadow-2xl">
+          <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 shrink-0 shadow-inner">
+            <Zap className="w-8 h-8 animate-pulse" />
           </div>
-          <div className="text-xs">
-            <p className="text-white font-bold">O Saldo a Receber impacta o lucro?</p>
-            <p className="text-slate-400">Sim! O lucro mostrado abaixo é **Potencial** (inclui o que você já ganhou mas ainda não recebeu o saldo). Monitore o saldo para garantir seu fluxo de caixa real.</p>
+          <div className="space-y-2 flex-1 text-center md:text-left">
+            <h3 className="text-lg font-black text-white uppercase italic tracking-tighter">Protocolo de Caixa: Saldo Pendente Detectado</h3>
+            <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-2xl">
+              Existem <span className="text-indigo-400 font-black">R$ {stats.pendingReceivables.toLocaleString()}</span> aguardando liberação. Este valor representa lucro em trânsito e impacta diretamente sua reserva de emergência.
+            </p>
           </div>
+          <button 
+            onClick={() => setActiveTab?.('trips')}
+            className="px-8 py-4 bg-indigo-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
+          >
+            Review Pending
+          </button>
         </div>
       )}
 
@@ -302,19 +496,23 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         <AIInsights insights={aiInsights} trips={trips} vehicles={vehicles} shippers={shippers} />
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Faturamento Bruto" value={`R$ ${stats.totalRevenue.toLocaleString()}`} trend={timeFilter} isPositive={true} icon={DollarSign} uiStyle={uiStyle} />
+      {/* ─── STATS GRID ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <StatCard title="Volume de Receita" value={`R$ ${stats.totalRevenue.toLocaleString()}`} trend={timeFilter} isPositive={true} icon={DollarSign} uiStyle={uiStyle} color="emerald" />
         <StatCard
-          title="Lucro Líquido Real"
+          title="Profit Residual"
           value={`R$ ${stats.totalProfit.toLocaleString()}`}
           trend={timeFilter}
           isPositive={true}
           icon={TrendingUp}
           uiStyle={uiStyle}
+          color="emerald"
         />
-        <StatCard title="Saldo a Receber" value={`R$ ${stats.pendingReceivables.toLocaleString()}`} trend="Pendente" isPositive={false} icon={Clock} uiStyle={uiStyle} />
-        {profile.config.userRole !== 'autonomo' && (
-          <StatCard title="Custos Motoristas" value={`R$ ${stats.driverCommissions.toLocaleString()}`} trend="Comissões" isPositive={true} icon={CreditCard} uiStyle={uiStyle} />
+        <StatCard title="Fluxo em Trânsito" value={`R$ ${stats.pendingReceivables.toLocaleString()}`} trend="Pendente" isPositive={false} icon={Clock} uiStyle={uiStyle} color="amber" />
+        {profile.config.userRole !== 'autonomo' ? (
+          <StatCard title="Capital Humano" value={`R$ ${stats.driverCommissions.toLocaleString()}`} trend="Comissões" isPositive={true} icon={CreditCard} uiStyle={uiStyle} color="indigo" />
+        ) : (
+          <StatCard title="Ativos Monitorados" value={vehicles.length.toString()} trend="Placas" isPositive={true} icon={Users} uiStyle={uiStyle} color="sky" />
         )}
       </div>
 
@@ -530,19 +728,46 @@ const DashboardProjectionChart = ({ data, uiStyle }: { data: any[], uiStyle?: st
   );
 };
 
-const StatCard: React.FC<{ title: string; value: string; trend: string; isPositive: boolean; icon: any; uiStyle?: string }> = ({ title, value, trend, isPositive, icon: Icon, uiStyle }) => (
-  <div className={`bg-slate-900 border border-slate-800 p-8 rounded-[2rem] hover:bg-slate-800/80 transition-all group relative overflow-hidden shadow-xl ${uiStyle === 'deep' ? 'hover:ring-1 hover:ring-emerald-500/30' : ''}`}>
-    <div className="flex items-center justify-between mb-6">
-      <div className={`p-4 bg-slate-950 rounded-2xl text-emerald-500 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-emerald-950 transition-all duration-500 shadow-inner`}>
-        <Icon className="w-5 h-5" />
+const StatCard: React.FC<{ title: string; value: string; trend: string; isPositive: boolean; icon: any; uiStyle?: string; color?: string }> = ({ title, value, trend, isPositive, icon: Icon, uiStyle, color = 'emerald' }) => {
+  const colorClasses: Record<string, string> = {
+    emerald: 'text-emerald-500 bg-emerald-500 shadow-emerald-500/20',
+    sky: 'text-sky-500 bg-sky-500 shadow-sky-500/20',
+    indigo: 'text-indigo-500 bg-indigo-500 shadow-indigo-500/20',
+    amber: 'text-amber-500 bg-amber-500 shadow-amber-500/20',
+    rose: 'text-rose-500 bg-rose-500 shadow-rose-500/20',
+    purple: 'text-purple-500 bg-purple-500 shadow-purple-500/20',
+  };
+
+  const selectedColor = colorClasses[color] || colorClasses.emerald;
+  const colorHex = selectedColor.split(' ')[0];
+
+  return (
+    <div className={`bg-slate-900 border border-slate-800 p-8 rounded-[3rem] hover:bg-slate-800/80 transition-all group relative overflow-hidden shadow-2xl ${uiStyle === 'deep' ? 'hover:ring-1 hover:ring-white/10' : ''}`}>
+      <div className="flex items-center justify-between mb-8">
+        <div className={`p-4 bg-slate-950 rounded-2xl ${colorHex} group-hover:scale-110 group-hover:bg-opacity-100 transition-all duration-500 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]`}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <div className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl ${isPositive ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-500 bg-slate-800'}`}>
+          {isPositive && <ArrowUpRight className="w-3 h-3" />}
+          {trend}
+        </div>
       </div>
-      <div className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-xl ${isPositive ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-500 bg-slate-800'}`}>{trend}</div>
+      <div className="space-y-1">
+        <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">{title}</h4>
+        <p className={`text-3xl font-black text-white italic tracking-tighter transition-all duration-500 group-hover:translate-x-1 ${uiStyle === 'deep' ? 'drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]' : ''}`}>{value}</p>
+      </div>
+      
+      {/* Neural Decoration */}
+      <div className="absolute bottom-4 right-8 opacity-5 group-hover:opacity-10 transition-opacity">
+        <Icon className="w-12 h-12" />
+      </div>
+      
+      {uiStyle === 'deep' && (
+        <div className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-${color}-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700`} />
+      )}
     </div>
-    <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">{title}</h4>
-    <p className={`text-2xl font-black text-white italic tracking-tighter ${uiStyle === 'deep' ? 'group-hover:text-emerald-400 transition-colors' : ''}`}>{value}</p>
-    {uiStyle === 'deep' && <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />}
-  </div>
-);
+  );
+};
 
 const AutonomousDriverTips = () => {
   return (

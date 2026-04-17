@@ -17,11 +17,12 @@ interface HeaderProps {
   setIsMobileMenuOpen?: (open: boolean) => void;
   isDemo?: boolean;
   onOpenTutorial?: () => void;
+  isSidebarCollapsed?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
   profile, notifications, onReadNotification, setActiveTab, activeTab, onRefresh,
-  isMobileMenuOpen, setIsMobileMenuOpen, isDemo, onOpenTutorial
+  isMobileMenuOpen, setIsMobileMenuOpen, isDemo, onOpenTutorial, isSidebarCollapsed
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -44,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({
   const totalUnread = allNotifications.filter(n => !n.read).length;
 
   return (
-    <header className="h-20 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 sticky top-0 z-[100] md:ml-64">
+    <header className={`h-20 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 sticky top-0 z-[100] transition-all duration-500 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
       <div className="flex items-center gap-4 flex-1">
         <button
           onClick={() => setIsMobileMenuOpen?.(!isMobileMenuOpen)}

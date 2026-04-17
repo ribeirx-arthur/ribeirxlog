@@ -182,77 +182,108 @@ const Performance: React.FC<PerformanceProps> = ({
    if (!mounted) return <div className="p-32 flex items-center justify-center font-black text-slate-800 tracking-[1em] animate-pulse">INITIATING BI ENGINE...</div>;
 
    return (
-      <div className="space-y-16 animate-in fade-in duration-1000 pb-32">
-         {/* HEADER PREMIUM Neural 5.0 */}
-         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10 border-b border-slate-800/50 pb-12">
-            <div className="flex items-center gap-10 group">
-               <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 via-teal-700 to-sky-700 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-emerald-500/20 rotate-6 group-hover:rotate-0 transition-all duration-700">
-                  <BarChart3 className="w-12 h-12 text-white" />
+      <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-[1200ms] pb-32">
+         {/* Neural BI Hero */}
+         <div className="relative h-[24rem] md:h-[30rem] rounded-[4rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
+            <img 
+               src="/performance_hero_bg_1776392058382.png" 
+               alt="Performance Hero" 
+               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[4000ms] brightness-[0.35]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent"></div>
+            
+            <div className="absolute inset-0 flex flex-col justify-end p-10 md:p-20">
+               <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.6em] italic">Operational Intelligence Hub</span>
                </div>
-               <div>
-                  <h2 className={`text-6xl ${luxuryTitle} tracking-tighter leading-none`}>Neural BI</h2>
-                  <p className="text-slate-500 text-[10px] font-black tracking-[0.5em] uppercase mt-4 flex items-center gap-3">
-                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                     Strategic Analytics v6.0 • Fully Blinded
-                  </p>
+               <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+                  <div className="space-y-4">
+                     <h2 className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-none italic uppercase">
+                        Neural <span className="text-emerald-500">Métricas</span>
+                     </h2>
+                     <p className="text-slate-400 text-base md:text-xl font-medium max-w-3xl leading-relaxed">
+                        Arthur, consolidei seu <span className="text-white">Relatório de Alta Performance</span>. Analise a rentabilidade por KM, rankings de ativos e projeções financeiras em um painel unificado.
+                     </p>
+                  </div>
+                  
+                  <div className="flex gap-6 shrink-0">
+                      <div className="bg-slate-900/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex items-center gap-6 group hover:translate-y-[-5px] transition-transform">
+                         <div className="p-5 bg-emerald-500/10 rounded-2xl">
+                            <Activity className="w-9 h-9 text-emerald-500" />
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status do BI</p>
+                            <p className="text-2xl font-black text-white uppercase italic">Optimal Flow</p>
+                         </div>
+                      </div>
+                  </div>
                </div>
             </div>
+         </div>
 
-            <nav className="flex bg-slate-950/80 backdrop-blur-xl border border-slate-800 p-2 rounded-[2.5rem] shadow-2xl scale-110">
+         {/* Navigation Control */}
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-[3rem] p-8 shadow-xl">
+            <div className="flex flex-wrap items-center gap-3 p-1.5 bg-slate-950/50 rounded-full border border-slate-800">
                {[
                   { id: 'geral', label: 'Monitor', icon: Activity },
-                  { id: 'rankings', label: 'Eilte', icon: Trophy },
+                  { id: 'rankings', label: 'Elite', icon: Trophy },
                   { id: 'custos', label: 'Cofre', icon: DollarSign },
                   { id: 'inteligencia', label: 'Cérebro', icon: Brain }
                ].map((v) => (
                   <button
                      key={v.id}
                      onClick={() => setActiveView(v.id as BIView)}
-                     className={`px-10 py-5 rounded-[1.8rem] text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-4 ${activeView === v.id ? 'bg-white text-slate-950 shadow-2xl' : 'text-slate-600 hover:text-white'
+                     className={`px-10 py-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-4 ${activeView === v.id ? 'bg-white text-slate-950 shadow-[0_10px_30px_rgba(255,255,255,0.1)]' : 'text-slate-500 hover:text-white hover:bg-white/5'
                         }`}
                   >
                      <v.icon className={`w-4 h-4 ${activeView === v.id ? 'text-emerald-500' : ''}`} />
                      {v.label}
                   </button>
                ))}
-            </nav>
-         </header>
+            </div>
+            
+            <div className="flex items-center gap-6 px-10 py-4 bg-slate-950/30 rounded-full border border-white/5 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">
+                <BarChart3 className="w-5 h-5 text-emerald-500" />
+                Processing Engine v6.2
+            </div>
+         </div>
 
          {activeView === 'geral' && (
             <div className="space-y-12 animate-in slide-in-from-bottom-10 duration-700">
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   <PremiumStat title="Receita Consolidada" value={analytics.totalRevenue} color="text-white" icon={Wallet} trend="+12%" />
                   <PremiumStat title="Lucro Líquido Real" value={analytics.totalProfit} color="text-emerald-400" icon={TrendingUp} trend="+7.5%" />
-                  <PremiumStat title="ROI de Operação" value={`${marginRatio}%`} color="text-sky-400" icon={Target} trend="Optimal" />
-                  <PremiumStat title="Rentabilidade/KM" value={`R$ ${(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}`} color="text-amber-400" icon={MapPin} trend="+3%" />
+                  <PremiumStat title="Market ROI" value={`${marginRatio}%`} color="text-sky-400" icon={Target} trend="Cruising" />
+                  <PremiumStat title="Eficiência / KM" value={`R$ ${(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}`} color="text-amber-400" icon={MapPin} trend="+3.2%" />
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                   <div className={glassCard + " lg:col-span-2 min-h-[550px]"}>
                      <div className="flex justify-between items-start mb-12">
-                        <div>
-                           <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Fluxo de Lucratividade</h3>
-                           <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase mt-3">Análise Temporal de 6 Meses (Neural SVG)</p>
+                        <div className="space-y-1">
+                           <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Trajetória de Performance</h3>
+                           <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase">Métricas Financeiras Históricas (Neural SVG)</p>
                         </div>
                      </div>
                      <div className="h-[380px] w-full relative">
-                        {/* CUSTOM FAILSAFE SVG CHART */}
                         <NeuralAreaChart data={chartData} />
                      </div>
                   </div>
 
                   <div className={glassCard + " flex flex-col items-center justify-between py-16"}>
-                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter text-center">Eficiência Real</h3>
+                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter text-center">Fator de Operação</h3>
                      <div className="relative w-72 h-72">
                         <NeuralRadialGauge value={Number(marginRatio)} />
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                            <p className="text-6xl font-black text-white tracking-tighter">{marginRatio}%</p>
-                           <span className="text-[10px] font-black text-emerald-500 uppercase mt-2 px-3 py-1 bg-emerald-500/10 rounded-full">Saúde Operacional</span>
+                           <span className="text-[10px] font-black text-emerald-500 uppercase mt-4 px-6 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20">Operational Health</span>
                         </div>
                      </div>
                      <div className="w-full space-y-4 px-10">
-                        <div className="flex justify-between items-center"><p className="text-[10px] font-black text-slate-500 uppercase">Fator de Retenção</p><p className="text-sm font-black text-white">{marginRatio}%</p></div>
-                        <div className="h-3 bg-slate-950 rounded-full overflow-hidden shadow-inner"><div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400" style={{ width: `${marginRatio}%` }} /></div>
+                        <div className="flex justify-between items-center"><p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Retenção de Capital</p><p className="text-sm font-black text-white">{marginRatio}%</p></div>
+                        <div className="h-4 bg-slate-950 rounded-full overflow-hidden shadow-inner p-1 border border-white/5"><div className="h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-teal-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.3)]" style={{ width: `${marginRatio}%` }} /></div>
                      </div>
                   </div>
                </div>
@@ -261,19 +292,19 @@ const Performance: React.FC<PerformanceProps> = ({
 
          {activeView === 'rankings' && (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 animate-in slide-in-from-right-10 duration-700">
-               <EliteRanking title="Performance de Lucro" desc="Motoristas que mais geraram retorno líquido" icon={Trophy} color="emerald" data={rankedDrivers.map(d => ({ name: d.name, val: d.profit, sub: `${d.trips} Trips Realizadas` }))} />
-               <EliteRanking title="Ranking de Comissões" desc="Total de ganhos brutos recebidos pelos motoristas" icon={Coins} color="sky" data={rankedCommissions.map(d => ({ name: d.name, val: d.commission, sub: 'Ganhos Acumulados' }))} />
-               <EliteRanking title="Principais Clientes" desc="Maiores geradores de faturamento e lucro" icon={Building2} color="amber" data={rankedShippers.map(s => ({ name: s.name, val: s.profit, sub: 'Parceria de Alto Nível' }))} />
-               <EliteRanking title="Rotas de Alta Margem" desc="Top 8 destinos mais rentáveis da frota" icon={MapPin} color="rose" data={rankedRoutes.map(r => ({ name: r.name, val: r.profit, sub: 'Performance Logística' }))} />
+               <EliteRanking title="Elite de Lucratividade" desc="Ranking de retorno líquido consolidado" icon={Trophy} color="emerald" data={rankedDrivers.map(d => ({ name: d.name, val: d.profit, sub: `${d.trips} Missões Finalizadas` }))} />
+               <EliteRanking title="Master Commissions" desc="Volume de repasses e ganhos de motoristas" icon={Coins} color="sky" data={rankedCommissions.map(d => ({ name: d.name, val: d.commission, sub: 'Capital Distribuído' }))} />
+               <EliteRanking title="Market Power (Shippers)" desc="Principais fontes de volume financeiro" icon={Building2} color="amber" data={rankedShippers.map(s => ({ name: s.name, val: s.profit, sub: 'Strategic Business Partner' }))} />
+               <EliteRanking title="The Golden Routes" desc="Trechos com maior densidade de lucro" icon={MapPin} color="rose" data={rankedRoutes.map(r => ({ name: r.name, val: r.profit, sub: 'Logistics Optimization' }))} />
             </div>
          )}
 
          {activeView === 'custos' && (
             <div className="space-y-12 animate-in zoom-in-95 duration-700">
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                  <div className={glassCard + " lg:col-span-1"}>
-                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-12 text-center">Auditoria de Evasão</h3>
-                     <div className="h-[380px] w-full flex items-center justify-center relative">
+               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                  <div className={glassCard + " lg:col-span-4"}>
+                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-12 text-center">Neural Cost Audit</h3>
+                     <div className="h-[380px] w-full flex items-center justify-center relative scale-110">
                         <NeuralPieChart data={[
                            { label: 'Diesel', value: analytics.totalFuel, color: '#38bdf8' },
                            { label: 'Manutenção', value: analytics.totalMaint, color: '#f43f5e' },
@@ -281,36 +312,45 @@ const Performance: React.FC<PerformanceProps> = ({
                            { label: 'Lucro', value: analytics.totalProfit, color: '#10b981' }
                         ]} />
                      </div>
-                     <div className="grid grid-cols-2 gap-6 mt-12">
-                        <MiniStat label="Diesel" val={analytics.totalFuel} color="bg-sky-400" />
-                        <MiniStat label="Peças" val={analytics.totalMaint} color="bg-rose-500" />
-                        <MiniStat label="Comissão" val={analytics.totalCommissions} color="bg-amber-400" />
-                        <MiniStat label="LUCRO" val={analytics.totalProfit} color="bg-emerald-500" />
+                     <div className="grid grid-cols-1 gap-4 mt-8">
+                        <MiniStat label="Fuel Consumption" val={analytics.totalFuel} color="bg-sky-400" />
+                        <MiniStat label="Technical Maint" val={analytics.totalMaint} color="bg-rose-500" />
+                        <MiniStat label="Fleet Commissions" val={analytics.totalCommissions} color="bg-amber-400" />
+                        <MiniStat label="REAL NET PROFIT" val={analytics.totalProfit} color="bg-emerald-500" />
                      </div>
                   </div>
 
-                  <div className={glassCard + " lg:col-span-2"}>
-                     <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-10">Rastreio de Maiores Gastos</h3>
-                     <div className="space-y-6">
+                  <div className={glassCard + " lg:col-span-8"}>
+                     <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-12 flex items-center gap-6">
+                        <History className="w-8 h-8 text-rose-500" />
+                        Major Interventions Log
+                     </h3>
+                     <div className="space-y-6 max-h-[700px] overflow-y-auto pr-4 custom-scrollbar">
                         {analytics.mostExpensiveMaintenances.length > 0 ? (
                            analytics.mostExpensiveMaintenances.map((m, i) => (
-                              <div key={i} className="flex items-center justify-between p-10 bg-slate-950/40 border border-slate-800/80 rounded-[2.5rem] hover:border-rose-500/40 transition-all hover:translate-x-3 group/item shadow-xl">
-                                 <div className="flex items-center gap-8">
-                                    <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-rose-500 group-hover/item:scale-110 transition-transform"><Wrench className="w-8 h-8" /></div>
+                              <div key={i} className="flex items-center justify-between p-10 bg-slate-950/60 border border-white/5 rounded-[3rem] hover:border-rose-500/30 transition-all hover:scale-[1.01] group/item shadow-2xl">
+                                 <div className="flex items-center gap-10">
+                                    <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center text-rose-500 group-hover/item:rotate-12 transition-transform shadow-inner"><Wrench className="w-10 h-10" /></div>
                                     <div>
-                                       <p className="text-2xl font-black text-white uppercase tracking-tighter">{m.description || 'Intervenção'}</p>
-                                       <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">
-                                          {vehicles.find(v => v.id === m.vehicleId)?.plate || 'Frota N/A'} • {m.type} • {m.date ? new Date(m.date).toLocaleDateString() : 'Auditoria Manual'}
-                                       </p>
+                                       <p className="text-3xl font-black text-white uppercase tracking-tighter italic">{m.description || 'Intervenção Mecânica'}</p>
+                                       <div className="flex items-center gap-4 mt-2">
+                                          <span className="px-4 py-1.5 bg-slate-900 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest border border-white/5">
+                                             Placa: {vehicles.find(v => v.id === m.vehicleId)?.plate || 'Frota N/A'}
+                                          </span>
+                                          <span className="px-4 py-1.5 bg-rose-500/10 rounded-full text-[10px] font-black text-rose-500 uppercase tracking-widest border border-rose-500/20">
+                                             {m.type}
+                                          </span>
+                                          <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">{m.date ? new Date(m.date).toLocaleDateString() : 'N/D'}</span>
+                                       </div>
                                     </div>
                                  </div>
                                  <div className="text-right">
-                                    <p className="text-4xl font-black text-rose-500 tracking-tighter">R$ {Number(m.totalCost).toLocaleString()}</p>
+                                    <p className="text-5xl font-black text-rose-500 tracking-tighter italic"><span className="text-lg mr-2">R$</span>{Number(m.totalCost).toLocaleString()}</p>
                                  </div>
                               </div>
                            ))
                         ) : (
-                           <div className="py-24 text-center opacity-20"><History className="w-20 h-20 mx-auto mb-6" /><p className="text-xl font-black uppercase italic tracking-widest">Nenhuma intervenção mecânica grave.</p></div>
+                           <div className="py-32 text-center opacity-30 flex flex-col items-center gap-8"><History className="w-24 h-24 mx-auto animate-pulse" /><p className="text-2xl font-black uppercase italic tracking-widest">Nenhum evento crítico registrado.</p></div>
                         )}
                      </div>
                   </div>
@@ -319,32 +359,41 @@ const Performance: React.FC<PerformanceProps> = ({
          )}
 
          {activeView === 'inteligencia' && (
-            <div className="animate-in zoom-in-95 duration-700">
-               <div className={glassCard + " bg-gradient-to-br from-indigo-950/20 via-slate-950 to-indigo-950/20 border-indigo-500/20"}>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 py-16">
+            <div className="animate-in zoom-in-95 duration-1000">
+               <div className={glassCard + " bg-gradient-to-br from-indigo-950/20 via-slate-950/80 to-emerald-950/10 border-indigo-500/30 p-16"}>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 py-12">
                      <div className="space-y-12">
-                        <div className="flex items-center gap-8">
-                           <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-2xl shadow-indigo-500/20"><Lightbulb className="w-10 h-10" /></div>
-                           <h3 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Visão Neural</h3>
+                        <div className="flex items-center gap-10">
+                           <div className="w-24 h-24 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl shadow-indigo-500/30 group-hover:rotate-6 transition-transform"><Brain className="w-12 h-12" /></div>
+                           <div>
+                              <h3 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Cérebro Neural</h3>
+                              <p className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.4em] mt-3 ml-1">Advanced Strategic Engine</p>
+                           </div>
                         </div>
-                        <div className="space-y-6">
-                           <div className="p-10 bg-slate-950/80 rounded-[3rem] border border-slate-800 shadow-2xl">
-                              <p className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.5em] mb-6">Recomendação Estratégica</p>
-                              <p className="text-white text-2xl font-medium leading-relaxed italic">
-                                 "Sua rota para <b>{rankedRoutes[0]?.name || 'seu destino principal'}</b> está entregando lucro de R$ {(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}/km. Concentrar 20% mais frota neste eixo elevaria o lucro mensal projetado em R$ {(analytics.totalProfit * 0.15).toLocaleString()}."
+                        <div className="space-y-8">
+                           <div className="p-12 bg-slate-950/90 rounded-[3.5rem] border border-white/5 shadow-2xl relative">
+                              <div className="absolute top-0 left-12 w-20 h-1 bg-indigo-500 rounded-full -translate-y-1/2" />
+                              <p className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.5em] mb-8">AI Decision Support</p>
+                              <p className="text-white text-3xl font-medium leading-relaxed italic border-l-4 border-indigo-500/30 pl-10">
+                                 "Sua operação na rota <b>{rankedRoutes[0]?.name || 'Nacional'}</b> apresenta a maior eficiência média. Com um lucro de R$ {(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}/km, redirecionar 15% do capital de rotas saturadas para este eixo ampliaria o faturamento em até 22% no próximo trimestre."
                               </p>
                            </div>
                         </div>
                      </div>
-                     <div className="bg-slate-950/90 rounded-[4rem] p-16 border border-slate-800 shadow-inner flex flex-col items-center justify-center text-center relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50 group-hover:via-emerald-500 transition-all duration-1000" />
-                        <Brain className="w-32 h-32 text-indigo-500 mb-10 animate-pulse" />
-                        <h4 className="text-3xl font-black text-white uppercase italic mb-8 tracking-tighter">ROI de Alta Performance</h4>
-                        <div className="w-full space-y-4">
+                     <div className="bg-slate-950/90 rounded-[4rem] p-16 border border-white/5 shadow-inner flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                        <Lightbulb className="w-40 h-40 text-indigo-500 mb-12 animate-pulse" />
+                        <h4 className="text-4xl font-black text-white uppercase italic mb-10 tracking-tighter">ROI Spectrum Analysis</h4>
+                        <div className="w-full space-y-6">
                            {rankedRoutes.slice(0, 3).map((r, i) => (
-                              <div key={i} className="flex justify-between items-center p-8 bg-slate-900/60 rounded-3xl border border-slate-800 group hover:border-indigo-500/40 transition-all">
-                                 <span className="text-sm font-black text-slate-400 uppercase tracking-widest">{r.name}</span>
-                                 <span className="text-xl font-black text-emerald-500">R$ {(r.profit / r.km).toFixed(2)}/km</span>
+                              <div key={i} className="flex justify-between items-center p-10 bg-slate-900 border border-white/5 rounded-3xl group hover:border-indigo-500/40 transition-all shadow-xl">
+                                 <div className="flex flex-col items-start gap-1">
+                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Route Channel</span>
+                                    <span className="text-base font-black text-white uppercase tracking-tight">{r.name}</span>
+                                 </div>
+                                 <div className="text-right">
+                                    <span className="text-2xl font-black text-emerald-500 italic uppercase">R$ {(r.profit / r.km).toFixed(2)}<span className="text-xs ml-1 text-slate-500">/KM</span></span>
+                                 </div>
                               </div>
                            ))}
                         </div>
@@ -353,8 +402,8 @@ const Performance: React.FC<PerformanceProps> = ({
                </div>
             </div>
          )}
-      </div>
-   );
+       </div>
+    );
 };
 
 // ------------------------------------------------------------------------------------------------

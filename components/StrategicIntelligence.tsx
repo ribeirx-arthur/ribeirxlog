@@ -259,272 +259,314 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
     if (!mounted) return null;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 pb-24">
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-purple-500/20 rotate-3 transform transition-transform hover:rotate-0 cursor-default">
-                        <Brain className="text-white w-9 h-9" />
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-24">
+            {/* Neural Intel Hero */}
+            <div className="relative h-[22rem] md:h-[28rem] rounded-[3.5rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
+                <img 
+                    src="/intelligence_hero_bg_1776392026774.png" 
+                    alt="Intelligence Hero" 
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3000ms] brightness-[0.3]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-transparent to-transparent"></div>
+                
+                <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-1 bg-indigo-500 rounded-full animate-pulse" />
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] italic">Neural Network Active</span>
                     </div>
-                    <div>
-                        <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Inteligência</h2>
-                        <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase mt-2 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            RBX Log Digital Brain v1.3
-                        </p>
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                        <div className="space-y-4">
+                            <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none italic uppercase">
+                                Strategic <span className="text-indigo-500">Cerebro</span>
+                            </h2>
+                            <p className="text-slate-400 text-sm md:text-lg font-medium max-w-2xl leading-relaxed">
+                                Arthur, conectei sua frota ao motor de <span className="text-white">Inteligência Estratégica</span>. Cada dado agora é um plano de ação para escalar sua margem líquida.
+                            </p>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                             <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-6 shadow-2xl flex items-center gap-5">
+                                <div className="p-4 bg-indigo-500/10 rounded-2xl">
+                                    <Zap className="w-7 h-7 text-indigo-500" />
+                                </div>
+                                <div>
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Status do Núcleo</p>
+                                    <p className="text-xl font-black text-emerald-500 uppercase">Sinapse Estável</p>
+                                </div>
+                             </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex items-center gap-2 bg-slate-900/50 p-1.5 rounded-full border border-slate-800">
+            {/* Insight Filter Navigation */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-6 shadow-xl">
+                <div className="flex flex-wrap items-center gap-2 p-1 bg-slate-950/50 rounded-full border border-slate-800">
                     {(['Tudo', 'Crítico', 'Financeiro', 'Frota', 'Performance'] as InsightCategory[]).map(cat => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all
-                ${activeCategory === cat ? 'bg-white text-slate-950 shadow-lg' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300
+                            ${activeCategory === cat ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
                         >
                             {cat}
                         </button>
                     ))}
                 </div>
-            </header>
+                
+                <div className="flex items-center gap-4 bg-slate-950/30 px-6 py-3 rounded-full border border-white/5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] italic">
+                    <Clock className="w-4 h-4 text-indigo-500" />
+                    Last Sync: {new Date().toLocaleTimeString()}
+                </div>
+            </div>
 
-            {/* Summary Widgets */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Stats Summary - Reimagined */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                    { label: 'Margem Líquida Média', value: `${stats.margin.toFixed(1)}%`, icon: Target, color: 'text-indigo-400' },
-                    { label: 'Lucro Total em Dados', value: `R$ ${stats.profit.toLocaleString()}`, icon: BarChart3, color: 'text-emerald-400' },
-                    { label: 'Saúde Geral da Frota', value: `${((vehicles.length - analytics.filter(i => i.category === 'Frota' && i.type === 'critical').length) / vehicles.length * 100).toFixed(0)}%`, icon: Truck, color: 'text-sky-400' },
+                    { label: 'Eficiência Operacional', value: `${stats.margin.toFixed(1)}%`, icon: Target, color: 'text-indigo-400', trail: 'Margem Líquida' },
+                    { label: 'Volume Sob Gestão', value: `R$ ${stats.profit.toLocaleString()}`, icon: Wallet, color: 'text-emerald-400', trail: 'Lucro Acumulado' },
+                    { label: 'Integridade da Frota', value: `${((vehicles.length - analytics.filter(i => i.category === 'Frota' && i.type === 'critical').length) / vehicles.length * 100).toFixed(0)}%`, icon: Truck, color: 'text-sky-400', trail: 'Risk Index' },
                 ].map((s, i) => (
-                    <div key={i} className="bg-slate-900 border border-slate-800 p-6 rounded-[2.5rem] flex items-center gap-5 group hover:border-slate-700 transition-colors">
-                        <div className={`w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center ${s.color}`}>
-                            <s.icon className="w-7 h-7" />
+                    <div key={i} className="group relative bg-slate-900/40 backdrop-blur-sm border border-white/5 p-8 rounded-[3rem] hover:bg-slate-800/60 transition-all duration-500">
+                        <div className="flex items-start justify-between">
+                            <div className={`p-4 rounded-2xl bg-slate-950/50 border border-white/5 ${s.color} group-hover:scale-110 transition-transform`}>
+                                <s.icon className="w-8 h-8" />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{s.trail}</span>
                         </div>
-                        <div>
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{s.label}</p>
-                            <p className="text-2xl font-black text-white">{s.value}</p>
+                        <div className="mt-8 space-y-1">
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{s.label}</p>
+                            <p className="text-4xl font-black text-white tracking-tighter italic uppercase">{s.value}</p>
+                        </div>
+                        <div className="mt-4 h-1 w-full bg-slate-950 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent w-full -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* AI FUTURE PROJECTION CHART */}
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[3rem] relative group">
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h3 className="text-xl font-black text-white uppercase italic flex items-center gap-3">
-                            <TrendingUp className="text-indigo-400 w-5 h-5" />
-                            Projeção de Lucro (6 Meses + 3 Futuros)
-                        </h3>
-                        <p className="text-slate-500 text-[10px] font-black tracking-widest uppercase mt-1">Análise de Tendência Estatística via IA</p>
-                    </div>
-                </div>
-                
-                <div className="h-[300px] w-full mt-4 flex items-center justify-center relative">
-                    <NeuralProjectionSVG data={projections} />
-                </div>
-                
-                <div className="flex items-center gap-4 mt-6 pt-6 border-t border-white/5">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-indigo-500" />
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Realizado</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-rose-500" />
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Projeção IA Futuro</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* GEMINI AI ADVICE BUTTON/SECTION */}
-            <div className="bg-indigo-600/10 border border-indigo-500/20 p-8 rounded-[3rem] flex flex-col items-center text-center gap-6">
-                <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center animate-bounce shadow-lg shadow-indigo-500/50">
-                    <Brain className="text-white w-7 h-7" />
-                </div>
-                <div className="max-w-2xl">
-                <h3 className="text-2xl font-black text-white uppercase italic mb-2 tracking-tighter">Inteligência Estratégica RBX (Groq)</h3>
-                <p className="text-slate-400 text-sm font-bold leading-relaxed mb-6">
-                    "Arthur, agora uso o motor ultra-veloz da Groq para ler todas as suas métricas e te dar planos de ação em milissegundos. Clique abaixo para gerar sua análise estratégica."
-                </p>
-                    
-                    {profile.plan_type === 'piloto' || profile.plan_type === 'none' ? (
-                        <div className="bg-slate-950/80 backdrop-blur-sm border border-slate-800 p-8 rounded-[2rem] flex flex-col items-center text-center gap-4">
-                            <Lock className="w-10 h-10 text-amber-500 mb-2" />
-                            <h4 className="text-lg font-black text-white uppercase italic">Consultoria Exclusiva PRO</h4>
-                            <p className="text-slate-400 text-xs font-bold leading-relaxed max-w-sm">
-                                Arthur, o chat estratégico em tempo real é um recurso avançado. Faça o upgrade para o plano **PRO** para desbloquear o cérebro digital completo.
-                            </p>
-                            <button className="mt-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-amber-950 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20">
-                                Liberar Acesso PRO
-                            </button>
-                        </div>
-                    ) : (
-                        <>
-                            {loadingAI && chatMessages.length === 0 ? (
-                                <div className="flex items-center gap-3 bg-white/5 px-8 py-4 rounded-full border border-white/10">
-                                    <RefreshCcw className="w-4 h-4 text-indigo-400 animate-spin" />
-                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Cérebro Processando...</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* AI PROJECTION CHART - More Minimalistic & Clean */}
+                <div className="lg:col-span-12 bg-slate-900/40 backdrop-blur-xl border border-white/5 p-10 rounded-[3.5rem] group overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/5 blur-[100px] -mr-48 -mt-48 rounded-full" />
+                    <div className="relative z-10">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                            <div>
+                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
+                                        <TrendingUp className="text-indigo-400 w-6 h-6" />
+                                    </div>
+                                    Predição Algorítmica de Fluxo
+                                </h3>
+                                <p className="text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase mt-2 ml-14">Time-series forecasting / Bayesian neural projection</p>
+                            </div>
+                            <div className="flex items-center gap-6 px-8 py-4 bg-slate-950/50 rounded-3xl border border-white/5">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Consolidado</span>
                                 </div>
-                            ) : chatMessages.length === 0 ? (
-                                <button 
-                                    onClick={() => handleSendMessage("Gere 3 dicas estratégicas para meu negócio agora.")}
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-full text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-500/30 transition-all active:scale-95"
-                                >
-                                    Gerar Insights Iniciais
-                                </button>
-                            ) : null}
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse" />
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Probabilidade Futura</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="h-[400px] w-full mt-4 flex items-center justify-center relative">
+                            <NeuralProjectionSVG data={projections} />
+                        </div>
+                    </div>
+                </div>
 
-                            {chatMessages.length > 0 && (
-                                <div className="mt-8 flex flex-col gap-4 w-full text-left">
-                                    <div className="max-h-[500px] overflow-y-auto pr-4 space-y-6 custom-scrollbar">
-                                        {chatMessages.map((msg, i) => (
-                                            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[85%] p-6 rounded-[2rem] text-sm leading-relaxed shadow-sm
+                {/* AI CHAT INTERFACE - Premium & Clean */}
+                <div className="lg:col-span-12 xl:col-span-12">
+                   <div className="bg-slate-900/40 backdrop-blur-xl border border-indigo-500/20 rounded-[3.5rem] overflow-hidden flex flex-col md:flex-row shadow-2xl">
+                      <div className="md:w-1/3 p-12 bg-indigo-600/5 border-r border-white/5 flex flex-col justify-between">
+                         <div className="space-y-6">
+                            <div className="w-20 h-20 bg-indigo-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-indigo-600/40 group-hover:rotate-6 transition-transform">
+                                <Brain className="text-white w-10 h-10" />
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">RBX Intel Core</h4>
+                                <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.3em]">Quantum Strategy Engine</p>
+                            </div>
+                            <p className="text-slate-400 text-sm font-medium leading-relaxed italic border-l-2 border-indigo-500/30 pl-6">
+                                "Eu analiso milhares de pontos de dados da sua operação para encontrar vazamentos de lucro e oportunidades de expansão em tempo real."
+                            </p>
+                         </div>
+
+                         <div className="mt-12 space-y-4">
+                            <div className="flex items-center gap-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                <ShieldAlert className="w-4 h-4 text-indigo-500" /> Security Protocol: AES-256
+                            </div>
+                            <div className="flex items-center gap-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                <Zap className="w-4 h-4 text-emerald-500" /> Latency: 0.2ms
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="flex-1 p-10 flex flex-col min-h-[600px] bg-slate-950/40">
+                        {profile.plan_type === 'piloto' || profile.plan_type === 'none' ? (
+                            <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
+                                <div className="w-24 h-24 bg-slate-900 border border-slate-800 rounded-[2.5rem] flex items-center justify-center text-amber-500 shadow-2xl">
+                                    <Lock className="w-10 h-10" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">Acesso Restrito</h4>
+                                    <p className="text-slate-500 text-sm font-bold max-w-sm">Este terminal de inteligência avançada requer credenciais do plano **PRO**.</p>
+                                </div>
+                                <button className="mt-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-amber-950 px-12 py-5 rounded-[2rem] text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-amber-500/20 hover:scale-105 transition-all active:scale-95">
+                                    Unlock Neural Core
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex-1 overflow-y-auto space-y-8 pr-4 custom-scrollbar mb-8">
+                                    {chatMessages.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center h-full text-center space-y-8 opacity-60">
+                                            <Disc className="w-16 h-16 text-indigo-500/30 animate-spin-slow" />
+                                            <div className="space-y-2">
+                                                <h5 className="text-xl font-black text-slate-400 uppercase italic tracking-tighter">Terminal Inicializado</h5>
+                                                <p className="text-slate-600 text-xs font-bold uppercase tracking-widest">Aguardando comando de voz ou texto...</p>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4 max-w-lg">
+                                                {['Qual meu lucro projetado?', 'Como reduzir custo de frota?', 'Análise de performance CNH', 'Dicas para escala trimestral'].map(hint => (
+                                                    <button 
+                                                        key={hint}
+                                                        onClick={() => handleSendMessage(hint)}
+                                                        className="px-6 py-4 bg-slate-900/50 border border-white/5 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-indigo-600/10 hover:text-indigo-400 hover:border-indigo-500/30 transition-all text-left"
+                                                    >
+                                                        {hint}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        chatMessages.map((msg, i) => (
+                                            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                                                <div className={`max-w-[85%] p-8 rounded-[2.5rem] text-sm leading-relaxed shadow-lg
                                                     ${msg.role === 'user' 
                                                         ? 'bg-indigo-600 text-white rounded-tr-none' 
-                                                        : 'bg-slate-900 border border-indigo-500/20 text-slate-300 rounded-tl-none border-l-4 border-l-indigo-600'}`}>
-                                                    <p className="whitespace-pre-line">{msg.content}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        <div ref={messagesEndRef} />
-                                        {loadingAI && (
-                                            <div className="flex justify-start">
-                                                <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-3">
-                                                    <div className="flex gap-1">
-                                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
-                                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                                        : 'bg-slate-900 border border-white/10 text-slate-300 rounded-tl-none border-l-4 border-l-indigo-600'}`}>
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        {msg.role === 'user' ? <Users className="w-4 h-4" /> : <Brain className="w-4 h-4 text-indigo-500" />}
+                                                        <span className="text-[9px] font-black uppercase tracking-widest opacity-60">
+                                                            {msg.role === 'user' ? 'Arthur' : 'RBX Intelligence'}
+                                                        </span>
                                                     </div>
-                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">IA Analisando...</span>
+                                                    <p className="whitespace-pre-line text-base font-medium leading-relaxed">{msg.content}</p>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
+                                        ))
+                                    )}
+                                    {loadingAI && (
+                                        <div className="flex justify-start animate-in fade-in duration-300">
+                                            <div className="bg-slate-900/50 border border-white/5 p-6 rounded-[2rem] flex items-center gap-6">
+                                                <div className="flex gap-2">
+                                                    {[0, 0.2, 0.4].map(delay => (
+                                                        <div key={delay} className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: `${delay}s` }} />
+                                                    ))}
+                                                </div>
+                                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] italic">Analisando ecossistema...</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div ref={messagesEndRef} />
+                                </div>
 
-                                    <div className="relative mt-4 group">
+                                <div className="relative group">
+                                    <div className="absolute inset-x-0 -top-12 h-12 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none" />
+                                    <div className="flex items-center gap-4 bg-slate-900 border border-white/10 rounded-[2.5rem] p-3 pl-8 shadow-2xl focus-within:border-indigo-500/50 transition-all">
                                         <input 
                                             type="text"
                                             value={input}
                                             onChange={(e) => setInput(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                            placeholder="Ex: Como abrir uma transportadora com meu lucro atual?"
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-full py-5 px-8 pr-16 text-sm text-white placeholder-slate-600 focus:border-indigo-500 outline-none transition-all"
+                                            placeholder="Pergunte qualquer coisa sobre sua operação..."
+                                            className="flex-1 bg-transparent border-none py-4 text-base text-white placeholder-slate-600 focus:outline-none"
                                         />
                                         <button 
                                             onClick={() => handleSendMessage()}
                                             disabled={!input.trim() || loadingAI}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                                            className="w-14 h-14 bg-indigo-600 hover:bg-indigo-500 text-white rounded-[1.5rem] flex items-center justify-center transition-all disabled:opacity-50 shadow-lg shadow-indigo-600/20 active:scale-90"
                                         >
-                                            <ArrowUpRight className="text-white w-5 h-5" />
+                                            <ArrowUpRight className="w-6 h-6" />
                                         </button>
                                     </div>
                                 </div>
-                            )}
-                        </>
-                    )}
+                            </>
+                        )}
+                      </div>
+                   </div>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {filteredInsights.map((insight, idx) => (
-                    <div
-                        key={idx}
-                        className={`p-8 rounded-[3rem] border transition-all hover:translate-y-[-4px] flex flex-col gap-6 relative overflow-hidden group
-              ${insight.type === 'critical' ? 'bg-rose-500/5 border-rose-500/20' :
-                                insight.type === 'warning' ? 'bg-amber-500/5 border-amber-500/20' :
-                                    insight.type === 'success' ? 'bg-emerald-500/5 border-emerald-500/20' :
-                                        'bg-slate-900 border-slate-800'}`}
-                    >
-                        <div className={`absolute -right-8 -top-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-1000 rotate-12 group-hover:opacity-[0.07]`}>
-                            <insight.icon className="w-48 h-48" />
-                        </div>
-
-                        <div className="flex items-center justify-between relative z-10">
-                            <div className="flex items-center gap-3">
-                                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em]
-                    ${insight.type === 'critical' ? 'bg-rose-500 text-white' :
-                                        insight.type === 'warning' ? 'bg-amber-500 text-amber-950' :
-                                            insight.type === 'success' ? 'bg-emerald-500 text-emerald-950' :
-                                                'bg-slate-800 text-slate-400'}`}>
-                                    {insight.category}
-                                </span>
+                {/* Insight Cards Overlaying Background Images */}
+                <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                    {filteredInsights.map((insight, idx) => (
+                        <div
+                            key={idx}
+                            className={`group p-10 rounded-[3.5rem] border transition-all duration-500 hover:translate-y-[-8px] flex flex-col gap-8 relative overflow-hidden shadow-xl
+                    ${insight.type === 'critical' ? 'bg-rose-500/5 border-rose-500/20 hover:bg-rose-500/10' :
+                        insight.type === 'warning' ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10' :
+                            insight.type === 'success' ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10' :
+                                'bg-slate-950/40 border-white/5 hover:bg-slate-950/60'}`}
+                        >
+                            <div className="flex items-center justify-between relative z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg
+                                        ${insight.type === 'critical' ? 'bg-rose-500/20 text-rose-500' :
+                                            insight.type === 'warning' ? 'bg-amber-500/20 text-amber-500' :
+                                                insight.type === 'success' ? 'bg-emerald-500/20 text-emerald-500' :
+                                                    'bg-slate-800 text-slate-400'}`}>
+                                        <insight.icon className="w-7 h-7" />
+                                    </div>
+                                    <div>
+                                        <span className={`px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-[0.2em]
+                                            ${insight.type === 'critical' ? 'text-rose-500' :
+                                                insight.type === 'warning' ? 'text-amber-500' :
+                                                    insight.type === 'success' ? 'text-emerald-500' :
+                                                        'text-slate-400'}`}>
+                                            {insight.category}
+                                        </span>
+                                    </div>
+                                </div>
                                 {insight.trend && (
-                                    <div className={`flex items-center gap-1 text-[9px] font-black ${insight.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    <div className={`flex items-center gap-2 px-4 py-1.5 bg-slate-950 rounded-full text-[9px] font-black ${insight.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'} border border-white/5`}>
                                         {insight.trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                        TENDÊNCIA
+                                        MARKET TREND
                                     </div>
                                 )}
                             </div>
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center 
-                ${insight.type === 'critical' ? 'bg-rose-500/20 text-rose-500' :
-                                    insight.type === 'warning' ? 'bg-amber-500/20 text-amber-500' :
-                                        insight.type === 'success' ? 'bg-emerald-500/20 text-emerald-500' :
-                                            'bg-slate-800 text-slate-400'}`}>
-                                <insight.icon className="w-6 h-6" />
+
+                            <div className="relative z-10 space-y-4">
+                                <h3 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter italic group-hover:text-indigo-400 transition-colors">{insight.title}</h3>
+                                <p className="text-slate-400 text-lg font-medium leading-relaxed italic border-l-2 border-indigo-500/20 pl-8">
+                                    "{insight.message}"
+                                </p>
                             </div>
-                        </div>
 
-                        <div className="relative z-10 space-y-4">
-                            <h3 className="text-2xl font-black text-white leading-tight uppercase tracking-tighter">{insight.title}</h3>
-                            <p className="text-slate-400 text-base font-medium leading-relaxed italic border-l-2 border-white/5 pl-6">
-                                "{insight.message}"
-                            </p>
-                        </div>
-
-                        {insight.action && (
-                            <div className="relative z-10 bg-black/30 p-5 rounded-2xl border border-white/5 flex items-start gap-4">
-                                <HelpCircle className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">O que fazer?</p>
-                                    <p className="text-slate-300 text-sm font-bold leading-tight">{insight.action}</p>
+                            {insight.action && (
+                                <div className="relative z-10 bg-slate-950/80 backdrop-blur-md p-6 rounded-[2rem] border border-white/5 flex items-start gap-5 shadow-2xl">
+                                    <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0">
+                                        <Lightbulb className="w-5 h-5 text-indigo-400" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none">Cerebro Plan Action</p>
+                                        <p className="text-white text-base font-bold leading-tight">{insight.action}</p>
+                                    </div>
                                 </div>
+                            )}
+
+                            <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between text-[10px] font-black text-slate-600 uppercase tracking-widest relative z-10">
+                                <div className="flex items-center gap-3">
+                                    <Zap className="w-3.5 h-3.5 text-indigo-500" />
+                                    <span>Sync: Real-time Neural Process</span>
+                                </div>
+                                <Disc className="w-4 h-4 animate-spin-slow opacity-20" />
                             </div>
-                        )}
-
-                        <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between text-[10px] font-black text-slate-600 uppercase tracking-widest relative z-10">
-                            <div className="flex items-center gap-2">
-                                <Zap className="w-3 h-3 text-indigo-500" />
-                                <span>Processamento Analítico Real-time</span>
-                            </div>
-                            <ArrowUpRight className="w-4 h-4 opacity-30" />
                         </div>
-                    </div>
-                ))}
-
-                {filteredInsights.length === 0 && (
-                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-slate-900/50 border border-dashed border-slate-800 rounded-[3rem]">
-                        <div className="w-20 h-20 bg-slate-800 rounded-3xl flex items-center justify-center text-slate-700 mb-6">
-                            <Filter className="w-10 h-10" />
-                        </div>
-                        <h4 className="text-xl font-black text-white uppercase italic">Nenhum insight nesta categoria</h4>
-                        <p className="text-slate-500 text-sm font-medium mt-2">Tente mudar o filtro ou adicione mais dados para análise!</p>
-                    </div>
-                )}
-            </div>
-
-            <div className="bg-gradient-to-r from-slate-900 to-indigo-950/20 border border-slate-800 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-3xl hidden md:block opacity-20 rounded-full -mr-32 -mt-32" />
-                <div className="flex-1 relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <span className="bg-indigo-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">AI Roadmap</span>
-                        <div className="w-full h-px bg-white/5 flex-1" />
-                    </div>
-                    <h4 className="text-3xl font-black text-white mb-4 uppercase italic tracking-tighter">Próximos Passos do Seu Negócio</h4>
-                    <p className="text-slate-400 text-lg italic leading-relaxed font-medium">
-                        "Para v1.4 estamos preparando a integração com preços de combustíveis regionais e cálculo de depreciação automática da frota. Mantenha seus dados atualizados para a máxima precisão de análise."
-                    </p>
-                </div>
-                <div className="flex flex-col items-center shrink-0 relative z-10">
-                    <div className="p-8 bg-slate-900 rounded-[2.5rem] border border-slate-700 shadow-2xl">
-                        <Target className="w-12 h-12 text-indigo-500" />
-                    </div>
-                    <div className="mt-4 flex flex-col items-center gap-1">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Status Operacional</span>
-                        <span className="text-emerald-500 font-black text-xs uppercase tracking-widest flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                            Otimizado
-                        </span>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>
