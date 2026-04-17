@@ -726,56 +726,6 @@ export default function Home() {
         showToast('Manutenção atualizada!', 'success');
     };
 
-    // ─── ONBOARDING COMPLETION ───
-    const handleOnboardingComplete = async (data: {
-        name?: string;
-        phone?: string;
-        companyName: string;
-        city: string;
-        truckCount?: number;
-        vehicle: Partial<Vehicle>;
-        driver: Partial<Driver>;
-        appMode: 'simple' | 'intermediate' | 'advanced';
-        userRole: 'autonomo' | 'transportadora';
-        tutorialMode?: 'simple' | 'advanced';
-    }) => {
-        try {
-            const updatedProfile: UserProfile = {
-                ...profile,
-                name: data.name || profile.name,
-                phone: data.phone || profile.phone,
-                companyName: data.companyName,
-                config: {
-                    ...profile.config,
-                    onboardingCompleted: true,
-                    appMode: data.appMode,
-                    userRole: data.userRole,
-                }
-            };
-            setProfile(updatedProfile);
-
-            if (user || isDemo) {
-                const token = await getToken({ template: 'supabase' });
-                const client = token ? createClerkSupabaseClient(token) : supabase;
-                const userId = isDemo ? DEMO_USER_ID : user?.id;
-
-                await client.from('profiles').update({
-                    name: updatedProfile.name,
-                    phone: updatedProfile.phone,
-                    company_name: data.companyName,
-                    config: updatedProfile.config
-                }).eq('id', userId);
-
-                if (data.vehicle.plate) await handleAddVehicle(data.vehicle as Vehicle);
-                if (data.driver.name) await handleAddDriver({ ...data.driver, vehicleId: vehicles[0]?.id } as Driver);
-            }
-            showToast('🎉 Configuração concluída! Bem-vindo.', 'success');
-        } catch (err) {
-            console.error(err);
-            showToast('Erro ao salvar.', 'error');
-        }
-    };
-
     // ─── SYSTEM ALERTS (CNH) ───
     useEffect(() => {
         if (!drivers.length) return;
@@ -1347,7 +1297,7 @@ export default function Home() {
     };
 
     return (
-        <AppModeProvider initialMode={profile.config.appMode || 'simple'}>
+        <AppModeProvider profile={profile}>
             <div className={`min-h-screen bg-slate-950 text-white font-sans selection:bg-emerald-500/30 selection:text-emerald-200 overflow-x-hidden ${!mounted ? 'opacity-0' : 'opacity-100 transition-opacity duration-1000'}`}>
                 
                 <OnboardingModal 

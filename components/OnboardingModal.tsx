@@ -13,7 +13,8 @@ import {
   Zap,
   CheckCircle2,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  ArrowUpRight
 } from 'lucide-react';
 import { UserProfile } from '../types';
 

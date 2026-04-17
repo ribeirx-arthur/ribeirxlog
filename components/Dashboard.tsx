@@ -298,7 +298,8 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
     );
   }
 
-  // RENDER NEURAL/DEEP DASHBOARD (ADVANCE  return (
+  // RENDER NEURAL/DEEP DASHBOARD (ADVANCED/INTERMEDIATE)
+  return (
     <div className="space-y-12 animate-in fade-in duration-700 pb-20 relative">
       {/* Background Ambience */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
