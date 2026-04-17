@@ -89,9 +89,20 @@ export default function Home() {
     const [mounted, setMounted] = useState(false);
     const [authenticatedClient, setAuthenticatedClient] = useState<any>(supabase);
 
+    const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    const isProfileIncomplete = isSignedIn && (!profile.name || !profile.phone || !profile.config.onboardingCompleted);
+
+    useEffect(() => {
+        if (isProfileIncomplete && mounted) {
+            setShowOnboardingModal(true);
+        }
+    }, [isProfileIncomplete, mounted]);
 
     // State Declarations
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -1265,15 +1276,6 @@ export default function Home() {
     }
 
     // ─── FINAL RENDER ───
-    const isProfileIncomplete = isSignedIn && (!profile.name || !profile.phone || !profile.config.onboardingCompleted);
-    const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-    useEffect(() => {
-        if (isProfileIncomplete && mounted) {
-            setShowOnboardingModal(true);
-        }
-    }, [isProfileIncomplete, mounted]);
 
     const handleOnboardingComplete = async (updatedData: Partial<UserProfile>) => {
         const newProfile = { ...profile, ...updatedData };
