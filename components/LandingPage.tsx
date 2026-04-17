@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import LegalModal from './LegalModal';
 import {
@@ -30,9 +29,33 @@ import {
     Globe,
     Youtube,
     Facebook,
-    Instagram
+    Instagram,
+    AlertCircle,
+    X
 } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../pricing';
+
+interface LandingFeatureCardProps {
+    icon: React.ReactNode;
+    title: string;
+    desc: string;
+    isNew?: boolean;
+}
+
+const LandingFeatureCard: React.FC<LandingFeatureCardProps> = ({ icon, title, desc, isNew }) => (
+    <li className="flex items-start gap-4 p-4 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/30 transition-all group">
+        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-all">
+            {icon}
+        </div>
+        <div>
+            <div className="flex items-center gap-2 mb-1">
+                <p className="text-sm font-black text-white uppercase tracking-tight">{title}</p>
+                {isNew && <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase rounded tracking-widest">Novo</span>}
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+        </div>
+    </li>
+);
 
 interface LandingPageProps {
     onGetStarted: () => void;

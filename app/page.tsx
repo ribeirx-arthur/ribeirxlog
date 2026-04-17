@@ -24,12 +24,13 @@ const OngoingTrips = React.lazy(() => import('../components/OngoingTrips'));
 const Bank = React.lazy(() => import('../components/Bank'));
 const GoalsDashboard = React.lazy(() => import('../components/GoalsDashboard'));
 import Onboarding from '../components/Onboarding';
+const TutorialSidebar = React.lazy(() => import('../components/TutorialSidebar'));
 
 import LandingPage from '../components/LandingPage';
 import AssetCompliance from '../components/AssetCompliance';
 import Paywall from '../components/Paywall';
 import { supabase, createClerkSupabaseClient } from '../services/supabase';
-import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain, ShieldCheck, Lock, Gauge, ArrowRightLeft } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Truck, PlusCircle, CheckCircle2, AlertTriangle, Menu, X, Users, TrendingUp, ShieldAlert, CreditCard, RefreshCcw, Share2, Disc, Brain, ShieldCheck, Lock, Gauge, ArrowRightLeft, BookOpen } from 'lucide-react';
 import {
     UserProfile,
     Vehicle,
@@ -86,6 +87,7 @@ export default function Home() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [showTutorial, setShowTutorial] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [authenticatedClient, setAuthenticatedClient] = useState<any>(supabase);
 
@@ -788,10 +790,31 @@ export default function Home() {
     };
 
     // ─── ONBOARDING COMPLETION ───
-    const handleOnboardingComplete = async (data: { companyName: string; city: string; vehicle: Partial<Vehicle>; driver: Partial<Driver>; appMode: 'simple' | 'advanced'; userRole: 'autonomo' | 'transportadora' }) => {
+    const handleOnboardingComplete = async (data: {
+        name?: string;
+        phone?: string;
+        companyName: string;
+        city: string;
+        truckCount?: number;
+        vehicle: Partial<Vehicle>;
+        driver: Partial<Driver>;
+        appMode: 'simple' | 'intermediate' | 'advanced';
+        userRole: 'autonomo' | 'transportadora';
+        tutorialMode?: 'simple' | 'advanced';
+    }) => {
         try {
-            // Update local state first for instant feedback
-            const updatedProfile: UserProfile = { ...profile, companyName: data.companyName, config: { ...profile.config, onboardingCompleted: true, appMode: data.appMode, userRole: data.userRole } };
+            const updatedProfile: UserProfile = {
+                ...profile,
+                name: data.name || profile.name,
+                phone: data.phone || profile.phone,
+                companyName: data.companyName,
+                config: {
+                    ...profile.config,
+                    onboardingCompleted: true,
+                    appMode: data.appMode,
+                    userRole: data.userRole,
+                }
+            };
             setProfile(updatedProfile);
 
             if (user || isDemo) {
@@ -799,16 +822,20 @@ export default function Home() {
                 const client = token ? createClerkSupabaseClient(token) : supabase;
                 const userId = isDemo ? DEMO_USER_ID : user?.id;
 
-                await client.from('profiles').update({ company_name: data.companyName, config: updatedProfile.config }).eq('id', userId);
+                await client.from('profiles').update({
+                    name: updatedProfile.name,
+                    phone: updatedProfile.phone,
+                    company_name: data.companyName,
+                    config: updatedProfile.config
+                }).eq('id', userId);
 
                 if (data.vehicle.plate) await handleAddVehicle(data.vehicle as Vehicle);
                 if (data.driver.name) await handleAddDriver({ ...data.driver, vehicleId: vehicles[0]?.id } as Driver);
             }
-            showToast("🎉 Configuração concluída! Bem-vindo.", 'success');
-
+            showToast('🎉 Configuração concluída! Bem-vindo.', 'success');
         } catch (err) {
             console.error(err);
-            showToast("Erro ao salvar.", 'error');
+            showToast('Erro ao salvar.', 'error');
         }
     };
 
@@ -1491,25 +1518,16 @@ export default function Home() {
     if (isSignedIn && isLoaded && !loadingData && profile?.config && profile.config.onboardingCompleted !== true) {
         return (
             <Onboarding
-                onComplete={handleOnboardingComplete}
+                profile={profile}
+                onComplete={handleOnboardingComplete as any}
                 onSkip={() => handleOnboardingComplete({
                     companyName: profile.companyName || 'Minha Transportadora',
-                    city: 'Não informado',
+                    city: '',
                     vehicle: {},
                     driver: {},
                     appMode: 'simple',
-                    userRole: 'transportadora'
+                    userRole: 'transportadora',
                 })}
-            />
-        );
-    }
-
-    // ─── RENDER ONBOARDING IF NEEDED ───
-    if (isSignedIn && isLoaded && !loadingData && profile?.config && profile.config.onboardingCompleted !== true) {
-        return (
-            <Onboarding
-                onComplete={handleOnboardingComplete}
-                onSkip={() => handleOnboardingComplete({ companyName: profile.companyName || 'Minha Transportadora', city: '', vehicle: {}, driver: {}, appMode: 'simple', userRole: 'transportadora' })}
             />
         );
     }
@@ -1536,6 +1554,7 @@ export default function Home() {
                     isMobileMenuOpen={isMobileMenuOpen}
                     isDemo={isDemo}
                     setIsMobileMenuOpen={setIsMobileMenuOpen}
+                    onOpenTutorial={() => setShowTutorial(true)}
                 />
                 <main className="md:ml-64 p-4 md:p-8">
                     <div className="max-w-7xl mx-auto pb-24 md:pb-8">
@@ -1555,7 +1574,26 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* User Profile Hook Trigger for Logout in Sidebar would be via Clerk UserButton now */}
+                {/* Tutorial Sidebar */}
+                <Suspense fallback={null}>
+                    <TutorialSidebar
+                        isOpen={showTutorial}
+                        onClose={() => setShowTutorial(false)}
+                        setActiveTab={setActiveTab}
+                        tutorialMode={(profile.config as any).tutorialMode || 'simple'}
+                    />
+                </Suspense>
+
+                {/* Floating Help Button */}
+                {!showTutorial && (
+                    <button
+                        onClick={() => setShowTutorial(true)}
+                        className="fixed bottom-6 right-6 z-[185] w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full shadow-2xl shadow-emerald-500/30 flex items-center justify-center transition-all active:scale-95 hover:scale-110 group"
+                        title="Central de Ajuda"
+                    >
+                        <BookOpen className="w-5 h-5" />
+                    </button>
+                )}
             </div>
         </AppModeProvider>
     );
