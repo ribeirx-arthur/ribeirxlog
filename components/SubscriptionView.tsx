@@ -158,7 +158,7 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                     price={PLANS.FROTA_ELITE.price}
                     period={PLANS.FROTA_ELITE.period}
                     desc={PLANS.FROTA_ELITE.desc}
-                    features={["Tudo do Gestor Pro", "Consultoria de Implantação", "Suporte Prioritário VIP", "Economia de ~3 Mensalidades"]}
+                    features={["Tudo do Gestor Pro", "Consultoria de Implantação", "Suporte Prioritário VIP", "Economia de ~1 Mensalidade"]}
                     onSelect={() => handleCheckout(PLANS.FROTA_ELITE)}
                     loading={isLoading === PLANS.FROTA_ELITE.id}
                 />
@@ -177,7 +177,7 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                                 <th className="p-6">Funcionalidade</th>
                                 <th className="p-6">Piloto</th>
                                 <th className="p-6 text-emerald-500">Gestor Pro</th>
-                                <th className="p-6">Frota Elite</th>
+                                <th className="p-6">Pro Anual</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">

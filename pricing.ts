@@ -5,8 +5,8 @@ export const PLANS = {
     PILOTO: {
         id: 'piloto',
         name: "Piloto",
-        price: "R$ 34,90",
-        amount: 34.90,
+        price: "R$ 37,90",
+        amount: 37.90,
         period: "/mês",
         desc: "Essencial para o motorista autônomo."
     },
@@ -20,9 +20,9 @@ export const PLANS = {
     },
     FROTA_ELITE: {
         id: 'frota_elite',
-        name: "Frota Elite",
-        price: "R$ 797,00",
-        amount: 797.00,
+        name: "Plano Pro Anual",
+        price: "R$ 797,90",
+        amount: 797.90,
         period: "/ano",
         desc: "Máxima economia e controle total."
     }

@@ -160,13 +160,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                                  <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-1000 delay-700">
                                     <div className="flex flex-col items-center">
                                         <button
-                                            onClick={onGetStarted}
+                                            onClick={() => {
+                                                const msg = encodeURIComponent("Olá Arthur! Quero meus 30 dias grátis no Plano Piloto da RibeirxLog.");
+                                                window.open(`https://wa.me/5513988205888?text=${msg}`, '_blank');
+                                            }}
                                             className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-lg hover:scale-105 active:scale-95 group"
                                         >
-                                            TESTAR 30 DIAS GRÁTIS <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            30 DIAS GRÁTIS NO WHATSAPP <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                         </button>
                                         <p className="text-[12px] md:text-[13px] text-slate-500 font-bold mt-3 text-center">
-                                            Sem cartão de crédito. Cancele quando quiser.
+                                            Exclusivo para o Plano Piloto. Solicite via WhatsApp.
                                         </p>
                                     </div>
                                     <a href="#planos" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg flex items-center justify-center h-[68px]">
@@ -523,10 +526,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-32 space-y-6">
                         <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
-                            <Zap className="w-3 h-3" /> 30 Dias Grátis — Sem Cartão
+                            <Zap className="w-3 h-3" /> 30 Dias Grátis via WhatsApp (Plano Piloto)
                         </div>
-                        <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter italic uppercase">Teste 30 dias. <br /> <span className="text-emerald-500">Pague só se gostar.</span></h2>
-                        <p className="text-slate-400 font-medium max-w-xl mx-auto">Libere todas as funções por 30 dias, incluindo a IA que analisa seus custos ocultos. Zero risco.</p>
+                        <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter italic uppercase">Solicite o Piloto. <br /> <span className="text-emerald-500">Teste por 30 dias.</span></h2>
+                        <p className="text-slate-400 font-medium max-w-xl mx-auto">Válido exclusivamente para o Plano Piloto ao entrar em contato conosco pelo WhatsApp.</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-end">
@@ -534,8 +537,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                             title="PILOTO"
                             price="R$ 37,90"
                             period="/mês"
-                            badgeText="IDEAL PARA AUTÔNOMOS"
-                            subPriceNote="Menos que um lanche por mês"
+                            badgeText="30 DIAS GRÁTIS"
+                            subPriceNote="Solicite no WhatsApp (13) 98820-5888"
                             desc="O essencial para o motorista autônomo organizar as contas do caminhão."
                             features={[
                                 { label: "Calculadora de Frete", note: "custo real por km" },
@@ -555,7 +558,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                             price="R$ 89,90"
                             period="/mês"
                             isPopular
-                            badgeText="30 DIAS GRÁTIS"
+                            badgeText="MAIS ESCOLHIDO"
                             desc="Controle total da sua frota com automação e inteligência artificial."
                             features={[
                                 { label: "Tudo do Piloto" },
@@ -663,14 +666,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                             QUANTO DINHEIRO VOCÊ <br />
                             <span className="text-emerald-500 underline decoration-emerald-500/30">PERDEU ESSE MÊS?</span>
                         </h2>
-                        <p className="text-slate-400 text-lg relative z-10 max-w-xl mx-auto">A IA do RBX Log descobre isso em 2 minutos. <strong className="text-white">30 dias grátis para você provar.</strong></p>
+                        <p className="text-slate-400 text-lg relative z-10 max-w-xl mx-auto">A IA do RBX Log descobre isso em 2 minutos. <strong className="text-white">Fale conosco e peça seus 30 dias grátis no Piloto.</strong></p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 relative z-10">
                             <button
-                                onClick={onGetStarted}
+                                onClick={() => {
+                                    const msg = encodeURIComponent("Olá Arthur! Quero meus 30 dias grátis no Plano Piloto.");
+                                    window.open(`https://wa.me/5513988205888?text=${msg}`, '_blank');
+                                }}
                                 className="w-full sm:w-auto px-16 py-8 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-[2.5rem] shadow-2xl transition-all text-2xl hover:scale-105 active:scale-95"
                             >
-                                TESTAR 30 DIAS GRÁTIS
+                                PEDIR 30 DIAS NO WHATSAPP
                             </button>
                             <button
                                 onClick={handleWhatsAppContact}
