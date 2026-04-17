@@ -13,10 +13,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * Seguro para uso em componentes do frontend e backend.
  * Sujeito às regras de Row Level Security (RLS) do Banco de Dados.
  */
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null as any;
 
 /**
  * Cria um cliente Supabase autenticado com o token do Clerk.

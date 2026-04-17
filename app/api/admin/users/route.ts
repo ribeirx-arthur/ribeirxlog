@@ -29,6 +29,10 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: `Não autorizado: ${adminEmail}` }, { status: 403 });
     }
 
+    if (!supabaseAdmin) {
+        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
+    }
+
     const { data: users, error } = await supabaseAdmin
         .from('profiles')
         .select('*')
@@ -54,6 +58,10 @@ export async function PATCH(req: Request) {
 
     if (!isAdminEmail(adminEmail)) {
         return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
+    }
+
+    if (!supabaseAdmin) {
+        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
     }
 
     const { userId, updates } = await req.json();

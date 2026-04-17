@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
+    if (!supabaseAdmin) {
+        console.error('[ASAAS WEBHOOK] Erro: SUPABASE_SERVICE_ROLE_KEY não configurado.');
+        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
+    }
 
     try {
         const body = await req.json();
