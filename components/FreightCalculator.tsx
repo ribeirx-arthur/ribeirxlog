@@ -799,10 +799,16 @@ const FreightCalculator: React.FC<FreightCalculatorProps> = ({ vehicles, profile
                                     <h2 className={`text-4xl font-black tracking-tighter ${results.status === 'excellent' ? 'text-emerald-500' :
                                         results.status === 'acceptable' ? 'text-sky-500' :
                                             results.status === 'warning' ? 'text-amber-500' :
-                                                'text-rose-500'
+                                                'text-rose-500 animate-pulse'
                                         }`}>
                                         R$ {results.netProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </h2>
+                                    {results.status === 'danger' && (
+                                        <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 animate-in shake duration-500">
+                                            <AlertCircle className="w-5 h-5 text-rose-500" />
+                                            <p className="text-[10px] text-rose-500 font-black uppercase tracking-widest leading-none">ALERTA: FRETE NÃO LUCRATIVO</p>
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-2 mt-2">
                                         <p className="text-[10px] text-slate-400 font-bold italic">Sobram limpos no seu bolso.</p>
                                         <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${results.status === 'excellent' ? 'bg-emerald-500/20 text-emerald-500' :

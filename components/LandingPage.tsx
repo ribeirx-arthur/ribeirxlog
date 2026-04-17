@@ -84,12 +84,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                             className="h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:scale-105 transition-transform duration-500"
                             onError={(e) => {
                                 e.currentTarget.onerror = null;
-                                e.currentTarget.outerHTML = `<div class="flex items-center gap-4 group cursor-pointer"><div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><span class="text-white font-black text-xl italic">RBX</span></div><div class="flex flex-col"><span class="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span class="text-emerald-500">LOG</span></span><span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence Dynamics</span></div></div>`;
+                                e.currentTarget.outerHTML = `<div class="flex items-center gap-4 group cursor-pointer"><div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"><span class="text-white font-black text-xl italic">RBX</span></div><div class="flex flex-col"><span class="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span class="text-emerald-500">LOG</span></span></div></div>`;
                             }}
                         />
                         <div className="flex flex-col">
                             <span className="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span className="text-emerald-500">LOG</span></span>
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence Dynamics</span>
                         </div>
                     </div>
                     <div className="hidden lg:flex items-center gap-10">
@@ -124,34 +123,33 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
                         <div className="lg:col-span-7 space-y-10 text-left">
-                            <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] animate-in fade-in slide-in-from-left-4 duration-1000">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                </span>
-                                RBS Intel v3.1 Enterprise
-                            </div>
 
-                            <h1 className="text-5xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
-                                VOCÊ ESTÁ DEIXANDO <br />
-                                <span className="text-emerald-500">DINHEIRO NA MESA.</span>
-                            </h1>
 
-                            <p className="text-lg md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
-                                Descubra com a Inteligência Artificial para onde o seu lucro está fugindo. O único aplicativo que rastreia seus custos reais e cria metas gerenciais usando IA. <span className="text-white font-bold">Por menos que um almoço.</span>
-                            </p>
+                             <h1 className="text-5xl md:text-8xl font-black text-white tracking-[-0.04em] leading-[0.9] animate-in fade-in slide-in-from-left-8 duration-1000 delay-200 uppercase">
+                                VOCÊ SABE QUANTO VAI <br />
+                                <span className="text-emerald-500">LUCRAR</span> ANTES DE SAIR COM O CAMINHÃO?
+                             </h1>
 
-                            <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in zoom-in-95 duration-1000 delay-700">
-                                <button
-                                    onClick={onGetStarted}
-                                    className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-lg hover:scale-105 active:scale-95 group"
-                                >
-                                    TESTAR GRÁTIS AGORA <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </button>
-                                <a href="#planos" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg">
-                                    VER TODOS OS PLANOS
-                                </a>
-                            </div>
+                             <p className="text-lg md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-left-12 duration-1000 delay-500">
+                                O Ribeirx calcula o custo real de cada frete — combustível, pedágio, pneu e manutenção — e te avisa se vale a pena antes de você assinar. <span className="text-white font-bold">Pare de adivinhar. Comece a lucrar de verdade.</span>
+                             </p>
+
+                                 <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-1000 delay-700">
+                                    <div className="flex flex-col items-center">
+                                        <button
+                                            onClick={onGetStarted}
+                                            className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all text-lg hover:scale-105 active:scale-95 group"
+                                        >
+                                            TESTAR 30 DIAS GRÁTIS <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        </button>
+                                        <p className="text-[12px] md:text-[13px] text-slate-500 font-bold mt-3 text-center">
+                                            Sem cartão de crédito. Cancele quando quiser.
+                                        </p>
+                                    </div>
+                                    <a href="#planos" className="w-full sm:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all text-lg flex items-center justify-center h-[68px]">
+                                        VER TODOS OS PLANOS
+                                    </a>
+                                </div>
 
                             {/* Core Modules Badges */}
                             <div className="flex flex-wrap gap-4 pt-8 border-t border-white/5">
@@ -178,6 +176,52 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                                     Seu navegador não suporta vídeos.
                                 </video>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section: Social Proof - O QUE MUDA NA PRÁTICA */}
+            <section className="py-20 relative z-10">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <p className="text-slate-500 text-xs font-medium uppercase tracking-[0.2em] mb-4">
+                            Utilizado por motoristas que viajam de Porto Alegre a Manaus. Sua gestão, seu lucro, seu caminhão.
+                        </p>
+                        <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-[0.2em] mb-4">
+                            O QUE MUDA NA PRÁTICA
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Card 1 */}
+                        <div className="bg-slate-900/40 border border-emerald-500/20 p-10 rounded-[2.5rem] flex flex-col items-center text-center backdrop-blur-sm group hover:border-emerald-500/40 transition-all">
+                            <span className="text-6xl md:text-7xl font-black text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
+                                R$0
+                            </span>
+                            <p className="text-slate-400 text-sm md:text-base font-medium max-w-[200px]">
+                                Gasto com planilha ou caderno para controlar viagens
+                            </p>
+                        </div>
+
+                        {/* Card 2 */}
+                        <div className="bg-slate-900/40 border border-emerald-500/20 p-10 rounded-[2.5rem] flex flex-col items-center text-center backdrop-blur-sm group hover:border-emerald-500/40 transition-all">
+                            <span className="text-6xl md:text-7xl font-black text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
+                                3min
+                            </span>
+                            <p className="text-slate-400 text-sm md:text-base font-medium max-w-[200px]">
+                                Para saber o custo real de um frete antes de aceitar
+                            </p>
+                        </div>
+
+                        {/* Card 3 */}
+                        <div className="bg-slate-900/40 border border-emerald-500/20 p-10 rounded-[2.5rem] flex flex-col items-center text-center backdrop-blur-sm group hover:border-emerald-500/40 transition-all">
+                            <span className="text-6xl md:text-7xl font-black text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
+                                100%
+                            </span>
+                            <p className="text-slate-400 text-sm md:text-base font-medium max-w-[200px]">
+                                Das suas despesas visíveis em um único lugar
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -266,6 +310,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
 
             {/* Trusted By Section (Micro-social proof) */}
             <section className="py-20 opacity-60">
+
                 <p className="text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-12">Focado em Eficiência, Controle e Retorno Financeiro Real</p>
                 <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-12 md:gap-24 grayscale group-hover:grayscale-0 transition-all duration-700">
                     <div className="text-2xl font-black text-slate-400 italic tracking-tighter hover:text-emerald-500 transition-colors uppercase">RBS_Infrastructure</div>
@@ -290,14 +335,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                                 Pare de adivinhar quanto sobrou no fim do mês. O RBX Log calcula automaticamente custos de diesel, manutenção e pneus. Tenha uma visão cirúrgica do seu lucro direto no celular.
                             </p>
                             <ul className="space-y-4">
-                                {["Cálculo de Diesel Automático", "Aviso de lucros negativos", "Histórico de fretes profissional"].map(item => (
-                                    <li key={item} className="flex items-center gap-4 text-white font-black text-[10px] md:text-sm uppercase tracking-widest">
-                                        <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                            <Check className="w-3 h-3 text-emerald-500" />
-                                        </div>
-                                        {item}
-                                    </li>
-                                ))}
+                                <LandingFeatureCard
+                                    icon={<AlertCircle className="w-6 h-6 text-emerald-500" />}
+                                    title="Alerta de Frete Não Lucrativo"
+                                    desc="Antes de aceitar, o sistema calcula se o frete cobre seus custos reais e te avisa com antecedência. Nunca mais saia no prejuízo sem saber."
+                                    isNew
+                                />
+                                <LandingFeatureCard
+                                    icon={<Zap className="w-6 h-6 text-emerald-500" />}
+                                    title="Calculadora de Frete"
+                                    desc="Saiba o custo real por km em segundos. Consideramos diesel, pedágio, manutenção e muito mais."
+                                />
                             </ul>
                         </div>
                         <div className="relative group">
@@ -457,45 +505,55 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-end">
                         <LandingPricingCard
                             title="PILOTO"
-                            price="R$ 34,90"
+                            price="R$ 37"
                             period="/mês"
+                            badgeText="IDEAL PARA AUTÔNOMOS"
+                            subPriceNote="Menos que um tanque de arla por mês"
                             desc="O essencial para o motorista autônomo organizar as contas do caminhão."
                             features={[
-                                "Calculadora Inteligente (10/dia)",
-                                "Controle de Caixa (Entrada/Saída)",
-                                "Relatório de Lucro por Viagem",
-                                "Sem Rastreamento GPS",
-                                "Suporte via Email"
+                                { label: "Calculadora de Frete", note: "custo real por km" },
+                                { label: "Lançar Viagem & Histórico" },
+                                { label: "Saúde da Frota", note: "revisões e alertas" },
+                                { label: "Controle de Pneus" },
+                                { label: "Dashboard Básico" },
+                                { label: "Acesso Mobile" },
+                                { label: "BI & Performance", disabled: true, note: "disponível no Pro" },
+                                { label: "Inteligência IA", disabled: true, note: "disponível no Pro" },
+                                { label: "Compliance Hub", disabled: true }
                             ]}
                             onSelect={() => onPurchase('Piloto')}
                         />
                         <LandingPricingCard
-                            title="GESTOR PRO"
-                            price="R$ 89,90"
+                            title="PRO"
+                            price="R$ 97"
                             period="/mês"
                             isPopular
-                            desc="Controle total da sua frota com rastreamento e inteligência artificial."
+                            badgeText="30 DIAS GRÁTIS"
+                            desc="Controle total da sua frota com automação e inteligência artificial."
                             features={[
-                                "Calculadora Inteligente (20/dia)",
-                                "Frota Ilimitada (Promoção)",
-                                "GPS Rastreamento (Em breve lojas)",
-                                "App do Motorista (Em breve)",
-                                "Gestão de Pneus e Manutenção",
-                                "Suporte Prioritário no Zap"
+                                { label: "Tudo do Piloto" },
+                                { label: "BI & Performance Completo" },
+                                { label: "Inteligência IA Ativa" },
+                                { label: "Compliance Hub" },
+                                { label: "Mapa & GPS Tracking" },
+                                { label: "Gestão de Motoristas", note: "até 10 heróis" },
+                                { label: "Relatório Mensal Automático" },
+                                { label: "Alerta de Frete não Lucrativo" }
                             ]}
                             onSelect={() => onPurchase('Gestor Pro')}
                         />
                         <LandingPricingCard
-                            title="FROTA ELITE"
-                            price="R$ 797,00"
-                            period="/ano"
-                            desc="O mesmo poder do plano Gestor Pro, com 2 meses de economia."
+                            title="GESTÃO"
+                            price="R$ 197"
+                            period="/mês"
+                            badgeText="PARA FROTAS"
+                            desc="Para transportadoras com 10 ou mais caminhões."
                             features={[
-                                "Tudo do Pro + Ilimitado",
-                                "Economia de R$ 281,00 no ano",
-                                "Consultoria de Implantação Grátis",
-                                "Selo de Transportadora Verificada",
-                                "Prioridade em Novas Funções"
+                                { label: "Tudo do Plano Pro" },
+                                { label: "Motoristas ILIMITADOS" },
+                                { label: "Relatório Executivo p/ Email" },
+                                { label: "Suporte Prioritário WhatsApp" },
+                                { label: "Onboarding Assistido Incluso" }
                             ]}
                             onSelect={() => onPurchase('Anual Elite')}
                         />
@@ -675,11 +733,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
     );
 };
 
-const LandingPricingCard = ({ title, price, period, desc, features, isPopular, onSelect }: any) => (
+const LandingPricingCard = ({ title, price, period, desc, features, badgeText, subPriceNote, isPopular, onSelect }: any) => (
     <div className={`p-8 md:p-16 rounded-[3rem] md:rounded-[4.5rem] flex flex-col transition-all border relative overflow-hidden group ${isPopular ? 'bg-slate-900 border-emerald-500/50 md:scale-105 shadow-[0_40px_100px_rgba(16,185,129,0.15)] z-10' : 'bg-slate-900/50 border-white/5 hover:border-white/10'}`}>
-        {isPopular && (
-            <div className="absolute top-8 right-8 px-6 py-2 bg-emerald-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl animate-pulse">
-                30 DIAS GRÁTIS
+        {badgeText && (
+            <div className={`absolute top-8 right-8 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl ${isPopular ? 'bg-emerald-500 text-slate-950 animate-pulse' : 'bg-slate-800 text-emerald-500'}`}>
+                {badgeText}
             </div>
         )}
         <div className="mb-12">
@@ -688,16 +746,28 @@ const LandingPricingCard = ({ title, price, period, desc, features, isPopular, o
                 <span className="text-6xl md:text-7xl font-black text-white tracking-tighter">{price}</span>
                 <span className="text-slate-500 text-lg font-bold tracking-tighter">{period}</span>
             </div>
+            {subPriceNote && (
+                <p className="text-emerald-500 text-[11px] font-bold uppercase tracking-wider mt-2">
+                    {subPriceNote}
+                </p>
+            )}
             <p className="text-slate-400 text-sm font-medium leading-relaxed mt-6 max-w-[250px]">{desc}</p>
         </div>
 
         <div className="space-y-6 mb-16 flex-1">
-            {features.map((f: string, i: number) => (
-                <div key={i} className="flex items-center gap-4 text-xs text-white/70 font-bold uppercase tracking-widest">
-                    <div className="w-6 h-6 bg-emerald-500/10 rounded-lg flex items-center justify-center shrink-0">
-                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+            {features.map((f: any, i: number) => (
+                <div key={i} className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest">
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${f.disabled ? 'bg-slate-800' : 'bg-emerald-500/10'}`}>
+                        {f.disabled ? (
+                            <X className="w-3.5 h-3.5 text-slate-600" />
+                        ) : (
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                        )}
                     </div>
-                    {f}
+                    <span className={f.disabled ? 'text-slate-600' : 'text-white/70'}>
+                        {f.label || f}
+                        {f.note && <span className="block text-[8px] opacity-50 lowercase">{f.note}</span>}
+                    </span>
                 </div>
             ))}
         </div>
@@ -706,7 +776,7 @@ const LandingPricingCard = ({ title, price, period, desc, features, isPopular, o
             onClick={onSelect}
             className={`w-full py-8 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] transition-all ${isPopular ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-[0_20px_40px_rgba(16,185,129,0.3)] active:scale-95' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'}`}
         >
-            ADQUIRIR AGORA
+            TESTAR 30 DIAS GRÁTIS
         </button>
     </div>
 );

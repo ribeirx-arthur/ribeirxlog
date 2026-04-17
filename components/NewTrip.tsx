@@ -467,11 +467,25 @@ const NewTrip: React.FC<NewTripProps> = ({ vehicles, drivers, shippers, onSave, 
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-8 border-b border-slate-800 pb-4">Prévia do Resultado</h3>
 
             <div className="space-y-6 relative z-10">
-              <div className="space-y-1">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lucro Estimado</p>
-                <p className={`text-4xl font-black tracking-tighter ${estimatedProfit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  R$ {estimatedProfit.toLocaleString()}
-                </p>
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Lucro Estimado</p>
+                  <p className={`text-4xl font-black tracking-tighter ${estimatedProfit > 0 ? 'text-emerald-500' : estimatedProfit < 0 ? 'text-rose-500 animate-pulse' : 'text-slate-400'}`}>
+                    R$ {estimatedProfit.toLocaleString()}
+                  </p>
+                </div>
+                
+                {estimatedProfit < 0 && (
+                  <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex gap-3 animate-in shake duration-500">
+                    <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-rose-500 font-black uppercase tracking-widest leading-none mb-1">ALERTA: FRETE NÃO LUCRATIVO</p>
+                      <p className="text-[9px] text-rose-400/80 font-medium leading-tight">
+                        Seus custos (Combustível + Despesas) são maiores que o faturamento desta viagem. Você vai pagar para trabalhar!
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
