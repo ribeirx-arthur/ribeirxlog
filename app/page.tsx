@@ -1284,9 +1284,16 @@ export default function Home() {
         
         if (!isDemo && user) {
             try {
+                const dbPayload: any = {
+                    name: updatedData.name,
+                    phone: updatedData.phone,
+                    config: updatedData.config
+                };
+                if (updatedData.companyName) dbPayload.company_name = updatedData.companyName;
+
                 const { error } = await authenticatedClient
                     .from('profiles')
-                    .update(updatedData)
+                    .update(dbPayload)
                     .eq('id', user.id);
                 
                 if (error) throw error;
