@@ -4,7 +4,7 @@ import {
     X, HelpCircle, ChevronRight, ChevronLeft, CheckCircle2, MessageCircle,
     BarChart3, Calculator, MapPin, Settings2, Truck, BookOpen, AlertCircle,
     ExternalLink, Bug, Send, User, Mail, FileText, Star, GraduationCap,
-    Play, Pause, ChevronDown
+    Play, Pause, ChevronDown, BrainCircuit
 } from 'lucide-react';
 import { TabType } from '../types';
 
@@ -85,6 +85,17 @@ const MODULES: TutorialModule[] = [
         steps: [
             { title: 'Alertas de Manutenção', desc: 'Configure KMs limite para óleo, freios, pneus e revisão geral.' },
             { title: 'Histórico de Serviços', desc: 'Registre cada manutenção com custo, data e KM para cálculo de custos por KM.' },
+        ]
+    },
+    {
+        id: 'ia',
+        icon: BrainCircuit,
+        title: 'IA e Lucratividade',
+        tab: 'intelligence',
+        steps: [
+            { title: 'IA para Controle Próprio', desc: 'A IA RBX foi feita para quem quer dominar 100% dos seus gastos próprios. Ela analisa padrões que o olho humano ignora.' },
+            { title: 'Projeção de Lucro', desc: 'Acesse a aba de Inteligência para ver como a IA projeta seus lucros baseada no histórico de despesas reais.' },
+            { title: 'Perguntas Estratégicas', desc: 'Peça orientações como "Como aumentar meu lucro nos próximos 3 meses?" e receba um plano de ação.' },
         ]
     },
 ];

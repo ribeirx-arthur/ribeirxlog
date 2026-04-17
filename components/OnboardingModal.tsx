@@ -101,26 +101,30 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-3xl" />
       
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-[3rem] shadow-3xl overflow-hidden flex flex-col md:flex-row h-[700px]">
+      <div className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-[3rem] shadow-3xl overflow-hidden flex flex-col md:flex-row md:h-[700px] max-h-[95vh] md:max-h-none">
         
         {/* Sidebar/Hero part of the modal */}
-        <div className="w-full md:w-80 bg-slate-950 p-10 flex flex-col justify-between border-r border-white/5 relative overflow-hidden shrink-0">
-          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+        <div className="w-full md:w-80 bg-slate-950 p-6 md:p-10 flex flex-row md:flex-col justify-between border-b md:border-b-0 md:border-r border-white/5 relative overflow-hidden shrink-0">
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none hidden md:block">
             <Rocket className="w-48 h-48 text-emerald-500 -rotate-12" />
           </div>
           
-          <div className="relative z-10">
-            <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
+          <div className="relative z-10 flex items-center md:block">
+            <h2 className="text-xl md:text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
               Ribeirx<span className="text-emerald-500">Log</span>
             </h2>
-            <div className="w-12 h-1 bg-emerald-500 rounded-full mt-4" />
+            <div className="hidden md:block w-12 h-1 bg-emerald-500 rounded-full mt-4" />
           </div>
 
-          <div className="relative z-10 space-y-6">
-            <StepIndicator current={step} />
+          <div className="relative z-10 hidden md:block">
+            <StepIndicator current={step} isMobile={false} />
           </div>
 
-          <div className="relative z-10 pt-8 border-t border-white/5">
+          <div className="flex md:hidden relative z-10">
+            <StepIndicator current={step} isMobile={true} />
+          </div>
+
+          <div className="relative z-10 pt-8 border-t border-white/5 hidden md:block">
              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
                    <ShieldCheck className="w-5 h-5" />
@@ -404,9 +408,19 @@ const ChoiceCard = ({ icon: Icon, title, desc, selected, onClick, color }: any) 
   </button>
 );
 
-const StepIndicator = ({ current }: { current: Step }) => {
+const StepIndicator = ({ current, isMobile }: { current: Step, isMobile?: boolean }) => {
   const steps: Step[] = ['welcome', 'path-choice', 'basic-info', 'company-details', 'success'];
   const currentIndex = steps.indexOf(current);
+
+  if (isMobile) {
+    return (
+      <div className="flex items-center gap-1.5">
+        {steps.map((_, i) => (
+          <div key={i} className={`h-1.5 transition-all duration-500 rounded-full ${i <= currentIndex ? 'bg-emerald-500 w-6 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-800 w-3'}`} />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

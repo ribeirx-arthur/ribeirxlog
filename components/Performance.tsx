@@ -196,7 +196,7 @@ const Performance: React.FC<PerformanceProps> = ({
             <div className="absolute inset-0 flex flex-col justify-end p-10 md:p-20">
                <div className="flex items-center gap-4 mb-6">
                   <div className="w-16 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
-                  <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.6em] italic">Operational Intelligence Hub</span>
+                  <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.6em] italic">Centro de Inteligência Operacional</span>
                </div>
                <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                   <div className="space-y-4">
@@ -264,7 +264,7 @@ const Performance: React.FC<PerformanceProps> = ({
                      <div className="flex justify-between items-start mb-12">
                         <div className="space-y-1">
                            <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Trajetória de Performance</h3>
-                           <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase">Métricas Financeiras Históricas (Neural SVG)</p>
+                           <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase">Métricas Financeiras Históricas (Neural RBS)</p>
                         </div>
                      </div>
                      <div className="h-[380px] w-full relative">

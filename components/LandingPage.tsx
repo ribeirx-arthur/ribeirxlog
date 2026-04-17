@@ -323,7 +323,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                         ))}
                     </div>
 
-                    <div className="mt-16 text-center">
+                    <div className="mt-16 text-center space-y-4">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-500 text-[10px] font-black uppercase tracking-widest mx-auto">
+                            <BrainCircuit className="w-3 h-3" /> Foco em Controle Total
+                        </div>
+                        <p className="text-slate-400 font-medium max-w-2xl mx-auto">Nossa IA foi desenhada especificamente para quem não aceita perder um centavo. Controle 100% dos seus gastos próprios e tome decisões baseadas em lucro real, não em "acho que sobrou".</p>
                         <button onClick={onGetStarted} className="px-12 py-6 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black rounded-2xl uppercase tracking-[0.2em] text-xs transition-all flex items-center gap-4 mx-auto">
                             VER DETALHES DE CADA FUNÇÃO <ArrowRight className="w-4 h-4" />
                         </button>
@@ -421,7 +425,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                                 Seu Negócio Guiado <br /><span className="text-emerald-500">por Inteligência Artificial.</span>
                             </h3>
                             <p className="text-lg text-slate-400 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
-                                <span className="text-white font-bold">O 1º Algoritmo Financeiro de Frotas.</span> Nossa Inteligência Artificial mapeia sua transportadora e cospe um plano passo-a-passo no seu celular para aumentar seus lucros em 30%. Sem planilhas difíceis.
+                                <span className="text-white font-bold">O 1º Algoritmo de Controle de Gastos Próprios.</span> Nossa Inteligência Artificial é indispensável para quem quer controlar cada centavo. Ela mapeia sua transportadora e responde perguntas cruciais como "Como posso aumentar meu lucro nos próximos 3 meses?" com precisão neural.
                             </p>
                             <div className="flex justify-center">
                                 <a href="#planos" className="px-10 py-5 bg-white text-slate-950 font-black rounded-2xl flex items-center gap-4 hover:scale-105 transition-all shadow-2xl uppercase tracking-widest text-sm">
@@ -528,10 +532,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-end">
                         <LandingPricingCard
                             title="PILOTO"
-                            price="R$ 37"
+                            price="R$ 37,90"
                             period="/mês"
                             badgeText="IDEAL PARA AUTÔNOMOS"
-                            subPriceNote="Menos que um tanque de arla por mês"
+                            subPriceNote="Menos que um lanche por mês"
                             desc="O essencial para o motorista autônomo organizar as contas do caminhão."
                             features={[
                                 { label: "Calculadora de Frete", note: "custo real por km" },
@@ -548,7 +552,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                         />
                         <LandingPricingCard
                             title="PRO"
-                            price="R$ 97"
+                            price="R$ 89,90"
                             period="/mês"
                             isPopular
                             badgeText="30 DIAS GRÁTIS"
@@ -567,9 +571,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onD
                         />
                         <LandingPricingCard
                             title="GESTÃO"
-                            price="R$ 197"
-                            period="/mês"
-                            badgeText="PARA FROTAS"
+                            price="R$ 797,90"
+                            period="/ano"
+                            badgeText="PLANO PRO ANUAL"
                             desc="Para transportadoras com 10 ou mais caminhões."
                             features={[
                                 { label: "Tudo do Plano Pro" },

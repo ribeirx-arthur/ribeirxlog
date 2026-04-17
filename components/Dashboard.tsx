@@ -322,11 +322,11 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
-                  Neural <span className="text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">Intel</span>
+                  Análise <span className="text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">Estratégica</span>
                 </h1>
                 {isFree && (
                   <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] font-black text-amber-500 uppercase tracking-widest shadow-lg shadow-amber-500/5">
-                    Free Tier
+                    Plano Básico
                   </span>
                 )}
               </div>
@@ -334,7 +334,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                   <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.34em]">
-                    {uiStyle === 'deep' ? 'Quantum Logistics Monitor v5.0' : 'Estratégia Operacional RBS'}
+                    {uiStyle === 'deep' ? 'Monitor de Logística Avançada' : 'Estratégia Operacional RBS'}
                   </p>
                 </div>
               </div>
@@ -400,7 +400,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
                     onClick={() => setShowDatePicker(false)}
                     className="w-full py-4 bg-emerald-500 text-slate-950 font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-emerald-500/30 active:scale-95 transition-all"
                   >
-                    Sync Intelligence
+                    Sincronizar Dados
                   </button>
                 </div>
               </div>
@@ -428,7 +428,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         <div className="absolute top-12 left-12">
            <div className="flex items-center gap-3 bg-slate-950/50 backdrop-blur-xl border border-white/5 px-4 py-2 rounded-2xl">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] italic">Neural Link Active</span>
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] italic">Análise de Dados Ativa</span>
            </div>
         </div>
 
@@ -436,11 +436,10 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
           <div className="space-y-6 max-w-3xl">
              <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
                 <Sparkles className="w-4 h-4 text-emerald-400" />
-                <span className="text-white text-[10px] font-black uppercase tracking-[0.25em]">Strategic Pulse Monitor</span>
+                <span className="text-white text-[10px] font-black uppercase tracking-[0.25em]">Monitor de Pulso Estratégico</span>
              </div>
              <h2 className="text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.85]">
-               Intelligence <br /> 
-               <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]">Redefined</span>
+               Rentabilidade <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]">Otimizada</span>
              </h2>
              <p className="text-slate-300 text-lg font-medium leading-relaxed max-w-xl">
                Análise profunda de rentabilidade, gestão de custos invisíveis e projeções financeiras alimentadas por inteligência artificial tática.
@@ -450,7 +449,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
           <div className="grid grid-cols-2 gap-4">
              <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-8 rounded-[3rem] shadow-2xl space-y-3 min-w-[200px] hover:border-emerald-500/30 transition-all group/card">
                 <div className="flex justify-between items-center">
-                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Next Payout</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Próximo Recebimento</p>
                    <TrendingUp className="w-4 h-4 text-emerald-500" />
                 </div>
                 <p className="text-3xl font-black text-white italic tracking-tighter">+ R$ {(projections.length > 0 ? (projections[0].projected || 0) : 0).toLocaleString()}</p>
@@ -460,10 +459,10 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
              </div>
              <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-8 rounded-[3rem] shadow-2xl space-y-3 min-w-[200px] hover:border-sky-500/30 transition-all group/card">
                 <div className="flex justify-between items-center">
-                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global Rank</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ranking Global</p>
                    <Activity className="w-4 h-4 text-sky-500" />
                 </div>
-                <p className="text-3xl font-black text-white italic tracking-tighter">Elite <span className="text-sky-500 text-xl font-medium">9.2</span></p>
+                <p className="text-3xl font-black text-white italic tracking-tighter">Elite <span className="text-sky-500 text-xl font-medium">{(stats.totalProfit / (Math.max(stats.totalRevenue, 1) || 1) * 100).toFixed(1)}</span></p>
                 <div className="h-1 w-full bg-slate-800 rounded-full mt-2 overflow-hidden">
                    <div className="h-full bg-sky-500 w-[45%] group-hover/card:w-[75%] transition-all duration-1000" />
                 </div>
@@ -488,7 +487,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
             onClick={() => setActiveTab?.('trips')}
             className="px-8 py-4 bg-indigo-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
           >
-            Review Pending
+            Revisar Pendentes
           </button>
         </div>
       )}
@@ -522,7 +521,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`lg:col-span-2 bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden ${uiStyle === 'deep' ? 'ring-1 ring-emerald-500/20' : ''}`}>
           {uiStyle === 'deep' && <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none"><Activity className="w-32 h-32 text-emerald-500" /></div>}
-          <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-8 border-b border-slate-800 pb-4">Desempenho de Caixa <span className="text-emerald-500">Real-Time</span></h3>
+          <h3 className="font-black text-slate-500 uppercase text-[10px] tracking-widest mb-8 border-b border-slate-800 pb-4">Desempenho de Caixa <span className="text-emerald-500">Tempo Real</span></h3>
           <div className="h-64 w-full">
             <DashboardNeuralChart data={chartData} uiStyle={uiStyle} />
           </div>
@@ -558,7 +557,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b border-slate-800/50 pb-6">
           <div>
             <h3 className="font-black text-white uppercase text-xl tracking-tighter flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-purple-500" /> IA Predictive Insights
+              <Sparkles className="w-6 h-6 text-purple-500" /> Insights Preditivos IA
             </h3>
             <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.2em] mt-1">Projeção Baseada em Redes Neurais e Histórico de Rentabilidade</p>
           </div>

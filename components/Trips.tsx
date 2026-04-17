@@ -377,12 +377,12 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
                   </button>
                   
                   {menuOpenId === trip.id && (
-                    <div className="absolute right-0 top-full mt-4 w-64 bg-slate-900 border border-white/10 rounded-[2rem] shadow-2xl z-[100] py-4 overflow-hidden animate-in zoom-in-95 duration-200">
+                    <div className="absolute right-0 top-full mt-4 w-64 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-3xl z-[9999] py-4 overflow-hidden animate-in zoom-in-95 duration-200">
                       <div className="px-6 py-2 mb-2 border-b border-white/5">
                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Ações Rápidas</p>
                       </div>
-                      <button onClick={() => { setEditingTrip({ ...trip }); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-white hover:bg-emerald-500/10 font-black uppercase tracking-widest transition-all"> <Edit3 className="w-5 h-5 text-emerald-500" /> Modificar </button>
-                      <button onClick={() => { setViewingFilesTripId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-white hover:bg-sky-500/10 font-black uppercase tracking-widest transition-all"> <ExternalLink className="w-5 h-5 text-sky-500" /> Inteligência </button>
+                      <button onClick={() => { setViewingFilesTripId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-white hover:bg-sky-500/10 font-black uppercase tracking-widest transition-all"> <ExternalLink className="w-5 h-5 text-sky-500" /> anexar docs e obs </button>
+                      <button onClick={() => { setEditingTrip({ ...trip }); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-white hover:bg-emerald-500/10 font-black uppercase tracking-widest transition-all"> <Edit3 className="w-5 h-5 text-emerald-500" /> editar viagem </button>
                       <button onClick={() => { setTripToDeleteId(trip.id); setMenuOpenId(null); }} className="w-full flex items-center gap-4 px-8 py-4 text-xs text-rose-500 hover:bg-rose-500/10 font-black uppercase tracking-widest transition-all"> <Trash2 className="w-5 h-5" /> Eliminar </button>
                     </div>
                   )}

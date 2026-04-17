@@ -273,13 +273,11 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                 <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-12 h-1 bg-indigo-500 rounded-full animate-pulse" />
-                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] italic">Neural Network Active</span>
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] italic">Rede Neural Ativa</span>
                     </div>
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                         <div className="space-y-4">
-                            <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none italic uppercase">
-                                Strategic <span className="text-indigo-500">Cerebro</span>
-                            </h2>
+                                Núcleo <span className="text-indigo-500">Estratégico</span>
                             <p className="text-slate-400 text-sm md:text-lg font-medium max-w-2xl leading-relaxed">
                                 Arthur, conectei sua frota ao motor de <span className="text-white">Inteligência Estratégica</span>. Cada dado agora é um plano de ação para escalar sua margem líquida.
                             </p>
@@ -326,7 +324,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                 {[
                     { label: 'Eficiência Operacional', value: `${stats.margin.toFixed(1)}%`, icon: Target, color: 'text-indigo-400', trail: 'Margem Líquida' },
                     { label: 'Volume Sob Gestão', value: `R$ ${stats.profit.toLocaleString()}`, icon: Wallet, color: 'text-emerald-400', trail: 'Lucro Acumulado' },
-                    { label: 'Integridade da Frota', value: `${((vehicles.length - analytics.filter(i => i.category === 'Frota' && i.type === 'critical').length) / vehicles.length * 100).toFixed(0)}%`, icon: Truck, color: 'text-sky-400', trail: 'Risk Index' },
+                    { label: 'Integridade da Frota', value: `${((vehicles.length - analytics.filter(i => i.category === 'Frota' && i.type === 'critical').length) / vehicles.length * 100).toFixed(0)}%`, icon: Truck, color: 'text-sky-400', trail: 'Saúde dos Ativos' },
                 ].map((s, i) => (
                     <div key={i} className="group relative bg-slate-900/40 backdrop-blur-sm border border-white/5 p-8 rounded-[3rem] hover:bg-slate-800/60 transition-all duration-500">
                         <div className="flex items-start justify-between">
@@ -359,7 +357,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                                     </div>
                                     Predição Algorítmica de Fluxo
                                 </h3>
-                                <p className="text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase mt-2 ml-14">Time-series forecasting / Bayesian neural projection</p>
+                                <p className="text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase mt-2 ml-14">Previsão de Séries Temporais / Projeção Neural</p>
                             </div>
                             <div className="flex items-center gap-6 px-8 py-4 bg-slate-950/50 rounded-3xl border border-white/5">
                                 <div className="flex items-center gap-3">
@@ -534,7 +532,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                                 {insight.trend && (
                                     <div className={`flex items-center gap-2 px-4 py-1.5 bg-slate-950 rounded-full text-[9px] font-black ${insight.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'} border border-white/5`}>
                                         {insight.trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                        MARKET TREND
+                                        TENDÊNCIA DE MERCADO
                                     </div>
                                 )}
                             </div>
@@ -561,7 +559,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                             <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between text-[10px] font-black text-slate-600 uppercase tracking-widest relative z-10">
                                 <div className="flex items-center gap-3">
                                     <Zap className="w-3.5 h-3.5 text-indigo-500" />
-                                    <span>Sync: Real-time Neural Process</span>
+                                    <span>Sincronia: Processamento em Tempo Real</span>
                                 </div>
                                 <Disc className="w-4 h-4 animate-spin-slow opacity-20" />
                             </div>
