@@ -307,7 +307,7 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
           const tripFinance = calculateTripFinance(trip, vehicle, driver, profile);
           
           return (
-            <div key={trip.id} className="group relative bg-slate-900/30 backdrop-blur-sm border border-white/5 rounded-[2.5rem] p-8 hover:bg-slate-800/40 transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl hover:shadow-emerald-500/5 shadow-lg">
+            <div key={trip.id} className={`group relative bg-slate-900/30 backdrop-blur-sm border border-white/5 rounded-[2.5rem] p-8 hover:bg-slate-800/40 transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl hover:shadow-emerald-500/5 shadow-lg ${menuOpenId === trip.id ? 'z-50' : 'z-10'}`}>
                {/* Accent bar */}
                <div className={`absolute left-0 top-0 bottom-0 w-2 rounded-l-[2.5rem] transition-all group-hover:w-3 ${trip.status === 'Pago' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                
