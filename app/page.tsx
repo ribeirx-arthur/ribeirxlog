@@ -100,9 +100,12 @@ export default function Home() {
 
     useEffect(() => {
         if (isProfileIncomplete && mounted) {
-            setShowOnboardingModal(true);
+            const localCheck = localStorage.getItem('rbx_onboarded_' + user?.id) === 'true';
+            if (!localCheck) {
+                setShowOnboardingModal(true);
+            }
         }
-    }, [isProfileIncomplete, mounted]);
+    }, [isProfileIncomplete, mounted, user?.id]);
 
     // State Declarations
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -1285,6 +1288,9 @@ export default function Home() {
     // ─── FINAL RENDER ───
 
     const handleOnboardingComplete = async (updatedData: Partial<UserProfile>) => {
+        if (user) {
+            localStorage.setItem('rbx_onboarded_' + user.id, 'true');
+        }
         const newProfile = { ...profile, ...updatedData };
         setProfile(newProfile);
         setShowOnboardingModal(false);
