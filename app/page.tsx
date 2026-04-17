@@ -96,7 +96,7 @@ export default function Home() {
         setMounted(true);
     }, []);
 
-    const isProfileIncomplete = isSignedIn && (!profile.name || !profile.phone || !profile.config.onboardingCompleted);
+    const isProfileIncomplete = isSignedIn && (!profile.name || !profile.config.onboardingCompleted);
 
     useEffect(() => {
         if (isProfileIncomplete && mounted) {
