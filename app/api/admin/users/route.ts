@@ -1,22 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-// Hardcoded fallback — mesma estratégia usada em services/supabase.ts
-const SUPABASE_URL = 'https://smwzfhbazdjrkoywpnfd.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd3pmaGJhemRqcmtveXdwbmZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTYzODM1NiwiZXhwIjoyMDg1MjE0MzU2fQ.yeLyesYmXIsG-VKFra0D0wZ2TIZkJkmEVcmKXcBh4DM';
-
-const getAdminClient = () => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceKey) {
-        return null;
-    }
-    return createClient(supabaseUrl, serviceKey);
-};
 
 // Verifica se o email passado é admin
 const isAdminEmail = (email: string): boolean => {
@@ -43,12 +29,7 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: `Não autorizado: ${adminEmail}` }, { status: 403 });
     }
 
-    const adminClient = getAdminClient();
-    if (!adminClient) {
-        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
-    }
-
-    const { data: users, error } = await adminClient
+    const { data: users, error } = await supabaseAdmin
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
@@ -75,14 +56,9 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
     }
 
-    const adminClient = getAdminClient();
-    if (!adminClient) {
-        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
-    }
-
     const { userId, updates } = await req.json();
 
-    const { error } = await adminClient
+    const { error } = await supabaseAdmin
         .from('profiles')
         .update(updates)
         .eq('id', userId);

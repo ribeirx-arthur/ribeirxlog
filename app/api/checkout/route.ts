@@ -5,38 +5,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     const asaasUrl = process.env.ASAAS_API_URL || 'https://www.asaas.com/api/v3';
-
-    // Procura por qualquer variação comum do nome da chave
-    const allKeys = Object.keys(process.env);
-    const possibleNames = [
-        'ASAAS_API_KEY',
-        'VITE_ASAAS_API_KEY',
-        'NEXT_PUBLIC_ASAAS_API_KEY',
-        'ASAS_API_KEY',
-        'ASAAS_KEY',
-        'ASAAS_TOKEN'
-    ];
-    const foundName = possibleNames.find(name => allKeys.includes(name));
-    const asaasKey = foundName ? process.env[foundName] : null;
-
-    // Log para depuração na Vercel
-    console.log('[DEBUG-SERVER] Nomes de chaves encontrados que podem ser Asaas:', allKeys.filter(k => k.includes('ASA') || k.includes('ASAS')));
-    console.log('[DEBUG-SERVER] Chave selecionada do campo:', foundName);
+    const asaasKey = process.env.ASAAS_API_KEY;
 
     if (!asaasKey) {
-        console.error('[ERROR-SERVER] Nenhuma chave Asaas encontrada nas variáveis de ambiente.');
+        console.error('[SECURITY] Asaas API Key not found in environment variables.');
         return NextResponse.json({
-            error: 'Asaas not configured',
-            debug_info: {
-                all_available_keys: allKeys,
-                keys_found: allKeys.filter(k => k.includes('ASA') || k.includes('ASAS')),
-                status: 'Missing environment variable in Project Settings'
-            }
+            error: 'Serviço de pagamentos não configurado.',
         }, { status: 500 });
     }
-
-    // Log para depuração (sem expor a chave inteira)
-    console.log(`[DEBUG-SERVER] Chave carregada. Tamanho: ${asaasKey.length}. Começa com $: ${asaasKey.startsWith('$')}`);
 
     try {
         const { email, name, planId, planName, amount, cpfCnpj } = await req.json();

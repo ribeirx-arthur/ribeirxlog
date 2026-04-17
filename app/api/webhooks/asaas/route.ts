@@ -1,20 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// Fallback hardcoded — mesma chave do .env.local
-const SUPABASE_URL_FALLBACK = 'https://smwzfhbazdjrkoywpnfd.supabase.co';
-const SERVICE_KEY_FALLBACK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtd3pmaGJhemRqcmtveXdwbmZkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTYzODM1NiwiZXhwIjoyMDg1MjE0MzU2fQ.yeLyesYmXIsG-VKFra0D0wZ2TIZkJkmEVcmKXcBh4DM';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || SUPABASE_URL_FALLBACK;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || SERVICE_KEY_FALLBACK;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-        console.error('[ASAAS WEBHOOK] Erro: Configuração do Supabase ausente.');
-        return NextResponse.json({ error: 'Configuração do servidor incompleta' }, { status: 500 });
-    }
-
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     try {
         const body = await req.json();

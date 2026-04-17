@@ -1,3 +1,4 @@
+import 'server-only';
 
 const ASAAS_API_KEY = process.env.ASAAS_API_KEY;
 const ASAAS_API_URL = process.env.ASAAS_API_URL || 'https://www.asaas.com/api/v3';
@@ -13,12 +14,15 @@ export const asaasService = {
      * Busca ou cria um cliente no Asaas pelo e-mail
      */
     async getOrCreateCustomer(email: string, name: string): Promise<string> {
+        if (!ASAAS_API_KEY) {
+            throw new Error('ASAAS_API_KEY não configurada no servidor.');
+        }
         try {
             // 1. Tenta buscar cliente existente
             const response = await fetch(`${ASAAS_API_URL}/customers?email=${email}`, {
                 method: 'GET',
                 headers: {
-                    'access_token': ASAAS_API_KEY!,
+                    'access_token': ASAAS_API_KEY,
                     'Content-Type': 'application/json'
                 }
             });
@@ -33,7 +37,7 @@ export const asaasService = {
             const createResponse = await fetch(`${ASAAS_API_URL}/customers`, {
                 method: 'POST',
                 headers: {
-                    'access_token': ASAAS_API_KEY!,
+                    'access_token': ASAAS_API_KEY,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -55,11 +59,14 @@ export const asaasService = {
      * Cria uma cobrança e retorna o link de pagamento
      */
     async createSubscriptionLink(customerId: string, planType: string, amount: number): Promise<string> {
+        if (!ASAAS_API_KEY) {
+            throw new Error('ASAAS_API_KEY não configurada no servidor.');
+        }
         try {
             const response = await fetch(`${ASAAS_API_URL}/payments`, {
                 method: 'POST',
                 headers: {
-                    'access_token': ASAAS_API_KEY!,
+                    'access_token': ASAAS_API_KEY,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
