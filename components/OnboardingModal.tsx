@@ -98,19 +98,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
   ];
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
-      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-3xl" />
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-4 md:p-8 animate-in fade-in duration-500">
+      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-3xl" />
       
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-[3rem] shadow-3xl overflow-hidden flex flex-col md:flex-row md:h-[700px] max-h-[95vh] md:max-h-none">
+      <div className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-3xl md:rounded-[3rem] shadow-3xl overflow-hidden flex flex-col md:flex-row md:h-[700px] h-[95vh] md:max-h-none">
         
         {/* Sidebar/Hero part of the modal */}
-        <div className="w-full md:w-80 bg-slate-950 p-6 md:p-10 flex flex-row md:flex-col justify-between border-b md:border-b-0 md:border-r border-white/5 relative overflow-hidden shrink-0">
+        <div className="w-full md:w-80 bg-slate-950 p-4 sm:p-6 md:p-10 flex flex-row md:flex-col justify-between border-b md:border-b-0 md:border-r border-white/5 relative overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none hidden md:block">
             <Rocket className="w-48 h-48 text-emerald-500 -rotate-12" />
           </div>
           
           <div className="relative z-10 flex items-center md:block">
-            <h2 className="text-xl md:text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
+            <h2 className="text-lg md:text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
               Ribeirx<span className="text-emerald-500">Log</span>
             </h2>
             <div className="hidden md:block w-12 h-1 bg-emerald-500 rounded-full mt-4" />
@@ -130,14 +130,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
                    <ShieldCheck className="w-5 h-5" />
                 </div>
                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-tight">
-                  Sua privacidade <br /> é nossa prioridade.
+                   Sua segurança <br /> em primeiro lugar.
                 </p>
              </div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-8 md:p-12 overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-950">
+        <div className="flex-1 p-5 sm:p-8 md:p-12 overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-950">
           
           {step === 'welcome' && (
             <div className="h-full flex flex-col justify-center space-y-8 animate-in slide-in-from-right-8 fade-in duration-500">
@@ -280,7 +280,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button 
                       onClick={() => setFormData({...formData, userRole: 'autonomo'})}
                       className={`p-6 rounded-3xl border transition-all text-left ${formData.userRole === 'autonomo' ? 'bg-emerald-500 text-slate-950 border-white/10 shadow-xl shadow-emerald-500/10' : 'bg-slate-950 text-slate-500 border-white/5 hover:border-white/10'}`}
@@ -361,14 +361,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
                      <h4 className="text-white font-black uppercase text-sm italic tracking-tighter">Lançar Primeira Viagem</h4>
                      <p className="text-xs text-slate-500 font-bold leading-relaxed">Vá direto para o campo de batalha.</p>
                      <button 
-                       onClick={() => window.location.reload()}
-                       className="w-full py-3 bg-sky-500/10 border border-sky-500/20 text-sky-500 text-[9px] font-black uppercase tracking-widest rounded-xl group-hover:bg-sky-500 group-hover:text-white transition-all"
-                     >Ir ao Dashboard</button>
+                        onClick={() => window.location.reload()}
+                        className="w-full py-3 bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[9px] font-black uppercase tracking-widest rounded-xl group-hover:bg-sky-500 group-hover:text-white transition-all"
+                      >Ir ao Dashboard</button>
                   </div>
                </div>
 
                <div className="pt-4 flex flex-col items-center gap-3">
-                  <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2">Suporte 24h via Neural Link</p>
+                  <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-2">Suporte via WhatsApp</p>
                   <a 
                     href="https://wa.me/5513988205888" 
                     target="_blank" 
@@ -391,14 +391,18 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onComp
 const ChoiceCard = ({ icon: Icon, title, desc, selected, onClick, color }: any) => (
   <button 
     onClick={onClick}
-    className={`p-8 rounded-[2.5rem] border transition-all text-left space-y-4 group relative overflow-hidden ${selected ? `bg-${color}-500 text-slate-950 border-white/10 shadow-2xl` : 'bg-slate-950 text-slate-500 border-white/5 hover:border-white/10'}`}
+    className={`p-5 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border transition-all text-left space-y-4 group relative overflow-hidden ${selected 
+      ? (color === 'emerald' ? 'bg-emerald-500 text-slate-950 border-white/10 shadow-2xl' : 'bg-sky-500 text-slate-950 border-white/10 shadow-2xl') 
+      : 'bg-slate-950 text-slate-500 border-white/5 hover:border-white/10'}`}
   >
-    <div className={`p-4 rounded-2xl ${selected ? 'bg-slate-950 text-white shadow-inner' : `bg-${color}-500/10 text-${color}-500`} transition-all w-fit`}>
+    <div className={`p-4 rounded-2xl ${selected 
+      ? 'bg-slate-950 text-white shadow-inner' 
+      : (color === 'emerald' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-sky-500/10 text-sky-500')} transition-all w-fit`}>
       <Icon className="w-6 h-6" />
     </div>
     <div className="space-y-1">
-      <h4 className={`text-xl font-black uppercase tracking-tighter italic ${selected ? 'text-slate-950' : 'text-white'}`}>{title}</h4>
-      <p className={`text-xs font-bold leading-relaxed ${selected ? 'text-slate-950/70' : 'text-slate-500'}`}>{desc}</p>
+      <h4 className={`text-lg sm:text-xl font-black uppercase tracking-tighter italic ${selected ? 'text-slate-950' : 'text-white'}`}>{title}</h4>
+      <p className={`text-[11px] sm:text-xs font-bold leading-relaxed ${selected ? 'text-slate-950/70' : 'text-slate-500'}`}>{desc}</p>
     </div>
     {selected && (
       <div className="absolute -bottom-4 -right-4 opacity-10 pointer-events-none">

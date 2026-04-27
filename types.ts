@@ -42,6 +42,7 @@ export interface UserProfile {
     userRole?: 'autonomo' | 'transportadora';
     enabledFeatures?: string[];
     onboardingCompleted?: boolean;
+    completedModules?: Record<string, boolean>;
     hasUsedCoupon?: boolean;
   };
   plan_type?: 'none' | 'piloto' | 'gestor_pro' | 'frota_elite' | 'mensal' | 'anual' | 'lifetime';

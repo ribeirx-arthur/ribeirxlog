@@ -103,6 +103,23 @@ const SubscriptionView: React.FC<SubscriptionViewProps> = ({ profile, initialPla
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter text-shadow-glow">Escolha seu Nível de Operação</h2>
                 <p className="text-slate-400 text-sm max-w-2xl mx-auto">Sua logística merece ser profissional. Escolha um plano agora e desbloqueie o verdadeiro potencial da sua frota com automação e IA.</p>
+                
+                {/* Oferta Especial 30 Dias Grátis */}
+                <div className="mt-8 p-6 bg-indigo-600/10 border border-indigo-500/30 rounded-[2rem] max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-indigo-500/60 transition-all shadow-xl shadow-indigo-500/10">
+                    <div className="text-left">
+                        <h4 className="text-xl font-black text-white uppercase italic tracking-tighter">Quer testar 30 dias grátis?</h4>
+                        <p className="text-indigo-300 text-xs font-medium uppercase tracking-widest mt-1">Válido exclusivamente para o Plano Piloto</p>
+                    </div>
+                    <button 
+                        onClick={() => {
+                            const message = encodeURIComponent(`Olá Arthur! Gostaria de resgatar meus 30 dias grátis no Plano Piloto. (E-mail: ${profile.email})`);
+                            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+                        }}
+                        className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-indigo-600/30 flex items-center gap-3 active:scale-95 transition-all"
+                    >
+                        <MessageCircle className="w-4 h-4" /> Resgatar no WhatsApp
+                    </button>
+                </div>
             </header>
 
             {/* Status da Assinatura Atual */}

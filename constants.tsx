@@ -21,6 +21,9 @@ export const INITIAL_PROFILE: UserProfile = {
     costPerKmTire: 0,               // 0 = usa estimula automática por eixos
     costPerKmMaintenance: 0,        // 0 = usa estimula automática por eixos
     appMode: 'simple',
-    userRole: 'transportadora'
+    userRole: 'transportadora',
+    onboardingCompleted: false,
+    completedModules: {},
+    hasUsedCoupon: false
   }
 };

@@ -227,13 +227,13 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
-                <div className="bg-emerald-600/30 px-8 py-5 rounded-[2rem] border border-white/20 backdrop-blur-xl shadow-xl">
+                <div className="bg-emerald-600/30 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] border border-white/20 backdrop-blur-xl shadow-xl">
                   <p className="text-emerald-950/70 text-[10px] font-black uppercase tracking-widest mb-1">Total Receita</p>
-                  <p className="text-2xl font-black text-emerald-950 italic tracking-tighter">R$ {stats.totalRevenue.toLocaleString()}</p>
+                  <p className="text-xl sm:text-2xl font-black text-emerald-950 italic tracking-tighter">R$ {stats.totalRevenue.toLocaleString()}</p>
                 </div>
-                <div className="bg-white/10 px-8 py-5 rounded-[2rem] border border-white/20 backdrop-blur-xl shadow-xl">
+                <div className="bg-white/10 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] border border-white/20 backdrop-blur-xl shadow-xl">
                   <p className="text-emerald-950/70 text-[10px] font-black uppercase tracking-widest mb-1 font-bold">Saldo a Receber</p>
-                  <p className="text-2xl font-black text-emerald-950 italic tracking-tighter">R$ {stats.pendingReceivables.toLocaleString()}</p>
+                  <p className="text-xl sm:text-2xl font-black text-emerald-950 italic tracking-tighter">R$ {stats.pendingReceivables.toLocaleString()}</p>
                 </div>
               </div>
             </div>
@@ -281,7 +281,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
             <div className="relative rounded-[2rem] overflow-hidden shadow-xl aspect-[2/1] border border-slate-800 group">
               <img
                 src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&q=80"
-                alt="Truck and Technology"
+                alt="Tecnologia Logística"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-luminosity"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent" />
@@ -379,7 +379,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
                 </div>
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Ignition Point</label>
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Data Inicial</label>
                     <input
                       type="date"
                       value={startDate}
@@ -388,7 +388,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Terminal Point</label>
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Data Final</label>
                     <input
                       type="date"
                       value={endDate}
@@ -446,23 +446,23 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
              </p>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-             <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-8 rounded-[3rem] shadow-2xl space-y-3 min-w-[200px] hover:border-emerald-500/30 transition-all group/card">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl space-y-3 min-w-full sm:min-w-[200px] hover:border-emerald-500/30 transition-all group/card">
                 <div className="flex justify-between items-center">
-                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Próximo Recebimento</p>
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Próximo Pagamento</p>
                    <TrendingUp className="w-4 h-4 text-emerald-500" />
                 </div>
-                <p className="text-3xl font-black text-white italic tracking-tighter">+ R$ {(projections.length > 0 ? (projections[0].projected || 0) : 0).toLocaleString()}</p>
+                <p className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter">+ R$ {(projections.length > 0 ? (projections[0].projected || 0) : 0).toLocaleString()}</p>
                 <div className="h-1 w-full bg-slate-800 rounded-full mt-2 overflow-hidden">
                    <div className="h-full bg-emerald-500 w-[65%] group-hover/card:w-[85%] transition-all duration-1000" />
                 </div>
              </div>
-             <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-8 rounded-[3rem] shadow-2xl space-y-3 min-w-[200px] hover:border-sky-500/30 transition-all group/card">
+             <div className="bg-slate-950/60 backdrop-blur-2xl border border-white/5 p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl space-y-3 min-w-full sm:min-w-[200px] hover:border-sky-500/30 transition-all group/card">
                 <div className="flex justify-between items-center">
                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ranking Global</p>
                    <Activity className="w-4 h-4 text-sky-500" />
                 </div>
-                <p className="text-3xl font-black text-white italic tracking-tighter">Elite <span className="text-sky-500 text-xl font-medium">{(stats.totalProfit / (Math.max(stats.totalRevenue, 1) || 1) * 100).toFixed(1)}</span></p>
+                <p className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter">Elite <span className="text-sky-500 text-xl font-medium">{(stats.totalProfit / (Math.max(stats.totalRevenue, 1) || 1) * 100).toFixed(1)}</span></p>
                 <div className="h-1 w-full bg-slate-800 rounded-full mt-2 overflow-hidden">
                    <div className="h-full bg-sky-500 w-[45%] group-hover/card:w-[75%] transition-all duration-1000" />
                 </div>
@@ -500,7 +500,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <StatCard title="Volume de Receita" value={`R$ ${stats.totalRevenue.toLocaleString()}`} trend={timeFilter} isPositive={true} icon={DollarSign} uiStyle={uiStyle} color="emerald" />
         <StatCard
-          title="Profit Residual"
+          title="Lucro Residual"
           value={`R$ ${stats.totalProfit.toLocaleString()}`}
           trend={timeFilter}
           isPositive={true}

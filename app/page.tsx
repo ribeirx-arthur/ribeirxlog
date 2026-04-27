@@ -96,16 +96,19 @@ export default function Home() {
         setMounted(true);
     }, []);
 
+    // Security check: Only Arthur (or specific emails) can see this
+    const isAdmin = profile.email === 'arthurribeiro@ribeirxlog.com.br' || 
+                    profile.email === 'arthurribeiro.contato@gmail.com' ||
+                    profile.email === 'ribeirxlog@gmail.com' ||
+                    profile.email === 'arthur@ribeirxlog.com.br';
+
     const isProfileIncomplete = isSignedIn && (!profile.name || !profile.config.onboardingCompleted);
 
     useEffect(() => {
-        if (isProfileIncomplete && mounted) {
-            const localCheck = localStorage.getItem('rbx_onboarded_' + user?.id) === 'true';
-            if (!localCheck) {
-                setShowOnboardingModal(true);
-            }
+        if (isProfileIncomplete && mounted && profile.id && !isDemo) {
+            setShowOnboardingModal(true);
         }
-    }, [isProfileIncomplete, mounted, user?.id]);
+    }, [isProfileIncomplete, mounted, profile.id, isDemo]);
 
     // State Declarations
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -1232,7 +1235,11 @@ export default function Home() {
                 return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
             case 'admin':
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} setActiveTab={setActiveTab} />;
-                return <AdminPanel profile={profile} supabaseClient={authenticatedClient} />;
+                return (
+                    <Suspense fallback={<div>Carregando Painel Master...</div>}>
+                        <AdminPanel currentProfile={profile} />
+                    </Suspense>
+                );
             default: return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} setActiveTab={setActiveTab} />;
         }
     };
@@ -1288,21 +1295,26 @@ export default function Home() {
     // ─── FINAL RENDER ───
 
     const handleOnboardingComplete = async (updatedData: Partial<UserProfile>) => {
-        if (user) {
-            localStorage.setItem('rbx_onboarded_' + user.id, 'true');
-        }
-        const newProfile = { ...profile, ...updatedData };
+        const newProfile = { 
+            ...profile, 
+            ...updatedData,
+            config: {
+                ...profile.config,
+                ...updatedData.config,
+                onboardingCompleted: true
+            }
+        };
         setProfile(newProfile);
         setShowOnboardingModal(false);
         
         if (!isDemo && user) {
+            localStorage.setItem('rbx_onboarded_' + user.id, 'true');
             try {
                 const dbPayload: any = {
-                    name: updatedData.name,
-                    config: updatedData.config
+                    name: newProfile.name,
+                    config: newProfile.config,
+                    company_name: newProfile.companyName
                 };
-                if (updatedData.companyName) dbPayload.company_name = updatedData.companyName;
-
 
                 const { error } = await authenticatedClient
                     .from('profiles')
@@ -1313,7 +1325,30 @@ export default function Home() {
                 showToast('Perfil configurado com sucesso!', 'success');
             } catch (e) {
                 console.error("Error saving onboarding:", e);
-                showToast('Erro ao salvar perfil, mas você pode continuar.', 'error');
+                showToast('Erro ao salvar perfil.', 'error');
+            }
+        }
+    };
+
+    const handleTutorialModuleComplete = async (moduleId: string) => {
+        const updatedModules = { ...(profile.config.completedModules || {}), [moduleId]: true };
+        const newProfile = {
+            ...profile,
+            config: {
+                ...profile.config,
+                completedModules: updatedModules
+            }
+        };
+        setProfile(newProfile);
+
+        if (!isDemo && user) {
+            try {
+                await authenticatedClient
+                    .from('profiles')
+                    .update({ config: newProfile.config })
+                    .eq('id', user.id);
+            } catch (e) {
+                console.error("Error saving tutorial progress:", e);
             }
         }
     };
@@ -1377,6 +1412,8 @@ export default function Home() {
                         onClose={() => setShowTutorial(false)}
                         setActiveTab={setActiveTab}
                         tutorialMode={(profile.config as any).tutorialMode || 'simple'}
+                        completedModules={profile.config.completedModules || {}}
+                        onMarkComplete={handleTutorialModuleComplete}
                     />
                 </Suspense>
 

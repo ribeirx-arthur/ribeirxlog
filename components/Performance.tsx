@@ -215,7 +215,7 @@ const Performance: React.FC<PerformanceProps> = ({
                          </div>
                          <div>
                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status do BI</p>
-                            <p className="text-2xl font-black text-white uppercase italic">Optimal Flow</p>
+                            <p className="text-2xl font-black text-white uppercase italic">Fluxo Ativo</p>
                          </div>
                       </div>
                   </div>
@@ -246,43 +246,43 @@ const Performance: React.FC<PerformanceProps> = ({
             
             <div className="flex items-center gap-6 px-10 py-4 bg-slate-950/30 rounded-full border border-white/5 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] italic">
                 <BarChart3 className="w-5 h-5 text-emerald-500" />
-                Processing Engine v6.2
+                Motor de Processamento v6.2
             </div>
          </div>
 
          {activeView === 'geral' && (
-            <div className="space-y-12 animate-in slide-in-from-bottom-10 duration-700">
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="space-y-8 sm:space-y-12 animate-in slide-in-from-bottom-10 duration-700">
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
                   <PremiumStat title="Receita Consolidada" value={analytics.totalRevenue} color="text-white" icon={Wallet} trend="+12%" />
                   <PremiumStat title="Lucro Líquido Real" value={analytics.totalProfit} color="text-emerald-400" icon={TrendingUp} trend="+7.5%" />
-                  <PremiumStat title="Market ROI" value={`${marginRatio}%`} color="text-sky-400" icon={Target} trend="Cruising" />
+                  <PremiumStat title="ROI de Mercado" value={`${marginRatio}%`} color="text-sky-400" icon={Target} trend="Cruising" />
                   <PremiumStat title="Eficiência / KM" value={`R$ ${(analytics.totalProfit / (analytics.totalKm || 1)).toFixed(2)}`} color="text-amber-400" icon={MapPin} trend="+3.2%" />
                </div>
 
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                  <div className={glassCard + " lg:col-span-2 min-h-[550px]"}>
-                     <div className="flex justify-between items-start mb-12">
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10">
+                  <div className="bg-slate-900/60 backdrop-blur-3xl border border-slate-800/80 rounded-3xl sm:rounded-[3.5rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden lg:col-span-2 min-h-[400px] sm:min-h-[550px]">
+                     <div className="flex justify-between items-start mb-8 sm:mb-12">
                         <div className="space-y-1">
-                           <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Trajetória de Performance</h3>
-                           <p className="text-slate-500 text-[10px] font-black tracking-[0.3em] uppercase">Métricas Financeiras Históricas (Neural RBS)</p>
+                           <h3 className="text-xl sm:text-3xl font-black text-white uppercase italic tracking-tighter">Performance de Lucro</h3>
+                           <p className="text-slate-500 text-[9px] sm:text-[10px] font-black tracking-[0.3em] uppercase">Resultados Históricos</p>
                         </div>
                      </div>
-                     <div className="h-[380px] w-full relative">
+                     <div className="h-[250px] sm:h-[380px] w-full relative">
                         <NeuralAreaChart data={chartData} />
                      </div>
                   </div>
 
-                  <div className={glassCard + " flex flex-col items-center justify-between py-16"}>
-                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter text-center">Fator de Operação</h3>
-                     <div className="relative w-72 h-72">
+                  <div className="bg-slate-900/60 backdrop-blur-3xl border border-slate-800/80 rounded-3xl sm:rounded-[3.5rem] p-6 sm:p-10 shadow-2xl flex flex-col items-center justify-between py-10 sm:py-16">
+                     <h3 className="text-xl sm:text-2xl font-black text-white uppercase italic tracking-tighter text-center">Fator de Operação</h3>
+                     <div className="relative w-48 h-48 sm:w-72 sm:h-72">
                         <NeuralRadialGauge value={Number(marginRatio)} />
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                           <p className="text-6xl font-black text-white tracking-tighter">{marginRatio}%</p>
-                           <span className="text-[10px] font-black text-emerald-500 uppercase mt-4 px-6 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20">Operational Health</span>
+                           <p className="text-4xl sm:text-6xl font-black text-white tracking-tighter">{marginRatio}%</p>
+                           <span className="text-[8px] sm:text-[10px] font-black text-emerald-500 uppercase mt-2 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-center">Saúde Operacional</span>
                         </div>
                      </div>
-                     <div className="w-full space-y-4 px-10">
-                        <div className="flex justify-between items-center"><p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Retenção de Capital</p><p className="text-sm font-black text-white">{marginRatio}%</p></div>
+                     <div className="w-full space-y-4 px-4 sm:px-10 mt-6 sm:mt-0">
+                        <div className="flex justify-between items-center"><p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Retenção de Capital</p><p className="text-xs sm:text-sm font-black text-white">{marginRatio}%</p></div>
                         <div className="h-4 bg-slate-950 rounded-full overflow-hidden shadow-inner p-1 border border-white/5"><div className="h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-teal-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.3)]" style={{ width: `${marginRatio}%` }} /></div>
                      </div>
                   </div>
@@ -291,20 +291,20 @@ const Performance: React.FC<PerformanceProps> = ({
          )}
 
          {activeView === 'rankings' && (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 animate-in slide-in-from-right-10 duration-700">
-               <EliteRanking title="Elite de Lucratividade" desc="Ranking de retorno líquido consolidado" icon={Trophy} color="emerald" data={rankedDrivers.map(d => ({ name: d.name, val: d.profit, sub: `${d.trips} Missões Finalizadas` }))} />
-               <EliteRanking title="Master Commissions" desc="Volume de repasses e ganhos de motoristas" icon={Coins} color="sky" data={rankedCommissions.map(d => ({ name: d.name, val: d.commission, sub: 'Capital Distribuído' }))} />
-               <EliteRanking title="Market Power (Shippers)" desc="Principais fontes de volume financeiro" icon={Building2} color="amber" data={rankedShippers.map(s => ({ name: s.name, val: s.profit, sub: 'Strategic Business Partner' }))} />
-               <EliteRanking title="The Golden Routes" desc="Trechos com maior densidade de lucro" icon={MapPin} color="rose" data={rankedRoutes.map(r => ({ name: r.name, val: r.profit, sub: 'Logistics Optimization' }))} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 sm:gap-12 animate-in slide-in-from-right-10 duration-700">
+               <EliteRanking title="Elite de Lucratividade" desc="Retorno líquido consolidado" icon={Trophy} color="emerald" data={rankedDrivers.map(d => ({ name: d.name, val: d.profit, sub: `${d.trips} Missões Finalizadas` }))} />
+               <EliteRanking title="Comissões Master" desc="Volume de repasses aos motoristas" icon={Coins} color="sky" data={rankedCommissions.map(d => ({ name: d.name, val: d.commission, sub: 'Capital Distribuído' }))} />
+               <EliteRanking title="Poder de Mercado" desc="Principais fontes de volume financeiro" icon={Building2} color="amber" data={rankedShippers.map(s => ({ name: s.name, val: s.profit, sub: 'Parceiro Estratégico' }))} />
+               <EliteRanking title="As Rotas de Ouro" desc="Trechos com maior densidade de lucro" icon={MapPin} color="rose" data={rankedRoutes.map(r => ({ name: r.name, val: r.profit, sub: 'Otimização Logística' }))} />
             </div>
          )}
 
          {activeView === 'custos' && (
-            <div className="space-y-12 animate-in zoom-in-95 duration-700">
-               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                  <div className={glassCard + " lg:col-span-4"}>
-                     <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-12 text-center">Neural Cost Audit</h3>
-                     <div className="h-[380px] w-full flex items-center justify-center relative scale-110">
+            <div className="space-y-8 sm:space-y-12 animate-in zoom-in-95 duration-700">
+               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12">
+                  <div className="bg-slate-900/60 backdrop-blur-3xl border border-slate-800/80 rounded-3xl sm:rounded-[3.5rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden lg:col-span-4">
+                     <h3 className="text-xl sm:text-2xl font-black text-white uppercase italic tracking-tighter mb-8 sm:mb-12 text-center">Auditoria de Custos</h3>
+                     <div className="h-[250px] sm:h-[380px] w-full flex items-center justify-center relative scale-100 sm:scale-110">
                         <NeuralPieChart data={[
                            { label: 'Diesel', value: analytics.totalFuel, color: '#38bdf8' },
                            { label: 'Manutenção', value: analytics.totalMaint, color: '#f43f5e' },
@@ -312,18 +312,18 @@ const Performance: React.FC<PerformanceProps> = ({
                            { label: 'Lucro', value: analytics.totalProfit, color: '#10b981' }
                         ]} />
                      </div>
-                     <div className="grid grid-cols-1 gap-4 mt-8">
-                        <MiniStat label="Fuel Consumption" val={analytics.totalFuel} color="bg-sky-400" />
-                        <MiniStat label="Technical Maint" val={analytics.totalMaint} color="bg-rose-500" />
-                        <MiniStat label="Fleet Commissions" val={analytics.totalCommissions} color="bg-amber-400" />
-                        <MiniStat label="REAL NET PROFIT" val={analytics.totalProfit} color="bg-emerald-500" />
+                     <div className="grid grid-cols-1 gap-3 sm:gap-4 mt-6 sm:mt-8">
+                        <MiniStat label="Consumo de Diesel" val={analytics.totalFuel} color="bg-sky-400" />
+                        <MiniStat label="Manutenção Frota" val={analytics.totalMaint} color="bg-rose-500" />
+                        <MiniStat label="Repasse de Comissões" val={analytics.totalCommissions} color="bg-amber-400" />
+                        <MiniStat label="LUCRO LÍQUIDO REAL" val={analytics.totalProfit} color="bg-emerald-500" />
                      </div>
                   </div>
 
-                  <div className={glassCard + " lg:col-span-8"}>
-                     <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-12 flex items-center gap-6">
-                        <History className="w-8 h-8 text-rose-500" />
-                        Major Interventions Log
+                  <div className="bg-slate-900/60 backdrop-blur-3xl border border-slate-800/80 rounded-3xl sm:rounded-[3.5rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden lg:col-span-8">
+                     <h3 className="text-2xl sm:text-3xl font-black text-white uppercase italic tracking-tighter mb-8 sm:mb-12 flex items-center gap-4 sm:gap-6">
+                        <History className="w-6 h-6 sm:w-8 sm:h-8 text-rose-500" />
+                        Histórico de Intervenções
                      </h3>
                      <div className="space-y-6 max-h-[700px] overflow-y-auto pr-4 custom-scrollbar">
                         {analytics.mostExpensiveMaintenances.length > 0 ? (
@@ -387,9 +387,9 @@ const Performance: React.FC<PerformanceProps> = ({
                         <div className="w-full space-y-6">
                            {rankedRoutes.slice(0, 3).map((r, i) => (
                               <div key={i} className="flex justify-between items-center p-10 bg-slate-900 border border-white/5 rounded-3xl group hover:border-indigo-500/40 transition-all shadow-xl">
-                                 <div className="flex flex-col items-start gap-1">
-                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Route Channel</span>
-                                    <span className="text-base font-black text-white uppercase tracking-tight">{r.name}</span>
+                               <div className="flex flex-col items-start gap-1">
+                                    <span className="text-[8px] sm:text-[10px] font-black text-slate-600 uppercase tracking-widest">Canal de Rota</span>
+                                    <span className="text-sm sm:text-base font-black text-white uppercase tracking-tight">{r.name}</span>
                                  </div>
                                  <div className="text-right">
                                     <span className="text-2xl font-black text-emerald-500 italic uppercase">R$ {(r.profit / r.km).toFixed(2)}<span className="text-xs ml-1 text-slate-500">/KM</span></span>
@@ -516,41 +516,40 @@ const NeuralPieChart = ({ data }: { data: any[] }) => {
 };
 
 const PremiumStat = ({ title, value, color, icon: Icon, trend }: any) => (
-   <div className="bg-slate-900 border border-slate-800 p-10 rounded-[2.5rem] shadow-2xl relative group overflow-hidden">
+   <div className="bg-slate-900 border border-slate-800 p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative group overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl hidden md:block opacity-20 translate-x-16 -translate-y-16 group-hover:bg-white/10 transition-all pointer-events-none" />
-      <div className="flex justify-between items-start mb-8">
-         <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 shadow-xl group-hover:scale-110 transition-all duration-700"><Icon className={`w-8 h-8 ${color}`} /></div>
-         <span className={`text-[10px] font-black px-4 py-1.5 rounded-full bg-slate-950 border border-slate-800 ${trend.includes('+') ? 'text-emerald-500 shadow-emerald-500/10' : 'text-slate-500'} shadow-lg`}>{trend}</span>
+      <div className="flex justify-between items-start mb-6 sm:mb-8">
+         <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 shadow-xl group-hover:scale-110 transition-all duration-700"><Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${color}`} /></div>
+         <span className={`text-[9px] sm:text-[10px] font-black px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-slate-950 border border-slate-800 ${trend.includes('+') ? 'text-emerald-500 shadow-emerald-500/10' : 'text-slate-500'} shadow-lg`}>{trend}</span>
       </div>
-      <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em] mb-2">{title}</p>
-      <p className={`text-4xl font-black ${color} tracking-tighter`}>{typeof value === 'number' ? `R$ ${Number(value).toLocaleString()}` : value}</p>
+      <p className="text-slate-500 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] mb-1 sm:mb-2">{title}</p>
+      <p className={`text-2xl sm:text-4xl font-black ${color} tracking-tighter`}>{typeof value === 'number' ? `R$ ${Number(value).toLocaleString()}` : value}</p>
    </div>
 );
 
 const EliteRanking = ({ title, desc, icon: Icon, color, data }: any) => {
    const c = color === 'emerald' ? 'text-emerald-500' : color === 'sky' ? 'text-sky-500' : color === 'amber' ? 'text-amber-500' : 'text-rose-500';
    return (
-      <div className="bg-slate-900/60 border border-slate-800/80 p-12 rounded-[3.5rem] shadow-2xl group/rank">
-         <div className="flex items-center gap-8 mb-12">
-            <div className={`w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 ${c} group-hover/rank:rotate-12 transition-all`}><Icon className="w-10 h-10" /></div>
+      <div className="bg-slate-900/60 border border-slate-800/80 p-6 sm:p-12 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl group/rank">
+         <div className="flex items-center gap-6 sm:gap-8 mb-8 sm:mb-12">
+            <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-slate-950 rounded-xl sm:rounded-2xl flex items-center justify-center border border-slate-800 ${c} group-hover/rank:rotate-12 transition-all`}><Icon className="w-6 h-6 sm:w-10 sm:h-10" /></div>
             <div>
-               <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">{title}</h3>
-               <p className="text-[11px] text-slate-500 uppercase font-bold tracking-[0.2em]">{desc}</p>
+               <h3 className="text-xl sm:text-3xl font-black text-white italic uppercase tracking-tighter">{title}</h3>
+               <p className="text-[9px] sm:text-[11px] text-slate-500 uppercase font-bold tracking-[0.2em]">{desc}</p>
             </div>
          </div>
-         <div className="space-y-6">
+         <div className="space-y-4 sm:space-y-6">
             {data.map((item: any, i: number) => (
-               <div key={i} className="flex items-center gap-8 p-8 bg-slate-950/60 rounded-[2.5rem] border border-slate-800/50 hover:border-emerald-500/20 transition-all shadow-xl group/item">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl ${i < 3 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-900 text-slate-700'} border border-slate-800 shadow-inner group-hover/item:scale-110 transition-transform`}>
+               <div key={i} className="flex items-center gap-4 sm:gap-8 p-4 sm:p-8 bg-slate-950/60 rounded-2xl sm:rounded-[2.5rem] border border-slate-800/50 hover:border-emerald-500/20 transition-all shadow-xl group/item">
+                  <div className={`w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center font-black text-lg sm:text-2xl ${i < 3 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-900 text-slate-700'} border border-slate-800 shadow-inner group-hover/item:scale-110 transition-transform`}>
                      {i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                     <p className="text-2xl font-black text-white uppercase truncate tracking-tighter">{item.name}</p>
-                     <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-1">{item.sub}</p>
+                     <p className="text-sm sm:text-2xl font-black text-white uppercase truncate tracking-tighter">{item.name}</p>
+                     <p className="text-[8px] sm:text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-1">{item.sub}</p>
                   </div>
                   <div className="text-right">
-                     <p className={`${c} font-black text-3xl tracking-tighter`}>R$ {Number(item.val).toLocaleString()}</p>
-                     <ChevronRight className="w-4 h-4 text-slate-800 inline-block ml-2 group-hover/item:translate-x-1 transition-transform" />
+                     <p className={`${c} font-black text-lg sm:text-3xl tracking-tighter whitespace-nowrap`}>R$ {Number(item.val).toLocaleString()}</p>
                   </div>
                </div>
             ))}

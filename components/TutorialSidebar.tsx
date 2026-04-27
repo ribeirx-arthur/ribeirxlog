@@ -105,14 +105,15 @@ interface TutorialSidebarProps {
     onClose: () => void;
     setActiveTab: (tab: TabType) => void;
     tutorialMode?: 'simple' | 'advanced';
+    completedModules: Record<string, boolean>;
+    onMarkComplete: (id: string) => void;
 }
 
 const TutorialSidebar: React.FC<TutorialSidebarProps> = ({
-    isOpen, onClose, setActiveTab, tutorialMode = 'simple'
+    isOpen, onClose, setActiveTab, tutorialMode = 'simple', completedModules, onMarkComplete
 }) => {
     const [activeModule, setActiveModule] = useState<string | null>(null);
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [completedModules, setCompletedModules] = useState<Record<string, boolean>>({});
     const [activeSection, setActiveSection] = useState<'tutorials' | 'bug-report'>('tutorials');
 
     // Bug report state
@@ -124,7 +125,7 @@ const TutorialSidebar: React.FC<TutorialSidebarProps> = ({
     const selectedModule = MODULES.find(m => m.id === activeModule);
 
     const handleMarkComplete = (id: string) => {
-        setCompletedModules(prev => ({ ...prev, [id]: true }));
+        onMarkComplete(id);
         setActiveModule(null);
     };
 

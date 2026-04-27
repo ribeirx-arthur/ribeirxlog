@@ -56,11 +56,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     'arthur.ribeirx@gmail.com',
     'arthur.riberix@gmail.com',
     'arthurpsantos01@gmail.com',
-    'arthur_ribeiro09@outlook.com'
+    'arthur_ribeiro09@outlook.com',
+    'arthurribeiro.contato@gmail.com',
+    'arthurribeiro@ribeirxlog.com.br',
+    'ribeirxlog@gmail.com',
+    'arthur@ribeirxlog.com.br'
   ];
   const isAdmin = adminEmails.includes(userEmail) ||
     userEmail.endsWith('@ribeirxlog.com') ||
-    (profile.name?.toLowerCase().includes('ribeirxlog'));
+    userEmail.endsWith('@ribeirxlog.com.br');
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },

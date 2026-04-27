@@ -270,27 +270,29 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-transparent to-transparent"></div>
                 
-                <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
+                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-16">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-12 h-1 bg-indigo-500 rounded-full animate-pulse" />
-                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] italic">Rede Neural Ativa</span>
+                        <span className="text-[9px] sm:text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] italic">Rede Neural Ativa</span>
                     </div>
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8">
                         <div className="space-y-4">
-                                Núcleo <span className="text-indigo-500">Estratégico</span>
-                            <p className="text-slate-400 text-sm md:text-lg font-medium max-w-2xl leading-relaxed">
+                                <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
+                                    Núcleo <span className="text-indigo-500">Estratégico</span>
+                                </h1>
+                            <p className="text-slate-400 text-xs sm:text-lg font-medium max-w-2xl leading-relaxed">
                                 Arthur, conectei sua frota ao motor de <span className="text-white">Inteligência Estratégica</span>. Cada dado agora é um plano de ação para escalar sua margem líquida.
                             </p>
                         </div>
                         
                         <div className="flex gap-4">
-                             <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-6 shadow-2xl flex items-center gap-5">
-                                <div className="p-4 bg-indigo-500/10 rounded-2xl">
-                                    <Zap className="w-7 h-7 text-indigo-500" />
+                             <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-2xl flex items-center gap-3 sm:gap-5">
+                                <div className="p-3 sm:p-4 bg-indigo-500/10 rounded-2xl text-indigo-500">
+                                    <Zap className="w-5 h-5 sm:w-7 sm:h-7" />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Status do Núcleo</p>
-                                    <p className="text-xl font-black text-emerald-500 uppercase">Sinapse Estável</p>
+                                    <p className="text-[8px] sm:text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Status do Núcleo</p>
+                                    <p className="text-base sm:text-xl font-black text-emerald-500 uppercase">Sinapse Estável</p>
                                 </div>
                              </div>
                         </div>
@@ -299,13 +301,13 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
             </div>
 
             {/* Insight Filter Navigation */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-6 shadow-xl">
-                <div className="flex flex-wrap items-center gap-2 p-1 bg-slate-950/50 rounded-full border border-slate-800">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-3xl md:rounded-[2.5rem] p-4 md:p-6 shadow-xl">
+                <div className="flex flex-wrap items-center gap-2 p-1 bg-slate-950/50 rounded-2xl md:rounded-full border border-slate-800">
                     {(['Tudo', 'Crítico', 'Financeiro', 'Frota', 'Performance'] as InsightCategory[]).map(cat => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300
+                            className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300
                             ${activeCategory === cat ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
                         >
                             {cat}
@@ -315,27 +317,27 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                 
                 <div className="flex items-center gap-4 bg-slate-950/30 px-6 py-3 rounded-full border border-white/5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] italic">
                     <Clock className="w-4 h-4 text-indigo-500" />
-                    Last Sync: {new Date().toLocaleTimeString()}
+                    Última Sincronização: {new Date().toLocaleTimeString()}
                 </div>
             </div>
 
             {/* Stats Summary - Reimagined */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 {[
                     { label: 'Eficiência Operacional', value: `${stats.margin.toFixed(1)}%`, icon: Target, color: 'text-indigo-400', trail: 'Margem Líquida' },
                     { label: 'Volume Sob Gestão', value: `R$ ${stats.profit.toLocaleString()}`, icon: Wallet, color: 'text-emerald-400', trail: 'Lucro Acumulado' },
                     { label: 'Integridade da Frota', value: `${((vehicles.length - analytics.filter(i => i.category === 'Frota' && i.type === 'critical').length) / vehicles.length * 100).toFixed(0)}%`, icon: Truck, color: 'text-sky-400', trail: 'Saúde dos Ativos' },
                 ].map((s, i) => (
-                    <div key={i} className="group relative bg-slate-900/40 backdrop-blur-sm border border-white/5 p-8 rounded-[3rem] hover:bg-slate-800/60 transition-all duration-500">
+                    <div key={i} className="group relative bg-slate-900/40 backdrop-blur-sm border border-white/5 p-6 md:p-8 rounded-3xl md:rounded-[3rem] hover:bg-slate-800/60 transition-all duration-500">
                         <div className="flex items-start justify-between">
-                            <div className={`p-4 rounded-2xl bg-slate-950/50 border border-white/5 ${s.color} group-hover:scale-110 transition-transform`}>
-                                <s.icon className="w-8 h-8" />
+                            <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl bg-slate-950/50 border border-white/5 ${s.color} group-hover:scale-110 transition-transform`}>
+                                <s.icon className="w-6 h-6 md:w-8 md:h-8" />
                             </div>
-                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{s.trail}</span>
+                            <span className="text-[9px] md:text-[10px] font-black text-slate-600 uppercase tracking-widest">{s.trail}</span>
                         </div>
-                        <div className="mt-8 space-y-1">
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{s.label}</p>
-                            <p className="text-4xl font-black text-white tracking-tighter italic uppercase">{s.value}</p>
+                        <div className="mt-6 md:mt-8 space-y-1">
+                            <p className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{s.label}</p>
+                            <p className="text-3xl md:text-4xl font-black text-white tracking-tighter italic uppercase">{s.value}</p>
                         </div>
                         <div className="mt-4 h-1 w-full bg-slate-950 rounded-full overflow-hidden">
                             <div className="h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent w-full -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
@@ -351,13 +353,13 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                     <div className="relative z-10">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                             <div>
-                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
-                                        <TrendingUp className="text-indigo-400 w-6 h-6" />
+                                <h3 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter flex items-center gap-4">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
+                                        <TrendingUp className="text-indigo-400 w-5 h-5 md:w-6 md:h-6" />
                                     </div>
                                     Predição Algorítmica de Fluxo
                                 </h3>
-                                <p className="text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase mt-2 ml-14">Previsão de Séries Temporais / Projeção Neural</p>
+                                <p className="text-slate-500 text-[9px] md:text-[10px] font-black tracking-[0.2em] uppercase mt-2 ml-10 md:ml-14">Previsão de Séries Temporais / Projeção Neural</p>
                             </div>
                             <div className="flex items-center gap-6 px-8 py-4 bg-slate-950/50 rounded-3xl border border-white/5">
                                 <div className="flex items-center gap-3">
@@ -380,27 +382,29 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                 {/* AI CHAT INTERFACE - Premium & Clean */}
                 <div className="lg:col-span-12 xl:col-span-12">
                    <div className="bg-slate-900/40 backdrop-blur-xl border border-indigo-500/20 rounded-[3.5rem] overflow-hidden flex flex-col md:flex-row shadow-2xl">
-                      <div className="md:w-1/3 p-12 bg-indigo-600/5 border-r border-white/5 flex flex-col justify-between">
+                      <div className="md:w-1/3 p-8 sm:p-12 bg-indigo-600/5 border-r border-white/5 flex flex-col justify-between">
                          <div className="space-y-6">
-                            <div className="w-20 h-20 bg-indigo-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-indigo-600/40 group-hover:rotate-6 transition-transform">
-                                <Brain className="text-white w-10 h-10" />
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-600 rounded-2xl sm:rounded-[2rem] flex items-center justify-center shadow-2xl shadow-indigo-600/40 group-hover:rotate-6 transition-transform">
+                                <Brain className="text-white w-8 h-8 sm:w-10 sm:h-10" />
                             </div>
                             <div className="space-y-2">
-                                <h4 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">RBX Intel Core</h4>
-                                <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.3em]">Quantum Strategy Engine</p>
+                                <h4 className="text-2xl sm:text-3xl font-black text-white uppercase italic tracking-tighter leading-none">RBX Núcleo Intel</h4>
+                                <p className="text-indigo-400 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em]">Motor de Estratégia</p>
                             </div>
-                            <p className="text-slate-400 text-sm font-medium leading-relaxed italic border-l-2 border-indigo-500/30 pl-6">
+                            <p className="text-slate-400 text-xs sm:text-sm font-medium leading-relaxed italic border-l-2 border-indigo-500/30 pl-4 sm:pl-6">
                                 "Eu analiso milhares de pontos de dados da sua operação para encontrar vazamentos de lucro e oportunidades de expansão em tempo real."
                             </p>
                          </div>
-
-                         <div className="mt-12 space-y-4">
-                            <div className="flex items-center gap-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                <ShieldAlert className="w-4 h-4 text-indigo-500" /> Security Protocol: AES-256
+ 
+                         <div className="mt-8 sm:mt-12 space-y-4">
+                            <div className="flex items-center gap-3 text-[8px] sm:text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                <ShieldAlert className="w-4 h-4 text-indigo-500" /> Protocolo: AES-256
                             </div>
-                            <div className="flex items-center gap-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                <Zap className="w-4 h-4 text-emerald-500" /> Latency: 0.2ms
+                            <div className="flex items-center gap-3 text-[8px] sm:text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                <Zap className="w-4 h-4 text-emerald-500" /> Latência: 0.2ms
                             </div>
+                         </div>
+                      </div>div>
                          </div>
                       </div>
 
@@ -538,20 +542,20 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                             </div>
 
                             <div className="relative z-10 space-y-4">
-                                <h3 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter italic group-hover:text-indigo-400 transition-colors">{insight.title}</h3>
-                                <p className="text-slate-400 text-lg font-medium leading-relaxed italic border-l-2 border-indigo-500/20 pl-8">
+                                <h3 className="text-xl sm:text-3xl font-black text-white leading-tight uppercase tracking-tighter italic group-hover:text-indigo-400 transition-colors">{insight.title}</h3>
+                                <p className="text-slate-400 text-sm sm:text-lg font-medium leading-relaxed italic border-l-2 border-indigo-500/20 pl-4 sm:pl-8">
                                     "{insight.message}"
                                 </p>
                             </div>
 
                             {insight.action && (
-                                <div className="relative z-10 bg-slate-950/80 backdrop-blur-md p-6 rounded-[2rem] border border-white/5 flex items-start gap-5 shadow-2xl">
-                                    <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0">
-                                        <Lightbulb className="w-5 h-5 text-indigo-400" />
+                                <div className="relative z-10 bg-slate-950/80 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-white/5 flex items-start gap-4 sm:gap-5 shadow-2xl">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0">
+                                        <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none">Cerebro Plan Action</p>
-                                        <p className="text-white text-base font-bold leading-tight">{insight.action}</p>
+                                        <p className="text-[8px] sm:text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none">Plano de Ação</p>
+                                        <p className="text-white text-sm sm:text-base font-bold leading-tight">{insight.action}</p>
                                     </div>
                                 </div>
                             )}
