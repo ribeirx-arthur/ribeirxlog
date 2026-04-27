@@ -404,7 +404,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                                 <Zap className="w-4 h-4 text-emerald-500" /> Latência: 0.2ms
                             </div>
                          </div>
-                      </div>div>
+                      </div>
                          </div>
                       </div>
 
