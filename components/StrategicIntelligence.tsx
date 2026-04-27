@@ -404,9 +404,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                                 <Zap className="w-4 h-4 text-emerald-500" /> Latência: 0.2ms
                             </div>
                          </div>
-                      </div>
-                         </div>
-                      </div>
+                       </div>
 
                       <div className="flex-1 p-10 flex flex-col min-h-[600px] bg-slate-950/40">
                         {profile.plan_type === 'piloto' || profile.plan_type === 'none' ? (
