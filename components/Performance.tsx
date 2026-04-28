@@ -184,12 +184,9 @@ const Performance: React.FC<PerformanceProps> = ({
    return (
       <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-[1200ms] pb-32">
          {/* Neural BI Hero */}
-         <div className="relative h-[24rem] md:h-[30rem] rounded-[4rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
-            <img 
-               src="/performance_hero_bg_1776392058382.png" 
-               alt="Performance Hero" 
-               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[4000ms] brightness-[0.35]"
-            />
+         <div className="relative h-[400px] md:h-[600px] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-slate-900/80 to-slate-950 group-hover:scale-105 transition-transform duration-[30s] ease-linear" />
+            <div className="absolute inset-0 opacity-20 mix-blend-screen bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] animate-pulse-slow" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent"></div>
             
@@ -198,12 +195,12 @@ const Performance: React.FC<PerformanceProps> = ({
                   <div className="w-16 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
                   <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.6em] italic">Centro de Inteligência Operacional</span>
                </div>
-               <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 md:gap-10">
                   <div className="space-y-4">
-                     <h2 className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-none italic uppercase">
+                     <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-none italic uppercase">
                         Neural <span className="text-emerald-500">Métricas</span>
                      </h2>
-                     <p className="text-slate-400 text-base md:text-xl font-medium max-w-3xl leading-relaxed">
+                     <p className="text-slate-400 text-xs md:text-xl font-medium max-w-3xl leading-relaxed">
                         Arthur, consolidei seu <span className="text-white">Relatório de Alta Performance</span>. Analise a rentabilidade por KM, rankings de ativos e projeções financeiras em um painel unificado.
                      </p>
                   </div>
@@ -223,9 +220,9 @@ const Performance: React.FC<PerformanceProps> = ({
             </div>
          </div>
 
-         {/* Navigation Control */}
-         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-[3rem] p-8 shadow-xl">
-            <div className="flex flex-wrap items-center gap-3 p-1.5 bg-slate-950/50 rounded-full border border-slate-800">
+          {/* Navigation Control */}
+         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-8 shadow-xl">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3 p-1.5 bg-slate-950/50 rounded-3xl md:rounded-full border border-slate-800">
                {[
                   { id: 'geral', label: 'Monitor', icon: Activity },
                   { id: 'rankings', label: 'Elite', icon: Trophy },
@@ -235,7 +232,7 @@ const Performance: React.FC<PerformanceProps> = ({
                   <button
                      key={v.id}
                      onClick={() => setActiveView(v.id as BIView)}
-                     className={`px-10 py-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-4 ${activeView === v.id ? 'bg-white text-slate-950 shadow-[0_10px_30px_rgba(255,255,255,0.1)]' : 'text-slate-500 hover:text-white hover:bg-white/5'
+                     className={`px-4 md:px-10 py-3 md:py-4 rounded-xl md:rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 md:gap-4 flex-1 md:flex-none ${activeView === v.id ? 'bg-white text-slate-950 shadow-[0_10px_30px_rgba(255,255,255,0.1)]' : 'text-slate-500 hover:text-white hover:bg-white/5'
                         }`}
                   >
                      <v.icon className={`w-4 h-4 ${activeView === v.id ? 'text-emerald-500' : ''}`} />

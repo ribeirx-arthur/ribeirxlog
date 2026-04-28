@@ -198,11 +198,8 @@ const Trips: React.FC<TripsProps> = ({ trips, setTrips, onUpdateTrip, onDeleteTr
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       {/* Hero Section - Neural Intel Design */}
       <div className="relative h-64 md:h-80 rounded-[3rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
-        <img 
-          src="/trips_hero_bg_1776391959496.png" 
-          alt="Trips Hero" 
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 brightness-[0.4]"
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-slate-900/80 to-slate-950 group-hover:scale-105 transition-transform duration-[30s] ease-linear" />
+        <div className="absolute inset-0 opacity-20 mix-blend-screen bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] animate-pulse-slow" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent"></div>
         

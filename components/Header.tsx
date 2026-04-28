@@ -18,11 +18,12 @@ interface HeaderProps {
   isDemo?: boolean;
   onOpenTutorial?: () => void;
   isSidebarCollapsed?: boolean;
+  userImageUrl?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
   profile, notifications, onReadNotification, setActiveTab, activeTab, onRefresh,
-  isMobileMenuOpen, setIsMobileMenuOpen, isDemo, onOpenTutorial, isSidebarCollapsed
+  isMobileMenuOpen, setIsMobileMenuOpen, isDemo, onOpenTutorial, isSidebarCollapsed, userImageUrl
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -198,8 +199,14 @@ const Header: React.FC<HeaderProps> = ({
               </div>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{profile.companyName}</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-emerald-500 overflow-hidden">
-              {profile.name.split(' ').map(n => n[0]).join('')}
+            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xs font-black text-emerald-950 shadow-lg shadow-emerald-500/20 border-2 border-emerald-500 overflow-hidden shrink-0">
+              {userImageUrl ? (
+                <img src={userImageUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                  {profile.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('')}
+                </div>
+              )}
             </div>
           </button>
         </div>

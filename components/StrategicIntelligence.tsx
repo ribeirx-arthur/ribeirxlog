@@ -261,23 +261,20 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-24">
             {/* Neural Intel Hero */}
-            <div className="relative h-[22rem] md:h-[28rem] rounded-[3.5rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
-                <img 
-                    src="/intelligence_hero_bg_1776392026774.png" 
-                    alt="Intelligence Hero" 
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3000ms] brightness-[0.3]"
-                />
+            <div className="relative h-[400px] md:h-[28rem] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden border border-emerald-500/20 shadow-2xl group">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-slate-900/80 to-slate-950 group-hover:scale-105 transition-transform duration-[30s] ease-linear" />
+                <div className="absolute inset-0 opacity-20 mix-blend-screen bg-[url('https://www.transparenttextures.com/patterns/black-thread-light.png')] animate-pulse-slow" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-transparent to-transparent"></div>
                 
-                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-16">
+                <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-12 h-1 bg-indigo-500 rounded-full animate-pulse" />
                         <span className="text-[9px] sm:text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] italic">Rede Neural Ativa</span>
                     </div>
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8">
+                    <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 md:gap-8">
                         <div className="space-y-4">
-                                <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
+                                <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white italic tracking-tighter uppercase leading-none">
                                     Núcleo <span className="text-indigo-500">Estratégico</span>
                                 </h1>
                             <p className="text-slate-400 text-xs sm:text-lg font-medium max-w-2xl leading-relaxed">
@@ -286,7 +283,7 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
                         </div>
                         
                         <div className="flex gap-4">
-                             <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-2xl flex items-center gap-3 sm:gap-5">
+                             <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-2xl flex items-center gap-3 sm:gap-5 group hover:-translate-y-1 transition-transform">
                                 <div className="p-3 sm:p-4 bg-indigo-500/10 rounded-2xl text-indigo-500">
                                     <Zap className="w-5 h-5 sm:w-7 sm:h-7" />
                                 </div>
@@ -301,14 +298,13 @@ const StrategicIntelligence: React.FC<StrategicIntelligenceProps> = ({
             </div>
 
             {/* Insight Filter Navigation */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-3xl md:rounded-[2.5rem] p-4 md:p-6 shadow-xl">
-                <div className="flex flex-wrap items-center gap-2 p-1 bg-slate-950/50 rounded-2xl md:rounded-full border border-slate-800">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md border border-indigo-500/10 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-8 shadow-xl">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 p-1.5 bg-slate-950/50 rounded-3xl md:rounded-full border border-slate-800">
                     {(['Tudo', 'Crítico', 'Financeiro', 'Frota', 'Performance'] as InsightCategory[]).map(cat => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300
-                            ${activeCategory === cat ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-4 md:px-10 py-3 md:py-4 rounded-xl md:rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 md:gap-4 flex-1 md:flex-none ${activeCategory === cat ? 'bg-indigo-600 text-white shadow-[0_10px_30px_rgba(79,70,229,0.2)]' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
                         >
                             {cat}
                         </button>

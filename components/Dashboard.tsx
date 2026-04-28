@@ -202,11 +202,8 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
         {/* Big Balance Card with Futuristic Background */}
         <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-1 shadow-2xl relative overflow-hidden group">
           <div className="bg-emerald-500 rounded-[2.8rem] p-10 relative overflow-hidden">
-            <img
-              src="/futuristic_logistics_dashboard_bg_1776391496908.png"
-              className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay group-hover:scale-105 transition-transform duration-1000"
-              alt="Dashboard"
-            />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-emerald-500/0 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-1000 animate-pulse-slow" />
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] animate-slide-diagonal" />
             <div className="absolute right-[-20px] top-[-20px] opacity-10 group-hover:rotate-12 transition-transform duration-1000">
               <Zap className="w-80 h-80 text-white" />
             </div>
@@ -279,11 +276,8 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
 
             {/* Banner de Imagem Temática Caminhão/Tecnologia */}
             <div className="relative rounded-[2rem] overflow-hidden shadow-xl aspect-[2/1] border border-slate-800 group">
-              <img
-                src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&q=80"
-                alt="Tecnologia Logística"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-luminosity"
-              />
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 to-slate-900/80 group-hover:scale-110 transition-transform duration-1000" />
+              <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/micro-carbon.png')]" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <h4 className="text-lg font-black text-white uppercase tracking-tight mb-1">Tecnologia em Movimento</h4>
@@ -418,11 +412,8 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
 
       {/* ─── HI-IMPACT HERO BANNER ─── */}
       <div className="relative h-[480px] w-full bg-slate-900 rounded-[4rem] overflow-hidden border border-slate-800 shadow-3xl group">
-        <img
-          src="/futuristic_logistics_dashboard_bg_1776391496908.png"
-          className="absolute inset-0 w-full h-full object-cover opacity-70 mix-blend-screen group-hover:scale-105 transition-transform duration-[30s] ease-linear"
-          alt="Dashboard Neural"
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-slate-900/80 to-slate-950 group-hover:scale-105 transition-transform duration-[30s] ease-linear" />
+        <div className="absolute inset-0 opacity-20 mix-blend-screen bg-[url('https://www.transparenttextures.com/patterns/connected.png')] animate-slide-diagonal" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
         
         <div className="absolute top-12 left-12">
@@ -438,7 +429,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips, vehicles, drivers, shipper
                 <Sparkles className="w-4 h-4 text-emerald-400" />
                 <span className="text-white text-[10px] font-black uppercase tracking-[0.25em]">Monitor de Pulso Estratégico</span>
              </div>
-             <h2 className="text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.85]">
+             <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-[1] md:leading-[0.85]">
                Rentabilidade <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]">Otimizada</span>
              </h2>
              <p className="text-slate-300 text-lg font-medium leading-relaxed max-w-xl">

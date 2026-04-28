@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     onClose?.();
   };
 
-  const userEmail = profile.email?.trim().toLowerCase() || '';
+  const userEmailStr = profile.email?.trim().toLowerCase() || profile.name?.trim().toLowerCase() || '';
   const adminEmails = [
     'arthur@ribeirxlog.com',
     'arthur.ribeirx@gmail.com',
@@ -60,11 +60,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     'arthurribeiro.contato@gmail.com',
     'arthurribeiro@ribeirxlog.com.br',
     'ribeirxlog@gmail.com',
-    'arthur@ribeirxlog.com.br'
+    'arthur@ribeirxlog.com.br',
+    'ribeirxlog'
   ];
-  const isAdmin = adminEmails.includes(userEmail) ||
-    userEmail.endsWith('@ribeirxlog.com') ||
-    userEmail.endsWith('@ribeirxlog.com.br');
+  const isAdmin = adminEmails.includes(userEmailStr) ||
+    userEmailStr.endsWith('@ribeirxlog.com') ||
+    userEmailStr.endsWith('@ribeirxlog.com.br');
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -119,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-500">
                 <span className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">RBX<span className="text-emerald-500">LOG</span></span>
-                <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Intelligence</span>
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mt-1">Inteligência</span>
               </div>
             )}
           </div>

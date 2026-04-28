@@ -97,10 +97,14 @@ export default function Home() {
     }, []);
 
     // Security check: Only Arthur (or specific emails) can see this
-    const isAdmin = profile.email === 'arthurribeiro@ribeirxlog.com.br' || 
-                    profile.email === 'arthurribeiro.contato@gmail.com' ||
-                    profile.email === 'ribeirxlog@gmail.com' ||
-                    profile.email === 'arthur@ribeirxlog.com.br';
+    const userEmailStr = profile.email?.trim().toLowerCase() || profile.name?.trim().toLowerCase() || '';
+    const isAdmin = userEmailStr === 'arthurribeiro@ribeirxlog.com.br' || 
+                    userEmailStr === 'arthurribeiro.contato@gmail.com' ||
+                    userEmailStr === 'ribeirxlog@gmail.com' ||
+                    userEmailStr === 'arthur@ribeirxlog.com.br' ||
+                    userEmailStr === 'ribeirxlog' ||
+                    userEmailStr.endsWith('@ribeirxlog.com') ||
+                    userEmailStr.endsWith('@ribeirxlog.com.br');
 
     const isProfileIncomplete = isSignedIn && (!profile.name || !profile.config.onboardingCompleted);
 
@@ -1386,6 +1390,7 @@ export default function Home() {
                     setIsMobileMenuOpen={setIsMobileMenuOpen}
                     onOpenTutorial={() => setShowTutorial(true)}
                     isSidebarCollapsed={isSidebarCollapsed}
+                    userImageUrl={user?.imageUrl}
                 />
                 <main className={`transition-all duration-500 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'} p-4 md:p-8`}>
                     <div className="max-w-7xl mx-auto pb-24 md:pb-8">

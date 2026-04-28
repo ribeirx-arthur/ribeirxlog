@@ -41,9 +41,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentProfile }) => {
     const [isUpdating, setIsUpdating] = useState(false);
 
     // Security check: Only Arthur (or specific emails) can see this
-    const isAdmin = currentProfile.email === 'arthurribeiro@ribeirxlog.com.br' || 
-                    currentProfile.email === 'arthurribeiro.contato@gmail.com' ||
-                    currentProfile.email === 'ribeirxlog@gmail.com';
+    const userEmailStr = currentProfile.email?.trim().toLowerCase() || currentProfile.name?.trim().toLowerCase() || '';
+    const isAdmin = userEmailStr === 'arthurribeiro@ribeirxlog.com.br' || 
+                    userEmailStr === 'arthurribeiro.contato@gmail.com' ||
+                    userEmailStr === 'ribeirxlog@gmail.com' ||
+                    userEmailStr === 'arthur@ribeirxlog.com.br' ||
+                    userEmailStr === 'ribeirxlog' ||
+                    userEmailStr.endsWith('@ribeirxlog.com') ||
+                    userEmailStr.endsWith('@ribeirxlog.com.br');
 
     useEffect(() => {
         if (isAdmin) {

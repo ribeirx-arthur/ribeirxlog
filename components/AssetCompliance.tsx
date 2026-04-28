@@ -87,7 +87,7 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
                         <ShieldCheck className="w-10 h-10 text-emerald-500" />
                     </div>
                     <div>
-                        <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase leading-none">Compliance Hub</h2>
+                        <h2 className="text-4xl md:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">Pasta de Documentos</h2>
                         <p className="text-slate-500 text-[10px] font-black tracking-[0.4em] uppercase mt-3">Active Asset Protection & Document Wallet</p>
                     </div>
                 </div>
