@@ -1236,7 +1236,20 @@ export default function Home() {
                 if (isFreeUser) {
                     return <Paywall title="Compliance & Documentos" plan="Gestor Pro" price="R$ 89,90" features={['Gestão de CNH/ANTT', 'Validade de Seguros', 'Alertas de Vencimento']} onUpgrade={() => setActiveTab('subscription')} />;
                 }
-                return <AssetCompliance vehicles={vehicles} drivers={drivers} />;
+                return (
+                    <AssetCompliance 
+                        vehicles={vehicles} 
+                        drivers={drivers} 
+                        profile={profile}
+                        onUpdateProfile={async (newConfig: any) => {
+                            const newProfile = { ...profile, config: newConfig };
+                            setProfile(newProfile);
+                            if (!isDemo && user) {
+                                await authenticatedClient.from('profiles').update({ config: newConfig }).eq('id', user.id);
+                            }
+                        }} 
+                    />
+                );
             case 'admin':
                 if (!isAdmin) return <Dashboard trips={trips} vehicles={vehicles} drivers={drivers} shippers={shippers} profile={profile} onPopulateDemo={handlePopulateDemoData} setActiveTab={setActiveTab} />;
                 return (

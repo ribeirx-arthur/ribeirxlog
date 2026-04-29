@@ -20,11 +20,16 @@ import { Vehicle, Driver } from '../types';
 interface AssetComplianceProps {
     vehicles: Vehicle[];
     drivers: Driver[];
+    profile?: any;
+    onUpdateProfile?: (newConfig: any) => void;
 }
 
-const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) => {
+const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers, profile, onUpdateProfile }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+    const [folderLinks, setFolderLinks] = useState<Record<string, string>>(profile?.config?.vehicleFolders || {});
+    const [editingLink, setEditingLink] = useState('');
+    const [isEditingFolder, setIsEditingFolder] = useState(false);
 
     const filteredVehicles = vehicles.filter(v =>
         v.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,15 +59,21 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
 
     const handleShareDocs = (vehicle: Vehicle) => {
         const driver = drivers.find(d => d.vehicleId === vehicle.id);
-        const text = `*HUB DE DOCUMENTOS - RBX LOG*\\n\\n` +
+        let text = `*HUB DE DOCUMENTOS - RBX LOG*\\n\\n` +
             `🚛 *Veículo:* ${vehicle.plate} (${vehicle.name})\n` +
             `👤 *Motorista:* ${driver?.name || 'Não vinculado'}\n\n` +
             `📄 *Status de Compliance:*\n` +
             `• ANTT: ${vehicle.anttNumber || 'N/A'}\n` +
             `• Venc. ANTT: ${vehicle.anttValidity || 'N/A'}\n` +
             `• Venc. Tacógrafo: ${vehicle.tacografoValidity || 'N/A'}\n` +
-            `• Venc. Licenciamento: ${vehicle.licensingValidity || 'N/A'}\n\n` +
-            `🔗 *Acesso aos arquivos:* [Portal RBX Log]`;
+            `• Venc. Licenciamento: ${vehicle.licensingValidity || 'N/A'}\n\n`;
+
+        const link = folderLinks[vehicle.id];
+        if (link) {
+            text += `📁 *Pasta de Documentos (Visualizar/Baixar):*\n${link}`;
+        } else {
+            text += `🔗 *Acesso aos arquivos:* [Portal RBX Log]`;
+        }
 
         const encodedText = encodeURIComponent(text);
         window.open(`https://wa.me/?text=${encodedText}`, '_blank');
@@ -81,14 +92,14 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
     return (
         <div className="space-y-10 animate-in fade-in duration-700 pb-32">
             {/* Header Neural */}
-            <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
-                <div className="flex items-center gap-8">
-                    <div className="w-20 h-20 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center border border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
-                        <ShieldCheck className="w-10 h-10 text-emerald-500" />
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8">
+                <div className="flex items-center gap-4 md:gap-8">
+                    <div className="w-14 h-14 md:w-20 md:h-20 bg-emerald-500/10 rounded-2xl md:rounded-[2rem] flex shrink-0 items-center justify-center border border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
+                        <ShieldCheck className="w-8 h-8 md:w-10 md:h-10 text-emerald-500" />
                     </div>
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">Pasta de Documentos</h2>
-                        <p className="text-slate-500 text-[10px] font-black tracking-[0.4em] uppercase mt-3">Active Asset Protection & Document Wallet</p>
+                        <h2 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">Pasta de Documentos</h2>
+                        <p className="text-slate-500 text-[9px] md:text-[10px] font-black tracking-[0.2em] md:tracking-[0.4em] uppercase mt-2 md:mt-3">Active Asset Protection & Document Wallet</p>
                     </div>
                 </div>
 
@@ -143,14 +154,14 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
 
                         return (
                             <div className="space-y-10 animate-in slide-in-from-right-10 duration-500">
-                                <div className="flex justify-between items-start">
+                                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                                     <div>
-                                        <h3 className="text-4xl font-black text-white italic tracking-tighter uppercase">{v.plate} — Compliance Status</h3>
+                                        <h3 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase">{v.plate} — Compliance Status</h3>
                                         <p className="text-slate-500 text-xs font-black uppercase tracking-widest mt-2">{v.brand} {v.model} ({v.year})</p>
                                     </div>
                                     <button
                                         onClick={() => handleShareDocs(v)}
-                                        className="bg-emerald-500 hover:bg-emerald-600 text-emerald-950 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-emerald-500/20 flex items-center gap-3"
+                                        className="bg-emerald-500 hover:bg-emerald-600 text-emerald-950 px-6 py-4 w-full sm:w-auto rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3 shrink-0"
                                     >
                                         <Share2 className="w-4 h-4" /> Enviar Kit Compliance
                                     </button>
@@ -167,23 +178,58 @@ const AssetCompliance: React.FC<AssetComplianceProps> = ({ vehicles, drivers }) 
                                     </div>
 
                                     {/* Preview Cloud */}
-                                    <div className="bg-slate-950 border border-slate-800 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center space-y-6">
-                                        <div className="w-24 h-24 bg-slate-900 rounded-3xl flex items-center justify-center text-slate-700 border border-slate-800">
-                                            <FileText className="w-12 h-12" />
+                                    <div className="bg-slate-950 border border-slate-800 rounded-[2.5rem] p-6 lg:p-8 flex flex-col items-center justify-center text-center space-y-6">
+                                        <div className="w-20 h-20 lg:w-24 lg:h-24 bg-slate-900 rounded-3xl flex items-center justify-center text-emerald-500 border border-slate-800">
+                                            <Download className="w-10 h-10 lg:w-12 lg:h-12" />
                                         </div>
                                         <div>
-                                            <h4 className="text-xl font-black text-white uppercase tracking-tighter">Digital Wallet</h4>
-                                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">Arquivos prontos para embarque</p>
+                                            <h4 className="text-lg lg:text-xl font-black text-white uppercase tracking-tighter">Pasta na Nuvem</h4>
+                                            <p className="text-slate-500 text-[9px] lg:text-[10px] font-black uppercase tracking-widest mt-2">Crie uma pasta no Google Drive,<br/>coloque os PDFs lá e cole o link abaixo.</p>
                                         </div>
-                                        <div className="w-full space-y-3">
-                                            <button className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between text-xs font-black text-slate-400 hover:text-white transition-all group">
-                                                <span className="flex items-center gap-3"><FileText className="w-4 h-4 text-emerald-500" /> CRLV_DIGITAL.pdf</span>
-                                                <Download className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
-                                            </button>
-                                            <button className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between text-xs font-black text-slate-400 hover:text-white transition-all group">
-                                                <span className="flex items-center gap-3"><FileText className="w-4 h-4 text-emerald-500" /> CERT_ANTT.pdf</span>
-                                                <Download className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
-                                            </button>
+                                        <div className="w-full">
+                                            {isEditingFolder || !folderLinks[v.id] ? (
+                                                <div className="space-y-3">
+                                                    <input 
+                                                        type="url" 
+                                                        value={editingLink || folderLinks[v.id] || ''}
+                                                        onChange={(e) => setEditingLink(e.target.value)}
+                                                        placeholder="https://drive.google.com/..." 
+                                                        className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs text-white outline-none focus:border-emerald-500 transition-colors"
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        {(isEditingFolder && folderLinks[v.id]) && (
+                                                            <button onClick={() => setIsEditingFolder(false)} className="flex-1 p-3 bg-slate-800 text-slate-400 rounded-xl font-bold text-[10px] uppercase transition-colors hover:text-white">Cancelar</button>
+                                                        )}
+                                                        <button 
+                                                            onClick={async () => {
+                                                                const newLinks = { ...folderLinks, [v.id]: editingLink };
+                                                                setFolderLinks(newLinks);
+                                                                if (onUpdateProfile && profile) {
+                                                                    await onUpdateProfile({ ...profile.config, vehicleFolders: newLinks });
+                                                                }
+                                                                setIsEditingFolder(false);
+                                                            }} 
+                                                            className="flex-1 p-3 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 rounded-xl font-bold text-[10px] uppercase transition-colors shadow-lg shadow-emerald-500/20"
+                                                        >
+                                                            Salvar Link Público
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3 w-full">
+                                                    <a 
+                                                        href={folderLinks[v.id]} 
+                                                        target="_blank" 
+                                                        rel="noreferrer"
+                                                        className="w-full p-4 bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl flex items-center justify-between text-xs font-black text-emerald-500 hover:text-emerald-400 transition-all group overflow-hidden"
+                                                    >
+                                                        <span className="flex items-center gap-3 truncate"><ExternalLink className="w-4 h-4 shrink-0" /> Abrir/Baixar Pasta</span>
+                                                    </a>
+                                                    <button onClick={() => { setEditingLink(folderLinks[v.id]); setIsEditingFolder(true); }} className="w-full text-[10px] font-bold text-slate-500 hover:text-emerald-500 uppercase transition-colors">
+                                                        Alterar Link
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

@@ -44,6 +44,7 @@ export interface UserProfile {
     onboardingCompleted?: boolean;
     completedModules?: Record<string, boolean>;
     hasUsedCoupon?: boolean;
+    vehicleFolders?: Record<string, string>;
   };
   plan_type?: 'none' | 'piloto' | 'gestor_pro' | 'frota_elite' | 'mensal' | 'anual' | 'lifetime';
   payment_status?: 'unpaid' | 'paid' | 'trial' | 'preview';
